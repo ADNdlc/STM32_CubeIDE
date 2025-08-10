@@ -9,9 +9,13 @@
 **/keilkill.bat
 **/.metadata/
 **/RemoteSystemsTempFiles/
-
+**/.idea/
+**/.vs/
 *.zip
 *.7z
+
+
+
 
 # Object files
 *.o
