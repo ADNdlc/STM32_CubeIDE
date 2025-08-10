@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Drivers",
+    "\\Drivers\\BSP",
+    "\\Drivers\\BSP\\esp_at"
+  ],
+  "SelectedNode": "\\Drivers\\BSP\\esp_at\\at_parser.c",
+  "PreviewInSolutionExplorer": false
+}

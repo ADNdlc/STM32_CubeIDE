@@ -2,10 +2,16 @@
 *.d
 
 # 忽略所有目录下的调试文件
+
 **/Debug/
 **/cmake-build-debug/
 **/Output/
 **/keilkill.bat
+**/.metadata/
+**/RemoteSystemsTempFiles/
+
+*.zip
+*.7z
 
 # Object files
 *.o
