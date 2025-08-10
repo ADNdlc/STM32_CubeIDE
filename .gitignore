@@ -1,6 +1,12 @@
 # Prerequisites
 *.d
 
+# 忽略所有目录下的调试文件
+**/Debug/
+**/cmake-build-debug/
+**/Output/
+**/keilkill.bat
+
 # Object files
 *.o
 *.ko
