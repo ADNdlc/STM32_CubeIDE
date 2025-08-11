@@ -89,6 +89,7 @@ void AT_controller_process(void) {
 }
 
 /* ============================ 由分发器调用的处理函数 ============================== */
+
 /**
  * 返回"OK"调用
  */
@@ -101,7 +102,7 @@ void handle_final_ok(const char* line) {
         g_state = AT_CTRL_STATE_IDLE;
     }
 #ifndef NDEBUG
-	printf("handle_final_ok: success!\r\n");
+	printf("handle_final_ok s: %s\r\n", line);
 #endif
 }
 
@@ -109,16 +110,14 @@ void handle_final_ok(const char* line) {
  * 返回"ERROR"调用
  */
 void handle_final_error(const char* line) {
-    if (g_state == AT_CTRL_STATE_WAIT_RSP) {
-        if (g_current_cmd && g_current_cmd->response_cb) {
-            g_current_cmd->response_cb(AT_CMD_ERROR, line);// 调用命令体的完成回调
-        }
-        g_current_cmd = NULL;
-        g_state = AT_CTRL_STATE_IDLE;
-        error_count ++;
-    }
+	if (g_current_cmd && g_current_cmd->response_cb) {
+		g_current_cmd->response_cb(AT_CMD_ERROR, line);// 调用命令体的完成回调
+	}
+	g_current_cmd = NULL;
+	g_state = AT_CTRL_STATE_IDLE;
+	error_count ++;
 #ifndef NDEBUG
-	printf("handle_final_error: Rcv an ERR\r\n");
+	printf("handle_final_error s: %s\r\n", line);
 #endif
 }
 
@@ -127,7 +126,7 @@ void handle_final_error(const char* line) {
  */
 void handle_Txdata_send(const char* line) {
     if (g_state == AT_CTRL_STATE_WAIT_DATAIN) {
-        // 收到'>'，发送数据
+        // 收到'>',发送数据
     	if(g_current_cmd->data_to_send == NULL){
     		ATuart_send_string("ERR");	// 让模块退出此状态
     		g_state = AT_CTRL_STATE_WAIT_RSP;
@@ -143,7 +142,7 @@ void handle_Txdata_send(const char* line) {
 }
 
 /**
- * 接收到“消息报告”类信息的回调,在这里进行数据解析
+ * 接收到"消息报告"类信息的回调,在这里进行数据解析
  */
 void handle_Rxdata_process(const char* line) {
     if (g_current_cmd && g_current_cmd->parser_cb) {// 如果当前有命令在执行，并且它定义了数据解析回调
@@ -163,6 +162,9 @@ void handle_busy(const char* line){
     if (g_current_cmd != NULL) {		// 如果空闲且队列中有待处理命令
          ATuart_send_string(g_current_cmd->cmd_str);	// 发送AT指令
     }
+#ifndef NDEBUG
+	printf("handle_busy s: %s\r\n", line);
+#endif
 }
 
 
