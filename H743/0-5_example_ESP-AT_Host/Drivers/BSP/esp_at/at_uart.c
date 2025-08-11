@@ -23,6 +23,19 @@ void ATuart_driver_init(UART_HandleTypeDef* uart_port) {
     HAL_UARTEx_ReceiveToIdle_DMA(AT_UART.uart_port, AT_UART.loopbuff, LOOP_BUF_SIZE);
 }
 
+/**
+ * @brief 通过AT串口发送一个以'\0'结尾的字符串
+ * @param str 要发送的字符串
+ */
+void ATuart_send_string(const char* str) {
+    if (str == NULL) return;
+    size_t len = strlen(str);
+    if (len > 0) {
+        HAL_UART_Transmit(AT_UART.uart_port, (uint8_t*)str, len, HAL_MAX_DELAY);
+    	//HAL_UART_Transmit_DMA(AT_UART.uart_port, (uint8_t*)str, len);
+    }
+}
+
 /** 获取已接收但还未读的字节数
  *
  **/

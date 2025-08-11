@@ -102,7 +102,7 @@ void AT_parser_line(const char* line) {
     // 比如 "OK", "+CWMODE:3", "+MQTTSUBRECV:..."
     // 在这里调用指令分发器
 	printf("parser_line:%s\r\n",line);
-	at_dispatcher_process_line(line);
+	AT_dispatcher_LineProcess(line);
 }
 /* USER CODE END 0 */
 
@@ -168,7 +168,7 @@ int main(void)
 
   ATuart_driver_init(&huart2);
   AT_parser_init();
-  at_controller_init(); // 初始化控制器
+  AT_controller_init(); // 初始化控制器
 
   uint8_t temp_read_buffer[128]; // 从驱动读取的临时缓冲区
 

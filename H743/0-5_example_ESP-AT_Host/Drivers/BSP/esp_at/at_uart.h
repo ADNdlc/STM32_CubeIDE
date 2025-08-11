@@ -16,6 +16,8 @@ void ATuart_driver_init(UART_HandleTypeDef* uart_port);
 
 size_t ATuart_get_readable_bytes(void);
 size_t ATuart_read(uint8_t *buffer, size_t len);
+void ATuart_send_string(const char* str);
+
 void ATuart_RxCpltHandle(UART_HandleTypeDef *ituart);
 
 #endif

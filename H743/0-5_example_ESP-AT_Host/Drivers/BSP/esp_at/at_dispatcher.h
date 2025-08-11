@@ -13,7 +13,7 @@
  *        它会查找匹配的处理程序并调用它。
  * @param line 一个指向以NULL结尾的字符串的指针，代表一行消息。
  */
-void at_dispatcher_process_line(const char* line);
+void AT_dispatcher_LineProcess(const char* line);
 
 
 #endif /* BSP_ESP_AT_AT_DISPATCHER_H_ */
