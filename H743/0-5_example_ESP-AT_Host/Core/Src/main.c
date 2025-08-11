@@ -38,6 +38,8 @@
 
 #include "esp_at/at_uart.h"
 #include "esp_at/at_parser.h"
+#include "esp_at/at_dispatcher.h"
+#include "esp_at/at_controller.h"
 //APP
 #include "MALLOC/malloc.h"
 #include "SDRAM_test/sdram_test.h"
@@ -95,11 +97,12 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void AT_process_line(const char* line) {
-    // 这就是解析器解耦出来的完整消息！
+void AT_parser_line(const char* line) {
+    // 解析器的消息
     // 比如 "OK", "+CWMODE:3", "+MQTTSUBRECV:..."
-    // 在这里调用你的指令分发器
-    printf("Parser Output: [%s]\r\n", line);
+    // 在这里调用指令分发器
+	printf("parser_line:%s\r\n",line);
+	at_dispatcher_process_line(line);
 }
 /* USER CODE END 0 */
 
@@ -165,6 +168,8 @@ int main(void)
 
   ATuart_driver_init(&huart2);
   AT_parser_init();
+  at_controller_init(); // 初始化控制器
+
   uint8_t temp_read_buffer[128]; // 从驱动读取的临时缓冲区
 
 
@@ -180,13 +185,14 @@ int main(void)
 			memset(receivData, 0, sizeof(receivData));
 			dataReady = 0;
 		}
-	  if (ATuart_get_readable_bytes() > 0){
-		  size_t len = ATuart_read(temp_read_buffer, sizeof(temp_read_buffer));
-		  if (len > 0)
-		  {
-			  AT_parser_input(temp_read_buffer, len);
-		  }
-	  }
+        if (ATuart_get_readable_bytes() > 0){
+            size_t len = ATuart_read(temp_read_buffer, sizeof(temp_read_buffer));
+            if (len > 0)
+            {
+                // 数据流向: uart_driver -> parser -> dispatcher -> controller
+                AT_parser_input(temp_read_buffer, len);
+            }
+        }
 
 	  if(time2 >= 2){
 		  time2 = 0;
