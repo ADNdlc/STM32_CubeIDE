@@ -33,7 +33,7 @@ static const AT_Handler_t at_handlers[] = {
 
     // --- 2. 特殊提示符 ---
 	{ "busy p...",	handle_busy },
-    { ">",          handle_Txdata_send },
+    { ">",          handle_CMDdata_send },
 
 //    // --- 3. URCs (非请求结果码) - 按字母顺序或功能或出现频率分组 ---
 //    { "+IPD",               handle_urc_ipd },

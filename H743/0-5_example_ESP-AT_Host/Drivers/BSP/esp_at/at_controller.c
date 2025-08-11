@@ -124,7 +124,7 @@ void handle_final_error(const char* line) {
 /**
  * 等待">"后发送数据(如果有)
  */
-void handle_Txdata_send(const char* line) {
+void handle_CMDdata_send(const char* line) {
     if (g_state == AT_CTRL_STATE_WAIT_DATAIN) {
         // 收到'>',发送数据
     	if(g_current_cmd->data_to_send == NULL){
