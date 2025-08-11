@@ -166,8 +166,6 @@ void handle_busy(const char* line){
 }
 
 
-
-
 void handle_urc_mqtt_recv(const char* line) {
     // 这是关键的云端下发命令处理
     printf("Controller: URC - MQTT message received!\r\n");
@@ -182,7 +180,6 @@ void handle_urc_mqtt_connected(const char* line) {  }
 void handle_urc_mqtt_disconnected(const char* line) {  }
 void handle_urc_ready(const char* line) { printf("Controller: Module is ready.\r\n"); }
 void handle_urc_wifi_disconnected(const char* line) {  }
-//void handle_prompt(const char* line) { printf("Controller: Received prompt >\r\n"); /* TODO: handle data sending state */ }
 void handle_data_cwlap(const char* line) { printf("Controller: Wi-Fi scan result: %s\r\n", line); }
 void handle_data_ip_addr(const char* line) { printf("Controller: IP data: %s\r\n", line); }
 
