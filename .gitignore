@@ -11,6 +11,10 @@
 **/RemoteSystemsTempFiles/
 **/.idea/
 **/.vs/
+
+F103/
+F407/
+
 *.zip
 *.7z
 
