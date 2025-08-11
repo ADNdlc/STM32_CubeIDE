@@ -155,7 +155,15 @@ void handle_Rxdata_process(const char* line) {
 #endif
 }
 
-
+/**
+ * 接收到“busy p...”
+ * 一般来说，状态机正常运行是不会看到此消息？但我不清楚模块处理云命令时能否响应
+ */
+void handle_busy(const char* line){
+    if (g_current_cmd != NULL) {		// 如果空闲且队列中有待处理命令
+         ATuart_send_string(g_current_cmd->cmd_str);	// 发送AT指令
+    }
+}
 
 
 
