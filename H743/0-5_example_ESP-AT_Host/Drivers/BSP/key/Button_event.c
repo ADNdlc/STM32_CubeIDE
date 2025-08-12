@@ -12,22 +12,38 @@
 
 #include "esp_at/at_controller.h"
 
-static void test_parser_cb(const char* data_line){
-	printf("test_parser_cb data: %s\r\n",data_line+11);
+static void test1_parser_cb(const char* data_line){
+	printf("test1_parser_cb data: %s\r\n",data_line+11);
 }
-static void test_response_cb(AT_CmdResult_t result, const char* line){
-	printf("test_response_cb result: %d line:%s\r\n", result, line);
+static void test1_response_cb(AT_CmdResult_t result, const char* line){
+	printf("test1_response_cb result: %d line:%s\r\n", result, line);
 }
 
-static AT_Cmd_t testCMD = {
-	.cmd_str = "testCMD\r\n",
+static AT_Cmd_t test1CMD = {
+	.cmd_str = "test1CMD\r\n",
 	.data_to_send = "data123",
 	.timeout_ms = 0xFFFF,
-	.parser_cb = test_parser_cb,
-	.response_cb = test_response_cb,
+	.parser_cb = test1_parser_cb,
+	.response_cb = test1_response_cb,
 	.next = NULL
 };
 
+
+static void test2_parser_cb(const char* data_line){
+	printf("test2_parser_cb data: %s\r\n",data_line+11);
+}
+static void test2_response_cb(AT_CmdResult_t result, const char* line){
+	printf("test2_response_cb result: %d line:%s\r\n", result, line);
+}
+
+static AT_Cmd_t test2CMD = {
+	.cmd_str = "test2CMD\r\n",
+	.data_to_send = NULL,
+	.timeout_ms = 500,
+	.parser_cb = test2_parser_cb,
+	.response_cb = test2_response_cb,
+	.next = NULL
+};
 
 
 /*实例化按钮*/
@@ -39,7 +55,7 @@ Button btn2;
 void btn0_single_click(Button* btn) {
 	printf("\r\nbtn0_single_click\r\n");
     // 单击处理
-	AT_controller_cmd_submit(&testCMD);
+	AT_controller_cmd_submit(&test1CMD);
 }
 
 void btn0_double_click(Button* btn) {
@@ -61,6 +77,7 @@ void btn0_long_click(Button* btn) {
 void btn1_single_click(Button* btn) {
 	printf("\r\nbtn1_single_click\r\n");
     // 单击处理
+	AT_controller_cmd_submit(&test2CMD);
 }
 
 void btn1_double_click(Button* btn) {

@@ -6,6 +6,7 @@
  */
 
 #include "at_uart.h"
+#include "at_parser.h"
 #include "at_controller.h"
 #include "at_dispatcher.h" // 控制器需要和分发器交互
 #ifndef NDEBUG
@@ -27,15 +28,21 @@ static AT_Cmd_t* g_cmd_queue_tail = NULL;			// 队列尾
 static AT_Cmd_t* g_current_cmd = NULL; 				// 当前正在执行的命令
 static uint32_t  g_cmd_sent_time = 0;   			// 命令发送的时间戳
 
-static uint8_t timeout_count = 0;
-static uint8_t error_count   = 0;
+static uint8_t timeout_count;
+static uint8_t error_count;
 
 
 
-// --- 公开函数实现 ---
+/**
+ * 初始化命令控制状态机,清空命令队列
+ */
 void AT_controller_init(void){
 	g_state = AT_CTRL_STATE_IDLE;
-    // ... 初始化其他状态
+	g_cmd_queue_head = NULL;
+	g_cmd_queue_tail = NULL;
+	g_current_cmd = NULL;
+	timeout_count = 0;
+	error_count   = 0;
 }
 
 /**
@@ -66,15 +73,31 @@ int AT_controller_cmd_submit(AT_Cmd_t* cmd){
 	if(g_cmd_queue_head == NULL){	//队列为空
 		g_cmd_queue_head = cmd;
 		g_cmd_queue_tail = cmd;
+		return 0;
 	}else{
 		g_cmd_queue_tail->next = cmd;	//加入队列尾
 		g_cmd_queue_tail = cmd;			//更新队列尾
+		return 0;
 	}
 #ifndef NDEBUG
 	printf("cmd_submit: %s\r\n", cmd->cmd_str);
 #endif
 }
 
+/**
+ * 错误状态恢复函数
+ */
+static void AT_controller_ERRhandler(void){
+	if(error_count > 10){
+		while(g_cmd_queue_head){
+		    AT_Cmd_t* cmd_to_clear = g_cmd_queue_head;	// 获取头节点
+		    g_cmd_queue_head = g_cmd_queue_head->next;		// 将头指针移动到下一个节点
+		    cmd_to_clear->response_cb(AT_CMD_ERROR,"recover");//调用所有命令的回调通知复位
+		}
+		AT_controller_init();
+		AT_parser_init();
+	}
+}
 
 /**
  * 命令发送控制状态机
@@ -82,6 +105,9 @@ int AT_controller_cmd_submit(AT_Cmd_t* cmd){
 void AT_controller_process(void) {
     switch (g_state) {
         case AT_CTRL_STATE_IDLE:
+
+        	AT_controller_ERRhandler();	//检查错误状态次数
+
             if (g_cmd_queue_head != NULL) {		// 如果空闲且队列中有待处理命令
                 g_current_cmd = cmd_dequeue();	// 从队列中取出一个命令
 
@@ -113,6 +139,8 @@ void AT_controller_process(void) {
             break;
     }
 }
+
+
 
 /* ============================ 由分发器调用的处理函数 ============================== */
 
@@ -148,7 +176,7 @@ void handle_final_error(const char* line) {
 		error_count ++;
 	}else{
 #ifndef NDEBUG
-printf("Received an ERROR in state %d: %s\r\n", g_state, line);
+printf("Rcv ERROR in ATstate %d: %s\r\n", g_state, line);
 #endif
 	}
 
@@ -158,20 +186,21 @@ printf("Received an ERROR in state %d: %s\r\n", g_state, line);
  * 等待">"后发送数据(如果有)
  */
 void handle_CMDdata_send(const char* line) {
-    if(g_state == AT_CTRL_STATE_WAIT_DATAIN) {	// 是等待输入状态
-        // 收到'>',发送数据
-    	if(g_current_cmd->data_to_send == NULL){
-    		ATuart_send_string("+++");	// 让模块退出此状态
-    		g_state = AT_CTRL_STATE_WAIT_RSP;
-    		error_count ++;
+    if((g_state==AT_CTRL_STATE_WAIT_DATAIN)&&(g_current_cmd->data_to_send!=NULL)) {	// 是等待输入状态且数据体有命令
+    	ATuart_send_string(g_current_cmd->data_to_send);// 发送"当前命令体"的数据(如果有)
+		g_state = AT_CTRL_STATE_WAIT_RSP; 				// 等待最终的 SEND OK/FAIL
+		return;
+    }
+	else{
+		HAL_Delay(20);
+		ATuart_send_string("+++");	// 让模块退出此状态(结尾没有换行)
+		HAL_Delay(20);
+		g_state = AT_CTRL_STATE_WAIT_RSP;
+		error_count ++;
+	}
 #ifndef NDEBUG
 	printf("handle_Txdata_send: NULL to send\r\n");
 #endif
-    	}else{
-    		ATuart_send_string(g_current_cmd->data_to_send);// 发送"当前命令体"的数据(如果有)
-    		g_state = AT_CTRL_STATE_WAIT_RSP; 				// 等待最终的 SEND OK/FAIL
-    	}
-    }
 }
 
 /**

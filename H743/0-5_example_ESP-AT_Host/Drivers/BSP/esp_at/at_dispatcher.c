@@ -28,16 +28,15 @@ static const AT_Handler_t at_handlers[] = {
     // --- 1. 最终响应 (Final Responses) ---
     { "OK",         handle_final_ok },
     { "ERROR",      handle_final_error },
-    { "SEND OK",    handle_final_ok }, 		// 对于CIPSEND，SEND OK就是成功标志
+    { "SEND OK",    handle_final_ok }, 		// 对于CIPSEND, SEND OK就是成功标志
     { "SEND FAIL",  handle_final_error },	// 发送失败
 
     // --- 2. 特殊提示符 ---
-	{ "busy p...",	handle_busy },
-    { ">",          handle_CMDdata_send },
+	{ "busy p...",	handle_busy },			//模块正在处理上一条命令
+    { ">",          handle_CMDdata_send },	//模块进入输入模式
 
+    // --- 3. URCs (非请求结果码) - 可按功能或出现频率分组 ---
 
-
-//    // --- 3. URCs (非请求结果码) - 按功能或出现频率分组 ---
 //    { "+IPD",               handle_urc_ipd },
 //    { "+MQTTSUBRECV:",      handle_urc_mqtt_recv },
 //    { "+MQTTCONNECTED",     handle_urc_mqtt_connected },
@@ -48,10 +47,9 @@ static const AT_Handler_t at_handlers[] = {
 //    { "WIFI DISCONNECT",    handle_urc_wifi_disconnected },
 
     // --- 4. 数据响应 (Data Responses) ---
-    // 查询命令返回的具体数据
-    { "+CWLAP:",    handle_Rxdata_process }, // WiFi扫描结果
-    { "+CIPSTA_IP:", handle_Rxdata_process }, // 获取到IP地址的另一种方式
-
+    // 查询命令返回的具体数据(只有发送命令才会 接受到这些消息)
+    { "+CWLAP:",    handle_Rxdata_process }, 	// WiFi扫描结果
+    { "+CIPSTA_IP:", handle_Rxdata_process }, 	// 获取到IP地址的另一种方式
 	{ "+test_data:", handle_Rxdata_process }
 
 	// ... 在这里可以添加需要处理的其他响应
@@ -77,4 +75,15 @@ void AT_dispatcher_LineProcess(const char* line) {
 #endif
 }
 
+/**
+ * 行解析回调函数
+ * 解析到完整的行后调用"响应分发器"
+ */
+void AT_parser_line(const char* line) {
+    // 解析器的消息
+#ifndef NDEBUG
+	printf("parser_line:%s \r\n",line);
+#endif
+	AT_dispatcher_LineProcess(line);
+}
 

@@ -1,5 +1,9 @@
 #include "esp_at/at_uart.h"
 #include <string.h>
+#ifndef NDEBUG
+#include <stdio.h>
+#endif
+
 
 typedef struct{
 	UART_HandleTypeDef* uart_port;		//AT使用的串口
@@ -18,7 +22,9 @@ void ATuart_driver_init(UART_HandleTypeDef* uart_port) {
     if(uart_port  == NULL){
     	return;
     }
+    HAL_UART_DMAStop(uart_port);
     AT_UART.uart_port = uart_port;
+    memset(AT_UART.loopbuff, 0, LOOP_BUF_SIZE);
     // Circular模式: DMA将在这个缓冲区上以环形模式运行
     HAL_UARTEx_ReceiveToIdle_DMA(AT_UART.uart_port, AT_UART.loopbuff, LOOP_BUF_SIZE);
 }
@@ -28,11 +34,14 @@ void ATuart_driver_init(UART_HandleTypeDef* uart_port) {
  * @param str 要发送的字符串
  */
 void ATuart_send_string(const char* str) {
+	HAL_StatusTypeDef res = HAL_BUSY;
     if (str == NULL) return;
     size_t len = strlen(str);
     if (len > 0) {
-        HAL_UART_Transmit(AT_UART.uart_port, (uint8_t*)str, len, HAL_MAX_DELAY);
-    	//HAL_UART_Transmit_DMA(AT_UART.uart_port, (uint8_t*)str, len);
+        //HAL_UART_Transmit(AT_UART.uart_port, (uint8_t*)str, len, HAL_MAX_DELAY);
+    	while(res != HAL_OK){
+    		res = HAL_UART_Transmit_DMA(AT_UART.uart_port, (uint8_t*)str, len);
+    	}
 #ifndef NDEBUG
 	printf("send_string: %s\r\n", str);
 #endif

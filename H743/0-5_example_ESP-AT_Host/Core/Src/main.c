@@ -98,13 +98,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void AT_parser_line(const char* line) {
-    // 解析器的消息
-    // 比如 "OK", "+CWMODE:3", "+MQTTSUBRECV:..."
-    // 在这里调用指令分发器Received promp
-	printf("parser_line:%s \r\n",line);
-	AT_dispatcher_LineProcess(line);
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -168,8 +162,8 @@ int main(void)
 
   Button_Init();
 
-  ATuart_driver_init(&huart2);
-  AT_parser_init();
+  ATuart_driver_init(&huart2);//绑定AT串口
+  AT_parser_init();		// 初始化行解析
   AT_controller_init(); // 初始化控制器
 
   uint8_t temp_read_buffer[128]; // 从驱动读取的临时缓冲区
