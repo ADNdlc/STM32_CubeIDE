@@ -23,7 +23,7 @@ typedef struct AT_Cmd_t {
     const char* data_to_send;   // 对于需要'>'提示符的命令，这是要发送的数据
     uint32_t timeout_ms;        // 此命令的超时时间
 
-    // --- 核心：回调函数 ---
+    // --- 通用回调函数 ---
 
     // 1. 命令执行完毕的回调 (成功/失败/超时)
     //    第一个参数是结果，第二个参数是原始的响应行
@@ -60,7 +60,7 @@ void AT_controller_init(void);
  *            因为它是异步执行的，不能是栈上的局部变量。
  * @return 0 成功加入队列, -1 队列已满
  */
-//int at_controller_submit_cmd(AT_Cmd_t* cmd);
+int AT_controller_cmd_submit(AT_Cmd_t* cmd);
 
 /**
  * @brief 在主循环中周期性调用的控制器处理函数

@@ -35,7 +35,9 @@ static const AT_Handler_t at_handlers[] = {
 	{ "busy p...",	handle_busy },
     { ">",          handle_CMDdata_send },
 
-//    // --- 3. URCs (非请求结果码) - 按字母顺序或功能或出现频率分组 ---
+
+
+//    // --- 3. URCs (非请求结果码) - 按功能或出现频率分组 ---
 //    { "+IPD",               handle_urc_ipd },
 //    { "+MQTTSUBRECV:",      handle_urc_mqtt_recv },
 //    { "+MQTTCONNECTED",     handle_urc_mqtt_connected },
@@ -44,13 +46,15 @@ static const AT_Handler_t at_handlers[] = {
 //    { "WIFI CONNECTED",     handle_urc_wifi_connected },
 //    { "WIFI GOT IP",        handle_urc_wifi_got_ip },
 //    { "WIFI DISCONNECT",    handle_urc_wifi_disconnected },
-//
-//    // --- 4. 数据响应 (Data Responses) ---
-//    // 查询命令返回的具体数据
-//    { "+CWLAP:",    handle_data_cwlap }, // WiFi扫描结果
-//    { "+CIPSTA_IP:", handle_data_ip_addr }, // 获取到IP地址的另一种方式
 
-    // ... 在这里可以添加需要处理的其他响应
+    // --- 4. 数据响应 (Data Responses) ---
+    // 查询命令返回的具体数据
+    { "+CWLAP:",    handle_Rxdata_process }, // WiFi扫描结果
+    { "+CIPSTA_IP:", handle_Rxdata_process }, // 获取到IP地址的另一种方式
+
+	{ "+test_data:", handle_Rxdata_process }
+
+	// ... 在这里可以添加需要处理的其他响应
 };
 
 /**

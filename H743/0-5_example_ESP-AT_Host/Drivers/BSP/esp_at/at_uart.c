@@ -33,6 +33,9 @@ void ATuart_send_string(const char* str) {
     if (len > 0) {
         HAL_UART_Transmit(AT_UART.uart_port, (uint8_t*)str, len, HAL_MAX_DELAY);
     	//HAL_UART_Transmit_DMA(AT_UART.uart_port, (uint8_t*)str, len);
+#ifndef NDEBUG
+	printf("send_string: %s\r\n", str);
+#endif
     }
 }
 

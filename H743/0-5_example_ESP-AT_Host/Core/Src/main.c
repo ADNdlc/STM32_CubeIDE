@@ -35,7 +35,8 @@
 #include "usart/retarget.h"
 //BSP
 #include "sdram/W9825G6KH.h"
-
+#include "key/key.h"
+#include "key/button_event.h"
 #include "esp_at/at_uart.h"
 #include "esp_at/at_parser.h"
 #include "esp_at/at_dispatcher.h"
@@ -100,8 +101,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 void AT_parser_line(const char* line) {
     // 解析器的消息
     // 比如 "OK", "+CWMODE:3", "+MQTTSUBRECV:..."
-    // 在这里调用指令分发器
-	printf("parser_line:%s\r\n",line);
+    // 在这里调用指令分发器Received promp
+	printf("parser_line:%s \r\n",line);
 	AT_dispatcher_LineProcess(line);
 }
 /* USER CODE END 0 */
@@ -165,6 +166,7 @@ int main(void)
   printf("mallco init success!!\r\n");
 #endif
 
+  Button_Init();
 
   ATuart_driver_init(&huart2);
   AT_parser_init();
@@ -193,6 +195,8 @@ int main(void)
                 AT_parser_input(temp_read_buffer, len);
             }
         }
+        AT_controller_process();
+      Button_UPDATE();
 
 	  if(time2 >= 2){
 		  time2 = 0;
