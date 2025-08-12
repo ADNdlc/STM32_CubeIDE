@@ -50,6 +50,7 @@ static const AT_Handler_t at_handlers[] = {
     // 查询命令返回的具体数据(只有发送命令才会 接受到这些消息)
     { "+CWLAP:",    handle_Rxdata_process }, 	// WiFi扫描结果
     { "+CIPSTA_IP:", handle_Rxdata_process }, 	// 获取到IP地址的另一种方式
+
 	{ "+test_data:", handle_Rxdata_process }
 
 	// ... 在这里可以添加需要处理的其他响应
