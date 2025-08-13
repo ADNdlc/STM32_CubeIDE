@@ -8,7 +8,7 @@
 #include "at_uart.h"
 #include "at_parser.h"
 #include "at_controller.h"
-#include "at_dispatcher.h" // 控制器需要和分发器交互
+#include "at_dispatcher.h"
 #ifndef NDEBUG
 #include <stdio.h>
 #endif
