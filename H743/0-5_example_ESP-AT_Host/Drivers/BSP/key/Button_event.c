@@ -30,24 +30,8 @@ static AT_Cmd_t test1CMD = {
 };
 
 
-static void test2_parser_cb(const char* data_line){
-	printf("test2_parser_cb data: %s\r\n",data_line+11);
-}
-static void test2_response_cb(AT_CmdResult_t result, const char* line){
-	printf("test2_response_cb result: %d line:%s\r\n", result, line);
-}
-
-static AT_Cmd_t test2CMD = {
-	.cmd_str = "test2CMD\r\n",
-	.data_to_send = NULL,
-	.timeout_ms = 500,
-	.parser_cb = test2_parser_cb,
-	.response_cb = test2_response_cb,
-	.next = NULL
-};
-
-
-extern wifi_info_t wifi_info;
+extern wifi_info_t wifi_info1;
+extern wifi_info_t wifi_info2;
 
 /*实例化按钮*/
 Button btn0;
@@ -64,7 +48,7 @@ void btn0_single_click(Button* btn) {
 void btn0_double_click(Button* btn) {
 	printf("\r\nbtn0_double_click\r\n");
     // 双击处理
-	WiFi_connect(&wifi_info);		//连接wifi
+	WiFi_connect(&wifi_info2);		//连接wifi
 }
 
 void btn0_triple_click(Button* btn) {
@@ -83,7 +67,7 @@ void btn0_long_click(Button* btn) {
 void btn1_single_click(Button* btn) {
 	printf("\r\nbtn1_single_click\r\n");
     // 单击处理
-	AT_controller_cmd_submit(&test2CMD);
+	WiFi_connect(&wifi_info1);
 }
 
 void btn1_double_click(Button* btn) {

@@ -37,11 +37,9 @@
 #include "sdram/W9825G6KH.h"
 #include "key/key.h"
 #include "key/button_event.h"
-#include "esp_at/at_uart.h"
-#include "esp_at/at_parser.h"
-#include "esp_at/at_dispatcher.h"
-#include "esp_at/at_controller.h"
+#include "esp_at/esp_app/esp_sys/esp_sys.h"
 #include "esp_at/esp_app/esp_wifi/esp_wifi.h"
+
 //APP
 #include "MALLOC/malloc.h"
 #include "SDRAM_test/sdram_test.h"
@@ -98,7 +96,12 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-wifi_info_t wifi_info = {
+wifi_info_t wifi_info1 = {
+	.SSID = "test2",
+	.PWD = "yu778834",
+};
+
+wifi_info_t wifi_info2 = {
 	.SSID = "test2",
 	.PWD = "yu778866",
 };
@@ -166,16 +169,10 @@ int main(void)
 
   Button_Init();
 
-  ATuart_driver_init(&huart2);//绑定AT串口
-  AT_parser_init();		// 初始化行解析
-  AT_controller_init(); // 初始化控制器
+  ESP_AT_sys_init(&huart2);
 
   WiFi_init(NULL);
-  WiFi_connect(&wifi_info);
-
-
-  uint8_t temp_read_buffer[128]; // 从驱动读取的临时缓冲区
-
+  WiFi_set_mode(Station);
 
   HAL_TIM_Base_Start_IT(&htim2);	//开启定时
   /* USER CODE END 2 */
@@ -189,17 +186,10 @@ int main(void)
 			memset(receivData, 0, sizeof(receivData));
 			dataReady = 0;
 		}
-        if (ATuart_get_readable_bytes() > 0){
-            size_t len = ATuart_read(temp_read_buffer, sizeof(temp_read_buffer));
-            if (len > 0)
-            {
-                // 数据流向: uart_driver -> parser -> dispatcher -> controller
-                AT_parser_input(temp_read_buffer, len);
-            }
-        }
-        AT_controller_process();
-        Button_UPDATE();
+		ESP_AT_sys_handle();
 
+
+        Button_UPDATE();
 	  if(time2 >= 2){
 		  time2 = 0;
 		  printf("ok\r\n");

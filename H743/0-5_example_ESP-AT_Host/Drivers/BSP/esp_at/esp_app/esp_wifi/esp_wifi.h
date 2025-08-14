@@ -16,6 +16,12 @@ typedef enum {
 	WIFI_STATE_DISCONNECTED= 4,
 } wifi_state_typedef;//WiFi连接状态,值一一对应
 
+typedef enum {
+	Closed = 0,
+	Station,
+	SoftAP,
+	Mixed,
+} wifi_mode_typedef;//模块工作模式(严格根据手册，返回值可直接比较)
 
 typedef struct wifi_info_t{//通用WiFi信息,可设置多个可连接WiFi
 	char* SSID;		//要连接的WiFi名
@@ -35,9 +41,13 @@ typedef void (*wifi_event_cb_t)(wifi_state_typedef new_state);
  * @param event_callback 当WiFi状态变化时调用的函数，可为NULL
  */
 void WiFi_init(wifi_event_cb_t event_callback);
-
 /**
- * @brief 配置模块为Station模式并连接到指定的AP
+ * @brief 配置模块工作模式
+ * @param wifi_mode wifi_mode_typedef
+ */
+void WiFi_set_mode(wifi_mode_typedef wifi_mode);
+/**
+ * @brief 配置模块连接到指定的AP
  *        这是一个非阻塞函数，会立即返回。
  * @param ssid AP的SSID
  * @param pwd AP的密码
@@ -55,7 +65,11 @@ void WiFi_disconnect(void);
  * @return wifi_state_typedef 当前状态
  */
 wifi_state_typedef WiFi_get_state(void);
-
+/**
+ * @brief 获取当前模块工作模式
+ * @return wifi_mode_typedef 当前模式
+ */
+wifi_mode_typedef WiFi_get_mode(void);
 
 // --- 由Dispatcher调用的内部URC处理函数 ---
 // 虽然是公开的，但不应由用户直接调用

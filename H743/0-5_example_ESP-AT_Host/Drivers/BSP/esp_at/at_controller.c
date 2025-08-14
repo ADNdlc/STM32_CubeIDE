@@ -37,9 +37,8 @@ static uint32_t  g_wait_sent_time = 0;   			// 进入等待的时间戳
 static uint8_t timeout_count;
 static uint8_t error_count;
 
-#define test 0
+
 /* ------------------------- 初始命令 ------------------------- */
-#if test
 static void _cmd_ATE0_rsp_cb(AT_CmdResult_t result, const char* line){
 	if(result == AT_CMD_OK){
 #ifndef NDEBUG
@@ -66,9 +65,8 @@ AT_Cmd_t autocnct = {
 	.data_to_send = NULL,
 	.timeout_ms = 100,
 	.parser_cb = NULL,
-	.response_cb = _cmd_ATE0_rsp_cb,
+	.response_cb = _cmd_autocnct_rsp_cb,
 };
-#endif
 
 static void _cmd_AT_rsp_cb(AT_CmdResult_t result, const char* line){
 	if(result == AT_CMD_OK){
@@ -76,11 +74,8 @@ static void _cmd_AT_rsp_cb(AT_CmdResult_t result, const char* line){
 	printf("AT_rsp: AT OK!\r\n");
 #endif
 
-#if test
-		AT_controller_cmd_submit(&ATE0);
-		AT_controller_cmd_submit(&autocnct);
-#endif
-#if !test
+
+#if 0
 		ATuart_send_string("ATE0\r\n");				//关闭回显
 		HAL_Delay(50);
 		ATuart_send_string("AT+CWAUTOCONN=0\r\n");	//关闭上电重连
@@ -108,7 +103,7 @@ AT_Cmd_t cmd_AT = {
  * 就绪回调
  */
 void handle_ready(const char* line){
-	HAL_Delay(100);
+	HAL_Delay(50);
 	g_state = AT_CTRL_STATE_IDLE;	//就绪
 #ifndef NDEBUG
 	printf("handle_ready: ready\r\n");
@@ -136,6 +131,8 @@ void AT_controller_init(void){
 
 	//提交初始命令
 	AT_controller_cmd_submit(&cmd_AT);
+	AT_controller_cmd_submit(&ATE0);
+	AT_controller_cmd_submit(&autocnct);
 }
 
 /**
