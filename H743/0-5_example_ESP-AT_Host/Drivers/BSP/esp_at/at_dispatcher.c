@@ -35,6 +35,7 @@ static const AT_Handler_t at_handlers[] = {
     // --- 2. 特殊提示符 ---
 	{ "busy p...",	handle_busy },			//模块正在处理上一条命令
     { ">",          handle_CMDdata_send },	//模块进入输入模式
+	{ "ready",      handle_ready },	//模块就绪
 
     // --- 3. URCs (非请求结果码) - 可按功能或出现频率分组 ---
 //    { "+IPD",               handle_urc_ipd },

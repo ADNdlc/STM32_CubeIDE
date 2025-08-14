@@ -44,7 +44,7 @@ static void WiFi_update_state(wifi_state_typedef new_state) {
     if (g_wifi_state != new_state) {
         g_wifi_state = new_state;
 #ifndef NDEBUG
-        printf("WiFi state changed to: %d\r\n", new_state);
+        printf("WiFi update_state to: %d\r\n", new_state);
 #endif
         // 如果上层注册了回调，就调用它
         if (g_state_event_cb) {
@@ -140,52 +140,4 @@ wifi_state_typedef WiFi_get_state(void) {
     return g_wifi_state;
 }
 
-
-
-#if 0
-/**
- * 清空储存的模块wifi信息
- */
-void WiFi_init(void){
-	ESP_WiFi.ESP_WiFi_Mode 	= 0;
-	ESP_WiFi.ESP_WiFi_State = 0;
-	memset(&(ESP_WiFi.Wifi_info), 0, sizeof(AP_info_t));
-}
-
-/**
- * 设置模块连接的WiFi的信息
- */
-void WiFi_info_set(AP_info_t* ap_info){
-	ESP_WiFi.Wifi_info.PWD = ap_info->PWD;
-	ESP_WiFi.Wifi_info.SSID = ap_info->SSID;
-}
-
-/**
- * 查询模块wifi工作模式
- */
-AT_CmdResult_t WiFi_mode_get(void){
-	static AT_Cmd_t CWMODE = { // 查询模块 Wi-Fi 模式
-		.cmd_str = "AT+CWMODE?",
-		.data_to_send = NULL,
-		.timeout_ms = 100,
-		.parser_cb = NULL,
-		.response_cb = NULL,
-	};
-}
-
-/**
- * 设置模块wifi工作模式
- */
-AT_CmdResult_t WiFi_mode_set(wifi_mode_typedef mode){
-	static char cmd_str[] = "AT+CWMODE=3,0\r\n";
-	sprintf(cmd_str, "AT+CWMODE=%d,0\r\n", mode);
-	static AT_Cmd_t CWMODE = { // 查询模块 Wi-Fi 模式
-		.cmd_str = cmd_str,
-		.data_to_send = NULL,
-		.timeout_ms = 100,
-		.parser_cb = NULL,
-		.response_cb = NULL,
-	};
-}
-#endif
 

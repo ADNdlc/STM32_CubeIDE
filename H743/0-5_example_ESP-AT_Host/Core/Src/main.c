@@ -41,6 +41,7 @@
 #include "esp_at/at_parser.h"
 #include "esp_at/at_dispatcher.h"
 #include "esp_at/at_controller.h"
+#include "esp_at/esp_app/esp_wifi/esp_wifi.h"
 //APP
 #include "MALLOC/malloc.h"
 #include "SDRAM_test/sdram_test.h"
@@ -97,7 +98,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+wifi_info_t wifi_info = {
+	.SSID = "test2",
+	.PWD = "yu778866",
+};
 
 /* USER CODE END 0 */
 
@@ -166,6 +170,10 @@ int main(void)
   AT_parser_init();		// 初始化行解析
   AT_controller_init(); // 初始化控制器
 
+  WiFi_init(NULL);
+  WiFi_connect(&wifi_info);
+
+
   uint8_t temp_read_buffer[128]; // 从驱动读取的临时缓冲区
 
 
@@ -190,7 +198,7 @@ int main(void)
             }
         }
         AT_controller_process();
-      Button_UPDATE();
+        Button_UPDATE();
 
 	  if(time2 >= 2){
 		  time2 = 0;

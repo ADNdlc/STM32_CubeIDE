@@ -11,6 +11,7 @@
 #include "main.h"
 
 #include "esp_at/at_controller.h"
+#include "esp_at/esp_app/esp_wifi/esp_wifi.h"
 
 static void test1_parser_cb(const char* data_line){
 	printf("test1_parser_cb data: %s\r\n",data_line+11);
@@ -46,6 +47,8 @@ static AT_Cmd_t test2CMD = {
 };
 
 
+extern wifi_info_t wifi_info;
+
 /*实例化按钮*/
 Button btn0;
 Button btn1;
@@ -61,6 +64,7 @@ void btn0_single_click(Button* btn) {
 void btn0_double_click(Button* btn) {
 	printf("\r\nbtn0_double_click\r\n");
     // 双击处理
+	WiFi_connect(&wifi_info);		//连接wifi
 }
 
 void btn0_triple_click(Button* btn) {
@@ -71,6 +75,8 @@ void btn0_triple_click(Button* btn) {
 void btn0_long_click(Button* btn) {
 	printf("\r\nbtn0_long_click\r\n");
     // 长按处理
+	WiFi_disconnect();				//断开wifi
+
 }
 
 /*================btn1========================*/

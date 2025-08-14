@@ -46,7 +46,7 @@ void handle_final_error(const char* line);
 void handle_CMDdata_send(const char* line);
 void handle_Rxdata_process(const char* line);
 void handle_busy(const char* line);
-
+void handle_ready(const char* line);
 /* ============================ 应用层函数 ============================== */
 
 /**
