@@ -364,7 +364,12 @@ void handle_final_ok(const char* line) {
 #endif
         g_current_cmd = NULL;//调用完成清空
         g_state = AT_CTRL_STATE_IDLE;
-    }
+    }else{
+#ifndef NDEBUG
+printf("Rcv OK in ATstate %d: %s\r\n", g_state, line);
+#endif
+	}
+
 }
 
 /**
@@ -389,7 +394,6 @@ void handle_final_error(const char* line) {
 printf("Rcv ERROR in ATstate %d: %s\r\n", g_state, line);
 #endif
 	}
-
 }
 
 /**
