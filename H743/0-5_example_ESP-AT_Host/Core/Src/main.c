@@ -34,6 +34,7 @@
 #include "sys/sys.h"
 #include "delay/delay.h"
 #include "usart/retarget.h"
+
 //BSP
 #include "sdram/W9825G6KH.h"
 #include "key/key.h"
@@ -45,6 +46,7 @@
 #include "MALLOC/malloc.h"
 #include "SDRAM_test/sdram_test.h"
 #include "RAMspeed_test/speed_test.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -159,6 +161,8 @@ int main(void)
   HAL_Delay(100);
   fsmc_sdram_test();
   HAL_Delay(100);
+#endif
+#if 1
   //内存池初始化
   my_mem_init(SRAMIN);
   my_mem_init(SRAMEX);
@@ -189,9 +193,8 @@ int main(void)
 			dataReady = 0;
 		}
 		ESP_AT_sys_handle();
-
-
         Button_UPDATE();
+
 	  if(time2 >= 2){
 		  time2 = 0;
 		  printf("ok\r\n");

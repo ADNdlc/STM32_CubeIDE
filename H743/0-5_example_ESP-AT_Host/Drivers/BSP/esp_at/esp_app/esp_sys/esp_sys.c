@@ -9,13 +9,19 @@
 
 uint8_t temp_read_buffer[128]; // 从驱动读取的临时缓冲区
 
+/*	初始化所有底层模块
+ *
+ */
 void ESP_AT_sys_init(UART_HandleTypeDef* uart_port){
 	ATuart_driver_init(uart_port);//绑定AT串口
 	AT_parser_init();		// 初始化行解析
-	AT_controller_init(); // 初始化控制器
+	AT_controller_init(); 	// 初始化控制器
 }
 
 
+/*	读取接收内容,维护命令状态机
+ * 	放在主函数中,循环调用
+ */
 void ESP_AT_sys_handle(void){
     if (ATuart_get_readable_bytes() > 0){
         size_t len = ATuart_read(temp_read_buffer, sizeof(temp_read_buffer));
