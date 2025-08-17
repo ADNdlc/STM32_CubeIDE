@@ -10,7 +10,9 @@
 #include <string.h>
 #include <stdio.h>
 #include "../../at_controller.h"
-
+#if USE_MY_MALLOC
+#include "malloc/malloc.h"
+#endif
 
 // --- 私有状态和回调 ---
 static wifi_mode_typedef  g_mode_state = Closed;				//储存模块工作模式
@@ -19,17 +21,16 @@ static wifi_event_cb_t 	  g_state_event_cb = NULL;				//状态改变时调用,�
 
 // --- 私有命令对象和缓冲区 ---
 #if !SAVE_CMD
-static AT_Cmd_t cmd_set_mode;// 用于AT+CWMODE=1
-static AT_Cmd_t cmd_iqe_mode;//用于模式查询
-static AT_Cmd_t cmd_join_ap;// 用于AT+CWJAP="ssid","pwd"
-static AT_Cmd_t cmd_quit_ap;// 用于AT+CWQAP
+static AT_Cmd_t cmd_set_mode;	// 用于AT+CWMODE=1
+static AT_Cmd_t cmd_iqe_mode;	//用于模式查询
+static AT_Cmd_t cmd_join_ap;	// 用于AT+CWJAP="ssid","pwd"
+static AT_Cmd_t cmd_quit_ap;	// 用于AT+CWQAP
 // 用于动态构建命令的缓冲区
 static char wifi_info_cmd_buffer[64];
 static char wifi_mode_cmd_buffer[20];
 #endif
 
 /* 更新内部记录的模块wifi连接状态
- *
  */
 static void WiFi_update_state(wifi_state_typedef new_state) {
     if (g_wifi_state != new_state) {
@@ -137,7 +138,11 @@ void WiFi_init(wifi_event_cb_t event_callback) {
 void WiFi_connect(wifi_info_t* APdata) {
     // 动态构建AT+CWJAP命令
 #if SAVE_CMD
-	char wifi_info_cmd_buffer[128];
+#if USE_MY_MALLOC
+	char* wifi_info_cmd_buffer = mymalloc(SRAMDTCM,64);
+#else
+	char wifi_info_cmd_buffer[64];
+#endif
 	AT_Cmd_t cmd_join_ap = (AT_Cmd_t){
         .cmd_str = wifi_info_cmd_buffer, // 指向动态缓冲区
         .timeout_ms = 10000, // 连接WiFi超时时间需要长一些
@@ -145,7 +150,7 @@ void WiFi_connect(wifi_info_t* APdata) {
     };
 #endif
 	if((g_mode_state==Station)||(g_mode_state==Mixed)){
-		snprintf(wifi_info_cmd_buffer, sizeof(wifi_info_cmd_buffer), "AT+CWJAP=\"%s\",\"%s\"\r\n", APdata->SSID, APdata->PWD);
+		snprintf(wifi_info_cmd_buffer, 64, "AT+CWJAP=\"%s\",\"%s\"\r\n", APdata->SSID, APdata->PWD);
 		WiFi_update_state(WIFI_STATE_CONNECTING);// 更新状态为“正在连接”
     	AT_controller_cmd_submit(&cmd_join_ap);
     	return;
@@ -160,7 +165,11 @@ void WiFi_connect(wifi_info_t* APdata) {
  */
 void WiFi_set_mode(wifi_mode_typedef wifi_mode) {				//第二个命令参数是自动重连,禁用
 #if SAVE_CMD
+#if USE_MY_MALLOC
+	char* wifi_mode_cmd_buffer = mymalloc(SRAMDTCM,20);
+#else
 	char wifi_mode_cmd_buffer[20];
+#endif
 	AT_Cmd_t cmd_set_mode = (AT_Cmd_t){
         .cmd_str = wifi_mode_cmd_buffer, // 指向动态缓冲区
         .timeout_ms = 10000, // 连接WiFi超时时间需要长一些
@@ -173,7 +182,7 @@ void WiFi_set_mode(wifi_mode_typedef wifi_mode) {				//第二个命令参数是�
 	.response_cb = _setmode_rsp_cb,
 	};
 #endif
-    snprintf(wifi_mode_cmd_buffer, sizeof(wifi_mode_cmd_buffer), "AT+CWMODE=%d,0\r\n", wifi_mode);
+    snprintf(wifi_mode_cmd_buffer, 20, "AT+CWMODE=%d,0\r\n", wifi_mode);
     AT_controller_cmd_submit(&cmd_set_mode);//设置
     AT_controller_cmd_submit(&cmd_iqe_mode);//查询
 }

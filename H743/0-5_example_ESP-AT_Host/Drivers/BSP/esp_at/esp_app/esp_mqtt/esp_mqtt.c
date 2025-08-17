@@ -5,35 +5,33 @@
  *      Author: 12114
  */
 
-#define USE_MY_MALLOC	0
-#if USE_MY_MALLOC
-#include "malloc/malloc.h"
-#endif
 #include "esp_mqtt.h"
 #include "../../at_controller.h"
 #include <stdio.h>
 #include <string.h>
+#if USE_MY_MALLOC
+#include "malloc/malloc.h"
+#endif
 
 // --- 私有状态和缓冲区 ---
 static mqtt_state_typedef g_mqtt_state = MQTT_STATE_NOCONNECTCFG;
 static mqtt_command_cb_t g_cmd_cb = NULL;
 
+#if !SAVE_CMD
 static char usercfg_cmd_buf[128];
 static char longpwd_cmd_buf[64];
 static char conn_cmd_buf[128];
 static char sub_cmd_buf[128];
-static char pub_cmd_buf[128]; // 这个只存命令本身
-// 用于发布数据的 payload 缓冲区
-static char pub_payload_buffer[512];
-
+static char pub_cmd_buf[128]; 	// 这个只存命令本身
+static char pub_payload_buffer[512];// 用于发布数据的 payload 缓冲区
 // --- 私有命令对象 ---
 static AT_Cmd_t cmd_mqtt_usercfg;		// 设置用户信息命令
 static AT_Cmd_t cmd_mqtt_long_password;	// 密码设置命令
 static AT_Cmd_t cmd_mqtt_conn;			// MQTT Broker连接命令
 static AT_Cmd_t cmd_mqtt_sub;			// 订阅命令
 static AT_Cmd_t cmd_mqtt_pub;			// 推送命令
-static AT_Cmd_t cmd_mqtt_clean;			//
-
+static AT_Cmd_t cmd_mqtt_clean;			// 清除设置命令(如果未启用自动重连，重连需清理后从头设置)
+#endif
 
 // --- 内部回调函数 ---
 static void _set_mqtt_rsp_cb(AT_CmdResult_t result, const char* line) {
@@ -46,7 +44,7 @@ static void _set_mqtt_rsp_cb(AT_CmdResult_t result, const char* line) {
 static void _simple_mqtt_rsp_cb(AT_CmdResult_t result, const char* line) {
     if (result != AT_CMD_OK) {
         // 如果序列中的任何一步失败，重置状态
-        g_mqtt_state = MQTT_STATE_NOCONNECTCFG;
+
     }
 }
 
@@ -65,7 +63,7 @@ static void _connect_rsp_cb(AT_CmdResult_t result, const char* line) {
 
 void MQTT_init(mqtt_command_cb_t cmd_callback) {
     g_cmd_cb = cmd_callback;
-
+#if !SAVE_CMD
     // 初始化所有命令对象，让它们的 cmd_str 指向各自独立的缓冲区
     cmd_mqtt_usercfg = (AT_Cmd_t){
     	.cmd_str = usercfg_cmd_buf,
@@ -97,29 +95,57 @@ void MQTT_init(mqtt_command_cb_t cmd_callback) {
     	.timeout_ms = 2000,
 		.response_cb = _simple_mqtt_rsp_cb
     };
+#endif
 }
 
 
 /* ========================================= MQTT服务器连接 ========================================== */
 /*	@brief			连接onenet的一个设备,模块支支持一个0号连接
  *
- *	@param client_id 	MQTT客户端ID,	即<设备名称/ID>
- *	@param username 	用户名,用于登陆	即<产品ID>
+ *	@param client_id 	MQTT客户端ID,	对于云平台 即<设备名称/ID>
+ *	@param username 	用户名,用于登陆	对于云平台 即<产品ID>
  *
  *	@param password 	密码(暂时手动输入)
  *
  */
 void MQTT_connect(const char* client_id, const char* username, const char* password) {
+#ifndef NDEBUG
     printf("MQTT Connecting...\r\n");
+#endif
 
+#if SAVE_CMD
+#if USE_MY_MALLOC
+	char* usercfg_cmd_buf = mymalloc(SRAMDTCM,128);
+	char* longpwd_cmd_buf = mymalloc(SRAMDTCM,64);
+	char* conn_cmd_buf = mymalloc(SRAMDTCM,128);
+#else
+    char usercfg_cmd_buf[128];
+    char longpwd_cmd_buf[64];
+    char conn_cmd_buf[128];
+#endif
+    AT_Cmd_t cmd_mqtt_usercfg = (AT_Cmd_t){
+       	.cmd_str = usercfg_cmd_buf,
+       	.timeout_ms = 5000,
+   		.response_cb = _set_mqtt_rsp_cb
+       };
+    AT_Cmd_t cmd_mqtt_long_password = (AT_Cmd_t){
+       	.timeout_ms = 5000,
+       	.response_cb = _set_mqtt_rsp_cb
+       }; // data_to_send 在运行时设置
+    AT_Cmd_t cmd_mqtt_conn = (AT_Cmd_t){
+       	.cmd_str = conn_cmd_buf,
+       	.timeout_ms = 20000,
+   		.response_cb = _connect_rsp_cb
+       };
+#endif
     // === OneNet连接序列 ===
     // 设置用户配置, 1:
-    snprintf(usercfg_cmd_buf, sizeof(usercfg_cmd_buf),
+    snprintf(usercfg_cmd_buf, 128,
              "AT+MQTTUSERCFG=0,1,\"%s\",\"%s\",\"\",0,0,\"\r\n", client_id, username);
     AT_controller_cmd_submit(&cmd_mqtt_usercfg);
 
     // 设置长密码, 写入longpwd_cmd_buf(数据在">"回调中发送)
-    snprintf(longpwd_cmd_buf, sizeof(longpwd_cmd_buf),
+    snprintf(longpwd_cmd_buf, 64,
              "AT+MQTTLONGPASSWORD=0,%d\r\n", strlen(password));
     // 动态设置命令对象的字段
     cmd_mqtt_long_password.cmd_str = longpwd_cmd_buf;
@@ -127,16 +153,27 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
     AT_controller_cmd_submit(&cmd_mqtt_long_password);
 
     // 连接Broker, 写入conn_cmd_buf
-    snprintf(conn_cmd_buf, sizeof(conn_cmd_buf),
+    snprintf(conn_cmd_buf, 128,
              "AT+MQTTCONN=0,\"%s\",%d,0\r\n", MQTT_HOST, MQTT_PORT);
     AT_controller_cmd_submit(&cmd_mqtt_conn);
 }
 
-
+/*	@brief	断开 MQTT 连接，释放资源
+ *			MQTT 设置不自动重连。如果 MQTT 建立连接后又断开，
+ *			需要先发送 AT+MQTTCLEAN=0 命令清理信息，重新配置参数，再建立新的连接。
+ */
 void MQTT_disconnect(void) {
+	AT_Cmd_t cmd_mqtt_clean = (AT_Cmd_t){
+    	.cmd_str = "AT+MQTTCLEAN=0\r\n",
+    	.timeout_ms = 2000,
+		.response_cb = _simple_mqtt_rsp_cb
+    };
     AT_controller_cmd_submit(&cmd_mqtt_clean);
 }
 
+/*	@brief	获取MQTT服务器连接状态
+ *	@return 连接状态
+ */
 mqtt_state_typedef MQTT_get_state(void) {
     return g_mqtt_state;
 }
@@ -149,8 +186,19 @@ mqtt_state_typedef MQTT_get_state(void) {
  *
  */
 void MQTT_subscribe(const char* topic, int qos) {
-    // 写入独立的 sub_cmd_buf
-    snprintf(sub_cmd_buf, sizeof(sub_cmd_buf), "AT+MQTTSUB=0,\"%s\",%d\r\n", topic, qos);
+#if SAVE_CMD
+#if USE_MY_MALLOC
+	char* sub_cmd_buf = mymalloc(SRAMDTCM,128);
+#else
+	static char sub_cmd_buf[128];
+#endif
+    AT_Cmd_t cmd_mqtt_sub = (AT_Cmd_t){
+    	.cmd_str = sub_cmd_buf,
+    	.timeout_ms = 5000,
+		.response_cb = _simple_mqtt_rsp_cb
+    };
+#endif
+    snprintf(sub_cmd_buf, 128, "AT+MQTTSUB=0,\"%s\",%d\r\n", topic, qos);
     AT_controller_cmd_submit(&cmd_mqtt_sub);
 }
 
@@ -167,8 +215,23 @@ void MQTT_publish(const char* topic, const char* data, uint8_t qos, uint8_t reta
 #ifndef NDEBUG
     	printf("MQTT_publish: NOconnect!");
 #endif
-    	return;}
-
+    	return;
+    }
+#if SAVE_CMD
+#if USE_MY_MALLOC
+	char* pub_cmd_buf = mymalloc(SRAMDTCM,128);
+	char* pub_payload_buffer = mymalloc(SRAMDTCM,512);
+#else
+	static char pub_cmd_buf[128]; 	// 这个只存命令本身
+	static char pub_payload_buffer[512];// 用于发布数据的 payload 缓冲区
+#endif
+    AT_Cmd_t cmd_mqtt_pub = (AT_Cmd_t){
+    	.cmd_str = pub_cmd_buf,
+    	.data_to_send = pub_payload_buffer,
+		.timeout_ms = 10000,
+		.response_cb = _simple_mqtt_rsp_cb
+    };
+#endif
 
 }
 
@@ -178,6 +241,24 @@ void MQTT_publish_sensor_data(const Sensor* sensor) {
     	printf("MQTT_publish: NOconnect!");
 #endif
     	return;}
+
+
+#if SAVE_CMD
+#if USE_MY_MALLOC
+	char* pub_cmd_buf = mymalloc(SRAMDTCM,128);
+	char* pub_payload_buffer = mymalloc(SRAMDTCM,512);
+#else
+	static char pub_cmd_buf[128]; 	// 这个只存命令本身
+	static char pub_payload_buffer[512];// 用于发布数据的 payload 缓冲区
+#endif
+    AT_Cmd_t cmd_mqtt_pub = (AT_Cmd_t){
+    	.cmd_str = pub_cmd_buf,
+    	.data_to_send = pub_payload_buffer,
+		.timeout_ms = 10000,
+		.response_cb = _simple_mqtt_rsp_cb
+    };
+#endif
+
     // 获取 Topic
     // $sys/{pid}/{device-name}/thing/property/post
     // 注意: {pid} 和 {device-name} 应该作为参数传入或从配置中读取

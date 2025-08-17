@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #define SAVE_CMD		1	//队列是否存储传入命令？
+#define USE_MY_MALLOC	1	//使用自己的malloc(放在DTCM)
 
 // 命令执行结果
 typedef enum {

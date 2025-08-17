@@ -13,8 +13,6 @@
 #ifndef NDEBUG
 #include <stdio.h>
 #endif
-
-#define USE_MY_MALLOC	1
 #if SAVE_CMD
 #include <stdlib.h>
 #if USE_MY_MALLOC
@@ -133,7 +131,7 @@ static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd){
 #endif
 
 #if USE_MY_MALLOC
-	AT_Cmd_t* AT_Cmd = mymalloc(SRAMDTCM, sizeof(AT_Cmd_t));
+	AT_Cmd_t* AT_Cmd = mymalloc(SRAMDTCM, sizeof(AT_Cmd_t)+1);
 	if(AT_Cmd != NULL){
 		*AT_Cmd = *cmd;
 	}else{
@@ -141,11 +139,11 @@ static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd){
 	}
 	//存储命令的字符串
 	if(cmd->data_to_send){
-		char* AT_Data = mymalloc(SRAMDTCM,strlen(AT_Cmd->data_to_send));
+		char* AT_Data = mymalloc(SRAMDTCM,strlen(AT_Cmd->data_to_send)+1);
 		strcpy(AT_Data, AT_Cmd->data_to_send);
 		AT_Cmd->data_to_send = AT_Data;
 	}
-	char* AT_str = mymalloc(SRAMDTCM,strlen(AT_Cmd->cmd_str));
+	char* AT_str = mymalloc(SRAMDTCM,strlen(AT_Cmd->cmd_str)+1);
 	strcpy(AT_str, AT_Cmd->cmd_str);
 	AT_Cmd->cmd_str = AT_str;
 #endif
