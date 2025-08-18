@@ -12,6 +12,7 @@
 
 #include "esp_at/at_controller.h"
 #include "esp_at/esp_app/esp_wifi/esp_wifi.h"
+#include "esp_at/esp_app/esp_mqtt/esp_mqtt.h"
 
 static void test1_parser_cb(const char* data_line){
 	printf("test1_parser_cb data: %s\r\n",data_line+11);
@@ -42,7 +43,7 @@ Button btn2;
 void btn0_single_click(Button* btn) {
 	printf("\r\nbtn0_single_click\r\n");
     // 单击处理
-	AT_controller_cmd_submit(&test1CMD);
+	AT_controller_cmd_submit(&test1CMD);//测试命令
 }
 
 void btn0_double_click(Button* btn) {
@@ -67,7 +68,7 @@ void btn0_long_click(Button* btn) {
 void btn1_single_click(Button* btn) {
 	printf("\r\nbtn1_single_click\r\n");
     // 单击处理
-	WiFi_connect(&wifi_info1);
+	WiFi_connect(&wifi_info1);		//测试错误Wifi
 }
 
 void btn1_double_click(Button* btn) {
@@ -89,7 +90,8 @@ void btn1_long_click(Button* btn) {
 void btn2_single_click(Button* btn) {
 	printf("\r\nbtn2_single_click\r\n");
     // 单击处理
-
+	MQTT_connect(MQTT_Get_DeviceID(),Product_ID,
+			"version=2018-10-31&res=products%2FSQKg9n0Ii0%2Fdevices%2Ftest2&et=1855499668539&method=md5&sign=%2FHVmg4Xz2RfTRWEu44mApQ%3D%3D");
 }
 
 void btn2_double_click(Button* btn) {
@@ -105,6 +107,7 @@ void btn2_triple_click(Button* btn) {
 void btn2_long_click(Button* btn) {
 	printf("\r\nbtn2_long_click\r\n");
     // 长按处理
+	MQTT_disconnect();
 }
 
 

@@ -22,7 +22,7 @@
 
 // --- 命令状态机定义 ---
 typedef enum {
-    AT_CTRL_STATE_IDLE,			//空闲,就绪
+    AT_CTRL_STATE_IDLE = 0,			//空闲,就绪
     AT_CTRL_STATE_WAIT_RSP,		//命令已发送，等待响应
     AT_CTRL_STATE_WAIT_DATAIN,	//输入模式
 
@@ -68,16 +68,17 @@ static void _cmd_AT_rsp_cb(AT_CmdResult_t result, const char* line){
 
 	}
 	else{
+		g_state = AT_CTRL_NOTREADY;//状态机进入非就绪态
 #ifndef NDEBUG
-	printf("AT_rsp: AT ERROR!!!\r\n");//暂时没做处理
+	printf("AT_rsp: AT ERROR!!!\r\n");
 #endif
 	}
 }
-#if !SAVE_CMD
+#if !SAVE_CMD	//静态命令
 AT_Cmd_t ATE0 = {
 	.cmd_str = "ATE0\r\n",//关闭回显
 	.data_to_send = NULL,
-	.timeout_ms = 100,
+	.timeout_ms = 200,
 	.parser_cb = NULL,
 	.response_cb = _cmd_ATE0_rsp_cb,
 };
@@ -85,14 +86,14 @@ AT_Cmd_t ATE0 = {
 AT_Cmd_t autocnct = {
 	.cmd_str = "AT+CWAUTOCONN=0\r\n",//关闭上电重连
 	.data_to_send = NULL,
-	.timeout_ms = 100,
+	.timeout_ms = 200,
 	.parser_cb = NULL,
 	.response_cb = _cmd_autocnct_rsp_cb,
 };
 AT_Cmd_t cmd_AT = {
 	.cmd_str = "AT\r\n",//查询AT是否就绪
 	.data_to_send = NULL,
-	.timeout_ms = 100,
+	.timeout_ms = 200,
 	.parser_cb = NULL,
 	.response_cb = _cmd_AT_rsp_cb,
 };
@@ -129,21 +130,19 @@ static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd){
 		AT_Cmd->data_to_send = AT_Data;
 	}
 #endif
-
 #if USE_MY_MALLOC
-	AT_Cmd_t* AT_Cmd = mymalloc(SRAMDTCM, sizeof(AT_Cmd_t)+1);
+	AT_Cmd_t* AT_Cmd = mymalloc(SRAMDTCM, sizeof(AT_Cmd_t));
 	if(AT_Cmd != NULL){
 		*AT_Cmd = *cmd;
 	}else{
 		return NULL;
 	}
-	//存储命令的字符串
 	if(cmd->data_to_send){
 		char* AT_Data = mymalloc(SRAMDTCM,strlen(AT_Cmd->data_to_send)+1);
 		strcpy(AT_Data, AT_Cmd->data_to_send);
 		AT_Cmd->data_to_send = AT_Data;
 	}
-	char* AT_str = mymalloc(SRAMDTCM,strlen(AT_Cmd->cmd_str)+1);
+	char* AT_str = mymalloc(SRAMDTCM,strlen(AT_Cmd->cmd_str)+1);//存储命令的字符串
 	strcpy(AT_str, AT_Cmd->cmd_str);
 	AT_Cmd->cmd_str = AT_str;
 #endif
@@ -158,7 +157,7 @@ static void CMD_delete(AT_Cmd_t* cmd){
     free(cmd);
 #endif
 #if USE_MY_MALLOC
-	// 释放字符串
+	// 释放字符串和命令体
 	if(cmd->data_to_send){myfree(SRAMDTCM, cmd->data_to_send);}
 	if(cmd->cmd_str){myfree(SRAMDTCM, cmd->cmd_str);}
 	myfree(SRAMDTCM, cmd);
@@ -171,22 +170,20 @@ static void CMD_delete(AT_Cmd_t* cmd){
  * 就绪回调
  */
 void handle_ready(const char* line){
-	HAL_Delay(50);
 	g_state = AT_CTRL_STATE_IDLE;	//就绪
 #ifndef NDEBUG
 	printf("handle_ready: ready\r\n");
 #endif
 }
-#if SAVE_CMD
-// 构建初始命令
+
+#if SAVE_CMD // 构建初始命令
 AT_Cmd_t ATE0 = {
-	.cmd_str = "ATE0\r\n",//关闭回显
+	.cmd_str = "ATE0\r\n",			//关闭回显
 	.data_to_send = NULL,
 	.timeout_ms = 100,
 	.parser_cb = NULL,
 	.response_cb = _cmd_ATE0_rsp_cb,
 };
-
 AT_Cmd_t autocnct = {
 	.cmd_str = "AT+CWAUTOCONN=0\r\n",//关闭上电重连
 	.data_to_send = NULL,
@@ -195,7 +192,7 @@ AT_Cmd_t autocnct = {
 	.response_cb = _cmd_autocnct_rsp_cb,
 };
 AT_Cmd_t cmd_AT = {
-	.cmd_str = "AT\r\n",//查询AT是否就绪
+	.cmd_str = "AT\r\n",			//查询AT是否就绪
 	.data_to_send = NULL,
 	.timeout_ms = 100,
 	.parser_cb = NULL,
@@ -222,10 +219,10 @@ void AT_controller_init(void){
 
 	ATuart_send_string("AT+RST\r\n");//模块软复位,等待就绪回调
 	g_wait_sent_time = HAL_GetTick();//记录等待模块就绪时间
-
-    AT_controller_cmd_submit(&cmd_AT);
-    AT_controller_cmd_submit(&ATE0);
-    AT_controller_cmd_submit(&autocnct);
+	//提交初始命令
+    AT_controller_cmd_submit(&cmd_AT);	//AT测试
+    AT_controller_cmd_submit(&ATE0);	//关闭回显
+    AT_controller_cmd_submit(&autocnct);//自动连接
 }
 
 /**
@@ -303,7 +300,9 @@ void AT_controller_process(void) {
 
                 g_cmd_sent_time = HAL_GetTick();			// 记录发送时间
                 if (g_current_cmd->data_to_send != NULL) { 	// 根据命令类型决定下一个状态
-                    g_state = AT_CTRL_STATE_WAIT_DATAIN;
+                    g_state = AT_CTRL_STATE_WAIT_DATAIN;	// 进入等待">"
+            		g_wait_sent_time = HAL_GetTick();		// 记录等待进入时间
+
                 } else {
                     g_state = AT_CTRL_STATE_WAIT_RSP;
                 }
@@ -312,19 +311,29 @@ void AT_controller_process(void) {
 
         case AT_CTRL_BUSY:/* 忙重发 */
         	if((HAL_GetTick()-g_wait_sent_time > wait_time) && (g_current_cmd)){ //超过等待时间
+                if(g_current_cmd->data_to_send){ //如果是数据发送命令在数据输入时忙,需重新发送命令和数据
+                	g_state = AT_CTRL_STATE_WAIT_DATAIN;
+                }else{
+                	g_state = g_last_state;	// 恢复原来的状态
+                }
                 ATuart_send_string(g_current_cmd->cmd_str);// 重发AT指令
-                g_state = g_last_state;	// 恢复原来的状态
         	}
         	break;
-        case AT_CTRL_STATE_WAIT_RSP:
+
         case AT_CTRL_STATE_WAIT_DATAIN:
+//        	if(HAL_GetTick()-g_wait_sent_time > 100){ //等待">"超时,可能丢失，尝试直接发送数据
+//        		//g_state = AT_CTRL_STATE_WAIT_RSP;
+//        		ATuart_send_string(g_current_cmd->data_to_send);
+//
+//        	}
+        case AT_CTRL_STATE_WAIT_RSP:
             if(HAL_GetTick()-g_cmd_sent_time > g_current_cmd->timeout_ms) {// 检查超时
                 // 超时发生！
                 if(g_current_cmd->response_cb) {
                     g_current_cmd->response_cb(AT_CMD_TIMEOUT, "Timeout");//既然是超时自然没有响应,先手动传一个字符串
                 }
 #ifndef NDEBUG
-	printf("timeout_count: %s\r\n", g_current_cmd->cmd_str);
+	printf("timeout_count:%s g_state:%d\r\n", g_current_cmd->cmd_str ,g_state);
 #endif
 #if SAVE_CMD
 	CMD_delete(g_current_cmd);
@@ -335,8 +344,8 @@ void AT_controller_process(void) {
             }
             break;
 
-        case AT_CTRL_NOTREADY:	//非就绪态,每隔5s复位一次
-           	if(HAL_GetTick() - g_wait_sent_time > 5000){ //超过等待时间
+        case AT_CTRL_NOTREADY:	//非就绪态,每隔10s复位一次
+           	if(HAL_GetTick() - g_wait_sent_time > 10000){ //超过等待时间
 					ATuart_send_string("AT+RST\r\n");//模块软复位,等待就绪回调
 					g_wait_sent_time = HAL_GetTick();//记录等待模块就绪时间
            	}
@@ -362,12 +371,12 @@ void handle_final_ok(const char* line) {
 #endif
         g_current_cmd = NULL;//调用完成清空
         g_state = AT_CTRL_STATE_IDLE;
-    }else{
+    }
+    else{
 #ifndef NDEBUG
 printf("Rcv OK in ATstate %d: %s\r\n", g_state, line);
 #endif
 	}
-
 }
 
 /**
@@ -399,6 +408,9 @@ printf("Rcv ERROR in ATstate %d: %s\r\n", g_state, line);
  */
 void handle_CMDdata_send(const char* line) {
     if((g_state==AT_CTRL_STATE_WAIT_DATAIN)&&(g_current_cmd->data_to_send!=NULL)) {	// 是等待输入状态且数据体有命令
+#ifndef NDEBUG
+	printf("handle_Txdata_send:%s\r\n",line);
+#endif
     	ATuart_send_string(g_current_cmd->data_to_send);// 发送"当前命令体"的数据(如果有)
 		g_state = AT_CTRL_STATE_WAIT_RSP; 				// 等待最终的 SEND OK/FAIL
 		return;
@@ -407,7 +419,6 @@ void handle_CMDdata_send(const char* line) {
 		HAL_Delay(20);
 		ATuart_send_string("+++");	// 让模块退出此状态(结尾没有换行)
 		HAL_Delay(20);
-		g_state = AT_CTRL_STATE_WAIT_RSP;
 		error_count ++;
 	}
 #ifndef NDEBUG

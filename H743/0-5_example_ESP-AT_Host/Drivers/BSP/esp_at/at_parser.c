@@ -47,7 +47,6 @@ void AT_parser_input(const uint8_t* data, size_t len) {
     current_len += len;
 
     /* ---------------- 开始处理行缓冲 -----------------*/
-#if 1
     size_t start_pos = 0;	//搜索起始位置
     while (start_pos < current_len) {
         // 查找 \n (通常 \r\n 一起出现，以 \n 为准)
@@ -81,7 +80,5 @@ void AT_parser_input(const uint8_t* data, size_t len) {
         memmove(line_buffer, line_buffer + start_pos, remaining_len);
         current_len = remaining_len;
     }
-#endif
-
 }
 

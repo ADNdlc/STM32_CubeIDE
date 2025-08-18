@@ -86,6 +86,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//1S周期回调
 
 //重定义'串口事件回调'函数
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
+	//ATuart_RxCpltHandle(huart);
 	if(huart == &huart1){
 		dataReady = 1;//在主函数里处理发送
 
@@ -93,7 +94,6 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 
 		HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t*)receivData, 50);
 	}
-	ATuart_RxCpltHandle(huart);
 }
 /* USER CODE END PFP */
 
