@@ -45,9 +45,9 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
 uint8_t MQTT_Set_DeviceID(char *c);
 char *MQTT_Get_DeviceID();
 
-// --- 由Dispatcher调用的URC处理函数 ---
-void MQTT_handle_urc_connected(const char* line);
-void MQTT_handle_urc_disconnected(const char* line);
-void MQTT_handle_urc_recv(const char* line);
+/* ========================================= MQTT URC 处理 ========================================== */
+void MQTT_handle_urc_connected(const char* line);//MQTT服务器连接状态
+void MQTT_handle_urc_disconnected(const char* line);//MQTT服务器断开状态
+void MQTT_handle_urc_recv(const char* line);//收到订阅信息回调
 
 #endif /* BSP_ESP_AT_ESP_APP_ESP_MQTT_ESP_MQTT_H_ */

@@ -44,10 +44,10 @@ static uint32_t  g_wait_sent_time = 0;   			// 进入等待的时间戳
 static uint8_t timeout_count = 0;
 static uint8_t error_count = 0;
 
-
+#if SAVE_CMD
 static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd);
 static void CMD_delete(AT_Cmd_t* cmd);
-
+#endif
 
 /* ======================================= 初始命令和回调 ======================================= */
 //关闭回显命令结果回调
@@ -136,21 +136,21 @@ void AT_controller_init(void){
 	AT_Cmd_t ATE0 = {
 		.cmd_str = "ATE0\r\n",			//关闭回显
 		.data_to_send = NULL,
-		.timeout_ms = 100,
+		.timeout_ms = 200,
 		.parser_cb = NULL,
 		.response_cb = _cmd_ATE0_rsp_cb,
 	};
 	AT_Cmd_t autocnct = {
 		.cmd_str = "AT+CWAUTOCONN=0\r\n",//关闭上电重连
 		.data_to_send = NULL,
-		.timeout_ms = 100,
+		.timeout_ms = 200,
 		.parser_cb = NULL,
 		.response_cb = _cmd_autocnct_rsp_cb,
 	};
 	AT_Cmd_t cmd_AT = {
 		.cmd_str = "AT\r\n",			//查询AT是否就绪
 		.data_to_send = NULL,
-		.timeout_ms = 100,
+		.timeout_ms = 200,
 		.parser_cb = NULL,
 		.response_cb = _cmd_AT_rsp_cb,
 	};
@@ -234,8 +234,10 @@ static void CMD_delete(AT_Cmd_t* cmd){
  * 通信错误状态恢复函数
  */
 static void AT_controller_ERRhandler(void){
-	if(error_count > 10){
-
+	if((error_count > 10)||(timeout_count > 10)){
+#ifndef NDEBUG
+	printf("ERRhandler: ERR:%d TimeOut:%d\r\n",error_count,timeout_count);
+#endif
 		AT_controller_init();
 		AT_parser_init();
 

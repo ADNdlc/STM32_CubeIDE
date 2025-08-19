@@ -76,17 +76,17 @@ void Sensor_Set_PointValue(DataPoint* point, ...) {
 /*===============================================设备函数====================================================*/
 
 /*	@brief				构造并返回一个"设备对象"
- *	@param device_id 	设备ID
+ *	@param Message_ID 	设备ID
  *	@param version 		版本
  *	@return				构造的 设备对象
  *
  */
-Sensor* Sensor_Init(const char* device_id, const char* version) {
+Sensor* Sensor_Init(const char* Message_ID, const char* version) {
 	void * temp=NULL;
 	temp = malloc(sizeof(Sensor));//不包含数组大小
 	if(temp!=NULL){
 		Sensor* sensor = temp;
-		sensor->device_id = device_id;
+		sensor->Message_ID = Message_ID;
 		sensor->version   = version;
 		/* 初始化数据点数组 */
 		sensor->data_points = NULL;
@@ -178,7 +178,7 @@ void Sensor_Data_free(Sensor* SenIndex) {
 }
 
 /**
- * @brief 将一个Sensor对象序列化为符合OneNet物模型格式的JSON字符串
+ * @brief 	将一个Sensor对象序列化为符合OneNet物模型格式的JSON字符串
  * @param sensor 		指向要序列化的Sensor对象的指针
  * @param buffer 		用于存放生成的JSON字符串的缓冲区
  * @param buffer_size 	缓冲区的最大大小
@@ -202,7 +202,7 @@ int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer
 	    // 写入JSON头部
 	    written = snprintf(buffer + offset, buffer_size - offset,
 	                       "{\"id\":\"%s\",\"version\":\"%s\",\"params\":{",
-	                       sensor->device_id, sensor->version);
+	                       sensor->Message_ID, sensor->version);
 	    if (written < 0 || written >= buffer_size - offset) return -1;
 	    offset += written;
 	    // 循环写入所有数据点

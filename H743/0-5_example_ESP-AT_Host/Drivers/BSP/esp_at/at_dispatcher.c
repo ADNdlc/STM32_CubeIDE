@@ -8,6 +8,7 @@
 #include "at_dispatcher.h"
 #include "at_controller.h"
 #include "esp_app/esp_wifi/esp_wifi.h"
+#include "esp_app/esp_mqtt/esp_mqtt.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -38,22 +39,18 @@ static const AT_Handler_t at_handlers[] = {
 	{ "ready",      handle_ready },	//模块就绪
 
     // --- 3. URCs (非请求结果码) - 可按功能或出现频率分组 ---
-//    { "+IPD",               handle_urc_ipd },
-//    { "+MQTTSUBRECV:",      handle_urc_mqtt_recv },
-//    { "+MQTTCONNECTED",     handle_urc_mqtt_connected },
-//    { "+MQTTDISCONNECTED",  handle_urc_mqtt_disconnected },
-//    { "ready",              handle_urc_ready },
+    { "+MQTTSUBRECV:",      MQTT_handle_urc_recv },
+    { "+MQTTCONNECTED",     MQTT_handle_urc_connected },
+    { "+MQTTDISCONNECTED",  MQTT_handle_urc_disconnected },
 
     { "WIFI CONNECTED",     WiFi_handle_urc_connected },
     { "WIFI GOT IP",        WiFi_handle_urc_got_ip },
     { "WIFI DISCONNECT",    WiFi_handle_urc_disconnect },
 
-    // --- 4. 数据响应 (Data Responses) ---
+    // --- 4. 数据响应 ---
     // 查询命令返回的具体数据(只有发送命令才会 接受到这些消息)
     { "+CWMODE:",    handle_Rxdata_process }, 	// 模块工作模式查询
-
-    { "+CIPSTA_IP:", handle_Rxdata_process }, 	// 获取到IP地址的另一种方式
-	{ "+test_data:", handle_Rxdata_process }
+    { "+MQTTSUBRECV:", handle_Rxdata_process }, // 收到到订阅消息
 
 	// ... 在这里添加需要处理的其他响应
 };

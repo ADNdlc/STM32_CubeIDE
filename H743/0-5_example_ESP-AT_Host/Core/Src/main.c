@@ -177,8 +177,7 @@ int main(void)
 
   ESP_AT_sys_init(&huart2);
 
-  WiFi_init(NULL);
-  WiFi_set_mode(Station);
+
 
   HAL_TIM_Base_Start_IT(&htim2);	//开启定时
   /* USER CODE END 2 */

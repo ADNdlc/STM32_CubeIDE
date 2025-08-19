@@ -14,6 +14,9 @@
 #include "esp_at/at_dispatcher.h"
 #include "esp_at/at_controller.h"
 
+#include "esp_at/esp_app/esp_wifi/esp_wifi.h"
+#include "esp_at/esp_app/esp_mqtt/esp_mqtt.h"
+
 void ESP_AT_sys_init(UART_HandleTypeDef* uart_port);
 void ESP_AT_sys_handle(void);
 

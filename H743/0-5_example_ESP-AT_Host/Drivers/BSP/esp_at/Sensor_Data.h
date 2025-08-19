@@ -59,7 +59,7 @@ typedef struct {
 
 // 传感器数据{ "id":"123","version":"1.0","params":{<...>} }
 typedef struct {
-    const char* device_id;     // 设备ID
+    const char* Message_ID;     // 消息id号
     const char* version;       // 固件版本
     /* 此指针用于访问一个DataPoint数组 */
     DataPoint* data_points;    // 数据点数组指针(一个传感器可能有多个数据点)

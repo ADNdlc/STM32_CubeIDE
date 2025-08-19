@@ -10,7 +10,7 @@
 #endif
 
 #define READ_BUFFER_SIZE 256
-#ifndef USE_MY_MALLOC
+#if !USE_MY_MALLOC
 static uint8_t temp_read_buffer[READ_BUFFER_SIZE]; // 从驱动读取的临时缓冲区
 #else
 static uint8_t* temp_read_buffer = NULL;
@@ -21,13 +21,18 @@ static uint8_t* temp_read_buffer = NULL;
  */
 void ESP_AT_sys_init(UART_HandleTypeDef* uart_port){
 	ATuart_driver_init(uart_port);//绑定AT串口
-#ifdef	USE_MY_MALLOC
+#if	USE_MY_MALLOC
 	if(!temp_read_buffer){
 		temp_read_buffer = mymalloc(SRAMDTCM, LINE_BUF_SIZE);
 	}
 #endif
 	AT_parser_init();		// 初始化行解析
 	AT_controller_init(); 	// 初始化控制器
+
+	WiFi_init(NULL);
+	WiFi_set_mode(Station);
+
+	MQTT_init(NULL);
 }
 
 
