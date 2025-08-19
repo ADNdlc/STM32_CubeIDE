@@ -10,8 +10,7 @@
 
 #include <stdint.h>
 
-#define SAVE_CMD		0	//队列是否存储传入命令？
-#define USE_MY_MALLOC	0	//使用自己的malloc(放在DTCM)
+#define SAVE_CMD		1	//队列是否存储传入命令？
 
 // 命令执行结果
 typedef enum {
@@ -79,19 +78,8 @@ void AT_controller_process(void);
 // 处理最终响应
 void handle_final_ok(const char* line);
 void handle_final_error(const char* line);
-// 处理URCs
-void handle_urc_ipd(const char* line);
-void handle_urc_mqtt_recv(const char* line);
-void handle_urc_mqtt_connected(const char* line);
-void handle_urc_mqtt_disconnected(const char* line);
-void handle_urc_ready(const char* line);
-void handle_urc_wifi_connected(const char* line);
-void handle_urc_wifi_got_ip(const char* line);
-void handle_urc_wifi_disconnected(const char* line);
-// 处理特殊提示符
-void handle_prompt(const char* line);
-// 处理数据响应
-void handle_data_cwlap(const char* line);
-void handle_data_ip_addr(const char* line);
+
+
+
 
 #endif /* BSP_ESP_AT_AT_CONTROLLER_H_ */

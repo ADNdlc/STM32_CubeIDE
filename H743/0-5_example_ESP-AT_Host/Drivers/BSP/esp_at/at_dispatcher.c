@@ -15,8 +15,8 @@
 /* ============================ 表项结构 ============================== */
 typedef void (*at_handler_func_t)(const char* line);// 处理函数原型
 typedef struct {									// 处理程序表条目
-    const char* prefix;
-    at_handler_func_t handler;
+    const char* prefix;			//响应头
+    at_handler_func_t handler;	//处理函数
 } AT_Handler_t;
 
 
@@ -55,12 +55,12 @@ static const AT_Handler_t at_handlers[] = {
     { "+CIPSTA_IP:", handle_Rxdata_process }, 	// 获取到IP地址的另一种方式
 	{ "+test_data:", handle_Rxdata_process }
 
-	// ... 在这里可以添加需要处理的其他响应
+	// ... 在这里添加需要处理的其他响应
 };
 
 /**
  * 响应分发器函数
- * 接受一个标准字符串(以"\0"结尾),判断类型并调用相应处理函数
+ * 接受一个标准字符串(以"\0"结尾),调用相应处理函数
  */
 void AT_dispatcher_LineProcess(const char* line) {
     // 遍历处理程序表

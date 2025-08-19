@@ -4,7 +4,12 @@
 #include <stdio.h>
 #endif
 
-
+/* ======================================= UART通信层 ========================================== */
+/**
+ * 模块使用的串口配置为DMA循环模式接收
+ * DMA开始后永不不停止,需及时读走解析
+ * 无需重写任何中断函数
+ */
 typedef struct {
 	UART_HandleTypeDef* uart_port;		//AT使用的串口
 	size_t		readIndex;				//读索引
@@ -26,7 +31,7 @@ void ATuart_driver_init(UART_HandleTypeDef* uart_port) {
     memset(AT_UART.loopbuff, 0, LOOP_BUF_SIZE);
     // Circular模式: DMA将在这个缓冲区上以环形模式运行
     HAL_UART_Receive_DMA(AT_UART.uart_port, AT_UART.loopbuff, LOOP_BUF_SIZE);
-    HAL_NVIC_DisableIRQ(DMA1_Stream2_IRQn);
+    //HAL_NVIC_DisableIRQ(DMA1_Stream2_IRQn);
 }
 
 /**
@@ -104,14 +109,12 @@ size_t ATuart_read(uint8_t *buffer, size_t len) {
 
 
 // --- 中断回调处理 --- (放到HAL_UARTEx_RxEventCallback中,只负责重新开启接收)
-//void ATuart_RxCpltHandle(UART_HandleTypeDef *ituart) {
-//    // 停止DMA，以确保能安全地读取CNDTR寄存器，并且防止在处理过程中发生新的接收
-//	if(ituart == AT_UART.uart_port){
-//		//HAL_UART_DMAStop(ituart);
-//
-//		HAL_UARTEx_ReceiveToIdle_DMA(ituart, AT_UART.loopbuff, LOOP_BUF_SIZE);
-//	}
-//}
-
+#if 0
+void ATuart_RxCpltHandle(UART_HandleTypeDef *ituart) {
+	if(ituart == AT_UART.uart_port){
+		HAL_UARTEx_ReceiveToIdle_DMA(ituart, AT_UART.loopbuff, LOOP_BUF_SIZE);
+	}
+}
+#endif
 
 

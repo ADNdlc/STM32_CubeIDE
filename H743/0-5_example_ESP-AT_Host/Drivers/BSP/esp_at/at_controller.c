@@ -22,7 +22,7 @@
 
 // --- 命令状态机定义 ---
 typedef enum {
-    AT_CTRL_STATE_IDLE = 0,			//空闲,就绪
+    AT_CTRL_STATE_IDLE = 0,		//空闲,就绪
     AT_CTRL_STATE_WAIT_RSP,		//命令已发送，等待响应
     AT_CTRL_STATE_WAIT_DATAIN,	//输入模式
 
@@ -39,13 +39,18 @@ static AT_Cmd_t* g_cmd_queue_tail = NULL;			// 队列尾,添加
 static AT_Cmd_t* g_current_cmd = NULL; 				// 当前正在执行的命令
 static uint32_t  g_cmd_sent_time = 0;   			// 命令发送的时间戳
 static uint32_t  g_wait_sent_time = 0;   			// 进入等待的时间戳
-#define wait_time 100			//等待时间(接收到busy p...后重发的间隔时间)
+#define wait_time 200			//等待时间(接收到busy p...后重发的间隔时间)
 
-static uint8_t timeout_count;
-static uint8_t error_count;
+static uint8_t timeout_count = 0;
+static uint8_t error_count = 0;
 
 
-/* ------------------------- 初始命令和回调 ------------------------- */
+static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd);
+static void CMD_delete(AT_Cmd_t* cmd);
+
+
+/* ======================================= 初始命令和回调 ======================================= */
+//关闭回显命令结果回调
 static void _cmd_ATE0_rsp_cb(AT_CmdResult_t result, const char* line){
 	if(result == AT_CMD_OK){
 #ifndef NDEBUG
@@ -53,6 +58,7 @@ static void _cmd_ATE0_rsp_cb(AT_CmdResult_t result, const char* line){
 #endif
 	}
 }
+//上电wifi重连命令结果回调
 static void _cmd_autocnct_rsp_cb(AT_CmdResult_t result, const char* line){
 	if(result == AT_CMD_OK){
 #ifndef NDEBUG
@@ -60,12 +66,12 @@ static void _cmd_autocnct_rsp_cb(AT_CmdResult_t result, const char* line){
 #endif
 	}
 }
+//AT测试命令结果回调
 static void _cmd_AT_rsp_cb(AT_CmdResult_t result, const char* line){
 	if(result == AT_CMD_OK){
 #ifndef NDEBUG
 	printf("AT_rsp: AT OK!\r\n");
 #endif
-
 	}
 	else{
 		g_state = AT_CTRL_NOTREADY;//状态机进入非就绪态
@@ -74,7 +80,8 @@ static void _cmd_AT_rsp_cb(AT_CmdResult_t result, const char* line){
 #endif
 	}
 }
-#if !SAVE_CMD	//静态命令
+/* 静态命令体 */
+#if !SAVE_CMD
 AT_Cmd_t ATE0 = {
 	.cmd_str = "ATE0\r\n",//关闭回显
 	.data_to_send = NULL,
@@ -82,7 +89,6 @@ AT_Cmd_t ATE0 = {
 	.parser_cb = NULL,
 	.response_cb = _cmd_ATE0_rsp_cb,
 };
-
 AT_Cmd_t autocnct = {
 	.cmd_str = "AT+CWAUTOCONN=0\r\n",//关闭上电重连
 	.data_to_send = NULL,
@@ -99,8 +105,65 @@ AT_Cmd_t cmd_AT = {
 };
 #endif
 
+/* ------------------- 初始化函数 ----------------- */
+//模块就绪回调
+//ready
+void handle_ready(const char* line){
+	g_state = AT_CTRL_STATE_IDLE;	//就绪
+#ifndef NDEBUG
+	printf("handle_ready: ready\r\n");
+#endif
+}
+/* 初始化命令控制状态机,清空命令队列
+ */
+void AT_controller_init(void){
+	while(g_cmd_queue_head){
+	    AT_Cmd_t* cmd_to_clear = g_cmd_queue_head;	// 获取头节点
+	    g_cmd_queue_head = g_cmd_queue_head->next;	// 将头指针移动到下一个节点
+	    cmd_to_clear->response_cb(AT_CMD_ERROR,"recover");// 调用所有命令的回调通知复位
+#if SAVE_CMD
+	    CMD_delete(cmd_to_clear);  // 释放
+#endif
+	}
+	g_state = AT_CTRL_NOTREADY;//状态机进入非就绪态
+	g_cmd_queue_head = NULL;
+	g_cmd_queue_tail = NULL;
+	g_current_cmd = NULL;
+	timeout_count = 0;		//清空错误计数
+	error_count   = 0;
+/* 构建初始命令(栈区) */
+#if SAVE_CMD
+	AT_Cmd_t ATE0 = {
+		.cmd_str = "ATE0\r\n",			//关闭回显
+		.data_to_send = NULL,
+		.timeout_ms = 100,
+		.parser_cb = NULL,
+		.response_cb = _cmd_ATE0_rsp_cb,
+	};
+	AT_Cmd_t autocnct = {
+		.cmd_str = "AT+CWAUTOCONN=0\r\n",//关闭上电重连
+		.data_to_send = NULL,
+		.timeout_ms = 100,
+		.parser_cb = NULL,
+		.response_cb = _cmd_autocnct_rsp_cb,
+	};
+	AT_Cmd_t cmd_AT = {
+		.cmd_str = "AT\r\n",			//查询AT是否就绪
+		.data_to_send = NULL,
+		.timeout_ms = 100,
+		.parser_cb = NULL,
+		.response_cb = _cmd_AT_rsp_cb,
+	};
+#endif
+	ATuart_send_string("AT+RST\r\n");//模块软复位,等待就绪回调
+	g_wait_sent_time = HAL_GetTick();//记录等待模块就绪时间
+	//提交初始命令(就绪后执行)
+    AT_controller_cmd_submit(&cmd_AT);	//AT测试
+    AT_controller_cmd_submit(&ATE0);	//关闭回显
+    AT_controller_cmd_submit(&autocnct);//自动连接
+}
 
-/* ================================== 队列内存管理 ================================ */
+/* ================================== 命令队列内存管理(动态命令兼容) ================================ */
 #if SAVE_CMD
 //拷贝一份(连同字符串)
 static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd){
@@ -137,17 +200,18 @@ static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd){
 	}else{
 		return NULL;
 	}
+	char* AT_str = mymalloc(SRAMDTCM,strlen(AT_Cmd->cmd_str)+1);//存储命令的字符串
+	strcpy(AT_str, AT_Cmd->cmd_str);
+	AT_Cmd->cmd_str = AT_str;
 	if(cmd->data_to_send){
 		char* AT_Data = mymalloc(SRAMDTCM,strlen(AT_Cmd->data_to_send)+1);
 		strcpy(AT_Data, AT_Cmd->data_to_send);
 		AT_Cmd->data_to_send = AT_Data;
 	}
-	char* AT_str = mymalloc(SRAMDTCM,strlen(AT_Cmd->cmd_str)+1);//存储命令的字符串
-	strcpy(AT_str, AT_Cmd->cmd_str);
-	AT_Cmd->cmd_str = AT_str;
 #endif
 	return AT_Cmd;
 }
+
 //释放
 static void CMD_delete(AT_Cmd_t* cmd){
 #if !USE_MY_MALLOC
@@ -158,76 +222,30 @@ static void CMD_delete(AT_Cmd_t* cmd){
 #endif
 #if USE_MY_MALLOC
 	// 释放字符串和命令体
-	if(cmd->data_to_send){myfree(SRAMDTCM, cmd->data_to_send);}
+	if(cmd->data_to_send){myfree(SRAMDTCM, cmd->data_to_send);} //先释放内部字符串
 	if(cmd->cmd_str){myfree(SRAMDTCM, cmd->cmd_str);}
 	myfree(SRAMDTCM, cmd);
 #endif
 }
 #endif
 
-/* ============================== 初始化 ============================== */
+/* ================================= 状态机和其管理函数 ================================ */
 /**
- * 就绪回调
+ * 通信错误状态恢复函数
  */
-void handle_ready(const char* line){
-	g_state = AT_CTRL_STATE_IDLE;	//就绪
-#ifndef NDEBUG
-	printf("handle_ready: ready\r\n");
-#endif
-}
+static void AT_controller_ERRhandler(void){
+	if(error_count > 10){
 
-#if SAVE_CMD // 构建初始命令
-AT_Cmd_t ATE0 = {
-	.cmd_str = "ATE0\r\n",			//关闭回显
-	.data_to_send = NULL,
-	.timeout_ms = 100,
-	.parser_cb = NULL,
-	.response_cb = _cmd_ATE0_rsp_cb,
-};
-AT_Cmd_t autocnct = {
-	.cmd_str = "AT+CWAUTOCONN=0\r\n",//关闭上电重连
-	.data_to_send = NULL,
-	.timeout_ms = 100,
-	.parser_cb = NULL,
-	.response_cb = _cmd_autocnct_rsp_cb,
-};
-AT_Cmd_t cmd_AT = {
-	.cmd_str = "AT\r\n",			//查询AT是否就绪
-	.data_to_send = NULL,
-	.timeout_ms = 100,
-	.parser_cb = NULL,
-	.response_cb = _cmd_AT_rsp_cb,
-};
-#endif
-/* 初始化命令控制状态机,清空命令队列
- */
-void AT_controller_init(void){
-	while(g_cmd_queue_head){
-	    AT_Cmd_t* cmd_to_clear = g_cmd_queue_head;	// 获取头节点
-	    g_cmd_queue_head = g_cmd_queue_head->next;	// 将头指针移动到下一个节点
-	    cmd_to_clear->response_cb(AT_CMD_ERROR,"recover");// 调用所有命令的回调通知复位
-#if SAVE_CMD
-	    CMD_delete(cmd_to_clear);  // 释放
-#endif
+		AT_controller_init();
+		AT_parser_init();
+
 	}
-	g_state = AT_CTRL_NOTREADY;//状态机进入非就绪态
-	g_cmd_queue_head = NULL;
-	g_cmd_queue_tail = NULL;
-	g_current_cmd = NULL;
-	timeout_count = 0;		//清空错误计数
-	error_count   = 0;
-
-	ATuart_send_string("AT+RST\r\n");//模块软复位,等待就绪回调
-	g_wait_sent_time = HAL_GetTick();//记录等待模块就绪时间
-	//提交初始命令
-    AT_controller_cmd_submit(&cmd_AT);	//AT测试
-    AT_controller_cmd_submit(&ATE0);	//关闭回显
-    AT_controller_cmd_submit(&autocnct);//自动连接
 }
 
 /**
  * @brief 从命令队列头部取出一个命令
  * @return 指向命令对象的指针，如果队列为空则返回NULL
+ *
  */
 static AT_Cmd_t* cmd_dequeue(void) {
     if (g_cmd_queue_head == NULL) {
@@ -275,16 +293,6 @@ int AT_controller_cmd_submit(AT_Cmd_t* cmd){
 }
 
 /**
- * 通信错误状态恢复函数
- */
-static void AT_controller_ERRhandler(void){
-	if(error_count > 10){
-		AT_controller_init();
-		AT_parser_init();
-	}
-}
-
-/**
  * 命令发送控制状态机
  */
 void AT_controller_process(void) {
@@ -295,42 +303,32 @@ void AT_controller_process(void) {
 
             if (g_cmd_queue_head != NULL) {		// 如果空闲且队列中有待处理命令
                 g_current_cmd = cmd_dequeue();	// 从队列中取出一个命令
-
                 ATuart_send_string(g_current_cmd->cmd_str);	// 发送AT指令
-
                 g_cmd_sent_time = HAL_GetTick();			// 记录发送时间
                 if (g_current_cmd->data_to_send != NULL) { 	// 根据命令类型决定下一个状态
                     g_state = AT_CTRL_STATE_WAIT_DATAIN;	// 进入等待">"
-            		g_wait_sent_time = HAL_GetTick();		// 记录等待进入时间
-
                 } else {
                     g_state = AT_CTRL_STATE_WAIT_RSP;
                 }
             }
             break;
-
         case AT_CTRL_BUSY:/* 忙重发 */
-        	if((HAL_GetTick()-g_wait_sent_time > wait_time) && (g_current_cmd)){ //超过等待时间
+        	if((HAL_GetTick() - g_wait_sent_time > wait_time) && (g_current_cmd)){ //超过等待时间
                 if(g_current_cmd->data_to_send){ //如果是数据发送命令在数据输入时忙,需重新发送命令和数据
                 	g_state = AT_CTRL_STATE_WAIT_DATAIN;
+                	g_wait_sent_time = HAL_GetTick();
                 }else{
                 	g_state = g_last_state;	// 恢复原来的状态
                 }
                 ATuart_send_string(g_current_cmd->cmd_str);// 重发AT指令
         	}
         	break;
-
         case AT_CTRL_STATE_WAIT_DATAIN:
-//        	if(HAL_GetTick()-g_wait_sent_time > 100){ //等待">"超时,可能丢失，尝试直接发送数据
-//        		//g_state = AT_CTRL_STATE_WAIT_RSP;
-//        		ATuart_send_string(g_current_cmd->data_to_send);
-//
-//        	}
         case AT_CTRL_STATE_WAIT_RSP:
             if(HAL_GetTick()-g_cmd_sent_time > g_current_cmd->timeout_ms) {// 检查超时
                 // 超时发生！
                 if(g_current_cmd->response_cb) {
-                    g_current_cmd->response_cb(AT_CMD_TIMEOUT, "Timeout");//既然是超时自然没有响应,先手动传一个字符串
+                	g_current_cmd->response_cb(AT_CMD_TIMEOUT, "Timeout");//既然是超时自然没有响应,先手动传一个字符串
                 }
 #ifndef NDEBUG
 	printf("timeout_count:%s g_state:%d\r\n", g_current_cmd->cmd_str ,g_state);
@@ -343,9 +341,10 @@ void AT_controller_process(void) {
                 timeout_count ++;
             }
             break;
-
-        case AT_CTRL_NOTREADY:	//非就绪态,每隔10s复位一次
+        case AT_CTRL_NOTREADY:					//非就绪态,每隔10s复位一次
            	if(HAL_GetTick() - g_wait_sent_time > 10000){ //超过等待时间
+					AT_controller_init();
+					AT_parser_init();
 					ATuart_send_string("AT+RST\r\n");//模块软复位,等待就绪回调
 					g_wait_sent_time = HAL_GetTick();//记录等待模块就绪时间
            	}
@@ -386,7 +385,7 @@ void handle_final_error(const char* line) {
 #ifndef NDEBUG
 	printf("handle_final_error s: %s\r\n", line);
 #endif
-	if (g_state == AT_CTRL_STATE_WAIT_RSP) {
+	if ((g_state == AT_CTRL_STATE_WAIT_RSP)||(g_state == AT_CTRL_STATE_WAIT_DATAIN)) {
 		if(g_current_cmd && g_current_cmd->response_cb) {	// 如果当前有命令且有最终回调
 			g_current_cmd->response_cb(AT_CMD_ERROR, line);	// 调用"当前命令体"的完成回调
 		}
@@ -454,21 +453,7 @@ void handle_busy(const char* line){
     }
 }
 
-void handle_urc_mqtt_recv(const char* line) {
-    // 这是关键的云端下发命令处理
-    printf("Controller: URC - MQTT message received!\r\n");
-    // 在这里解析 line, 提取 topic 和 payload
-    // 例如: sscanf(line, "+MQTTSUBRECV:%*d,\"%[^\"]\",%*d,%s", topic, payload);
-    // 然后根据内容执行相应操作...
-}
 
-// 对于暂时不处理的，可以先留一个空的实现或只打印一条消息
-void handle_urc_ipd(const char* line) {  }
-void handle_urc_mqtt_connected(const char* line) {  }
-void handle_urc_mqtt_disconnected(const char* line) {  }
-void handle_urc_ready(const char* line) { printf("Controller: Module is ready.\r\n"); }
-void handle_urc_wifi_disconnected(const char* line) {  }
-void handle_data_cwlap(const char* line) { printf("Controller: Wi-Fi scan result: %s\r\n", line); }
-void handle_data_ip_addr(const char* line) { printf("Controller: IP data: %s\r\n", line); }
+
 
 

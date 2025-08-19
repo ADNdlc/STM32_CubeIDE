@@ -14,7 +14,7 @@
 #include "malloc/malloc.h"
 #endif
 
-#define longPWD 0	//长输入时,不知为何模块没有发送">",只有发送一次密码才能收到，但再发一遍也没有设置正确
+#define longPWD 1	//长输入时,不知为何模块没有发送">",只有发送一次密码才能收到，但再发一遍也没有设置正确
 
 // --- 私有状态和缓冲区 ---
 static char DeviceID[64] = "test2";		//设备ID, 即Client ID
@@ -42,7 +42,7 @@ static AT_Cmd_t cmd_mqtt_pub;			// 推送命令
 static AT_Cmd_t cmd_mqtt_clean;			// 清除设置命令(如果未启用自动重连，重连需清理后从头设置)
 #endif
 
-
+void MQTTBroker_connect(void);
 // =========== 命令结果回调函数 ============
 static void _set_userCFG_rsp_cb(AT_CmdResult_t result, const char* line) {
     if (result != AT_CMD_OK) {
@@ -171,7 +171,7 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
        };
 #if longPWD
     AT_Cmd_t cmd_mqtt_long_password = (AT_Cmd_t){
-       	.timeout_ms = 5000,
+       	.timeout_ms = 10000,
        	.response_cb = _set_longPWD_rsp_cb
        }; // data_to_send 在运行时设置
 #endif
@@ -202,7 +202,7 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
     // 在long_password成功回调中提交
 }
 
-void MQTTBroker_connect(){
+void MQTTBroker_connect(void){
 #ifndef NDEBUG
     printf("MQTT Connecting...\r\n");
 #endif
@@ -332,64 +332,64 @@ char *MQTT_Get_DeviceID(){
 	return DeviceID;
 }
 
-/*	@brief			推送传感器数据
- *
- *	@param topic 	主题名称
- *	@param sensor 	传感器对象
- *	@param qos 		服务质量 0/1/2
- *	@param retain 	保留会话? 0/1
- *
- */
-void MQTT_publish_sensor_data(const Sensor* sensor) {
-    if (g_mqtt_state != MQTT_STATE_CONNECTED) {
-#ifndef NDEBUG
-    	printf("MQTT_publish: NOconnect!");
-#endif
-    	return;
-    }
-    if (g_mqtt_state != MQTT_STATE_CONNECTED) {
-#ifndef NDEBUG
-    	printf("MQTT_publish: NOconnect!");
-#endif
-    	return;
-    }
-
-
-#if SAVE_CMD
-#if USE_MY_MALLOC
-	char* pub_cmd_buf = mymalloc(SRAMDTCM,128);
-	char* pub_payload_buffer = mymalloc(SRAMDTCM,512);
-#else
-	static char pub_cmd_buf[128]; 	// 这个只存命令本身
-	static char pub_payload_buffer[512];// 用于发布数据的 payload 缓冲区
-#endif
-    AT_Cmd_t cmd_mqtt_pub = (AT_Cmd_t){
-    	.cmd_str = pub_cmd_buf,
-    	.data_to_send = pub_payload_buffer,
-		.timeout_ms = 10000,
-		.response_cb = _simple_mqtt_rsp_cb
-    };
-#endif
-
-    // 获取 Topic
-    // $sys/{pid}/{device-name}/thing/property/post
-    // 注意: {pid} 和 {device-name} 应该作为参数传入或从配置中读取
-    // 这里为了简化，我们硬编码
-    const char* pid = "SQKg9n0Ii0"; // 从你的文档中提取
-    const char* dev_name = "temperatureAndHumidity";
-    char topic[128];
-    snprintf(topic, sizeof(topic), "$sys/%s/%s/thing/property/post", pid, dev_name);
-    // 序列化数据到 payload
-    int payload_len = Sensor_Data_to_json_string(sensor, pub_payload_buffer, sizeof(pub_payload_buffer));
-    if (payload_len < 0) {
-        printf("Error: JSON serialization failed!\r\n");
-        return;
-    }
-    // 构建 AT+MQTTPUBRAW 命令, 写入独立的 pub_cmd_buf
-     snprintf(pub_cmd_buf, sizeof(pub_cmd_buf),
-              "AT+MQTTPUBRAW=0,\"%s\",%d,0,0\r\n", topic, payload_len);
-    AT_controller_cmd_submit(&cmd_mqtt_pub);
-}
+///*	@brief			推送传感器数据
+// *
+// *	@param topic 	主题名称
+// *	@param sensor 	传感器对象
+// *	@param qos 		服务质量 0/1/2
+// *	@param retain 	保留会话? 0/1
+// *
+// */
+//void MQTT_publish_sensor_data(const Sensor* sensor) {
+//    if (g_mqtt_state != MQTT_STATE_CONNECTED) {
+//#ifndef NDEBUG
+//    	printf("MQTT_publish: NOconnect!");
+//#endif
+//    	return;
+//    }
+//    if (g_mqtt_state != MQTT_STATE_CONNECTED) {
+//#ifndef NDEBUG
+//    	printf("MQTT_publish: NOconnect!");
+//#endif
+//    	return;
+//    }
+//
+//
+//#if SAVE_CMD
+//#if USE_MY_MALLOC
+//	char* pub_cmd_buf = mymalloc(SRAMDTCM,128);
+//	char* pub_payload_buffer = mymalloc(SRAMDTCM,512);
+//#else
+//	static char pub_cmd_buf[128]; 	// 这个只存命令本身
+//	static char pub_payload_buffer[512];// 用于发布数据的 payload 缓冲区
+//#endif
+//    AT_Cmd_t cmd_mqtt_pub = (AT_Cmd_t){
+//    	.cmd_str = pub_cmd_buf,
+//    	.data_to_send = pub_payload_buffer,
+//		.timeout_ms = 10000,
+//		.response_cb = _simple_mqtt_rsp_cb
+//    };
+//#endif
+//
+//    // 获取 Topic
+//    // $sys/{pid}/{device-name}/thing/property/post
+//    // 注意: {pid} 和 {device-name} 应该作为参数传入或从配置中读取
+//    // 这里为了简化，我们硬编码
+//    const char* pid = "SQKg9n0Ii0"; // 从你的文档中提取
+//    const char* dev_name = "temperatureAndHumidity";
+//    char topic[128];
+//    snprintf(topic, sizeof(topic), "$sys/%s/%s/thing/property/post", pid, dev_name);
+//    // 序列化数据到 payload
+//    int payload_len = Sensor_Data_to_json_string(sensor, pub_payload_buffer, sizeof(pub_payload_buffer));
+//    if (payload_len < 0) {
+//        printf("Error: JSON serialization failed!\r\n");
+//        return;
+//    }
+//    // 构建 AT+MQTTPUBRAW 命令, 写入独立的 pub_cmd_buf
+//     snprintf(pub_cmd_buf, sizeof(pub_cmd_buf),
+//              "AT+MQTTPUBRAW=0,\"%s\",%d,0,0\r\n", topic, payload_len);
+//    AT_controller_cmd_submit(&cmd_mqtt_pub);
+//}
 
 
 /* ========================================= MQTT URC 处理 ========================================== */

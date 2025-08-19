@@ -11,13 +11,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define USE_MY_MALLOC	1	//使用自己的malloc(放在DTCM)
+
 // 定义解析器行缓冲区的最大大小
 // 应该大于任何可能收到的最长的一行AT响应
-#define LINE_BUF_SIZE  256
+#define LINE_BUF_SIZE  1024
 
 // 初始化AT解析器
 void AT_parser_init(void);
-
 /**
  * @brief 向解析器输入新的数据
  * @param data 从驱动层读取到的数据指针
