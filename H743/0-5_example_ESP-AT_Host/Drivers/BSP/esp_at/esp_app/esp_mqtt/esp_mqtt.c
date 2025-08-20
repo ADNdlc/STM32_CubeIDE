@@ -74,6 +74,7 @@ static void _connect_rsp_cb(AT_CmdResult_t result, const char* line) {
 #ifndef NDEBUG
     printf("MQTT Connected!\r\n");
 #endif
+
     } else {
     	//失败需重新设置用户信息
         g_mqtt_state = MQTT_STATE_NOUSERCFG;
@@ -322,15 +323,16 @@ uint8_t MQTT_Set_DeviceID(char *c){
 /*	@brief		获取本设备名称(标识符)
  *	@return		设备名称
  */
-char *MQTT_Get_DeviceID(){
+char *MQTT_Get_DeviceID(void){
 	return DeviceID;
 }
 
-/*	@brief			推送传感器数据(根据云功能写)
+/*	@brief			推送传感器数据
  *	@param sensor 	传感器对象
  *
  */
 void MQTT_publish_sensor_data(const Sensor* sensor) {
+#define payload_size 512
 	   if (g_mqtt_state != MQTT_STATE_CONNECTED) {
 	#ifndef NDEBUG
 	    	printf("MQTT_publish: NOconnect!");
@@ -340,10 +342,10 @@ void MQTT_publish_sensor_data(const Sensor* sensor) {
 	#if SAVE_CMD
 	#if USE_MY_MALLOC
 		char* pub_cmd_buf = mymalloc(SRAMDTCM,128);
-		char* pub_payload_buffer = mymalloc(SRAMDTCM,512);
+		char* pub_payload_buffer = mymalloc(SRAMDTCM,payload_size);
 	#else
 		char pub_cmd_buf[128]; 	// 这个只存命令本身
-		char pub_payload_buffer[512];// 用于发布数据的 payload 缓冲区
+		char pub_payload_buffer[payload_size];// 用于发布数据的 载荷 缓冲区
 	#endif
 	    AT_Cmd_t cmd_mqtt_pub = (AT_Cmd_t){
 	    	.cmd_str = pub_cmd_buf,
@@ -354,28 +356,45 @@ void MQTT_publish_sensor_data(const Sensor* sensor) {
 	#endif
 
 
+	// 获取 Topic
+	// $sys/{pid}/{device-name}/thing/property/post
+	const char* dev_name = MQTT_Get_DeviceID();	//获取本机名称
+	char topic[128];
+	snprintf(topic, sizeof(topic), "$sys/%s/%s/thing/property/post", Product_ID, dev_name);
 
-//	    // 构建 AT+MQTTPUBRAW 命令, 写入独立的 pub_cmd_buf
-//		snprintf(pub_cmd_buf, 128,
-//				"AT+MQTTPUBRAW=0,\"%s\",%d,%d,%d\r\n", topic, strlen(data), qos, retain);
-//		AT_controller_cmd_submit(&cmd_mqtt_pub);//提交命令,data在回调中发送
+	// 序列化数据到 payload
+	int payload_len = Sensor_Data_to_json_string(sensor, pub_payload_buffer, payload_size);
+	if (payload_len < 0) {
+		printf("Error: JSON serialization failed!\r\n");
+		return;
+	}
+
+	// 构建 AT+MQTTPUBRAW 命令
+	snprintf(pub_cmd_buf, sizeof(pub_cmd_buf),
+			"AT+MQTTPUBRAW=0,\"%s\",%d,0,0\r\n", topic, payload_len);
+#ifndef NDEBUG
+	printf("push cmd: %s\r\n", pub_cmd_buf);
+	printf("push payload: %s\r\n", pub_payload_buffer);
+#endif
+	// 提交发布命令
+	AT_controller_cmd_submit(&cmd_mqtt_pub);
 }
 
 
 /* ========================================= MQTT URC 处理 ========================================== */
-//MQTT服务器连接状态
+//MQTT服务器连接状态 +MQTTCONNECTED
 void MQTT_handle_urc_connected(const char* line) {
     g_mqtt_state = MQTT_STATE_CONNECTED;
     printf("MQTT Connected to broker.\r\n");
     // 可以在这里自动订阅主题
 
 }
-//MQTT服务器断开状态
+//MQTT服务器断开状态 +MQTTDISCONNECTED
 void MQTT_handle_urc_disconnected(const char* line) {
     g_mqtt_state = MQTT_STATE_NOUSERCFG;
     printf("MQTT Disconnected from broker.\r\n");
 }
-//收到订阅信息回调
+//收到订阅信息回调 +MQTTSUBRECV:
 void MQTT_handle_urc_recv(const char* line) {
     // 格式: +MQTTSUBRECV:0,"<topic>",<len>,<payload>
     char topic[128];

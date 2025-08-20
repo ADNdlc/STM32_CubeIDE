@@ -9,6 +9,7 @@
 #include "at_controller.h"
 #include "esp_app/esp_wifi/esp_wifi.h"
 #include "esp_app/esp_mqtt/esp_mqtt.h"
+#include "esp_app/RTC_SNTP/RTC_cal.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -47,10 +48,13 @@ static const AT_Handler_t at_handlers[] = {
     { "WIFI GOT IP",        WiFi_handle_urc_got_ip },
     { "WIFI DISCONNECT",    WiFi_handle_urc_disconnect },
 
+	{ "+TIME_UPDATED",    SNTP_handle_time_update },
+
     // --- 4. 数据响应 ---
-    // 查询命令返回的具体数据(只有发送命令才会 接受到这些消息)
-    { "+CWMODE:",    handle_Rxdata_process }, 	// 模块工作模式查询
+    // 查询命令返回的具体数据(只有发送命令才会 接受到这些消息 统一使用handle_Rxdata_process回调)
+    { "+CWMODE:",      handle_Rxdata_process }, 	// 模块工作模式查询
     { "+MQTTSUBRECV:", handle_Rxdata_process }, // 收到到订阅消息
+	{ "+CIPSNTPTIME:", handle_Rxdata_process }, 	// 查询NTP时间
 
 	// ... 在这里添加需要处理的其他响应
 };

@@ -356,8 +356,7 @@ void AT_controller_process(void) {
 
 
 /* ============================ 由分发器调用的处理函数 ============================== */
-/**
- * 返回"OK"调用
+/* 返回"OK"调用
  */
 void handle_final_ok(const char* line) {
 #ifndef NDEBUG

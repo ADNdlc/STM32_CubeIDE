@@ -9,10 +9,7 @@
 #include "Button_event.h"
 #include "retarget.h"
 #include "main.h"
-
-#include "esp_at/at_controller.h"
-#include "esp_at/esp_app/esp_wifi/esp_wifi.h"
-#include "esp_at/esp_app/esp_mqtt/esp_mqtt.h"
+#include "esp_at/esp_app/esp_sys/esp_sys.h"
 
 static void test1_parser_cb(const char* data_line){
 	printf("test1_parser_cb data: %s\r\n",data_line+11);
@@ -68,12 +65,24 @@ void btn0_long_click(Button* btn) {
 void btn1_single_click(Button* btn) {
 	printf("\r\nbtn1_single_click\r\n");
     // 单击处理
-	WiFi_connect(&wifi_info1);		//测试错误Wifi
+	//WiFi_connect(&wifi_info1);		//测试错误Wifi
+
+	RTC_TimeTypeDef sTime = {0};
+	RTC_DateTypeDef sDate = {0};
+	if(RTC_is_calibrated()){
+		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+		printf("日期为:20%d-%d-%d\r\n",sDate.Year,sDate.Month,sDate.Date);
+		printf("时间为:%dh-%dmin-%dsec\r\n",sTime.Hours,sTime.Minutes,sTime.Seconds);
+	}else{
+		printf("RTC not ready.\r\n");
+	}
 }
 
 void btn1_double_click(Button* btn) {
 	printf("\r\nbtn1_double_click\r\n");
     // 双击处理
+
 }
 
 void btn1_triple_click(Button* btn) {
