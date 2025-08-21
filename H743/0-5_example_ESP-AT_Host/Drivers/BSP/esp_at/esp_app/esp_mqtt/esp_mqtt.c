@@ -7,6 +7,7 @@
 
 #include "esp_mqtt.h"
 #include "../../at_controller.h"
+
 #include "../esp_wifi/esp_wifi.h"
 #include <stdio.h>
 #include <string.h>
@@ -43,11 +44,11 @@ static void MQTTBroker_connect(void);
 static void _set_userCFG_rsp_cb(AT_CmdResult_t result, const char* line) {
     if (result != AT_CMD_OK) {
         // 如果序列中的任何一步失败，重置状态
+    	if(g_mqtt_state == MQTT_STATE_CONNECTED) return;
         g_mqtt_state = MQTT_STATE_NOUSERCFG;return;
     }
     if(result == AT_CMD_OK){
     	g_mqtt_state = MQTT_STATE_NOPWD;	//进入下一项参数设置
-    	MQTTBroker_connect();
     }
 }
 //MQTT用户长密码设置
@@ -71,10 +72,11 @@ static void _simple_mqtt_rsp_cb(AT_CmdResult_t result, const char* line) {
 static void _connect_rsp_cb(AT_CmdResult_t result, const char* line) {
     if (result == AT_CMD_OK) {
         // 命令被接受，等待 +MQTTCONNECTED URC
+    	// 订阅设备设置主题
+    	MQTT_subscribe("$sys/SQKg9n0Ii0/test2/thing/property/set",0);
 #ifndef NDEBUG
     printf("MQTT Connected!\r\n");
 #endif
-
     } else {
     	//失败需重新设置用户信息
         g_mqtt_state = MQTT_STATE_NOUSERCFG;
@@ -355,7 +357,6 @@ void MQTT_publish_sensor_data(const Sensor* sensor) {
 	    };
 	#endif
 
-
 	// 获取 Topic
 	// $sys/{pid}/{device-name}/thing/property/post
 	const char* dev_name = MQTT_Get_DeviceID();	//获取本机名称
@@ -394,6 +395,42 @@ void MQTT_handle_urc_disconnected(const char* line) {
     g_mqtt_state = MQTT_STATE_NOUSERCFG;
     printf("MQTT Disconnected from broker.\r\n");
 }
+
+// 用于发送 set_reply 消息的回调
+void MQTT_send_reply(const char* id, int code, const char* msg) {
+    if (g_mqtt_state != MQTT_STATE_CONNECTED) return;
+
+    static char reply_topic_buf[128];
+    static char reply_payload_buf[128];
+    static AT_Cmd_t cmd_mqtt_reply;
+
+    // 构建 Topic: $sys/{pid}/{device-name}/thing/property/set_reply
+    const char* dev_name = MQTT_Get_DeviceID();
+    snprintf(reply_topic_buf, sizeof(reply_topic_buf),
+             "$sys/%s/%s/thing/property/set_reply", Product_ID, dev_name);
+
+    // 构建 Payload
+    int payload_len = snprintf(reply_payload_buf, sizeof(reply_payload_buf),
+                               "{\"id\":\"%s\",\"code\":%d,\"msg\":\"%s\"}",
+                               id, code, msg);
+
+    // 构建 AT 命令
+    static char reply_cmd_buf[128];
+    snprintf(reply_cmd_buf, sizeof(reply_cmd_buf),
+             "AT+MQTTPUBRAW=0,\"%s\",%d,0,0\r\n", reply_topic_buf, payload_len);
+
+    // 初始化并提交命令
+    cmd_mqtt_reply = (AT_Cmd_t) {
+        .cmd_str = reply_cmd_buf,
+        .data_to_send = reply_payload_buf,
+        .timeout_ms = 10000,
+        .response_cb = _simple_mqtt_rsp_cb
+    };
+    AT_controller_cmd_submit(&cmd_mqtt_reply);
+}
+
+
+
 //收到订阅信息回调 +MQTTSUBRECV:
 void MQTT_handle_urc_recv(const char* line) {
     // 格式: +MQTTSUBRECV:0,"<topic>",<len>,<payload>
@@ -401,7 +438,6 @@ void MQTT_handle_urc_recv(const char* line) {
     char payload[256];
     int len;
 
-    // 简化的解析，实际项目中可能需要更健壮的解析器
     const char* topic_start = strchr(line, '"');
     if (!topic_start) return;
     const char* topic_end = strchr(topic_start + 1, '"');
@@ -421,11 +457,30 @@ void MQTT_handle_urc_recv(const char* line) {
         strncpy(payload, payload_start, len);
         payload[len] = '\0';
 
-        // 调用上层注册的回调函数
-        if (g_cmd_cb) {
-            g_cmd_cb(topic, payload);
-        }
-    }
+        const char* payload_start = strchr(len_start, ',') + 1;
+           if (payload_start) {
+               // 不再需要本地的 payload 缓冲区，直接将指针传递
+               // 注意：这要求 Cloud_dispatcher_process_command 是同步执行的
+
+               // 我们需要找到订阅的主题是否是 set topic
+               // $sys/{pid}/{device-name}/thing/property/set
+               char set_topic_pattern[128];
+               snprintf(set_topic_pattern, sizeof(set_topic_pattern),
+                        "$sys/%s/%s/thing/property/set", Product_ID, MQTT_Get_DeviceID());
+
+               if (strcmp(topic, set_topic_pattern) == 0) {
+                   // 是属性设置命令交给云命令分发器处理
+                   Cloud_dispatcher_process_command(payload_start);
+               } else {
+                   // 是其他订阅消息，例如 post_reply
+                   // 调用旧的回调（如果需要的话）
+                   if (g_cmd_cb) {
+                       g_cmd_cb(topic, payload_start);
+                   }
+               }
+           }
+       }
+
 }
 
 

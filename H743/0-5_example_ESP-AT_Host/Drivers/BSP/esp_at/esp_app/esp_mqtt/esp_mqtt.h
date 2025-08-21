@@ -48,6 +48,7 @@ char *MQTT_Get_DeviceID();
 /* ========================================= MQTT URC 处理 ========================================== */
 void MQTT_handle_urc_connected(const char* line);//MQTT服务器连接状态
 void MQTT_handle_urc_disconnected(const char* line);//MQTT服务器断开状态
-void MQTT_handle_urc_recv(const char* line);//收到订阅信息回调
+void MQTT_handle_urc_recv(const char* line);	//收到订阅信息回调
+
 
 #endif /* BSP_ESP_AT_ESP_APP_ESP_MQTT_ESP_MQTT_H_ */

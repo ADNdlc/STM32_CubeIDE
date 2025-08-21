@@ -31,6 +31,19 @@ DataPoint Sensor_Create_Point(const char* name, DataType type) {
     return point;
 }
 
+/*	@brief			初始化一个 数据点对象
+ *
+ *	@param point 	数据点
+ *	@param name 	数据点"标识符"
+ *	@param type 	数据类型
+ *
+ */
+void Sensor_init_Point(DataPoint* point, const char* name, DataType type) {
+    point->name = name;
+    point->type = type;
+    point->timestamp = 0;//发生送时再设置时间
+}
+
 //内部调用
 static void Set_PointValue(DataPoint* point, va_list args){
     switch(point->type) {
@@ -97,7 +110,7 @@ Sensor* Sensor_Init(const char* Message_ID, const char* version) {
 }
 
 
-/*	@brief				添加数据点到设备
+/*	@brief				添加数据点到设备(重分配内存并拷贝)
  *	@param set 			设备
  *	@param point 		数据点
  *
@@ -125,7 +138,7 @@ bool Sensor_Add_Point(Sensor* SenIndex, DataPoint point) {
  *
  *	@param S 		设备对象
  *	@param name 	数据点"标识符"
- *	@param time		毫秒时间戳
+ *	@param time		时间戳
  *	@param type		数据类型(创建数据点时类型已定不允许需修改类型)
  *	@param ...		数据值
  *
@@ -185,6 +198,7 @@ void Sensor_Data_free(Sensor* SenIndex) {
  * @return 		成功则返回生成的JSON字符串长度，失败则返回-1
  */
 int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer_size){
+#if 1
 	 if (!sensor || !buffer) return -1;
 	    int offset = 0;
 	    int written;
@@ -199,12 +213,18 @@ int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer
 	    	}
 	    }
 */
+
+	    printf("write begin\r\n");
+
 	    // 写入JSON头部
 	    written = snprintf(buffer + offset, buffer_size - offset,
 	                       "{\"id\":\"%s\",\"version\":\"%s\",\"params\":{",
 	                       sensor->Message_ID, sensor->version);
 	    if (written < 0 || written >= buffer_size - offset) return -1;
 	    offset += written;
+
+	    printf("write head\r\n");
+
 	    // 循环写入所有数据点
 	    for (int i = 0; i < sensor->count; ++i) {
 	        const DataPoint* p = &sensor->data_points[i];// 写入数据点名称
@@ -212,6 +232,9 @@ int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer
 	                           "\"%s\":{\"value\":", p->name);
 	        if (written < 0 || written >= buffer_size - offset) return -1;
 	        offset += written;
+
+		    printf("write P_count %d\r\n",i);
+
 	        // 根据类型写入数据点的值
 	        switch (p->type) {
 	            case DATA_int:
@@ -229,11 +252,14 @@ int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer
 	                break;
 	        }
 	        if (written < 0 || written >= buffer_size - offset) return -1;
+
 	        offset += written;
 	        // 写入时间戳和结尾
-	        // (注意: OneNet 的 time 字段似乎不是必需的, 但加上更完整)
-	        written = snprintf(buffer + offset, buffer_size - offset, "}");
+	        written = snprintf(buffer + offset, buffer_size - offset, ",\"time\":%lu000}",p->timestamp);
 	        if (written < 0 || written >= buffer_size - offset) return -1;
+
+		    printf("write time\r\n");
+
 	        offset += written;
 	        // 如果不是最后一个数据点，则添加逗号
 	        if (i < sensor->count - 1) {
@@ -245,9 +271,13 @@ int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer
 	    // 写入JSON尾部
 	    written = snprintf(buffer + offset, buffer_size - offset, "}}");
 	    if (written < 0 || written >= buffer_size - offset) return -1;
+
+	    printf("write tail\r\n");
+
 	    offset += written;
 
 	    return offset; // 返回总长度
+#endif
 }
 
 

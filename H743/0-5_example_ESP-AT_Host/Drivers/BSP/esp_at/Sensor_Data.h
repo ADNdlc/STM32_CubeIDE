@@ -59,7 +59,7 @@ typedef struct {
 
 // 传感器数据{ "id":"123","version":"1.0","params":{<...>} }
 typedef struct {
-    const char* Message_ID;     // 消息id号
+    const char* Message_ID;    // 消息id号,String类型的数字,长度限制不超过13位
     const char* version;       // 固件版本
     /* 此指针用于访问一个DataPoint数组 */
     DataPoint* data_points;    // 数据点数组指针(一个传感器可能有多个数据点)
@@ -68,6 +68,7 @@ typedef struct {
 
 /*============================================== 数据点函数 ====================================================*/
 DataPoint Sensor_Create_Point(const char* name, DataType type);
+void Sensor_init_Point(DataPoint* point, const char* name, DataType type);
 void Sensor_Set_PointValue(DataPoint* point, ...);
 
 /*=============================================== 设备函数 ====================================================*/

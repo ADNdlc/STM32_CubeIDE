@@ -40,7 +40,7 @@ static const AT_Handler_t at_handlers[] = {
 	{ "ready",      handle_ready },	//模块就绪
 
     // --- 3. URCs (非请求结果码) - 可按功能或出现频率分组 ---
-    { "+MQTTSUBRECV:",      MQTT_handle_urc_recv },
+    { "+MQTTSUBRECV:",      MQTT_handle_urc_recv },			//有订阅主题消息
     { "+MQTTCONNECTED",     MQTT_handle_urc_connected },
     { "+MQTTDISCONNECTED",  MQTT_handle_urc_disconnected },
 
@@ -53,7 +53,6 @@ static const AT_Handler_t at_handlers[] = {
     // --- 4. 数据响应 ---
     // 查询命令返回的具体数据(只有发送命令才会 接受到这些消息 统一使用handle_Rxdata_process回调)
     { "+CWMODE:",      handle_Rxdata_process }, 	// 模块工作模式查询
-    { "+MQTTSUBRECV:", handle_Rxdata_process }, // 收到到订阅消息
 	{ "+CIPSNTPTIME:", handle_Rxdata_process }, 	// 查询NTP时间
 
 	// ... 在这里添加需要处理的其他响应

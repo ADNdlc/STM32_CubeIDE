@@ -33,13 +33,13 @@ typedef enum {
 
 /* ===================== 私有变量和状态位 ===================== */
 static AT_CtrlState_t g_state = AT_CTRL_NOTREADY;		/* 状态机标志 */
-static AT_CtrlState_t g_last_state = AT_CTRL_STATE_IDLE;//上一个状态,用来等待忙状态
 static AT_Cmd_t* g_cmd_queue_head = NULL;			// 队列头,取出
 static AT_Cmd_t* g_cmd_queue_tail = NULL;			// 队列尾,添加
 static AT_Cmd_t* g_current_cmd = NULL; 				// 当前正在执行的命令
 static uint32_t  g_cmd_sent_time = 0;   			// 命令发送的时间戳
 static uint32_t  g_wait_sent_time = 0;   			// 进入等待的时间戳
 #define wait_time 200			//等待时间(接收到busy p...后重发的间隔时间)
+static uint16_t  g_busy_count = 0;
 
 static uint8_t timeout_count = 0;
 static uint8_t error_count = 0;
@@ -316,11 +316,19 @@ void AT_controller_process(void) {
             break;
         case AT_CTRL_BUSY:/* 忙重发 */
         	if((HAL_GetTick() - g_wait_sent_time > wait_time) && (g_current_cmd)){ //超过等待时间
+        		if(g_busy_count*wait_time > 20000){
+                    if(g_current_cmd->response_cb) {
+                    	g_current_cmd->response_cb(AT_CMD_TIMEOUT, "BUSY");
+                    }
+                    g_current_cmd = NULL;
+                    g_state = AT_CTRL_STATE_IDLE;
+                    error_count++;
+        		}
                 if(g_current_cmd->data_to_send){ //如果是数据发送命令在数据输入时忙,需重新发送命令和数据
                 	g_state = AT_CTRL_STATE_WAIT_DATAIN;
                 	g_wait_sent_time = HAL_GetTick();
                 }else{
-                	g_state = g_last_state;	// 恢复原来的状态
+                	g_state = AT_CTRL_STATE_WAIT_RSP;
                 }
                 ATuart_send_string(g_current_cmd->cmd_str);// 重发AT指令
         	}
@@ -364,6 +372,7 @@ void handle_final_ok(const char* line) {
 #endif
     if(g_state == AT_CTRL_STATE_WAIT_RSP) {	//只有进入最终响应等待，才执行最终回调("OK"在">"之前)
         if (g_current_cmd && g_current_cmd->response_cb) {
+        	g_busy_count = 0;
             g_current_cmd->response_cb(AT_CMD_OK, line);// 调用"当前命令体"的完成回调
         }
 #if SAVE_CMD
@@ -388,6 +397,7 @@ void handle_final_error(const char* line) {
 #endif
 	if ((g_state == AT_CTRL_STATE_WAIT_RSP)||(g_state == AT_CTRL_STATE_WAIT_DATAIN)) {
 		if(g_current_cmd && g_current_cmd->response_cb) {	// 如果当前有命令且有最终回调
+			g_busy_count = 0;
 			g_current_cmd->response_cb(AT_CMD_ERROR, line);	// 调用"当前命令体"的完成回调
 		}
 #if SAVE_CMD
@@ -448,7 +458,7 @@ void handle_busy(const char* line){
 	printf("handle_busy s: %s\r\n", line);
 #endif
     if(g_current_cmd != NULL) {	// 如果正在处理命令
-		g_last_state = g_state;	// 记录上个状态
+    	g_busy_count++;
 		g_state = AT_CTRL_BUSY;	// 进入等待重发
 		g_wait_sent_time = HAL_GetTick();//记录等待进入时间
     }

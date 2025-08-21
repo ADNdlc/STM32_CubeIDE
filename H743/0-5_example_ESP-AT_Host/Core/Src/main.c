@@ -38,6 +38,8 @@
 //BSP
 #include "sdram/W9825G6KH.h"
 #include "key/key.h"
+#include "dht11/dht11.h"
+#include "dht11/dht11_MQTT.h"
 #include "key/button_event.h"
 #include "esp_at/esp_app/esp_sys/esp_sys.h"
 #include "esp_at/esp_app/esp_wifi/esp_wifi.h"
@@ -78,9 +80,12 @@ void SystemClock_Config(void);
 
 //重定义'定时器周期回调'函数
 static uint8_t time2 = 0;
+static uint8_t pf1, pf2;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//1S周期回调
 	if(htim == &htim2){
 		time2++;
+		if(time2%3 == 0) pf1 = 1;
+		if(time2%5 == 0) pf2 = 1;
 	}
 }
 
@@ -174,12 +179,17 @@ int main(void)
 #endif
 
   Button_Init();
+  DHT11_Init();
+  dht11_MQTTInit();
+
+  led_control_init();
 
   ESP_AT_sys_init(&huart2);
 
 
 
   HAL_TIM_Base_Start_IT(&htim2);	//开启定时
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -193,11 +203,20 @@ int main(void)
 		}
 		ESP_AT_sys_handle();
         Button_UPDATE();
-
-	  if(time2 >= 2){
-		  time2 = 0;
+	  if(pf1){
+		  pf1 = 0;
 		  printf("ok\r\n");
 	  }
+	  if(pf2){
+		  pf2 = 0;
+		  if(!DHT11_ReadData()){
+			  printf("T:%d  H:%d\r\n",DHT11_GetTemperature(), DHT11_GetHumidity());
+		  }else{
+			printf("dht11:err\r\n");
+			DHT11_Init();
+		  }
+	  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

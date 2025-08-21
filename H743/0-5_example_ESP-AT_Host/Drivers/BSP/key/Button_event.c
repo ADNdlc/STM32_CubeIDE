@@ -10,6 +10,7 @@
 #include "retarget.h"
 #include "main.h"
 #include "esp_at/esp_app/esp_sys/esp_sys.h"
+#include "dht11/dht11_MQTT.h"
 
 static void test1_parser_cb(const char* data_line){
 	printf("test1_parser_cb data: %s\r\n",data_line+11);
@@ -100,12 +101,13 @@ void btn2_single_click(Button* btn) {
 	printf("\r\nbtn2_single_click\r\n");
     // 单击处理
 	MQTT_connect(MQTT_Get_DeviceID(),Product_ID,
-			"version=2018-10-31&res=products%2FSQKg9n0Ii0%2Fdevices%2Ftest2&et=1855499668539&method=md5&sign=%2FHVmg4Xz2RfTRWEu44mApQ%3D%3D");
+	"version=2018-10-31&res=products%2FSQKg9n0Ii0%2Fdevices%2Ftest2&et=1855499668539&method=md5&sign=%2FHVmg4Xz2RfTRWEu44mApQ%3D%3D");
 }
 
 void btn2_double_click(Button* btn) {
 	printf("\r\nbtn2_double_click\r\n");
     // 双击处理
+	dht11_MQTT_updateANDpublish();	//获取传感器数据并推送
 }
 
 void btn2_triple_click(Button* btn) {

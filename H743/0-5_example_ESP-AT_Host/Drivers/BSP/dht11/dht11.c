@@ -5,28 +5,11 @@
  *      Author: Administrator
  */
 
-/*
-//杜洋工作室出品
-//洋桃系列开发板应用程序
-//关注微信公众号：洋桃电子
-//洋桃开发板资料下载 www.DoYoung.net/YT
-//即可免费看所有教学视频，下载技术资料，技术疑难提问
-//更多内容尽在 杜洋工作室主页 www.doyoung.net
-*/
-
-/*
-《修改日志》
-1-201708202309 创建。
-
-
-*/
-
 #include "dht11.h"
 #include "main.h"
 
 
-uint8_t humiture[2] = {0};//存放传感器数据，顺序为 0湿度 1温度
-
+static uint8_t humiture[2] = {0};//存放传感器数据，顺序为 0湿度 1温度
 
 void DHT11_IO_OUT (void){ //端口变为输出
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -99,7 +82,10 @@ uint8_t DHT11_Init (void){	//DHT11初始化
 	return Dht11_Check(); //等待DHT11回应
 }
 
-uint8_t DHT11_ReadData(uint8_t *h){ //读取一次数据//湿度值(十进制，范围:20%~90%) ，温度值(十进制，范围:0~50°)，返回值：0,正常;1,失败
+/* 获取并更新温湿度数据
+ * 返回执行情况
+ */
+uint8_t DHT11_ReadData(void){ //读取一次数据//湿度值(十进制，范围:20%~90%) ，温度值(十进制，范围:0~50°)，返回值：0,正常;1,失败
 	uint8_t buf[5];
 	uint8_t i;
     DHT11_RST();//DHT11端口复位，发出起始信号
@@ -108,15 +94,17 @@ uint8_t DHT11_ReadData(uint8_t *h){ //读取一次数据//湿度值(十进制，
             buf[i]=Dht11_ReadByte(); //读出数据
         }
         if((buf[0]+buf[1]+buf[2]+buf[3])==buf[4]){	//数据校验
-            *h=buf[0]; //将湿度值放入指针1
-			h++;
-            *h=buf[2]; //将温度值放入指针2
+            humiture[0]=buf[0]; //湿度值
+            humiture[1]=buf[2]; //温度值
         }
-    }else return 1;
+    }else return 1;//失败
     return 0;
 }
 
-/*********************************************************************************************
- * 杜洋工作室 www.DoYoung.net
- * 洋桃电子 www.DoYoung.net/YT
-*********************************************************************************************/
+uint8_t DHT11_GetTemperature(void){
+	return humiture[1];
+}
+
+uint8_t DHT11_GetHumidity(void){
+	return humiture[0];
+}

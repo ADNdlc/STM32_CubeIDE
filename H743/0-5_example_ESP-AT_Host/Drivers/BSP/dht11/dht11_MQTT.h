@@ -9,24 +9,21 @@
 #define DHT11_DHT11_MQTT_H_
 
 #include "esp_at/esp_app/esp_mqtt/esp_mqtt.h"
+#include "esp_at/Sensor_Data.h"
 #include "dht11.h"
 
-#define dht11_name "\"123\""
-#define dht11_version "\"1.0\""
+#define dht11_message "11"
+#define dht11_version "1.0"
 
 /*数据点信息*/
-#define	T_TAG	"\"currentTemperature\""
-#define	T_Type	DATA_int
+#define	T_TAG	"currentTemperature"	//标识符
+#define	T_Type	DATA_int					//类型
 
-#define	H_TAG	"\"currenthumidity\""
-#define	H_Type	DATA_int
-
-extern Sensor* Sensor_dht11;
-
-/*===================================================函数========================================================*/
+#define	H_TAG	"currenthumidity"		//标识符
+#define	H_Type	DATA_int					//类型
 
 void dht11_MQTTInit();
-uint8_t dht11_MQTT_updataANDpublish(Sensor* S,uint8_t* data);
+void dht11_MQTT_updateANDpublish(void);
 
 
 #endif /* DHT11_DHT11_MQTT_H_ */
