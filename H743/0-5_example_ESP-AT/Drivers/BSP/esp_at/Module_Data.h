@@ -1,12 +1,12 @@
 /*
- * Sensor_Data.h
+ * Module_Data.h
  *
  *  Created on: May 31, 2025
  *      Author: 12114
  */
 
-#ifndef ESP32_AT_SENSOR_DATA_H_
-#define ESP32_AT_SENSOR_DATA_H_
+#ifndef ESP32_AT_Module_DATA_H_
+#define ESP32_AT_Module_DATA_H_
 
 //#include "Timestamp.h"
 #include <stdlib.h>
@@ -25,9 +25,9 @@
 }
 */
 
-
-#define message_reallocInfo		1
-#define message_point_type		1
+//调试信息
+#define message_reallocInfo		0
+#define message_point_type		0
 
 /*=========================================数据点定义=============================================*/
 // 数据类型枚举
@@ -64,28 +64,28 @@ typedef struct {
     /* 此指针用于访问一个DataPoint数组 */
     DataPoint* data_points;    // 数据点数组指针(一个传感器可能有多个数据点)
     uint8_t count;             // 数据点数量(DataPoint数组大小)
-} Sensor;
+} Module;
 
 /*============================================== 数据点函数 ====================================================*/
-DataPoint Sensor_Create_Point(const char* name, DataType type);
-void Sensor_init_Point(DataPoint* point, const char* name, DataType type);
-void Sensor_Set_PointValue(DataPoint* point, ...);
+DataPoint Module_Create_Point(const char* name, DataType type);
+void Module_init_Point(DataPoint* point, const char* name, DataType type);
+void Module_Set_PointValue(DataPoint* point, ...);
 
 /*=============================================== 设备函数 ====================================================*/
-Sensor* Sensor_Init(const char* device_id, const char* version);
-bool Sensor_Add_Point(Sensor* SenIndex, DataPoint point);
-uint8_t Sensor_Change_PointValue(Sensor* S,const char* m_name, uint32_t time, DataType type, ...);
-void Sensor_Data_free(Sensor* SenIndex);
+Module* Module_Init(const char* device_id, const char* version);
+bool Module_Add_Point(Module* SenIndex, DataPoint point);
+uint8_t Module_Change_PointValue(Module* S,const char* m_name, uint32_t time, DataType type, ...);
+void Module_Data_free(Module* SenIndex);
 
 /* ============================================= 序列化器 ===================================================== */
 /**
- * @brief 将一个Sensor对象序列化为符合OneNet物模型格式的JSON字符串
- * @param sensor 		指向要序列化的Sensor对象的指针
+ * @brief 将一个Module对象序列化为符合OneNet物模型格式的JSON字符串
+ * @param Module 		指向要序列化的Module对象的指针
  * @param buffer 		用于存放生成的JSON字符串的缓冲区
  * @param buffer_size 	缓冲区的最大大小
  * @return 		成功则返回生成的JSON字符串长度，失败则返回-1
  */
-int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer_size);
+int Module_Data_to_json_string(const Module* Module, char* buffer, size_t buffer_size);
 
 
-#endif /* ESP32_AT_SENSOR_DATA_H_ */
+#endif /* ESP32_AT_Module_DATA_H_ */

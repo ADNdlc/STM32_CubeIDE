@@ -20,13 +20,13 @@ static uint8_t* line_buffer = NULL;
 #endif
 static size_t current_len = 0;	//已有长度(缓冲区可能剩下的非完整行)
 
-// --- 外部回调函数 ---
+/* ==================== 外部回调函数 ==================== */
 // 当解析器找到一个完整的行时，会调用这个函数
 // 需要在别处实现此函数
 extern void AT_parser_line(const char* line);
 
-/** 初始化清零整个行缓冲区
- **/
+/* 初始化清零整个行缓冲区
+ */
 void AT_parser_init(void) {
 #if USE_MY_MALLOC
 	if(!line_buffer){ //还没有申请缓冲区

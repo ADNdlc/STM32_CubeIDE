@@ -30,6 +30,7 @@ typedef struct {									// 处理程序表条目
 static const AT_Handler_t at_handlers[] = {
     // --- 1. 最终响应 (Final Responses) ---
     { "OK",         handle_final_ok },
+	{ "+MQTTPUB:OK",handle_final_ok },		// 长载荷推送最后不只回复"OK"
     { "ERROR",      handle_final_error },
     { "SEND OK",    handle_final_ok }, 		// 对于CIPSEND, SEND OK就是成功标志
     { "SEND FAIL",  handle_final_error },	// 发送失败
@@ -41,6 +42,7 @@ static const AT_Handler_t at_handlers[] = {
 
     // --- 3. URCs (非请求结果码) - 可按功能或出现频率分组 ---
     { "+MQTTSUBRECV:",      MQTT_handle_urc_recv },			//有订阅主题消息
+
     { "+MQTTCONNECTED",     MQTT_handle_urc_connected },
     { "+MQTTDISCONNECTED",  MQTT_handle_urc_disconnected },
 

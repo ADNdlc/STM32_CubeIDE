@@ -13,11 +13,9 @@
 #ifndef NDEBUG
 #include <stdio.h>
 #endif
-#if SAVE_CMD
 #include <stdlib.h>
 #if USE_MY_MALLOC
 #include "malloc/malloc.h"
-#endif
 #endif
 
 // --- 命令状态机定义 ---
@@ -32,7 +30,7 @@ typedef enum {
 
 
 /* ===================== 私有变量和状态位 ===================== */
-static AT_CtrlState_t g_state = AT_CTRL_NOTREADY;		/* 状态机标志 */
+static AT_CtrlState_t g_state = AT_CTRL_NOTREADY;	/* 状态机标志 */
 static AT_Cmd_t* g_cmd_queue_head = NULL;			// 队列头,取出
 static AT_Cmd_t* g_cmd_queue_tail = NULL;			// 队列尾,添加
 static AT_Cmd_t* g_current_cmd = NULL; 				// 当前正在执行的命令
@@ -44,10 +42,9 @@ static uint16_t  g_busy_count = 0;
 static uint8_t timeout_count = 0;
 static uint8_t error_count = 0;
 
-#if SAVE_CMD
+
 static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd);
 static void CMD_delete(AT_Cmd_t* cmd);
-#endif
 
 /* ======================================= 初始命令和回调 ======================================= */
 //关闭回显命令结果回调
@@ -80,30 +77,6 @@ static void _cmd_AT_rsp_cb(AT_CmdResult_t result, const char* line){
 #endif
 	}
 }
-/* 静态命令体 */
-#if !SAVE_CMD
-AT_Cmd_t ATE0 = {
-	.cmd_str = "ATE0\r\n",//关闭回显
-	.data_to_send = NULL,
-	.timeout_ms = 200,
-	.parser_cb = NULL,
-	.response_cb = _cmd_ATE0_rsp_cb,
-};
-AT_Cmd_t autocnct = {
-	.cmd_str = "AT+CWAUTOCONN=0\r\n",//关闭上电重连
-	.data_to_send = NULL,
-	.timeout_ms = 200,
-	.parser_cb = NULL,
-	.response_cb = _cmd_autocnct_rsp_cb,
-};
-AT_Cmd_t cmd_AT = {
-	.cmd_str = "AT\r\n",//查询AT是否就绪
-	.data_to_send = NULL,
-	.timeout_ms = 200,
-	.parser_cb = NULL,
-	.response_cb = _cmd_AT_rsp_cb,
-};
-#endif
 
 /* ------------------- 初始化函数 ----------------- */
 //模块就绪回调
@@ -131,8 +104,7 @@ void AT_controller_init(void){
 	g_current_cmd = NULL;
 	timeout_count = 0;		//清空错误计数
 	error_count   = 0;
-/* 构建初始命令(栈区) */
-#if SAVE_CMD
+/* 构建初始命令 */
 	AT_Cmd_t ATE0 = {
 		.cmd_str = "ATE0\r\n",			//关闭回显
 		.data_to_send = NULL,
@@ -154,7 +126,6 @@ void AT_controller_init(void){
 		.parser_cb = NULL,
 		.response_cb = _cmd_AT_rsp_cb,
 	};
-#endif
 	ATuart_send_string("AT+RST\r\n");//模块软复位,等待就绪回调
 	g_wait_sent_time = HAL_GetTick();//记录等待模块就绪时间
 	//提交初始命令(就绪后执行)
@@ -164,7 +135,6 @@ void AT_controller_init(void){
 }
 
 /* ================================== 命令队列内存管理(动态命令兼容) ================================ */
-#if SAVE_CMD
 //拷贝一份(连同字符串)
 static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd){
 #if !USE_MY_MALLOC
@@ -192,8 +162,7 @@ static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd){
 		strcpy(AT_Data,AT_Cmd->data_to_send);
 		AT_Cmd->data_to_send = AT_Data;
 	}
-#endif
-#if USE_MY_MALLOC
+#else
 	AT_Cmd_t* AT_Cmd = mymalloc(SRAMDTCM, sizeof(AT_Cmd_t));
 	if(AT_Cmd != NULL){
 		*AT_Cmd = *cmd;
@@ -211,7 +180,6 @@ static AT_Cmd_t* CMD_save(AT_Cmd_t* cmd){
 #endif
 	return AT_Cmd;
 }
-
 //释放
 static void CMD_delete(AT_Cmd_t* cmd){
 #if !USE_MY_MALLOC
@@ -227,7 +195,6 @@ static void CMD_delete(AT_Cmd_t* cmd){
 	myfree(SRAMDTCM, cmd);
 #endif
 }
-#endif
 
 /* ================================= 状态机和其管理函数 ================================ */
 /**

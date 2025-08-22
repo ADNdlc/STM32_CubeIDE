@@ -107,14 +107,3 @@ size_t ATuart_read(uint8_t *buffer, size_t len) {
     return bytes_to_read;
 }
 
-
-// --- 中断回调处理 --- (放到HAL_UARTEx_RxEventCallback中,只负责重新开启接收)
-#if 0
-void ATuart_RxCpltHandle(UART_HandleTypeDef *ituart) {
-	if(ituart == AT_UART.uart_port){
-		HAL_UARTEx_ReceiveToIdle_DMA(ituart, AT_UART.loopbuff, LOOP_BUF_SIZE);
-	}
-}
-#endif
-
-

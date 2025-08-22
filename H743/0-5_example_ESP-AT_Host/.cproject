@@ -50,12 +50,12 @@
 									<listOptionValue builtIn="false" value="../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/BSP}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Application}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/SYSTEM}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/SYSTEM/delay}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/SYSTEM/sys}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/SYSTEM/usart}&quot;"/>
+									<listOptionValue builtIn="false" value="../Drivers/SYSTEM/delay"/>
+									<listOptionValue builtIn="false" value="../Drivers/SYSTEM/sys"/>
+									<listOptionValue builtIn="false" value="../Drivers/SYSTEM/usart"/>
+									<listOptionValue builtIn="false" value="../Drivers/SYSTEM"/>
+									<listOptionValue builtIn="false" value="../Drivers/BSP"/>
+									<listOptionValue builtIn="false" value="../Application"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1640579390" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

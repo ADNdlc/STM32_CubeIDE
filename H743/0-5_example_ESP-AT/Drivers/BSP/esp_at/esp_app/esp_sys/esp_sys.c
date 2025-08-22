@@ -19,13 +19,18 @@ static uint8_t* temp_read_buffer = NULL;
 
 // Wi-Fi 事件回调函数
 static void wifi_event_handler(wifi_state_typedef new_state) {
-    if (new_state == WIFI_STATE_GOT_IP) {
+    if (new_state != WIFI_STATE_GOT_IP) {
+
+    }
+}
+
+static void MQTT_event_handler(mqtt_state_typedef new_state) {
+    if (new_state != MQTT_STATE_CONNECTED) {
 
     }
 }
 
 /*	初始化所有底层模块
- *
  */
 void ESP_AT_sys_init(UART_HandleTypeDef* uart_port){
 	ATuart_driver_init(uart_port);//绑定AT串口
@@ -41,10 +46,10 @@ void ESP_AT_sys_init(UART_HandleTypeDef* uart_port){
 	WiFi_set_mode(Station);
 
 	RTC_sntp_init();
-	RTC_sntp_configure_and_enable(8,"cn.pool.ntp.org", "ntp.aliyun.com", 0);
+	RTC_sntp_configure(8,"cn.pool.ntp.org", "ntp.aliyun.com", 0);
 	//设置NTP服务器,模块联网后会自动同步,需要等待一段时间
 
-	MQTT_init(NULL);
+	MQTT_init(MQTT_event_handler);
 }
 
 

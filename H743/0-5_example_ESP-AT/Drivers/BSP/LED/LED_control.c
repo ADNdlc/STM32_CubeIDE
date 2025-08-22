@@ -13,10 +13,8 @@ static void handle_led_command(cJSON* value_item) {
     if (cJSON_IsBool(value_item)) {
         if (cJSON_IsTrue(value_item)) {
         	LED_ON
-            printf("LED has been turned ON\r\n");
         } else {
         	LED_OFF
-            printf("LED has been turned OFF\r\n");
         }
     }
 }

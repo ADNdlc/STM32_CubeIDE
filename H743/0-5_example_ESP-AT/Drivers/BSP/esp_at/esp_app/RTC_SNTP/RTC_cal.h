@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
+#include <time.h>
 /**
  * @brief 初始化 RTC/SNTP 管理器
  */
@@ -22,7 +22,7 @@ void RTC_sntp_init(void);
  * @param server1 SNTP服务器地址1, 例如 "ntp.aliyun.com"
  *
  */
-void RTC_sntp_configure_and_enable(int8_t timezone, const char* s1, const char* s2, const char* s3);
+void RTC_sntp_configure(int8_t timezone, const char* s1, const char* s2, const char* s3);
 
 /**
  * @brief 发起一次RTC同步请求
@@ -36,6 +36,21 @@ void RTC_calibrat_BY_NTP(void);
  * @return true 如果已校准, false 如果未校准
  */
 bool RTC_is_calibrated(void);
+
+
+/**
+ * @brief 从STM32的RTC中获取当前的UTC时间戳
+ *        它会读取RTC的本地时间，然后根据指定的时区偏移量计算出标准的UTC时间戳。
+ *
+ * @param timezone_offset 时区偏移量。例如：
+ *                        - 东八区 (中国): 传入 8
+ *                        - 零时区 (UTC): 传入 0
+ *                        - 西五区 (美国东部): 传入 -5
+ *
+ * @return time_t 类型的UTC时间戳 (自1970-01-01 00:00:00 UTC以来的秒数)。
+ *         如果RTC未设置或读取失败，可能返回 -1。
+ */
+time_t RTC_get_unix(int8_t timezone);
 
 // ============ 由Dispatcher调用的URC处理函数 ==============
 /**

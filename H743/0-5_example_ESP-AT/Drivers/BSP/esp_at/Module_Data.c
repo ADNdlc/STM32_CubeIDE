@@ -1,5 +1,5 @@
 /*
- * Sensor_Data.c
+ * Module_Data.c
  *
  *  Created on: May 31, 2025
  *      Author: 12114
@@ -8,22 +8,22 @@
 #if USE_MY_MALLOC
 #include "malloc/malloc.h"
 #endif
-#include "Sensor_Data.h"
+#include "Module_Data.h"
 #include "string.h"
 #include "stdarg.h"
 #include "stdio.h"
 
 /*===============================================数据点函数====================================================*/
 /*	@brief			构造并返回一个 数据点对象
- * 					这个函数创建的数据点仅作初始化,最终所有的数据点都会添加到Sensor_Add_Point创建的内存块中,
- * 					此内存块指针交由一个Sensor管理
+ * 					这个函数创建的数据点仅作初始化,最终所有的数据点都会添加到Module_Add_Point创建的内存块中,
+ * 					此内存块指针交由一个Module管理
  *
  *	@param name 	数据点"标识符"
  *	@param type 	数据类型
  *	@return			构造的 数据点对象
  *
  */
-DataPoint Sensor_Create_Point(const char* name, DataType type) {
+DataPoint Module_Create_Point(const char* name, DataType type) {
     DataPoint point = {0};
     point.name = name;
     point.type = type;
@@ -38,7 +38,7 @@ DataPoint Sensor_Create_Point(const char* name, DataType type) {
  *	@param type 	数据类型
  *
  */
-void Sensor_init_Point(DataPoint* point, const char* name, DataType type) {
+void Module_init_Point(DataPoint* point, const char* name, DataType type) {
     point->name = name;
     point->type = type;
     point->timestamp = 0;//发生送时再设置时间
@@ -77,7 +77,7 @@ printf("Data Point Type ERR!");
  *	@param ... 		可变参数传入(只能传DataType枚举出的类型)
  *
  */
-void Sensor_Set_PointValue(DataPoint* point, ...) {
+void Module_Set_PointValue(DataPoint* point, ...) {
     va_list args;
     va_start(args, point);
 
@@ -94,17 +94,17 @@ void Sensor_Set_PointValue(DataPoint* point, ...) {
  *	@return				构造的 设备对象
  *
  */
-Sensor* Sensor_Init(const char* Message_ID, const char* version) {
+Module* Module_Init(const char* Message_ID, const char* version) {
 	void * temp=NULL;
-	temp = malloc(sizeof(Sensor));//不包含数组大小
+	temp = malloc(sizeof(Module));//不包含数组大小
 	if(temp!=NULL){
-		Sensor* sensor = temp;
-		sensor->Message_ID = Message_ID;
-		sensor->version   = version;
+		Module* Module = temp;
+		Module->Message_ID = Message_ID;
+		Module->version   = version;
 		/* 初始化数据点数组 */
-		sensor->data_points = NULL;
-		sensor->count = 0;
-		return sensor;
+		Module->data_points = NULL;
+		Module->count = 0;
+		return Module;
 	}
 	return temp;
 }
@@ -116,7 +116,7 @@ Sensor* Sensor_Init(const char* Message_ID, const char* version) {
  *
  *	@return			执行结果
  */
-bool Sensor_Add_Point(Sensor* SenIndex, DataPoint point) {
+bool Module_Add_Point(Module* SenIndex, DataPoint point) {
 	void * temp=NULL;
 	//重新分配存放数据点内存大小(扩大count个DataPoint的大小)
 	temp = realloc(SenIndex->data_points, (SenIndex->count+1) * sizeof(DataPoint));
@@ -145,7 +145,7 @@ bool Sensor_Add_Point(Sensor* SenIndex, DataPoint point) {
  *	@return			0成功, 1未找到, 2类型不匹配
  *
  */
-uint8_t Sensor_Change_PointValue(Sensor* S,const char* m_name, uint32_t time, DataType type, ...){
+uint8_t Module_Change_PointValue(Module* S,const char* m_name, uint32_t time, DataType type, ...){
     va_list args;
     va_start(args, type);
 
@@ -176,7 +176,7 @@ uint8_t Sensor_Change_PointValue(Sensor* S,const char* m_name, uint32_t time, Da
 
 /*	@brief	销毁一个设备对象和添加到其中的所有数据点
  */
-void Sensor_Data_free(Sensor* SenIndex) {
+void Module_Data_free(Module* SenIndex) {
 	if (SenIndex) {
         // 释放所有字符串数据点
     	for (int i = 0; i < SenIndex->count; i++) {
@@ -191,15 +191,15 @@ void Sensor_Data_free(Sensor* SenIndex) {
 }
 
 /**
- * @brief 	将一个Sensor对象序列化为符合OneNet物模型格式的JSON字符串
- * @param sensor 		指向要序列化的Sensor对象的指针
+ * @brief 	将一个Module对象序列化为符合OneNet物模型格式的JSON字符串
+ * @param Module 		指向要序列化的Module对象的指针
  * @param buffer 		用于存放生成的JSON字符串的缓冲区
  * @param buffer_size 	缓冲区的最大大小
  * @return 		成功则返回生成的JSON字符串长度，失败则返回-1
  */
-int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer_size){
+int Module_Data_to_json_string(const Module* Module, char* buffer, size_t buffer_size){
 #if 1
-	 if (!sensor || !buffer) return -1;
+	 if (!Module || !buffer) return -1;
 	    int offset = 0;
 	    int written;
 /*
@@ -219,15 +219,15 @@ int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer
 	    // 写入JSON头部
 	    written = snprintf(buffer + offset, buffer_size - offset,
 	                       "{\"id\":\"%s\",\"version\":\"%s\",\"params\":{",
-	                       sensor->Message_ID, sensor->version);
+	                       Module->Message_ID, Module->version);
 	    if (written < 0 || written >= buffer_size - offset) return -1;
 	    offset += written;
 
 	    printf("write head\r\n");
 
 	    // 循环写入所有数据点
-	    for (int i = 0; i < sensor->count; ++i) {
-	        const DataPoint* p = &sensor->data_points[i];// 写入数据点名称
+	    for (int i = 0; i < Module->count; ++i) {
+	        const DataPoint* p = &Module->data_points[i];// 写入数据点名称
 	        written = snprintf(buffer + offset, buffer_size - offset,
 	                           "\"%s\":{\"value\":", p->name);
 	        if (written < 0 || written >= buffer_size - offset) return -1;
@@ -262,7 +262,7 @@ int Sensor_Data_to_json_string(const Sensor* sensor, char* buffer, size_t buffer
 
 	        offset += written;
 	        // 如果不是最后一个数据点，则添加逗号
-	        if (i < sensor->count - 1) {
+	        if (i < Module->count - 1) {
 	            written = snprintf(buffer + offset, buffer_size - offset, ",");
 	            if (written < 0 || written >= buffer_size - offset) return -1;
 	            offset += written;

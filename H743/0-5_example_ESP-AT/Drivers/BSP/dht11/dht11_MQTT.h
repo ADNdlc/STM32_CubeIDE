@@ -8,8 +8,8 @@
 #ifndef DHT11_DHT11_MQTT_H_
 #define DHT11_DHT11_MQTT_H_
 
+#include <esp_at/Module_Data.h>
 #include "esp_at/esp_app/esp_mqtt/esp_mqtt.h"
-#include "esp_at/Sensor_Data.h"
 #include "dht11.h"
 
 #define dht11_message "11"

@@ -8,14 +8,12 @@
 #ifndef BSP_ESP_AT_ESP_APP_ESP_MQTT_ESP_MQTT_H_
 #define BSP_ESP_AT_ESP_APP_ESP_MQTT_ESP_MQTT_H_
 
-#include "../../Sensor_Data.h" // 需要用到Sensor结构
-
+#include "../../Module_Data.h" // 需要用到Module结构
 
 #define  MQTT_HOST	"mqtts.heclouds.com"//onenet服务器地址
 #define  MQTT_PORT	1883				//服务器端口
 #define	 Product_ID	"SQKg9n0Ii0" // 此ID在onenet用于区分产品,即对应物模型。
 								 //	此ID确定连接的是何种设备有何功能,不可更改
-
 typedef enum {
 	MQTT_STATE_NOUSERCFG,	//无用户信息
 	MQTT_STATE_NOPWD,		//无密码
@@ -38,8 +36,8 @@ mqtt_state_typedef MQTT_get_state(void);
 // 订阅一个主题
 void MQTT_subscribe(const char* topic, int qos);
 
-// 使用Sensor对象发布物模型数据
-void MQTT_publish_sensor_data(const Sensor* sensor);
+// 使用Module对象发布物模型数据
+void MQTT_publish_Module_data(const Module* Module);
 
 void MQTT_connect(const char* client_id, const char* username, const char* password);
 uint8_t MQTT_Set_DeviceID(char *c);
