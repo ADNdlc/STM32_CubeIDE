@@ -213,18 +213,12 @@ int Module_Data_to_json_string(const Module* Module, char* buffer, size_t buffer
 	    	}
 	    }
 */
-
-	    printf("write begin\r\n");
-
 	    // 写入JSON头部
 	    written = snprintf(buffer + offset, buffer_size - offset,
 	                       "{\"id\":\"%s\",\"version\":\"%s\",\"params\":{",
 	                       Module->Message_ID, Module->version);
 	    if (written < 0 || written >= buffer_size - offset) return -1;
 	    offset += written;
-
-	    printf("write head\r\n");
-
 	    // 循环写入所有数据点
 	    for (int i = 0; i < Module->count; ++i) {
 	        const DataPoint* p = &Module->data_points[i];// 写入数据点名称
@@ -232,9 +226,6 @@ int Module_Data_to_json_string(const Module* Module, char* buffer, size_t buffer
 	                           "\"%s\":{\"value\":", p->name);
 	        if (written < 0 || written >= buffer_size - offset) return -1;
 	        offset += written;
-
-		    printf("write P_count %d\r\n",i);
-
 	        // 根据类型写入数据点的值
 	        switch (p->type) {
 	            case DATA_int:
@@ -257,9 +248,6 @@ int Module_Data_to_json_string(const Module* Module, char* buffer, size_t buffer
 	        // 写入时间戳和结尾
 	        written = snprintf(buffer + offset, buffer_size - offset, ",\"time\":%lu000}",p->timestamp);
 	        if (written < 0 || written >= buffer_size - offset) return -1;
-
-		    printf("write time\r\n");
-
 	        offset += written;
 	        // 如果不是最后一个数据点，则添加逗号
 	        if (i < Module->count - 1) {
@@ -271,9 +259,6 @@ int Module_Data_to_json_string(const Module* Module, char* buffer, size_t buffer
 	    // 写入JSON尾部
 	    written = snprintf(buffer + offset, buffer_size - offset, "}}");
 	    if (written < 0 || written >= buffer_size - offset) return -1;
-
-	    printf("write tail\r\n");
-
 	    offset += written;
 
 	    return offset; // 返回总长度

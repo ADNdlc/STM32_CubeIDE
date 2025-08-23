@@ -130,7 +130,7 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
     	return;
 	}
 #ifndef NDEBUG
-    printf("MQTT SetUserCFG...\r\n");
+    printf("MQTT_connect: SetUserCFG...\r\n");
 #endif
 #if USE_MY_MALLOC
 	char* usercfg_cmd_buf = mymalloc(SRAMDTCM,256);
@@ -165,6 +165,7 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
     // 连接Broker
     // 在long_password成功回调中提交
 }
+
 //提交连接命令(回调中使用)
 static void MQTTBroker_connect(void){
 #ifndef NDEBUG
