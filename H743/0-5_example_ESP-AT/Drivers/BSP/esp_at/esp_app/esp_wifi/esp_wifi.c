@@ -54,6 +54,15 @@ static void _connect_rsp_cb(AT_CmdResult_t result, const char* line) {
         WiFi_update_state(WIFI_STATE_DISCONNECTED);
     }
 }
+// 断开AP命令的响应回调
+static void _disconnect_rsp_cb(AT_CmdResult_t result, const char* line) {
+    if (result == AT_CMD_OK) {
+    	WiFi_update_state(WIFI_STATE_DISCONNECTED);
+    } else {
+
+    }
+}
+
 
 // 模式设置结果回调
 static void _setmode_rsp_cb(AT_CmdResult_t result, const char* line) {
@@ -192,7 +201,7 @@ void WiFi_disconnect(void) {
 	AT_Cmd_t cmd_quit_ap = (AT_Cmd_t){
 	.cmd_str = "AT+CWQAP\r\n",
 	.timeout_ms = 1000,
-	.response_cb = NULL,
+	.response_cb = _disconnect_rsp_cb,
 	};
 #endif
     AT_controller_cmd_submit(&cmd_quit_ap);

@@ -22,6 +22,9 @@ static void wifi_event_handler(wifi_state_typedef new_state) {
     if (new_state != WIFI_STATE_GOT_IP) {
 
     }
+    else if(new_state == WIFI_STATE_DISCONNECTED){
+    	MQTT_disconnect();
+    }
 }
 
 static void MQTT_event_handler(mqtt_state_typedef new_state) {

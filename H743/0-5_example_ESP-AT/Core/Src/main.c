@@ -40,6 +40,7 @@
 #include "key/key.h"
 #include "dht11/dht11.h"
 #include "dht11/dht11_MQTT.h"
+#include "LED/LED.h"
 #include "key/button_event.h"
 #include "esp_at/esp_app/esp_sys/esp_sys.h"
 #include "esp_at/esp_app/esp_wifi/esp_wifi.h"
@@ -161,12 +162,6 @@ int main(void)
 #endif
   SDRAM_InitSequence();
 
-#if 0
-  //内存基本读写测试
-  HAL_Delay(100);
-  fsmc_sdram_test();
-  HAL_Delay(100);
-#endif
 #if 1
   //内存池初始化
   my_mem_init(SRAMIN);

@@ -27,19 +27,19 @@ static void MQTTBroker_connect(void);
 //MQTT用户属性设置
 static void _set_userCFG_rsp_cb(AT_CmdResult_t result, const char* line) {
     if (result != AT_CMD_OK) {
-        // 如果序列中的任何一步失败，重置状态
+        // 如果序列中的任何一步失败,重置状态
     	if(g_mqtt_state == MQTT_STATE_CONNECTED) return;//已连接再重复发送连接会返回ERROR但不会断开
         g_mqtt_state = MQTT_STATE_NOUSERCFG;return;
     }
     if(result == AT_CMD_OK){
-    	g_mqtt_state = MQTT_STATE_NOPWD;	//进入下一项参数设置
+    	g_mqtt_state = MQTT_STATE_NOPWD;//进入下一项参数设置
     }
 }
 
 //MQTT用户长密码设置
 static void _set_longPWD_rsp_cb(AT_CmdResult_t result, const char* line) {
     if (result != AT_CMD_OK) {
-        // 如果序列中的任何一步失败，重置状态
+        // 如果序列中的任何一步失败,重置状态
         g_mqtt_state = MQTT_STATE_NOUSERCFG;return;
     }
     if((result == AT_CMD_OK)&&(g_mqtt_state == MQTT_STATE_NOPWD)){
@@ -47,7 +47,6 @@ static void _set_longPWD_rsp_cb(AT_CmdResult_t result, const char* line) {
     	MQTTBroker_connect();
     }
 }
-
 // mqtt连接命令的最终回调
 static void _connect_rsp_cb(AT_CmdResult_t result, const char* line) {
     if (result == AT_CMD_OK) {
@@ -60,13 +59,23 @@ static void _connect_rsp_cb(AT_CmdResult_t result, const char* line) {
         g_mqtt_state = MQTT_STATE_NOUSERCFG;
     }
 }
+// mqtt连接命令的最终回调
+static void _disconnect_rsp_cb(AT_CmdResult_t result, const char* line) {
+    if (result == AT_CMD_OK) {
+        // 命令被接受，等待 +MQTTCONNECTED URC
+#ifndef NDEBUG
+    printf("MQTT Disconnected OK!\r\n");
+#endif
+    	g_mqtt_state = MQTT_STATE_NOUSERCFG;
+    } else {
 
+    }
+}
 //结果回调
 static void _simple_mqtt_rsp_cb(AT_CmdResult_t result, const char* line) {
     if (result != AT_CMD_OK) {
     }
 }
-
 // mqtt订阅命令的最终回调
 static void _subscribe_rsp_cb(AT_CmdResult_t result, const char* line){
     if (result == AT_CMD_OK) {
@@ -79,7 +88,6 @@ static void _subscribe_rsp_cb(AT_CmdResult_t result, const char* line){
 #endif
     }
 }
-
 // mqtt推送命令的最终回调
 static void _publish_rsp_cb(AT_CmdResult_t result, const char* line){
     if (result == AT_CMD_OK) {
@@ -89,43 +97,13 @@ static void _publish_rsp_cb(AT_CmdResult_t result, const char* line){
     }
 }
 
-/* ====================== 公开API实现 ====================== */
-
+/* ============================ 公开API实现 ============================ */
+/*	MQTT相关初始化
+ *
+ */
 void MQTT_init(mqtt_command_cb_t cmd_callback) {
     g_cmd_cb = cmd_callback;
-#if !SAVE_CMD
-    // 初始化所有命令对象，让它们的 cmd_str 指向各自独立的缓冲区
-    cmd_mqtt_usercfg = (AT_Cmd_t){
-    	.cmd_str = usercfg_cmd_buf,
-    	.timeout_ms = 2000,
-		.response_cb = _set_userCFG_rsp_cb
-    };
-    cmd_mqtt_long_password = (AT_Cmd_t){
-    	.timeout_ms = 3000,
-    	.response_cb = _set_longPWD_rsp_cb
-    }; // data_to_send 在运行时设置
-    cmd_mqtt_conn = (AT_Cmd_t){
-    	.cmd_str = conn_cmd_buf,
-    	.timeout_ms = 20000,
-		.response_cb = _connect_rsp_cb
-    };
-    cmd_mqtt_sub = (AT_Cmd_t){
-    	.cmd_str = sub_cmd_buf,
-    	.timeout_ms = 5000,
-		.response_cb = _simple_mqtt_rsp_cb
-    };
-    cmd_mqtt_pub = (AT_Cmd_t){
-    	.cmd_str = pub_cmd_buf,
-    	.data_to_send = pub_payload_buffer,
-		.timeout_ms = 10000,
-		.response_cb = _simple_mqtt_rsp_cb
-    };
-    cmd_mqtt_clean = (AT_Cmd_t){
-    	.cmd_str = "AT+MQTTCLEAN=0\r\n",
-    	.timeout_ms = 2000,
-		.response_cb = _simple_mqtt_rsp_cb
-    };
-#endif
+    //...
 }
 
 
@@ -145,10 +123,15 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
 #endif
 		return;
 	}
+	else if(g_mqtt_state == MQTT_STATE_CONNECTED){
+#ifndef NDEBUG
+    printf("MQTT_connect: has been connected.\r\n");
+#endif
+    	return;
+	}
 #ifndef NDEBUG
     printf("MQTT SetUserCFG...\r\n");
 #endif
-#if SAVE_CMD
 #if USE_MY_MALLOC
 	char* usercfg_cmd_buf = mymalloc(SRAMDTCM,256);
 	char* longpwd_cmd_buf = mymalloc(SRAMDTCM,64);
@@ -165,9 +148,9 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
        	.timeout_ms = 3000,
        	.response_cb = _set_longPWD_rsp_cb
        }; // data_to_send 在运行时设置
-#endif
-    // === OneNet连接 ===
-    // 设置用户配置, 1: MQTT over TCP (无证书)
+    //设置前先发送清理函数,不然非首次连接就ERROR
+    MQTT_disconnect();
+    // 设置用户配置, 连接方式 1: MQTT over TCP (无证书)
     snprintf(usercfg_cmd_buf, 256,
              "AT+MQTTUSERCFG=0,1,\"%s\",\"%s\",\"\",0,0,\"\r\n", client_id, username);
     AT_controller_cmd_submit(&cmd_mqtt_usercfg);
@@ -182,12 +165,11 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
     // 连接Broker
     // 在long_password成功回调中提交
 }
-//提交连接命令
+//提交连接命令(回调中使用)
 static void MQTTBroker_connect(void){
 #ifndef NDEBUG
     printf("MQTT Connecting...\r\n");
 #endif
-#if SAVE_CMD
 #if USE_MY_MALLOC
 	char* conn_cmd_buf = mymalloc(SRAMDTCM,128);
 #else
@@ -198,7 +180,6 @@ static void MQTTBroker_connect(void){
        	.timeout_ms = 15000,
    		.response_cb = _connect_rsp_cb
        };
-#endif
     // 连接Broker
     snprintf(conn_cmd_buf, 128,"AT+MQTTCONN=0,\"%s\",%d,0\r\n", MQTT_HOST, MQTT_PORT);
     AT_controller_cmd_submit(&cmd_mqtt_conn);
@@ -209,13 +190,11 @@ static void MQTTBroker_connect(void){
  *			需要先发送 AT+MQTTCLEAN=0 命令清理信息，重新配置参数，再建立新的连接。
  */
 void MQTT_disconnect(void) {
-#if SAVE_CMD
 	AT_Cmd_t cmd_mqtt_clean = (AT_Cmd_t){
     	.cmd_str = "AT+MQTTCLEAN=0\r\n",
     	.timeout_ms = 2000,
-		.response_cb = _simple_mqtt_rsp_cb
+		.response_cb = _disconnect_rsp_cb
     };
-#endif
     AT_controller_cmd_submit(&cmd_mqtt_clean);
 }
 
@@ -240,7 +219,6 @@ void MQTT_subscribe(const char* topic, int qos) {
 #endif
 		return;
 	}
-#if SAVE_CMD
 #if USE_MY_MALLOC
 	char* sub_cmd_buf = mymalloc(SRAMDTCM,128);
 #else
@@ -251,7 +229,6 @@ void MQTT_subscribe(const char* topic, int qos) {
     	.timeout_ms = 5000,
 		.response_cb = _subscribe_rsp_cb
     };
-#endif
     snprintf(sub_cmd_buf, 128, "AT+MQTTSUB=0,\"%s\",%d\r\n", topic, qos);
     AT_controller_cmd_submit(&cmd_mqtt_sub);
 }
@@ -293,6 +270,7 @@ void MQTT_publish(const char* topic, const char* data, uint8_t qos, uint8_t reta
 }
 
 /* ====================================== 设备主题订阅与推送(onenet云功能) ======================================= */
+
 /*	@brief		设置本设备名称(标识符),测试:test2
  *
  *	@param c 	设备名称
@@ -309,6 +287,7 @@ uint8_t MQTT_Set_DeviceID(char *c){
 	strcpy(DeviceID, c);
 	return 0;
 }
+
 /*	@brief		获取本设备名称(标识符)
  *	@return		设备名称
  */
@@ -343,33 +322,27 @@ void MQTT_publish_Module_data(const Module* Module) {
 			.response_cb = _publish_rsp_cb,
 	    };
 	#endif
-
 	// 获取 Topic
 	// $sys/{pid}/{device-name}/thing/property/post
 	const char* dev_name = MQTT_Get_DeviceID();	//获取本机名称
 	char topic[128];
 	snprintf(topic, sizeof(topic), "$sys/%s/%s/thing/property/post", Product_ID, dev_name);
-
 	// 序列化数据到 payload
 	int payload_len = Module_Data_to_json_string(Module, pub_payload_buffer, payload_size);
 	if (payload_len < 0) {
 		printf("Error: JSON serialization failed!\r\n");
 		return;
 	}
-
 	// 构建 AT+MQTTPUBRAW 命令
 	snprintf(pub_cmd_buf, sizeof(pub_cmd_buf),
 			"AT+MQTTPUBRAW=0,\"%s\",%d,0,0\r\n", topic, payload_len);
-#ifndef NDEBUG
-	printf("push cmd: %s\r\n", pub_cmd_buf);
-	printf("push payload: %s\r\n", pub_payload_buffer);
-#endif
 	// 提交发布命令
 	AT_controller_cmd_submit(&cmd_mqtt_pub);
 }
 
 
 /* ========================================= MQTT URC 处理 ========================================== */
+
 //MQTT服务器连接状态 +MQTTCONNECTED
 void MQTT_handle_urc_connected(const char* line) {
     g_mqtt_state = MQTT_STATE_CONNECTED;
@@ -379,6 +352,7 @@ void MQTT_handle_urc_connected(const char* line) {
     // 可以在这里自动订阅主题
     MQTT_subscribe("$sys/SQKg9n0Ii0/test2/thing/property/set",0);
 }
+
 //MQTT服务器断开状态 +MQTTDISCONNECTED
 void MQTT_handle_urc_disconnected(const char* line) {
     g_mqtt_state = MQTT_STATE_NOUSERCFG;
@@ -387,18 +361,21 @@ void MQTT_handle_urc_disconnected(const char* line) {
 #endif
 }
 
-// 用于发送 set_reply 消息的回调
+/*	@brief	回复云属性设置回复函数
+ *			用于回复接收到的云端命令
+ *
+ *	@param id	云命令的消息id
+ *	@param code	事件代码 成功:200
+ *	@param msg	回复内容,随意
+ *
+ */
 void MQTT_send_reply(const char* id, int code, const char* msg) {
     if (g_mqtt_state != MQTT_STATE_CONNECTED) return;
-
-#ifndef NDEBUG
-    printf("MQTT reply:%s\r\n",id);
-#endif
-
     char reply_topic_buf[128];
     char reply_payload_buf[128];
     AT_Cmd_t cmd_mqtt_reply;
-    // 构建 Topic: $sys/{pid}/{device-name}/thing/property/set_reply
+    // 回复set_reply主题
+    // Topic: $sys/{pid}/{device-name}/thing/property/set_reply
     const char* dev_name = MQTT_Get_DeviceID();
     snprintf(reply_topic_buf, sizeof(reply_topic_buf),
              "$sys/%s/%s/thing/property/set_reply", Product_ID, dev_name);
@@ -417,16 +394,15 @@ void MQTT_send_reply(const char* id, int code, const char* msg) {
         .timeout_ms = 10000,
         .response_cb = _simple_mqtt_rsp_cb
     };
-#ifndef NDEBUG
-    printf("reply_cmd:%s",reply_cmd_buf);
-    printf("reply:%s\r\n",reply_payload_buf);
-#endif
     AT_controller_cmd_submit(&cmd_mqtt_reply);
 }
 
 
-/*	订阅信息回调
- *	+MQTTSUBRECV:
+/*	@brief	订阅信息回调  +MQTTSUBRECV:
+ * 			找到set主题后的Json载荷并交给"云命令分发器"
+ *
+ *	@param line 收到的内容
+ *
  */
 void MQTT_handle_urc_recv(const char* line) {
     // 格式: +MQTTSUBRECV:0,"<topic>",<len>,<payload>
@@ -457,7 +433,6 @@ void MQTT_handle_urc_recv(const char* line) {
                char set_topic_pattern[128];
                snprintf(set_topic_pattern, sizeof(set_topic_pattern),
                         "$sys/%s/%s/thing/property/set", Product_ID, MQTT_Get_DeviceID());
-
                if (strcmp(topic, set_topic_pattern) == 0) {
                    // 是属性设置命令交给云命令分发器处理
                    Cloud_dispatcher_process_command(payload_start);

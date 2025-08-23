@@ -26,27 +26,79 @@ typedef enum {
 // topic 和 payload 指向临时缓冲区，如果需要长期保存，请在回调中拷贝
 typedef void (*mqtt_command_cb_t)(const char* topic, const char* payload);
 
-// --- 公开API ---
 
+/* ============================ 公开API实现 ============================ */
 void MQTT_init(mqtt_command_cb_t cmd_callback);
+
+/* =================== MQTT服务器连接(根据AT命令定义) ====================== */
+/*	@brief			连接onenet的一个对应设备,模块支支持一个0号连接
+ *	@param client_id 	MQTT客户端ID,	对于云平台 即<设备名称/ID>, DeviceID
+ *	@param username 	用户名,用于登陆	对于云平台 即<产品ID>
+ *	@param password 	密码(暂时手动输入)
+ */
 void MQTT_connect(const char* client_id, const char* username, const char* password);
+
+/*	@brief	断开 MQTT 连接，释放资源
+ */
 void MQTT_disconnect(void);
+
+/*	@brief	获取MQTT服务器连接状态
+ *	@return 连接状态
+ */
 mqtt_state_typedef MQTT_get_state(void);
 
-// 订阅一个主题
+/* ================== MQTT主题订阅与推送(模块通用api) ================= */
+/*	@brief			订阅一个mqtt主题
+ *	@param topic 	主题名称
+ *	@param qos 		服务质量
+ */
 void MQTT_subscribe(const char* topic, int qos);
 
-// 使用Module对象发布物模型数据
+/*	@brief			向一个主题推送字符串消息
+ *	@param topic 	主题名称
+ *	@param data 	推送内容
+ *	@param qos 		服务质量 0/1/2
+ *	@param retain 	保留会话? 0/1
+ */
+void MQTT_publish(const char* topic, const char* data, uint8_t qos, uint8_t retain);
+
+/* ================ 设备主题订阅与推送(onenet云功能) ================ */
+/*	@brief		设置本设备名称(标识符),测试:test2
+ *	@param c 	设备名称
+ *	@return		执行结果
+ */
+uint8_t MQTT_Set_DeviceID(char *c);
+
+/*	@brief		获取本设备名称(标识符)
+ *	@return		设备名称
+ */
+char *MQTT_Get_DeviceID(void);
+
+/*	@brief			推送传感器数据
+ *	@param Module 	传感器对象
+ */
 void MQTT_publish_Module_data(const Module* Module);
 
-void MQTT_connect(const char* client_id, const char* username, const char* password);
-uint8_t MQTT_Set_DeviceID(char *c);
-char *MQTT_Get_DeviceID();
+/* ======================== MQTT URC 处理 ========================== */
+//MQTT服务器连接状态 +MQTTCONNECTED
+void MQTT_handle_urc_connected(const char* line);
 
-/* ========================================= MQTT URC 处理 ========================================== */
-void MQTT_handle_urc_connected(const char* line);//MQTT服务器连接状态
-void MQTT_handle_urc_disconnected(const char* line);//MQTT服务器断开状态
-void MQTT_handle_urc_recv(const char* line);	//收到订阅信息回调
+//MQTT服务器断开状态 +MQTTDISCONNECTED
+void MQTT_handle_urc_disconnected(const char* line);
+
+/*	@brief	用于回复接收到的云端命令
+ *	@param id	云命令的消息id
+ *	@param code	事件代码 成功:200
+ *	@param msg	回复内容,随意
+ */
+void MQTT_send_reply(const char* id, int code, const char* msg);
+
+/*	@brief	订阅信息回调  +MQTTSUBRECV:
+ * 			找到set主题后的Json载荷并交给"云命令分发器"
+ *	@param line 收到的内容
+ */
+void MQTT_handle_urc_recv(const char* line);
+
 
 
 #endif /* BSP_ESP_AT_ESP_APP_ESP_MQTT_ESP_MQTT_H_ */

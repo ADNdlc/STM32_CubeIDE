@@ -10,8 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define MAX_CLOUD_HANDLERS 16 // 定义最大可注册的命令数量(可写功能点数量)
-
+#define MAX_CLOUD_HANDLERS 20 // 定义最大可注册的命令数量(可写功能点数量)
 extern void MQTT_send_reply(const char* id, int code, const char* msg);
 
 // 命令注册表条目
@@ -21,10 +20,17 @@ typedef struct {
 } Cloud_Handler_t;
 
 // 命令注册表实例
-static Cloud_Handler_t handler_registry[MAX_CLOUD_HANDLERS];
-static int handler_count = 0;	//已有条目数
+static Cloud_Handler_t handler_registry[MAX_CLOUD_HANDLERS];// 云命令处理表
+static int handler_count = 0;								// 已有条目数
 
-
+/*	@brief	云命令处理项添加
+ * 			设备使用此api注册云属性设置回调
+ *
+ *	@param	identifier	功能点标识符
+ *	@param	handler		处理函数
+ *
+ *	@return	执行结果
+ */
 bool Cloud_dispatcher_register_handler(const char* identifier, cloud_cmd_handler_t handler) {
     if (handler_count >= MAX_CLOUD_HANDLERS) {
         return false; // 表已满
@@ -35,17 +41,21 @@ bool Cloud_dispatcher_register_handler(const char* identifier, cloud_cmd_handler
     return true;
 }
 
+/*	@brief	云命令分发器
+ * 			遍历handler_registry中所有处理项
+ *
+ *	@param	payload_json  云命令内容中提取出的Json载荷
+
+ */
 void Cloud_dispatcher_process_command(const char* payload_json) {
     cJSON* root = cJSON_Parse(payload_json);
     if (root == NULL) {
-        printf("Error: Failed to parse JSON payload.\r\n");
-        return;
+        printf("Error: Failed to parse JSON payload.\r\n");return;
     }
-    // 提取重要的元数据 (id)
+    // 提取元数据
     cJSON* id_item = cJSON_GetObjectItem(root, "id");
     if (id_item == NULL || !cJSON_IsString(id_item)) {
-        cJSON_Delete(root);
-        return;
+        cJSON_Delete(root);return;
     }
     const char* cmd_id = id_item->valuestring;
     // 获取 params 对象
@@ -53,7 +63,9 @@ void Cloud_dispatcher_process_command(const char* payload_json) {
     if (params == NULL || !cJSON_IsObject(params)) {
         cJSON_Delete(root);
         // 没有params
-
+#ifndef  NDEBUG
+        printf("JSON is NULL\r\n");
+#endif
         return;
     }
     // 遍历 params 对象中的所有条目(功能点标识符)
@@ -79,3 +91,4 @@ void Cloud_dispatcher_process_command(const char* payload_json) {
     MQTT_send_reply(cmd_id, 200, "success");
     cJSON_Delete(root);// 最后清理JSON对象,传入的是地址
 }
+
