@@ -7,7 +7,7 @@
 #include "RTC_cal.h"
 #include "rtc.h"	// 此模块用于校准RTC
 #include <string.h>
-
+#include <stdio.h>
 #include "../esp_wifi/esp_wifi.h"
 #include "../../at_controller.h"
 

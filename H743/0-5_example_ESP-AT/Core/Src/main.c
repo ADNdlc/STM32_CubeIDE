@@ -177,7 +177,7 @@ int main(void)
   DHT11_Init();
   dht11_MQTTInit();
 
-  led_control_init();
+  LED_init();
 
   ESP_AT_sys_init(&huart2);
 

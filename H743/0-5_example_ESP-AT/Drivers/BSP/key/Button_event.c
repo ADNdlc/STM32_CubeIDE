@@ -11,6 +11,7 @@
 #include "main.h"
 #include "esp_at/esp_app/esp_sys/esp_sys.h"
 #include "dht11/dht11_MQTT.h"
+#include "LED/LED.h"
 
 static void test1_parser_cb(const char* data_line){
 	printf("test1_parser_cb data: %s\r\n",data_line+11);
@@ -108,6 +109,7 @@ void btn2_double_click(Button* btn) {
 	printf("\r\nbtn2_double_click\r\n");
     // 双击处理
 	dht11_MQTT_updateANDpublish();	//获取传感器数据并推送
+	LED_MQTT_publish();
 }
 
 void btn2_triple_click(Button* btn) {

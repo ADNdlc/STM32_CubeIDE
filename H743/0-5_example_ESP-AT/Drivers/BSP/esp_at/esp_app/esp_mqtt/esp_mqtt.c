@@ -6,9 +6,10 @@
  */
 
 #include "esp_mqtt.h"
+#include "../../at_parser.h"
 #include "../../at_controller.h"
-
 #include "../esp_wifi/esp_wifi.h"
+#include "cloud_dispatcher.h"
 #include <stdio.h>
 #include <string.h>
 #if USE_MY_MALLOC
@@ -18,8 +19,22 @@
 // --- 私有状态和缓冲区 ---
 static char DeviceID[64] = "test2";		//设备ID, 即Client ID
 
+#define topic_length	 128
+#define payload_length	 256
+#define topic_set_length 128
+#if USE_MY_MALLOC
+		static char* topic = NULL;
+		static char* payload = NULL;
+		static char* set_topic_pattern = NULL;
+#else
+		static char topic[topic_length];
+		static char payload[payload_length];
+		static char set_topic_pattern[topic_set_length];
+#endif
+
 static mqtt_state_typedef g_mqtt_state = MQTT_STATE_NOUSERCFG;	//MQTT连接状态
-static mqtt_command_cb_t g_cmd_cb = NULL;						//下发回调(其他)
+static mqtt_event_cb_t g_event_cb = NULL;						//事件回调
+
 
 static void MQTTBroker_connect(void);
 
@@ -101,9 +116,13 @@ static void _publish_rsp_cb(AT_CmdResult_t result, const char* line){
 /*	MQTT相关初始化
  *
  */
-void MQTT_init(mqtt_command_cb_t cmd_callback) {
-    g_cmd_cb = cmd_callback;
-    //...
+void MQTT_init(mqtt_event_cb_t event_callback) {
+	g_event_cb = event_callback;
+#if USE_MY_MALLOC
+	topic = mymalloc(SRAMDTCM,topic_length);
+	payload = mymalloc(SRAMDTCM,payload_length);
+	set_topic_pattern = mymalloc(SRAMDTCM,topic_set_length);
+#endif
 }
 
 
@@ -162,6 +181,11 @@ void MQTT_connect(const char* client_id, const char* username, const char* passw
     cmd_mqtt_long_password.cmd_str = longpwd_cmd_buf;
     cmd_mqtt_long_password.data_to_send = password;
     AT_controller_cmd_submit(&cmd_mqtt_long_password);
+
+#if USE_MY_MALLOC
+	myfree(SRAMDTCM,usercfg_cmd_buf);
+	myfree(SRAMDTCM,longpwd_cmd_buf);
+#endif
     // 连接Broker
     // 在long_password成功回调中提交
 }
@@ -184,6 +208,9 @@ static void MQTTBroker_connect(void){
     // 连接Broker
     snprintf(conn_cmd_buf, 128,"AT+MQTTCONN=0,\"%s\",%d,0\r\n", MQTT_HOST, MQTT_PORT);
     AT_controller_cmd_submit(&cmd_mqtt_conn);
+#if USE_MY_MALLOC
+	myfree(SRAMDTCM,conn_cmd_buf);
+#endif
 }
 
 /*	@brief	断开 MQTT 连接，释放资源
@@ -197,6 +224,7 @@ void MQTT_disconnect(void) {
 		.response_cb = _disconnect_rsp_cb
     };
     AT_controller_cmd_submit(&cmd_mqtt_clean);
+    g_event_cb(MQTT_STATE_NOUSERCFG);
 }
 
 /*	@brief	获取MQTT服务器连接状态
@@ -232,6 +260,9 @@ void MQTT_subscribe(const char* topic, int qos) {
     };
     snprintf(sub_cmd_buf, 128, "AT+MQTTSUB=0,\"%s\",%d\r\n", topic, qos);
     AT_controller_cmd_submit(&cmd_mqtt_sub);
+#if USE_MY_MALLOC
+	myfree(SRAMDTCM,sub_cmd_buf);
+#endif
 }
 
 /*	@brief			向一个主题推送字符串消息
@@ -249,7 +280,6 @@ void MQTT_publish(const char* topic, const char* data, uint8_t qos, uint8_t reta
 #endif
     	return;
     }
-#if SAVE_CMD
 #if USE_MY_MALLOC
 	char* pub_cmd_buf = mymalloc(SRAMDTCM,128);
 	char* pub_payload_buffer = mymalloc(SRAMDTCM,512);
@@ -263,11 +293,14 @@ void MQTT_publish(const char* topic, const char* data, uint8_t qos, uint8_t reta
 		.timeout_ms = 10000,
 		.response_cb = _publish_rsp_cb,
     };
-#endif
     // 构建 AT+MQTTPUBRAW 命令, 写入独立的 pub_cmd_buf
 	snprintf(pub_cmd_buf, 128,
 			"AT+MQTTPUBRAW=0,\"%s\",%d,%d,%d\r\n", topic, strlen(data), qos, retain);
 	AT_controller_cmd_submit(&cmd_mqtt_pub);//提交命令,data在回调中发送
+#if USE_MY_MALLOC
+	myfree(SRAMDTCM,pub_cmd_buf);
+	myfree(SRAMDTCM,pub_payload_buffer);
+#endif
 }
 
 /* ====================================== 设备主题订阅与推送(onenet云功能) ======================================= */
@@ -308,26 +341,25 @@ void MQTT_publish_Module_data(const Module* Module) {
 	#endif
 	    	return;
 	    }
-	#if SAVE_CMD
-	#if USE_MY_MALLOC
+#if USE_MY_MALLOC
 		char* pub_cmd_buf = mymalloc(SRAMDTCM,128);
 		char* pub_payload_buffer = mymalloc(SRAMDTCM,payload_size);
-	#else
+		char* topic = mymalloc(SRAMDTCM,128);
+#else
 		char pub_cmd_buf[128]; 	// 这个只存命令本身
 		char pub_payload_buffer[payload_size];// 用于发布数据的 载荷 缓冲区
-	#endif
+		char topic[128];
+#endif
 	    AT_Cmd_t cmd_mqtt_pub = (AT_Cmd_t){
 	    	.cmd_str = pub_cmd_buf,
 	    	.data_to_send = pub_payload_buffer,
 			.timeout_ms = 10000,
 			.response_cb = _publish_rsp_cb,
 	    };
-	#endif
 	// 获取 Topic
 	// $sys/{pid}/{device-name}/thing/property/post
 	const char* dev_name = MQTT_Get_DeviceID();	//获取本机名称
-	char topic[128];
-	snprintf(topic, sizeof(topic), "$sys/%s/%s/thing/property/post", Product_ID, dev_name);
+	snprintf(topic, 128, "$sys/%s/%s/thing/property/post", Product_ID, dev_name);
 	// 序列化数据到 payload
 	int payload_len = Module_Data_to_json_string(Module, pub_payload_buffer, payload_size);
 	if (payload_len < 0) {
@@ -335,10 +367,15 @@ void MQTT_publish_Module_data(const Module* Module) {
 		return;
 	}
 	// 构建 AT+MQTTPUBRAW 命令
-	snprintf(pub_cmd_buf, sizeof(pub_cmd_buf),
+	snprintf(pub_cmd_buf, 128,
 			"AT+MQTTPUBRAW=0,\"%s\",%d,0,0\r\n", topic, payload_len);
 	// 提交发布命令
 	AT_controller_cmd_submit(&cmd_mqtt_pub);
+#if USE_MY_MALLOC
+    myfree(SRAMDTCM,pub_cmd_buf);
+	myfree(SRAMDTCM,pub_payload_buffer);
+	myfree(SRAMDTCM,topic);
+#endif
 }
 
 
@@ -350,6 +387,7 @@ void MQTT_handle_urc_connected(const char* line) {
 #ifndef NDEBUG
     printf("MQTT Connected to broker.\r\n");
 #endif
+    g_event_cb(MQTT_STATE_CONNECTED);
     // 可以在这里自动订阅主题
     MQTT_subscribe("$sys/SQKg9n0Ii0/test2/thing/property/set",0);
 }
@@ -357,6 +395,7 @@ void MQTT_handle_urc_connected(const char* line) {
 //MQTT服务器断开状态 +MQTTDISCONNECTED
 void MQTT_handle_urc_disconnected(const char* line) {
     g_mqtt_state = MQTT_STATE_NOUSERCFG;
+    g_event_cb(MQTT_STATE_NOUSERCFG);
 #ifndef NDEBUG
     printf("MQTT Disconnected from broker.\r\n");
 #endif
@@ -372,21 +411,27 @@ void MQTT_handle_urc_disconnected(const char* line) {
  */
 void MQTT_send_reply(const char* id, int code, const char* msg) {
     if (g_mqtt_state != MQTT_STATE_CONNECTED) return;
-    char reply_topic_buf[128];
-    char reply_payload_buf[128];
+#if USE_MY_MALLOC
+		char* reply_topic_buf = mymalloc(SRAMDTCM,128);
+		char* reply_payload_buf = mymalloc(SRAMDTCM,128);
+		char* reply_cmd_buf = mymalloc(SRAMDTCM,128);
+#else
+	    char reply_topic_buf[128];
+	    char reply_payload_buf[128];
+	    char reply_cmd_buf[128];
+#endif
     AT_Cmd_t cmd_mqtt_reply;
     // 回复set_reply主题
     // Topic: $sys/{pid}/{device-name}/thing/property/set_reply
     const char* dev_name = MQTT_Get_DeviceID();
-    snprintf(reply_topic_buf, sizeof(reply_topic_buf),
+    snprintf(reply_topic_buf, 128,
              "$sys/%s/%s/thing/property/set_reply", Product_ID, dev_name);
     // 构建 Payload
-    int payload_len = snprintf(reply_payload_buf, sizeof(reply_payload_buf),
+    int payload_len = snprintf(reply_payload_buf, 128,
                                "{\"id\":\"%s\",\"code\":%d,\"msg\":\"%s\"}",
                                id, code, msg);
     // 构建 AT 命令
-    char reply_cmd_buf[128];
-    snprintf(reply_cmd_buf, sizeof(reply_cmd_buf),
+    snprintf(reply_cmd_buf, 128,
              "AT+MQTTPUBRAW=0,\"%s\",%d,0,0\r\n", reply_topic_buf, payload_len);
     // 初始化并提交命令
     cmd_mqtt_reply = (AT_Cmd_t) {
@@ -396,8 +441,12 @@ void MQTT_send_reply(const char* id, int code, const char* msg) {
         .response_cb = _simple_mqtt_rsp_cb
     };
     AT_controller_cmd_submit(&cmd_mqtt_reply);
+#if USE_MY_MALLOC
+    myfree(SRAMDTCM,reply_cmd_buf);
+	myfree(SRAMDTCM,reply_payload_buf);
+	myfree(SRAMDTCM,reply_topic_buf);
+#endif
 }
-
 
 /*	@brief	订阅信息回调  +MQTTSUBRECV:
  * 			找到set主题后的Json载荷并交给"云命令分发器"
@@ -407,8 +456,6 @@ void MQTT_send_reply(const char* id, int code, const char* msg) {
  */
 void MQTT_handle_urc_recv(const char* line) {
     // 格式: +MQTTSUBRECV:0,"<topic>",<len>,<payload>
-    char topic[128];
-    char payload[256];
     int len;
     const char* topic_start = strchr(line, '"');
     if (!topic_start) return;
@@ -416,36 +463,34 @@ void MQTT_handle_urc_recv(const char* line) {
     if (!topic_end) return;
 
     int topic_len = topic_end - (topic_start + 1);
-    if (topic_len < sizeof(topic)) {
+    if (topic_len < topic_length) {
         strncpy(topic, topic_start + 1, topic_len);
         topic[topic_len] = '\0';
     }
     const char* len_start = topic_end + 2; // 跳过 ",
     len = atoi(len_start);
     const char* payload_start = strchr(len_start, ',') + 1;
-    if (payload_start && len < sizeof(payload)) {
+    if (payload_start && len < payload_length) {
         strncpy(payload, payload_start, len);
         payload[len] = '\0';
         const char* payload_start = strchr(len_start, ',') + 1;
-           if (payload_start) {
+        if (payload_start) {
                // 不再需要本地的 payload 缓冲区，直接将指针传递
                // 我们需要找到订阅的主题是否是 set topic
                // $sys/{pid}/{device-name}/thing/property/set
-               char set_topic_pattern[128];
-               snprintf(set_topic_pattern, sizeof(set_topic_pattern),
+               snprintf(set_topic_pattern, topic_set_length,
                         "$sys/%s/%s/thing/property/set", Product_ID, MQTT_Get_DeviceID());
                if (strcmp(topic, set_topic_pattern) == 0) {
                    // 是属性设置命令交给云命令分发器处理
                    Cloud_dispatcher_process_command(payload_start);
-               } else {
-                   // 是其他订阅消息，例如 post_reply
-                   // 调用旧的回调（如果需要的话）
-                   if (g_cmd_cb) {
-                       g_cmd_cb(topic, payload_start);
-                   }
                }
-           }
-       }
+               else { // 是其他订阅消息，例如 post_reply
+#ifndef NDEBUG
+        printf("MQTT_handle_urc_recv: NO handler '%s'\r\n",line);
+#endif
+               }
+        }
+    }
 }
 
 

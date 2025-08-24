@@ -35,7 +35,8 @@ typedef enum {
     DATA_int,
     DATA_float,
     DATA_double,
-    DATA_string
+    DATA_string,
+	DATA_bool
 	//...
 } DataType;
 
@@ -46,6 +47,7 @@ typedef struct {
     DataType type;         		// 此数据点数据<类型>
 
     union {
+    	bool bool_value;
         int int_value;
         float float_value;
         double double_value;

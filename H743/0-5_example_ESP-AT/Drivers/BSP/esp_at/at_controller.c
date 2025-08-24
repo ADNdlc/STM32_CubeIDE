@@ -7,7 +7,6 @@
 
 #include "string.h"
 #include "at_uart.h"
-#include "at_parser.h"
 #include "at_controller.h"
 #include "at_dispatcher.h"
 #ifndef NDEBUG
@@ -94,9 +93,8 @@ void AT_controller_init(void){
 	    AT_Cmd_t* cmd_to_clear = g_cmd_queue_head;	// 获取头节点
 	    g_cmd_queue_head = g_cmd_queue_head->next;	// 将头指针移动到下一个节点
 	    cmd_to_clear->response_cb(AT_CMD_ERROR,"recover");// 调用所有命令的回调通知复位
-#if SAVE_CMD
+
 	    CMD_delete(cmd_to_clear);  // 释放
-#endif
 	}
 	g_state = AT_CTRL_NOTREADY;//状态机进入非就绪态
 	g_cmd_queue_head = NULL;
@@ -231,7 +229,7 @@ static AT_Cmd_t* cmd_dequeue(void) {
 
 /**
  * @brief 		向控制器提交一个要执行的命令
- * @param cmd 	指向一个命令对象的指针。注意：若没启用 SAVE_CMD 此对象必须是静态的或全局的，
+ * @param cmd 	指向一个命令对象的指针。
  *            	因为它是异步执行的，不能是栈上的局部变量。
  * @return 0 成功加入队列, -1 队列已满或内存错误
  */
@@ -242,14 +240,10 @@ int AT_controller_cmd_submit(AT_Cmd_t* cmd){
 	if (0) {	//以后再实现满判断,可能需要根据线程堆栈或系统资源？
 	    return -1;
 	}
-#if SAVE_CMD
 	AT_Cmd_t* temp = CMD_save(cmd);
 	if(!temp){
 		return -1;
 	}
-#else
-	AT_Cmd_t* temp = cmd;
-#endif
 	temp->next = NULL;
 	if(!g_cmd_queue_head) {
 		g_cmd_queue_head = temp;
@@ -310,9 +304,7 @@ void AT_controller_process(void) {
 #ifndef NDEBUG
 	printf("timeout_count:%s g_state:%d\r\n", g_current_cmd->cmd_str ,g_state);
 #endif
-#if SAVE_CMD
-	CMD_delete(g_current_cmd);
-#endif
+				CMD_delete(g_current_cmd);
                 g_current_cmd = NULL;
                 g_state = AT_CTRL_STATE_IDLE;
                 timeout_count ++;
@@ -342,9 +334,7 @@ void handle_final_ok(const char* line) {
         	g_busy_count = 0;
             g_current_cmd->response_cb(AT_CMD_OK, line);// 调用"当前命令体"的完成回调
         }
-#if SAVE_CMD
-	CMD_delete(g_current_cmd);
-#endif
+        CMD_delete(g_current_cmd);
         g_current_cmd = NULL;//调用完成清空
         g_state = AT_CTRL_STATE_IDLE;
     }
@@ -367,9 +357,7 @@ void handle_final_error(const char* line) {
 			g_busy_count = 0;
 			g_current_cmd->response_cb(AT_CMD_ERROR, line);	// 调用"当前命令体"的完成回调
 		}
-#if SAVE_CMD
-	CMD_delete(g_current_cmd);
-#endif
+		CMD_delete(g_current_cmd);
 		g_current_cmd = NULL;
 		g_state = AT_CTRL_STATE_IDLE;
 		error_count ++;	//记录命令执行总体错误次数

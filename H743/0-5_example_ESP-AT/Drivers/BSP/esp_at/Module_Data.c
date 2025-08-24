@@ -4,7 +4,7 @@
  *  Created on: May 31, 2025
  *      Author: 12114
  */
-#define USE_MY_MALLOC	0
+#define USE_MY_MALLOC	1
 #if USE_MY_MALLOC
 #include "malloc/malloc.h"
 #endif
@@ -20,7 +20,7 @@
  *
  *	@param name 	数据点"标识符"
  *	@param type 	数据类型
- *	@return			构造的 数据点对象
+ *	@return			构造的 数据点对象(需要空间接收)
  *
  */
 DataPoint Module_Create_Point(const char* name, DataType type) {
@@ -47,6 +47,10 @@ void Module_init_Point(DataPoint* point, const char* name, DataType type) {
 //内部调用
 static void Set_PointValue(DataPoint* point, va_list args){
     switch(point->type) {
+    	case DATA_bool:
+            // 注意：bool 类型在通过 ... 传递时会被提升为 int
+    		point->value.bool_value = (bool)va_arg(args, int);
+    		break;
         case DATA_int:
             point->value.int_value = va_arg(args, int);
             break;
@@ -59,7 +63,11 @@ static void Set_PointValue(DataPoint* point, va_list args){
         case DATA_string:
             // 如果是字符串类型且之前已有字符串，先释放
             if (point->type == DATA_string && point->value.string_value) {
+#if !USE_MY_MALLOC
                 free((void*)point->value.string_value);
+#else
+                myfree(SRAMDTCM, (void*)point->value.string_value);
+#endif
             }
             // 使用strdup复制一个独立副本(这里不释放strdup,而是让string_value指向其申请的内存)
             const char* new_str = va_arg(args, const char*);
@@ -96,7 +104,11 @@ void Module_Set_PointValue(DataPoint* point, ...) {
  */
 Module* Module_Init(const char* Message_ID, const char* version) {
 	void * temp=NULL;
+#if !USE_MY_MALLOC
 	temp = malloc(sizeof(Module));//不包含数组大小
+#else
+	temp = mymalloc(SRAMDTCM, sizeof(Module));
+#endif
 	if(temp!=NULL){
 		Module* Module = temp;
 		Module->Message_ID = Message_ID;
@@ -119,7 +131,11 @@ Module* Module_Init(const char* Message_ID, const char* version) {
 bool Module_Add_Point(Module* SenIndex, DataPoint point) {
 	void * temp=NULL;
 	//重新分配存放数据点内存大小(扩大count个DataPoint的大小)
+#if !USE_MY_MALLOC
 	temp = realloc(SenIndex->data_points, (SenIndex->count+1) * sizeof(DataPoint));
+#else
+	temp = myrealloc(SRAMDTCM, SenIndex->data_points, (SenIndex->count+1) * sizeof(DataPoint));
+#endif
 	if(temp!=NULL){
 		SenIndex->data_points = temp;//扩大后的数组头地址(可能移动)
 		SenIndex->data_points[SenIndex->count] = point;//把数据点添加到数组末尾
@@ -182,11 +198,20 @@ void Module_Data_free(Module* SenIndex) {
     	for (int i = 0; i < SenIndex->count; i++) {
     		//如果是字符串数据点且有值,需要释放旧的字符串内存,因为此时值是指针
     		if ((SenIndex->data_points[i].type == DATA_string) && (SenIndex->data_points[i].value.string_value)){
+#if !USE_MY_MALLOC
     			free((void*)SenIndex->data_points[i].value.string_value);
+#else
+    			myfree(SRAMDTCM, (void*)SenIndex->data_points[i].value.string_value);
+#endif
     		}
     	}
+#if !USE_MY_MALLOC
     	free(SenIndex->data_points);
     	free(SenIndex);
+#else
+		myfree(SRAMDTCM, SenIndex->data_points);
+		myfree(SRAMDTCM, SenIndex);
+#endif
 	}
 }
 
@@ -228,6 +253,13 @@ int Module_Data_to_json_string(const Module* Module, char* buffer, size_t buffer
 	        offset += written;
 	        // 根据类型写入数据点的值
 	        switch (p->type) {
+	        	case DATA_bool:
+	        		if (p->value.bool_value) {
+	        			written = snprintf(buffer + offset, buffer_size - offset, "true");
+	        		} else {
+	        			written = snprintf(buffer + offset, buffer_size - offset, "false");
+	        		}
+	        		break;
 	            case DATA_int:
 	                written = snprintf(buffer + offset, buffer_size - offset, "%d", p->value.int_value);
 	                break;

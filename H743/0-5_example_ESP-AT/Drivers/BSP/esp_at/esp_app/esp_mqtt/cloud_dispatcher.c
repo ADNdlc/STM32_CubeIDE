@@ -42,7 +42,7 @@ bool Cloud_dispatcher_register_handler(const char* identifier, cloud_cmd_handler
 }
 
 /*	@brief	云命令分发器
- * 			遍历handler_registry中所有处理项
+ * 			遍历handler_registry中所有处理项调用相应处理函数
  *
  *	@param	payload_json  云命令内容中提取出的Json载荷
 
@@ -50,7 +50,10 @@ bool Cloud_dispatcher_register_handler(const char* identifier, cloud_cmd_handler
 void Cloud_dispatcher_process_command(const char* payload_json) {
     cJSON* root = cJSON_Parse(payload_json);
     if (root == NULL) {
-        printf("Error: Failed to parse JSON payload.\r\n");return;
+#ifndef NDEBUG
+        printf("Cloud_process:Fail parse JSON!!!\r\n");
+#endif
+        return;
     }
     // 提取元数据
     cJSON* id_item = cJSON_GetObjectItem(root, "id");
@@ -76,14 +79,15 @@ void Cloud_dispatcher_process_command(const char* payload_json) {
         bool handled = false;
         for (int i = 0; i < handler_count; ++i) {
             if (strcmp(handler_registry[i].identifier, identifier) == 0) {
-                // 找到了！调用它
                 handler_registry[i].handler(current_param);
                 handled = true;
                 break;
             }
         }
         if (!handled) {
-            printf("Warning: No handler for identifier '%s'\r\n", identifier);
+#ifndef NDEBUG
+        printf("Cloud_process:No handler '%s'\r\n", identifier);
+#endif
         }
         current_param = current_param->next; // 移动到下一个参数
     }

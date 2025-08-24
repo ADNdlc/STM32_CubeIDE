@@ -8,9 +8,8 @@
 #ifndef BSP_ESP_AT_AT_CONTROLLER_H_
 #define BSP_ESP_AT_AT_CONTROLLER_H_
 
+#include "at_parser.h"
 #include <stdint.h>
-
-#define SAVE_CMD		1	//队列是否存储传入命令？
 
 // 命令执行结果
 typedef enum {

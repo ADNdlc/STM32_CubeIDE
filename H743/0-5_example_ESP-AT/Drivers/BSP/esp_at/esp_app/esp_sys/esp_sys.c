@@ -33,7 +33,7 @@ static void MQTT_event_handler(mqtt_state_typedef new_state) {
     }
 }
 
-/*	初始化所有底层模块
+/* 初始化所有底层模块
  */
 void ESP_AT_sys_init(UART_HandleTypeDef* uart_port){
 	ATuart_driver_init(uart_port);//绑定AT串口

@@ -24,11 +24,11 @@ typedef enum {
 
 // 云端命令下发的回调函数指针
 // topic 和 payload 指向临时缓冲区，如果需要长期保存，请在回调中拷贝
-typedef void (*mqtt_command_cb_t)(const char* topic, const char* payload);
+typedef void (*mqtt_event_cb_t)(mqtt_state_typedef new_state);
 
 
 /* ============================ 公开API实现 ============================ */
-void MQTT_init(mqtt_command_cb_t cmd_callback);
+void MQTT_init(mqtt_event_cb_t event_callback);
 
 /* =================== MQTT服务器连接(根据AT命令定义) ====================== */
 /*	@brief			连接onenet的一个对应设备,模块支支持一个0号连接

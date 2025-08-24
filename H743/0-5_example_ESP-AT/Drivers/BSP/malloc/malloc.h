@@ -43,7 +43,7 @@
 
 /* mem5内存参数设定.mem5是H7内部的DTCM内存,此部分内存仅CPU和MDMA可以访问!!! */
 #define MEM5_BLOCK_SIZE 64                                    /* 内存块大小为64字节 */
-#define MEM5_MAX_SIZE 120 * 1024                              /* 最大管理内存120K,H7的DTCM共128KB */
+#define MEM5_MAX_SIZE 4 * 1024                              /* 最大管理内存120K,H7的DTCM共128KB */
 #define MEM5_ALLOC_TABLE_SIZE MEM5_MAX_SIZE / MEM5_BLOCK_SIZE /* 内存表大小 */
 
 /* mem6内存参数设定.mem6是H7内部的ITCM内存,此部分内存仅CPU和MDMA可以访问!!! */
