@@ -15,8 +15,8 @@ extern void MQTT_send_reply(const char* id, int code, const char* msg);
 
 // 命令注册表条目
 typedef struct {
-    const char* identifier;
-    cloud_cmd_handler_t handler;
+    const char* identifier;		//功能点标识符
+    cloud_cmd_handler_t handler;//处理函数
 } Cloud_Handler_t;
 
 // 命令注册表实例
@@ -31,7 +31,7 @@ static int handler_count = 0;								// 已有条目数
  *
  *	@return	执行结果
  */
-bool Cloud_dispatcher_register_handler(const char* identifier, cloud_cmd_handler_t handler) {
+bool Cloud_dispatcher_register(const char* identifier, cloud_cmd_handler_t handler) {
     if (handler_count >= MAX_CLOUD_HANDLERS) {
         return false; // 表已满
     }
@@ -79,6 +79,7 @@ void Cloud_dispatcher_process_command(const char* payload_json) {
         bool handled = false;
         for (int i = 0; i < handler_count; ++i) {
             if (strcmp(handler_registry[i].identifier, identifier) == 0) {
+            	/* 调用相应处理 */
                 handler_registry[i].handler(current_param);
                 handled = true;
                 break;

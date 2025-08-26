@@ -40,7 +40,7 @@ void LED_init(void) {
 	Module_LED = Module_Init("22","1.0");
 	Module_Add_Point(Module_LED,Module_Create_Point(led_TAG,led_Type));
     // 将自己的能力注册到云命令分发器
-    Cloud_dispatcher_register_handler("LED", handle_led_command);
+	Cloud_dispatcher_register("LED", handle_led_command);
 }
 
 void LED_MQTT_publish(void){

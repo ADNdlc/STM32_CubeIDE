@@ -21,7 +21,7 @@ typedef void (*cloud_cmd_handler_t)(cJSON* value_item);
  * @param handler    对应的处理函数
  * @return true 注册成功, false 注册失败 (例如，表满了)
  */
-bool Cloud_dispatcher_register_handler(const char* identifier, cloud_cmd_handler_t handler);
+bool Cloud_dispatcher_register(const char* identifier, cloud_cmd_handler_t handler);
 
 /**
  * @brief 解析并分发来自云端的命令

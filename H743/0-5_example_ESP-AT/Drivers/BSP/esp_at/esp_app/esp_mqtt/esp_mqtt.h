@@ -22,8 +22,6 @@ typedef enum {
     MQTT_STATE_CONNECTED,	//已连接 MQTT Broker
 } mqtt_state_typedef;
 
-// 云端命令下发的回调函数指针
-// topic 和 payload 指向临时缓冲区，如果需要长期保存，请在回调中拷贝
 typedef void (*mqtt_event_cb_t)(mqtt_state_typedef new_state);
 
 
@@ -79,6 +77,8 @@ char *MQTT_Get_DeviceID(void);
  */
 void MQTT_publish_Module_data(const Module* Module);
 
+
+
 /* ======================== MQTT URC 处理 ========================== */
 //MQTT服务器连接状态 +MQTTCONNECTED
 void MQTT_handle_urc_connected(const char* line);
@@ -86,19 +86,19 @@ void MQTT_handle_urc_connected(const char* line);
 //MQTT服务器断开状态 +MQTTDISCONNECTED
 void MQTT_handle_urc_disconnected(const char* line);
 
-/*	@brief	用于回复接收到的云端命令
- *	@param id	云命令的消息id
- *	@param code	事件代码 成功:200
- *	@param msg	回复内容,随意
- */
-void MQTT_send_reply(const char* id, int code, const char* msg);
-
 /*	@brief	订阅信息回调  +MQTTSUBRECV:
  * 			找到set主题后的Json载荷并交给"云命令分发器"
  *	@param line 收到的内容
  */
 void MQTT_handle_urc_recv(const char* line);
 
+
+/*	@brief	用于回复接收到的云端命令
+ *	@param id	云命令的消息id
+ *	@param code	事件代码 成功:200
+ *	@param msg	回复内容,随意
+ */
+void MQTT_send_reply(const char* id, int code, const char* msg);
 
 
 #endif /* BSP_ESP_AT_ESP_APP_ESP_MQTT_ESP_MQTT_H_ */

@@ -60,3 +60,5 @@ time_t RTC_get_unix(int8_t timezone);
 void SNTP_handle_time_update(const char* line);
 
 #endif /* BSP_ESP_AT_ESP_APP_RTC_SNTP_RTC_CAL_H_ */
+
+
