@@ -205,7 +205,7 @@ int main(void)
         Button_UPDATE();
 	  if(pf1){
 		  pf1 = 0;
-		  printf("ok\r\n");
+		  printf(".\r\n");
 	  }
 	  if(pf2){
 		  pf2 = 0;

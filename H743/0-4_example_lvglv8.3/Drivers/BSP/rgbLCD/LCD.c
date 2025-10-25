@@ -8,6 +8,7 @@
 #include "ltdc.h"
 #include "LCD.h"
 
+
 static uint16_t ltdc_buf_1[800][480] __attribute__((section(".sdram_section"), aligned(16)));
 static uint16_t ltdc_buf_2[800][480] __attribute__((section(".sdram_section"), aligned(16)));
 static uint16_t* front_buf = ltdc_buf_1;

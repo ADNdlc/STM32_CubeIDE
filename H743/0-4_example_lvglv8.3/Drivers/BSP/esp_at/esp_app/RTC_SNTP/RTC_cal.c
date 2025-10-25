@@ -122,7 +122,6 @@ void SNTP_handle_time_update(const char* line) {
 
 /* ================== 公开API ================== */
 void RTC_sntp_init(void) {
-	//初始化命令体
     cmd_sntp_cfg = (AT_Cmd_t){
         .cmd_str = sntp_cfg_buf,
         .timeout_ms = 5000,
