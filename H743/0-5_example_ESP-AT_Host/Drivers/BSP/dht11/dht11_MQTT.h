@@ -17,10 +17,10 @@
 
 /*数据点信息*/
 #define	T_TAG	"currentTemperature"	//标识符
-#define	T_Type	DATA_int					//类型
+#define	T_Type	DATA_int				//类型
 
 #define	H_TAG	"currenthumidity"		//标识符
-#define	H_Type	DATA_int					//类型
+#define	H_Type	DATA_int				//类型
 
 void dht11_MQTTInit();
 void dht11_MQTT_updateANDpublish(void);

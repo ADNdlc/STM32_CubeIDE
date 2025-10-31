@@ -17,7 +17,7 @@ typedef void (*cloud_cmd_handler_t)(cJSON* value_item);
 
 /**
  * @brief 向云命令注册表注册一个新的命令处理器
- * @param identifier 命令的标识符 (JSON key), e.g., "LED"
+ * @param identifier 命令的标识符 (JSON key), e.g."LED"
  * @param handler    对应的处理函数
  * @return true 注册成功, false 注册失败 (例如，表满了)
  */

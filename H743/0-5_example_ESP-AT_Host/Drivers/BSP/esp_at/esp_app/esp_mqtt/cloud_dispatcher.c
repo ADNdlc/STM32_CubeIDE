@@ -64,7 +64,7 @@ void Cloud_dispatcher_process_command(const char* payload_json) {
         bool handled = false;
         for (int i = 0; i < handler_count; ++i) {
             if (strcmp(handler_registry[i].identifier, identifier) == 0) {
-                // 找到了！调用它
+                // 找到后,调用
                 handler_registry[i].handler(current_param);
                 handled = true;
                 break;
