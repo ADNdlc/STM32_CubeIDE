@@ -10,6 +10,8 @@
 #include <string.h>
 #include <stdio.h>
 
+
+#ifdef oldmethod
 #define MAX_CLOUD_HANDLERS 16 // 定义最大可注册的命令数量(可写功能点数量)
 
 // 命令注册表条目
@@ -31,6 +33,31 @@ bool Cloud_dispatcher_register_handler(const char* identifier, cloud_cmd_handler
     handler_count++;
     return true;
 }
+#endif
+
+static bool convert_cjson_to_prop_value(const device_property_t* prop, cJSON* json_value, property_value_t* out_value) {
+    if (!prop || !json_value || !out_value) return false;
+
+    switch (prop->type) {
+    case PROP_TYPE_SWITCH:
+        if (cJSON_IsBool(json_value)) {
+            out_value->b = cJSON_IsTrue(json_value);
+            return true;
+        }
+        break;
+    case PROP_TYPE_SLIDER:
+    case PROP_TYPE_ENUM:
+        if (cJSON_IsNumber(json_value)) {
+            out_value->i = json_value->valueint;
+            return true;
+        }
+        break;
+    // 其他类型转换...
+    default:
+        break;
+    }
+    return false;
+}
 
 void Cloud_dispatcher_process_command(const char* payload_json) {
     cJSON* root = cJSON_Parse(payload_json);
@@ -51,14 +78,14 @@ void Cloud_dispatcher_process_command(const char* payload_json) {
     if (params == NULL || !cJSON_IsObject(params)) {
         cJSON_Delete(root);
         // 即使没有params，也应该回复
-        MQTT_send_reply(cmd_id, 200, "success"); // 假设有个这个函数
+        MQTT_send_reply(cmd_id, 200, "success");
         return;
     }
 
     // 遍历 params 对象中的所有条目(功能点标识符)
     cJSON* current_param = params->child;
     while (current_param != NULL) {
-        const char* identifier = current_param->string; // 这就是 "LED", "angle"
+        const char* identifier = current_param->string; // 解析的功能点
 
         // 在注册表中查找匹配的处理器
         bool handled = false;
