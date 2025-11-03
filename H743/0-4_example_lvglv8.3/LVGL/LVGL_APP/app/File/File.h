@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "ui/Act_manager.h"
+#include "Act_manager.h"
 
     void File_test();
     app_def_t* File_def_get();

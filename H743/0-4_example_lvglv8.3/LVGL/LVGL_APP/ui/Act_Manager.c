@@ -1,13 +1,14 @@
-﻿#include <app/File/File.h>
-#include "Act_Manager.h"
+﻿#include "Act_Manager.h"
 #include "Home.h"
 #include "Popup.h"
+#include "util.h"
 
 /* 外部引用(获取接口来初始化对应应用) */
-#include "app/Settings/Settings.h"
-#include "app/Contol/Contol.h"
-#include "app/test1/test1.h"
-#include "app/colorwheel/colorwheel.h"
+#include "APP/Settings/Settings.h"
+#include "APP/Contol/Contol.h"
+#include "APP/test1/test1.h"
+#include "APP/File/File.h"
+#include "APP/colorwheel/colorwheel.h"
 
 // #define opa_test
 
@@ -123,7 +124,7 @@ void act_manager_init()
     act_manager_register(colorwheel_def_get());
 
     /* ----初始化主页面活动---- */
-    activity_t *home_activity = (activity_t *)malloc(sizeof(activity_t));
+    activity_t *home_activity = (activity_t *)lv_mem_alloc(sizeof(activity_t));
     assert(home_activity != NULL);
 
     home_activity->App = (app_def_t *)G_home_activity_def;
@@ -176,8 +177,7 @@ void act_manager_register(const app_def_t *activity_def)
  */
 void act_manager_switch_to(app_def_t *new_app, void *user_data)
 {
-    if (!new_app)
-    {
+    if (!new_app){
         return;
     }
 #ifndef NDEBUG
@@ -185,15 +185,14 @@ void act_manager_switch_to(app_def_t *new_app, void *user_data)
 #endif
 
     // 如果当前有活动正在运行，则调用它的 pause 回调
-    if (G_activity_stack != NULL && G_activity_stack->App->pause)
-    {
+    if (G_activity_stack != NULL && G_activity_stack->App->pause){
         G_activity_stack->App->pause(G_activity_stack);
     }
 
     /* 活动包含了指向app定义的指针,app屏幕,活动时间,链表指针
      * 不包含应用定义,释放时主要是要释放屏幕占用内存
      */
-    activity_t *new_activity = (activity_t *)malloc(sizeof(activity_t));
+    activity_t *new_activity = (activity_t *)lv_mem_alloc(sizeof(activity_t));
     assert(new_activity != NULL);
 #ifndef NDEBUG
     printf("malloc_success for %s\r\n", new_app->name);
@@ -204,12 +203,11 @@ void act_manager_switch_to(app_def_t *new_app, void *user_data)
     new_activity->last_used_time = lv_tick_get();
     new_activity->prev = G_activity_stack; // 将新活动的prev指向当前的栈顶(指向前一个活动应用)
     new_activity->screen = new_activity->App->create();
-    if (new_activity->screen == NULL)
-    {
+    if (new_activity->screen == NULL){
 #ifndef NDEBUG
         printf("create() for %s returned NULL screen\r\n", new_app->name);
 #endif
-        free(new_activity);
+        lv_mem_free(new_activity);
         return;
     }
 
@@ -226,8 +224,7 @@ void act_manager_switch_to(app_def_t *new_app, void *user_data)
 void act_manager_go_back(void)
 {
     // 栈为空，或只有一个元素(Home)，则无法返回
-    if (G_activity_stack == NULL || G_activity_stack->prev == NULL)
-    {
+    if (G_activity_stack == NULL || G_activity_stack->prev == NULL){
         return;
     }
 
@@ -243,22 +240,19 @@ void act_manager_go_back(void)
     G_activity_stack = prev_activity;
 
     // 3. 如果上一个活动有 resume 回调，则调用它
-    if (prev_activity->App->resume)
-    {
+    if (prev_activity->App->resume){
         prev_activity->App->resume(prev_activity);
     }
 
     // 4. 切换回上一个屏幕，并让LVGL在动画结束后自动删除当前屏幕的UI对象
-    //    最后一个参数为 true 是关键！
     lv_scr_load_anim(prev_activity->screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 300, 0, true);
 
     // 5. 调用当前活动的 destroy 回调 (如果有)，并释放其活动实例的内存
     //    注意：UI (screen) 的删除由 lv_scr_load_anim 负责
-    if (current_activity->App->destroy)
-    {
+    if (current_activity->App->destroy){
         current_activity->App->destroy(current_activity);
     }
-    free(current_activity);
+    lv_mem_free(current_activity);
 }
 
 /**
@@ -287,12 +281,15 @@ void act_manager_go_home(void)
     while (current != home_activity)
     {
         activity_t *to_delete = current;
+
+        printf("[Info]Act_manager: free \"%s\"\r\n", to_delete->App->name);
+
         current = current->prev;
         if (to_delete->App->destroy)
         {
             to_delete->App->destroy(to_delete);
         }
-        free(to_delete);
+        lv_mem_free(to_delete);
     }
 
     // 将活动栈指针重置回Home

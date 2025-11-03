@@ -5,15 +5,16 @@
 extern "C" {
 #endif
 
-#include "ui/Act_Manager.h"
+#include "Act_manager.h"
 
     /**
      * @brief 获取接口
      * @return home的接口
      */
     app_def_t* home_def_get();
-    uint8_t get_TitleBar_height();
-    uint8_t get_TitleBar_opa();
+    void set_Wifi_icon(bool connect);
+    void set_battery_icon(uint8_t level);
+    void set_time_label(uint8_t hour, uint8_t minute);
 
     /**
     * @brief 主页面创建

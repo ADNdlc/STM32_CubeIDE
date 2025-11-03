@@ -1,7 +1,10 @@
-﻿ #include "Contol.h"
+﻿#include "Contol.h"
+#include "style.h" // 引入视图头文件
+#include "Contol_view.h"
+#include "Contol_controller.h"
 
 
-LV_IMG_DECLARE(icon_Contol);//图标声明
+LV_IMG_DECLARE(icon_Contol);//应用图标声明
 
 
 //---------- 接口实现 -------------//
@@ -18,22 +21,43 @@ app_def_t* Contol_def_get() {
     return &Contol;
 }
 
+
+
+/**
+ * @brief  创建app的主体UI(静态部分)
+ * @param  NULL
+ * @return app根容器对象指针
+ */
 lv_obj_t* Contol_create_cb(void) {
 #ifdef NDEBUG
-    printf("Contol_create");
+    printf("APP create _Contol_");
 #endif
-    lv_obj_t* Contol_Screens;
-    Contol_Screens = lv_obj_create(NULL);
-    lv_obj_clean(Contol_Screens);//清屏
+    style_init();
 
-    lv_obj_t* obj = lv_label_create(Contol_Screens);
-    lv_label_set_text(obj, "Contol");
-    lv_obj_set_style_text_font(obj, &lv_font_montserrat_30, LV_STATE_DEFAULT);
-    lv_obj_center(obj);
+    lv_obj_t* screen = lv_obj_create(NULL);
+    // 创建 Tabview 作为app根容器
+    lv_obj_t* tabview = lv_tabview_create(screen, LV_DIR_BOTTOM, scr_act_height() / 12);
+    style_tabview_simple(tabview, style_get_base_default(), style_get_base_checked());
 
-    return Contol_Screens;
+    create_main(tabview);
+    create_add(tabview);
+    create_user(tabview);
+
+
+    return screen;
 }
-lv_obj_t* Contol_destroy_cb(struct activity_t* activity) {}
-lv_obj_t* Contol_pause_cb(struct activity_t* activity) {}
-lv_obj_t* Contol_resume_cb(struct activity_t* activity) {}
 
+
+void Contol_destroy_cb(struct activity_t* activity) {
+    style_deinit();
+    DeviceManager_Unsubscribe(ui_state_update_cb);  //注销ui注册的观察回调
+    controller_clear_ui_map();                      //清除设备控件映射表
+}
+
+void Contol_pause_cb(struct activity_t* activity) {
+
+}
+
+void Contol_resume_cb(struct activity_t* activity) {
+
+}

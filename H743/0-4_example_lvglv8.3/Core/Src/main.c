@@ -17,6 +17,7 @@
  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <led/LED.h>
 #include "main.h"
 #include "dma.h"
 #include "dma2d.h"
@@ -43,8 +44,8 @@
 #include "touch_GT9147/touch_gt9xxx.h"
 #include "key/Button_event.h"
 #include "key/key.h"
-#include "dht11/dht11.h"
 #include "dht11/dht11_MQTT.h"
+#include "led/led.h"
 #include "key/button_event.h"
 #include "esp_at/esp_app/esp_sys/esp_sys.h"
 #include "esp_at/esp_app/esp_wifi/esp_wifi.h"
@@ -134,7 +135,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 #define fatfs_base_test 0   // 直接操作fatfs
 #define lvgl_base_test 0    // lvgl基本显示测试(方块图)
 #define benchmark 0         // lvgl性能测试
-#define lvgl_ui_test 1      // ui测试
+#define lvgl_ui   1      	// ui测试
 
 
 /* USER CODE END 0 */

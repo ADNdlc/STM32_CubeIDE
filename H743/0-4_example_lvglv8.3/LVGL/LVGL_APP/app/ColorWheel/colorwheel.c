@@ -1,4 +1,5 @@
-﻿#include "ui/Act_Manager.h"
+﻿#include "Act_Manager.h"
+#include "util.h"
 #include "colorwheel.h"
 
 #ifndef NDEBUG
@@ -41,23 +42,6 @@ static void app_slider_rgb_event_cb(lv_event_t* e);// RGB滑块事件回调
 static void app_colorwheel_event_cb(lv_event_t* e);// 色轮事件回调
 static void app_slider_hsv_event_cb(lv_event_t* e);// HSV滑块事件回调
 
-/**
- * @brief   创建有颜色的滑块
- * @param  color 滑块颜色
- * @return 滑块对象
- */
-lv_obj_t* slider_create(lv_color_t color, lv_obj_t* Screens) {
-    lv_obj_t* slider = lv_slider_create(Screens);                      //创建滑块部件
-    lv_obj_set_size(slider, scr_act_width() / 3, scr_act_height() / 20);    //设置滑块大小
-
-    lv_obj_set_style_bg_color(slider, color, LV_PART_INDICATOR);            //设置滑块"指示器"颜色
-    lv_obj_set_style_bg_color(slider, color, LV_PART_MAIN);                 //设置滑块"主体"颜色
-    lv_obj_set_style_bg_opa(slider, 100, LV_PART_MAIN);                     //设置滑块"主体"透明度(0~255,0为全透明,255为不透明)
-
-    lv_obj_remove_style(slider, NULL, LV_PART_KNOB);                        //移除手柄部分
-
-    return slider;
-}
 
 /**
  * @brief 创建一个调色程序demo

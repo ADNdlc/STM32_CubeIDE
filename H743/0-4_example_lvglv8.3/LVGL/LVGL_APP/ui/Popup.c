@@ -1,7 +1,5 @@
 ﻿#include "Popup.h"
-
-#define scr_act_width() lv_obj_get_width(lv_scr_act())   // 获取屏幕宽度
-#define scr_act_height() lv_obj_get_height(lv_scr_act()) // 获取屏幕高度
+#include "util.h"
 
 LV_IMG_DECLARE(icon_bright); // 亮度滑块图标
 LV_IMG_DECLARE(icon_wifi);   // WiFi按钮图标
@@ -69,12 +67,16 @@ static lv_obj_t *menu_child_container_create(lv_obj_t *Parent, uint8_t x, uint8_
     // lv_obj_set_style_opa(block, 0, LV_PART_MAIN);//不要让整体透明，这会影响子项
     lv_obj_set_style_bg_opa(block, 0, LV_PART_MAIN);
     obj_style_set(block);
-    lv_obj_set_grid_cell(block, LV_GRID_ALIGN_STRETCH, x, span_x, LV_GRID_ALIGN_STRETCH, y, span_y);
+    lv_obj_set_grid_cell(block, LV_GRID_ALIGN_STRETCH, x, span_x, LV_GRID_ALIGN_STRETCH, y, span_y);//拉伸对齐
     // 内容背景
     lv_obj_t *block_bg = lv_obj_create(block);
     lv_obj_update_layout(block_bg); // 更新信息
-    lv_obj_set_size(block_bg, (lv_obj_get_width(block) * 8) / 10, (lv_obj_get_height(block) * 8) / 10);
-    lv_obj_align(block_bg, LV_ALIGN_TOP_MID, 0, 0); // 子项对齐
+    //边距固定(20 大部件和小部件相同)
+    lv_obj_set_size(block_bg, lv_obj_get_width(block) - 20, lv_obj_get_height(block) - 20);
+
+    //设置对齐
+    lv_obj_align(block_bg, LV_ALIGN_CENTER, 0, 0); // 子项对齐,中心
+
     obj_style_set(block_bg);
     lv_obj_set_style_radius(block_bg, 30, LV_PART_MAIN);                       // 圆角
     lv_obj_set_style_bg_color(block_bg, lv_color_hex(0x828282), LV_PART_MAIN); // 块背景
@@ -100,33 +102,33 @@ static lv_obj_t *create_pd_menu_content(lv_obj_t *parent, const pulldown_menu_pa
     lv_obj_set_style_bg_opa(content_container, 80, LV_PART_MAIN); // 下拉菜单背景透明度
     obj_style_set(content_container);
     // 设置网格布局
-    static lv_coord_t col_dsc[] = {100, 100, 100, 100, 100, 100, 100, 100, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {LV_GRID_FR(3), 100, 100, 100, 100, LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t col_dsc[] = { LV_GRID_FR(1), 98, 98, 98, 98, 98, 98, 98,LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {LV_GRID_FR(1), 98, 98, 98, 98, LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST};
     lv_obj_set_grid_dsc_array(content_container, col_dsc, row_dsc);
     lv_obj_set_style_pad_all(content_container, 0, 0); // 边距(是整体边距,不是子项间的距离)
-    lv_obj_set_style_pad_gap(content_container, 0, 0); // 子项边距
+    lv_obj_set_style_pad_gap(content_container, 20, 20); // 子项边距
     // 底部拖拽区
     lv_obj_t *obj_line = lv_obj_create(content_container);
     lv_obj_set_style_bg_color(obj_line, lv_color_hex(0x000000), LV_PART_MAIN);
     lv_obj_set_style_bg_opa(obj_line, 40, LV_PART_MAIN); // 注意子项和父项重叠区opa会叠加,实际上是在设置子比父深多少
     obj_style_set(obj_line);
-    lv_obj_set_grid_cell(obj_line, LV_GRID_ALIGN_STRETCH, 0, 8, LV_GRID_ALIGN_STRETCH, 5, 1);
+    lv_obj_set_grid_cell(obj_line, LV_GRID_ALIGN_STRETCH, 0, 9, LV_GRID_ALIGN_STRETCH, 5, 1);
     static lv_point_t line_points[] = {{0, 0}, {60, 0}};
     lv_obj_t *line = lv_line_create(obj_line);
     lv_line_set_points(line, line_points, 2);                                // 设置线条坐标点,创建线条
-    lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);                               // 设置位置（对齐标签）
+    lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);                               // 设置位置
     lv_obj_set_style_line_width(line, 5, LV_PART_MAIN);                      // 设线的宽度
     lv_obj_set_style_line_color(line, lv_color_hex(0x353535), LV_PART_MAIN); // 线的颜色
     lv_obj_set_style_line_rounded(line, true, LV_PART_MAIN);                 // 设置线条圆角
-    lv_obj_set_grid_cell(line, LV_GRID_ALIGN_STRETCH, 4, 2, LV_GRID_ALIGN_STRETCH, 5, 1);
+    lv_obj_set_grid_cell(line, LV_GRID_ALIGN_STRETCH, 5, 1, LV_GRID_ALIGN_STRETCH, 5, 1);
 
     /* 这里暂时写死，后续考虑扩展性 */
 #if 1
     /* 播放块 */
-    lv_obj_t *app_bg = menu_child_container_create(content_container, 0, 2, 1, 2);
+    lv_obj_t *app_bg = menu_child_container_create(content_container, 1, 2, 1, 2);
 
     /* 亮度块 */
-    lv_obj_t *bright_bg = menu_child_container_create(content_container, 2, 1, 1, 2);
+    lv_obj_t *bright_bg = menu_child_container_create(content_container, 3, 1, 1, 2);
     lv_obj_t *bright = lv_slider_create(bright_bg);
     lv_obj_update_layout(bright_bg);
     lv_obj_set_size(bright, lv_obj_get_width(bright_bg), lv_obj_get_height(bright_bg));
@@ -155,7 +157,7 @@ static lv_obj_t *create_pd_menu_content(lv_obj_t *parent, const pulldown_menu_pa
     lv_obj_set_style_img_recolor_opa(bright_img, bright_img_opa, LV_PART_MAIN); // 滤镜强度
 
     /* 音量块 */
-    lv_obj_t *volume_bg = menu_child_container_create(content_container, 3, 1, 1, 2);
+    lv_obj_t *volume_bg = menu_child_container_create(content_container, 4, 1, 1, 2);
     lv_obj_t *volume = lv_slider_create(volume_bg);
     lv_obj_update_layout(volume_bg);
     lv_obj_set_size(volume, lv_obj_get_width(volume_bg), lv_obj_get_height(volume_bg));
@@ -189,7 +191,7 @@ static lv_obj_t *create_pd_menu_content(lv_obj_t *parent, const pulldown_menu_pa
     }
 
     /* WiFi */
-    lv_obj_t *WiFi_bg = menu_child_container_create(content_container, 4, 1, 1, 1);
+    lv_obj_t *WiFi_bg = menu_child_container_create(content_container, 5, 1, 1, 1);
 
     lv_obj_t *WiFi = lv_btn_create(WiFi_bg); // 创建按钮
     lv_obj_update_layout(WiFi_bg);
@@ -210,36 +212,22 @@ static lv_obj_t *create_pd_menu_content(lv_obj_t *parent, const pulldown_menu_pa
 
     lv_obj_set_user_data(WiFi, WiFi_icon); // 存储图标对象,方便回调获取
 
+    /* WiFi2 */
+    lv_obj_t* WiFi_bg2 = menu_child_container_create(content_container, 5, 1, 2, 1);
+
+    lv_obj_t* WiFi2 = lv_btn_create(WiFi_bg2); // 创建按钮
+    lv_obj_update_layout(WiFi_bg2);
+    lv_obj_set_size(WiFi2, lv_obj_get_width(WiFi_bg2), lv_obj_get_height(WiFi_bg2));
+    lv_obj_align(WiFi2, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_style_radius(WiFi2, 30, LV_PART_MAIN);                           // 指示器圆角
+    lv_obj_add_flag(WiFi2, LV_OBJ_FLAG_CHECKABLE);                              // 设置按钮为切换
+    lv_obj_set_style_bg_color(WiFi2, lv_color_hex(0x828282), LV_STATE_DEFAULT); // 默认 "释放" 时背景颜色为灰色
+    lv_obj_set_style_bg_color(WiFi2, lv_color_hex(0x1E90FF), LV_STATE_CHECKED); // 设置按钮 "选中" 时背景颜色为蓝色
+
 #endif
 
 #if 0
-    //布局测试
-    for (uint8_t row = 1; row < 5; row++) {
-        // 遍历每一列
-        for (uint8_t col = 0; col < 8; col++) {
-            // 1. 创建一个简单的占位符对象
-            lv_obj_t* placeholder = lv_obj_create(content_container);
-            lv_obj_clear_flag(placeholder, LV_OBJ_FLAG_CLICKABLE);//移除点击属性
-            // 为其设置一个独特的背景色
-            lv_obj_set_style_bg_color(placeholder, lv_palette_main(LV_PALETTE_RED + row), 0);
-            lv_obj_set_style_border_width(placeholder, 1, 0); // 加个边框看得更清楚
-            lv_obj_set_style_border_color(placeholder, lv_color_white(), 0);
-            lv_obj_set_style_bg_opa(placeholder, LV_OPA_50, 0);
-            // 3. 在占位符中央添加一个标签，显示其坐标
-            lv_obj_t* label = lv_label_create(placeholder);
-            lv_label_set_text_fmt(label, "%d, %d", row, col);
-            lv_obj_set_style_text_color(label, lv_color_white(), 0);
-            lv_obj_center(label);
-            // 4. 将占位符放置在正确的网格单元格中，并让它填满整个单元格
-            lv_obj_set_grid_cell(placeholder,
-                LV_GRID_ALIGN_STRETCH, // 水平方向拉伸
-                col,                   // 列索引
-                1,                     // 占 1 列
-                LV_GRID_ALIGN_STRETCH, // 垂直方向拉伸
-                row,                   // 行索引
-                1);                    // 占 1 行
-        }
-    }
+    test_layout_grid(content_container,6,9); // 布局测试
 #endif
     return content_container;
 }
@@ -259,7 +247,7 @@ static inline lv_opa_t obj_get_style_opa(const struct _lv_obj_t *obj, uint32_t p
 /**
  * @brief 聚焦模式,隐藏指定级父项下的所有对象,排除聚焦子项和顶级项下它的所有父项( 适用于不知道父项地址 )
  *
- * @param focused_bg 排除项
+ * @param focused_bg 聚焦对象
  * @param Top_parent 父项级
  * @param enable     此函数操作可还原
  */

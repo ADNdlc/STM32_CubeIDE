@@ -465,15 +465,23 @@ void MQTT_handle_urc_recv(const char* line) {
                // 我们需要找到订阅的主题是否是 set topic
                // $sys/{pid}/{device-name}/thing/property/set
                char set_topic_pattern[128];
+#if !useoldfunc
+               char received_pid[32];
+               char received_devID[32];
+               sscanf(topic, "$sys/%[^/]/%[^/]/thing/property/set", received_pid, received_devID);
+#endif
                snprintf(set_topic_pattern, sizeof(set_topic_pattern),
                         "$sys/%s/%s/thing/property/set", Product_ID, MQTT_Get_DeviceID());
 
                if (strcmp(topic, set_topic_pattern) == 0) {
                    // 是属性设置命令交给云命令分发器处理
+#if useoldfunc
                    Cloud_dispatcher_process_command(payload_start);
+#else
+                   Cloud_dispatcher_process_command(MQTT_Get_DeviceID(), payload_start);
+#endif
                } else {
                    // 是其他订阅消息，例如 post_reply
-                   // 调用旧的回调（如果需要的话）
                    if (g_cmd_cb) {
                        g_cmd_cb(topic, payload_start);
                    }

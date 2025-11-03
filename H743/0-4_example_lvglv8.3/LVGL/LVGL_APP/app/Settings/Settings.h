@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "ui/Act_manager.h"
+#include "Act_manager.h"
 
     app_def_t* Settings_def_get();
 

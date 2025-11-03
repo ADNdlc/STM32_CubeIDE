@@ -6,7 +6,7 @@ extern "C"
 {
 #endif
 
-    // #define NDEBUG /* DEBUG测试 */
+//#define NDEBUG
 
 #include "lvgl.h"
 #include <assert.h> //断言
@@ -14,11 +14,8 @@ extern "C"
 #include <stdio.h> //printf
 #endif
 
-#define scr_act_width() lv_obj_get_width(lv_scr_act())   // 获取屏幕宽度
-#define scr_act_height() lv_obj_get_height(lv_scr_act()) // 获取屏幕高度
-
     struct activity_t; // 活动声明
-                       /* -------------------------------------------- 应用接口定义 --------------------------------------------- */
+    /* -------------------------------------------- 应用接口定义 --------------------------------------------- */
     // 定义活动生命周期回调函数指针
     // 这些接口函数由每个具体的应用去实现
     typedef lv_obj_t *(*app_create_cb)(void);                    // 创建UI (返回屏幕对象)
