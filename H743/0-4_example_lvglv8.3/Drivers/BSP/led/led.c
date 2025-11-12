@@ -14,32 +14,11 @@ LV_IMG_DECLARE(img_light);
 
 
 static bool led_set_property_cb(device_data_t* device, const char* prop_id, property_value_t value) {
-    int temp;
-    if (sscanf(device, "LED%d", &temp)) {
-        switch(temp){
-            case 1:
-            	if(value)LED_SET(1,1);
-            	else LED_SET(0,1);
-            	break;
-            case 2:
-            	if(value)LED_SET(1,2);
-            	else LED_SET(0,2);
-            	break;
-            default: return false;
-        }
-        return true; // 操作成功
-    }
-    else {
-    	return false;
-    }
+
 }
 
 static bool led_get_property_cb(device_data_t* device, const char* prop_id, property_value_t* value) {
-    int temp;
-    if (sscanf(device, "LED%d", &temp)) {
 
-    }
-    return false; // 不支持的属性
 }
 
 void led_control_init(void){
