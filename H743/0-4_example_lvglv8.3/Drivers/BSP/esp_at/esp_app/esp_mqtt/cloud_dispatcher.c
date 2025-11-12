@@ -6,7 +6,7 @@
  */
 
 #include "cloud_dispatcher.h"
-#include "service/device_manager.h"
+//#include "service/device_manager.h"
 #include "esp_mqtt.h"
 #include <string.h>
 #include <stdio.h>
@@ -34,8 +34,7 @@ bool Cloud_dispatcher_register_handler(const char* identifier, cloud_cmd_handler
     handler_count++;
     return true;
 }
-#endif
-
+#else
 static bool convert_cjson_to_prop_value(const device_property_t* prop, cJSON* json_value, property_value_t* out_value) {
     if (!prop || !json_value || !out_value) return false;
 
@@ -59,6 +58,7 @@ static bool convert_cjson_to_prop_value(const device_property_t* prop, cJSON* js
     }
     return false;
 }
+#endif
 
 
 #if useoldfunc
@@ -134,7 +134,6 @@ void Cloud_dispatcher_process_command(const char* deviceID, const char* payload_
 
     cJSON_Delete(root);// 清理JSON对象
     // 立即构建并发送成功回复 (这个函数将在 esp_mqtt.c 中实现)
-    extern void MQTT_send_reply(const char* id, int code, const char* msg);
     MQTT_send_reply(cmd_id, 200, "success");
 }
 

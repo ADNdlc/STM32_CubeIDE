@@ -39,7 +39,7 @@ lv_obj_t* controller_find_ui_control(const char* deviceID, const char* propID) {
     return NULL;
 }
 
-// 设备状态更新回调函数
+// 设备ui状态更新回调函数
 void ui_state_update_cb(const device_data_t* device, const char* prop_id) {
     printf("[Info]Contol_controller: %s/%s ui update \r\n", device->deviceID, prop_id);
 

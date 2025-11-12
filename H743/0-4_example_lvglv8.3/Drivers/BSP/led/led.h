@@ -8,16 +8,27 @@
 #ifndef BSP_LED_LED_H_
 #define BSP_LED_LED_H_
 
-#include "GPIO.h"
+#include "stm32h7xx_hal.h"
 
-#define LED_Pin		GPIO_PIN_1
-#define LED_Port	GPIOB
+#define LED_Port(x) LED##x##_Port
+#define LED_Pin(x)  LED##x##_Pin
 
-#define LED_ON		HAL_GPIO_WritePin(LED_Port,LED_Pin,GPIO_PIN_RESET);
-#define LED_OFF		HAL_GPIO_WritePin(LED_Port,LED_Pin,GPIO_PIN_SET);
-#define LED_SET(x)	(X)?LED_ON:LED_OFF
-#define LED_READ	HAL_GPIO_ReadPin(LED_Port,LED_Pin);
-#define LED_TOGGLE	HAL_GPIO_TogglePin(LED_Port,LED_Pin);
+#define LED_count   2
+
+#define LED1_Pin	GPIO_PIN_1
+#define LED1_Port	GPIOB
+
+#define LED2_Pin	GPIO_PIN_2
+#define LED2_Port	GPIOB
+
+
+
+#define LED_ON(i)		HAL_GPIO_WritePin(LED_Port(i),LED_Pin(i),GPIO_PIN_RESET)
+#define LED_OFF(i)		HAL_GPIO_WritePin(LED_Port(i),LED_Pin(i),GPIO_PIN_SET)
+#define LED_SET(x,i)	(x)?LED_ON(i):LED_OFF(i)
+#define LED_READ(i)		HAL_GPIO_ReadPin(LED_Port(i),LED_Pin(i))
+#define LED_TOGGLE(i)	HAL_GPIO_TogglePin(LED_Port(i),LED_Pin(i))
+
 
 void led_control_init(void);
 

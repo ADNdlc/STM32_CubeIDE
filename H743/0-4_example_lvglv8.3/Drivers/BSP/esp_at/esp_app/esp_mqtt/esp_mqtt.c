@@ -7,7 +7,7 @@
 
 #include "esp_mqtt.h"
 #include "../../at_controller.h"
-
+#include "cloud_dispatcher.h"
 #include "../esp_wifi/esp_wifi.h"
 #include <stdio.h>
 #include <string.h>
@@ -462,7 +462,7 @@ void MQTT_handle_urc_recv(const char* line) {
                // 不再需要本地的 payload 缓冲区，直接将指针传递
                // 注意：这要求 Cloud_dispatcher_process_command 是同步执行的
 
-               // 我们需要找到订阅的主题是否是 set topic
+               // 需要找到订阅的主题是否是 set topic
                // $sys/{pid}/{device-name}/thing/property/set
                char set_topic_pattern[128];
 #if !useoldfunc
@@ -476,7 +476,8 @@ void MQTT_handle_urc_recv(const char* line) {
                if (strcmp(topic, set_topic_pattern) == 0) {
                    // 是属性设置命令交给云命令分发器处理
 #if useoldfunc
-                   Cloud_dispatcher_process_command(payload_start);
+                   //Cloud_dispatcher_process_command(payload_start);//单独使用mqtt功能的接口
+                   device_manager_process_command(payload_start);//设备管理器接口
 #else
                    Cloud_dispatcher_process_command(MQTT_Get_DeviceID(), payload_start);
 #endif

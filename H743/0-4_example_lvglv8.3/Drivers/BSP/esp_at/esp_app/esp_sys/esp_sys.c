@@ -45,6 +45,7 @@ void ESP_AT_sys_init(UART_HandleTypeDef* uart_port){
 	//设置NTP服务器,模块联网后会自动同步,需要等待一段时间
 
 	MQTT_init(NULL);
+
 }
 
 

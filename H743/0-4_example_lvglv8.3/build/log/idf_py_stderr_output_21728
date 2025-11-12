@@ -1,0 +1,4 @@
+CMake Error at CMakeLists.txt:4 (cmake_minimum_required):
+  CMake 3.31 or higher is required.  You are running version 3.30.2
+
+

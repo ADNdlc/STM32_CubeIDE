@@ -1,3 +1,8 @@
 {
-    "idf.pythonInstallPath": "D:\\develop\\ESP_IDF\\Espressif\\tools\\idf-python\\3.11.2\\python.exe"
+    "idf.pythonInstallPath": "D:\\develop\\ESP_IDF\\Espressif\\tools\\idf-python\\3.11.2\\python.exe",
+    "files.associations": {
+        "*.md": "c",
+        "敲摡敭琮瑸": "plaintext",
+        "cjson.h": "c"
+    }
 }

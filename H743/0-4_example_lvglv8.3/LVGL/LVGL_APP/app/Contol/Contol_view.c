@@ -175,8 +175,8 @@ lv_obj_t* view_create_device_card(lv_obj_t* parent, const struct device_data_t* 
             lv_obj_align_to(label_sw, sw, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
 
             // 绑定事件回调
-            lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx);
-            lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE, ctx);
+            lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx);// 绑定事件回调
+            lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE, ctx);   // 删除回调,释放上下文空间
 
             controller_register_ui_control(device->deviceID, prop->id, sw);// 注册控件到映射表
             break;
