@@ -115,11 +115,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(time2%3 == 0) pf1 = 1;
 	if(time2%5 == 0) pf2 = 1;
   }
-  if (htim->Instance == TIM6){
+  if (htim == &htim6){
     lv_tick_inc(1); // 给lvgl提供时基
     Times6++;
     if (Times6 >= 500){
-      HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin); // led闪烁指示
+
       Times6 = 0;
     }
   }
@@ -129,13 +129,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-#define usart1_echo 1
-#define sdram_base_test 0
-#define memory_speed_test 0 // malloc
-#define fatfs_base_test 0   // 直接操作fatfs
-#define lvgl_base_test 0    // lvgl基本显示测试(方块图)
-#define benchmark 0         // lvgl性能测试
-#define lvgl_ui   1      	// ui测试
+#define usart1_echo 		1
+#define sdram_base_test 	0
+#define memory_speed_test 	0  // malloc
+#define fatfs_base_test 	0  // 直接操作fatfs
+#define lvgl_base_test 		0  // lvgl基本显示测试(方块图)
+#define benchmark 			0  // lvgl性能测试
+#define lvgl_ui_test   		1  // ui测试
 
 
 /* USER CODE END 0 */

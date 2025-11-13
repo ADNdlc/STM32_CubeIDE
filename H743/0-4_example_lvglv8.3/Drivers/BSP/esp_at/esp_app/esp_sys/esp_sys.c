@@ -5,6 +5,9 @@
  *      Author: 12114
  */
 #include "esp_sys.h"
+//测试
+#include "../esp_mqtt/esp_mqtt.h"
+
 #if USE_MY_MALLOC
 #include "malloc/malloc.h"
 #endif
@@ -16,6 +19,11 @@ static uint8_t temp_read_buffer[READ_BUFFER_SIZE]; // 从驱动读取的临时�
 static uint8_t* temp_read_buffer = NULL;
 #endif
 
+wifi_info_t wifi_info = {
+	"test2",
+	"yu778866"
+};
+#define token "version=2018-10-31&res=products%2FSQKg9n0Ii0%2Fdevices%2Ftest2&et=1855499668539&method=md5&sign=%2FHVmg4Xz2RfTRWEu44mApQ%3D%3D"
 
 // Wi-Fi 事件回调函数
 static void wifi_event_handler(wifi_state_typedef new_state) {
@@ -40,11 +48,17 @@ void ESP_AT_sys_init(UART_HandleTypeDef* uart_port){
 	WiFi_init(wifi_event_handler);
 	WiFi_set_mode(Station);
 
+	HAL_Delay(500);
+	WiFi_connect(&wifi_info);
+	HAL_Delay(500);
+
 	RTC_sntp_init();
 	RTC_sntp_configure_and_enable(8,"cn.pool.ntp.org", "ntp.aliyun.com", 0);
 	//设置NTP服务器,模块联网后会自动同步,需要等待一段时间
 
 	MQTT_init(NULL);
+	//连接设备
+	MQTT_connect("test2",MQTT_Get_DeviceID(),token);
 
 }
 

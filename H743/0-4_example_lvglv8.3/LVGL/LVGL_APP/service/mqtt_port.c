@@ -4,7 +4,6 @@
 #include "stdio.h"
 #include "string.h"
 
-
 // 用于限制同步到云端的频率，避免频繁更新
 #define SYNC_INTERVAL_MS 1000
 
@@ -20,25 +19,21 @@ void device_manager_process_command(const char* payload_json){
         printf("Error: Failed to parse JSON payload.\r\n");
         return;
     }
-    
     // 获取 params 对象
     cJSON* params = cJSON_GetObjectItem(root, "params");
     if (!params) {
         cJSON_Delete(root);
         return;
     }
-    
     // 遍历 params 中的每个属性
     cJSON* current_param = params->child;
     while (current_param != NULL) {
         const char* propID = current_param->string;
-        
         // 遍历所有设备查找属性
         uint8_t device_count = DeviceManager_GetDeviceCount();
         for (int i = 0; i < device_count; i++) {
             const device_data_t* device = DeviceManager_GetDeviceByIndex(i);
             if (!device) continue;
-            
             // 检查设备是否包含此属性
             const device_property_t* prop = NULL;
             for (int j = 0; j < device->property_count; j++) {
@@ -47,7 +42,6 @@ void device_manager_process_command(const char* payload_json){
                     break;
                 }
             }
-            
             // 如果找到了属性，则更新它
             if (prop) {
                 property_value_t new_value;
@@ -80,7 +74,7 @@ void device_manager_process_command(const char* payload_json){
                     default:
                         break;
                 }
-                
+
                 // 如果值有效，则更新属性
                 if (value_valid) {
                     DeviceManager_UpdateProperty(device->deviceID, propID, new_value);
@@ -90,7 +84,6 @@ void device_manager_process_command(const char* payload_json){
         }
         current_param = current_param->next;
     }
-    
     cJSON_Delete(root);
 }
 

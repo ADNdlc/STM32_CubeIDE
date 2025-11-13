@@ -100,12 +100,15 @@ void generic_control_event_cb(lv_event_t* e) {
     
 }
 
+extern void device_manager_state_sync(const device_data_t* device, const char* prop_id);
 
 // 初始化主页Tab
 void controller_init_main_tab(lv_obj_t* tab) {
 
     // ui需要监控设备状态变化
     DeviceManager_Subscribe(ui_state_update_cb);
+    DeviceManager_Subscribe(device_manager_state_sync);
+
 
     // 2. 从DeviceManager获取设备并创建UI
     uint8_t device_count = DeviceManager_GetDeviceCount();

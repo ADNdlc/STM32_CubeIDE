@@ -8,19 +8,15 @@
 #ifndef BSP_LED_LED_H_
 #define BSP_LED_LED_H_
 
-#include "stm32h7xx_hal.h"
+#include "main.h"
 
-#define LED_Port(x) LED##x##_Port
+#define LED_Port(x) LED##x##_GPIO_Port
 #define LED_Pin(x)  LED##x##_Pin
 
 #define LED_count   2
 
-#define LED1_Pin	GPIO_PIN_1
-#define LED1_Port	GPIOB
-
-#define LED2_Pin	GPIO_PIN_2
-#define LED2_Port	GPIOB
-
+//硬件接口定义为如下形式
+// LEDx
 
 
 #define LED_ON(i)		HAL_GPIO_WritePin(LED_Port(i),LED_Pin(i),GPIO_PIN_RESET)
