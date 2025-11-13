@@ -3,6 +3,7 @@
     "files.associations": {
         "*.md": "c",
         "敲摡敭琮瑸": "plaintext",
-        "cjson.h": "c"
+        "cjson.h": "c",
+        "cstdint": "c"
     }
 }

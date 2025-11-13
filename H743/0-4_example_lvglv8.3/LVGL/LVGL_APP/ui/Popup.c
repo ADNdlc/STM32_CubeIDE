@@ -898,6 +898,8 @@ static void WiFi_event_cb(lv_event_t *e)
             printf("WiFi button turned ON (Checked)\r\n");
 #endif
             // 在这里执行开启WiFi的逻辑
+            extern void wificonnect(void);
+            wificonnect();
         }
         else
         { // 如果不是，说明状态刚刚从“选中”变为“未选中”
@@ -907,6 +909,8 @@ static void WiFi_event_cb(lv_event_t *e)
             printf("WiFi button turned OFF (Default)\r\n");
 #endif
             // 在这里执行关闭WiFi的逻辑
+            extern void wifidisconnect(void);
+            wifidisconnect();
         }
     }
 }
