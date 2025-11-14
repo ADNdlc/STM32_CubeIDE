@@ -423,7 +423,7 @@ void MQTT_send_reply(const char* id, int code, const char* msg) {
     cmd_mqtt_reply = (AT_Cmd_t) {
         .cmd_str = reply_cmd_buf,
         .data_to_send = reply_payload_buf,
-        .timeout_ms = 10000,
+        .timeout_ms = 15000,  // 增加超时时间到15秒
         .response_cb = _simple_mqtt_rsp_cb
     };
     AT_controller_cmd_submit(&cmd_mqtt_reply);

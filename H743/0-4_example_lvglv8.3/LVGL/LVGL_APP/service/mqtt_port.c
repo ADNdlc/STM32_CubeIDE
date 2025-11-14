@@ -10,21 +10,42 @@
 // 记录上次同步时间
 static uint32_t last_sync_time = 0;
 
+// 标志位，用于防止在处理云命令时触发状态同步
+static bool is_processing_cloud_command = false;
+
 /* 接收云命令
  * payload_json: 形如 {"id":"12","version":"1.0","params":{"LED":true}}
  */
 void device_manager_process_command(const char* payload_json){
+    is_processing_cloud_command = true; // 设置标志位
+    
     cJSON* root = cJSON_Parse(payload_json);
     if (root == NULL) {
         printf("Error: Failed to parse JSON payload.\r\n");
+        // 即使解析失败，也尝试回复避免超时
+        MQTT_send_reply("unknown", 400, "json parse error");
+        is_processing_cloud_command = false; // 清除标志位
         return;
     }
+    
+    // 提取重要的元数据 (id)
+    cJSON* id_item = cJSON_GetObjectItemCaseSensitive(root, "id");
+    char cmd_id[32] = "unknown"; // 使用固定大小的缓冲区
+    if (cJSON_IsString(id_item) && (id_item->valuestring != NULL)) {
+        strncpy(cmd_id, id_item->valuestring, sizeof(cmd_id) - 1);
+        cmd_id[sizeof(cmd_id) - 1] = '\0'; // 确保字符串结束
+    }
+    
     // 获取 params 对象
-    cJSON* params = cJSON_GetObjectItem(root, "params");
+    cJSON* params = cJSON_GetObjectItemCaseSensitive(root, "params");
     if (!params) {
         cJSON_Delete(root);
+        // 即使没有params，也应该回复
+        MQTT_send_reply(cmd_id, 200, "success");
+        is_processing_cloud_command = false; // 清除标志位
         return;
     }
+    
     // 遍历 params 中的每个属性
     cJSON* current_param = params->child;
     while (current_param != NULL) {
@@ -85,12 +106,22 @@ void device_manager_process_command(const char* payload_json){
         current_param = current_param->next;
     }
     cJSON_Delete(root);
+    
+    // 发送回复消息，避免云端超时
+    MQTT_send_reply(cmd_id, 200, "success");
+    
+    is_processing_cloud_command = false; // 清除标志位
 }
 
 /* 将设备管理器中的设备状态同步给云端(观察者回调)
  *
  */
 void device_manager_state_sync(const device_data_t* device, const char* prop_id){
+    // 检查是否正在处理云命令，如果是则跳过同步
+    if (is_processing_cloud_command) {
+        return;
+    }
+    
     // 获取当前系统时间
     uint32_t current_time = HAL_GetTick();
     

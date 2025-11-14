@@ -4,6 +4,7 @@
         "*.md": "c",
         "敲摡敭琮瑸": "plaintext",
         "cjson.h": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "string.h": "c"
     }
 }

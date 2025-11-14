@@ -40,8 +40,11 @@ static void wifi_event_handler(wifi_state_typedef new_state) {
     if (new_state == WIFI_STATE_GOT_IP) {
 		
 		// 连接成功后,开始MQTT连接
-		MQTT_connect("test2",MQTT_Get_DeviceID(),token);
+		MQTT_connect(MQTT_Get_DeviceID(),Product_ID,token);
 
+    } else if (new_state == WIFI_STATE_DISCONNECTED) {
+        // WiFi断开连接时，清理MQTT资源
+        MQTT_disconnect();
     }
 }
 

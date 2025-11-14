@@ -17,7 +17,6 @@
  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <led/LED.h>
 #include "main.h"
 #include "dma.h"
 #include "dma2d.h"
@@ -276,7 +275,7 @@ int main(void)
 
     if (pf1){ //运行指示
       pf1 = 0;
-      printf(".");
+      //printf(".");
     }
 
     Button_UPDATE();
