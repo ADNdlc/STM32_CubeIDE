@@ -45,9 +45,11 @@ MEMORY
 {
   FLASH (rx)     : ORIGIN = 0x08000000, LENGTH = 2048K
   DTCMRAM (xrw)  : ORIGIN = 0x20000000, LENGTH = 128K
+/* ↓ 系统SRAM ↓ = 864K */
   RAM_D1 (xrw)   : ORIGIN = 0x24000000, LENGTH = 512K
-  RAM_D2 (xrw)   : ORIGIN = 0x30000000, LENGTH = 288K
+  RAM_D2 (xrw)   : ORIGIN = 0x30000000, LENGTH = 288K	/* 128K + 128K + 32K */
   RAM_D3 (xrw)   : ORIGIN = 0x38000000, LENGTH = 64K
+/* ↑ 系统SRAM ↑ */ 
   ITCMRAM (xrw)  : ORIGIN = 0x00000000, LENGTH = 64K
 }
 
@@ -177,4 +179,98 @@ SECTIONS
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
 
+/* ======================================================== ↓ 用户定义区 ↓ ======================================================== */
 
+/* 定义外部内存区域 */
+MEMORY {
+  SDRAM (xrw) : ORIGIN = 0xC0000000, LENGTH = 32M  /* 定义SDRAM区域 */
+}
+
+
+SECTIONS {
+	/* LTDC缓存 */
+	.sdram_section (NOLOAD) : {
+		. = ALIGN(16);
+		*(.sdram_section)  /* 将变量放入此段 */
+		. = ALIGN(16);	
+	} > SDRAM
+	
+	/* --------------------------- ↓ 外部SDRAM ↓ --------------------------- */
+	/* NOLOAD 属性告诉加载器不要在烧录时初始化这片内存 */
+	.sdram_pool 0XC01F4000 (NOLOAD) :
+	{
+		. = ALIGN(64);
+		KEEP(*(.sdram_pool))
+		. = ALIGN(64);
+	} >SDRAM
+	
+		.sdram_map (ADDR(.sdram_pool) + SIZEOF(.sdram_pool)) (NOLOAD) :
+	{
+		. = ALIGN(4);
+		KEEP(*(.sdram_map))
+	} >SDRAM
+
+	/* --------------------------- ↓ ITCM ↓ --------------------------- */
+	/* ITCM内存池 */
+	.itcm_pool 0x00000000 :
+	{
+	    . = ALIGN(64);
+	    *(.itcm_pool)
+	    . = ALIGN(64);
+	} >ITCMRAM
+	/* ITCM内存管理表 */
+	.itcm_map (ADDR(.itcm_pool) + SIZEOF(.itcm_pool)) :
+	{
+		. = ALIGN(4); /* MT_TYPE 通常是 4 字节对齐 */
+		*(.itcm_map)
+	} >ITCMRAM
+	/* --------------------------- ↓ DTCM ↓ --------------------------- */
+	/* DTCM内存池 */
+	.dtcm_pool 0x20000000 :
+	{
+	    . = ALIGN(64);
+	    *(.dtcm_pool)
+	    . = ALIGN(64);
+	} >DTCMRAM
+	/* DTCM内存管理表 */
+	.dtcm_map (ADDR(.dtcm_pool) + SIZEOF(.dtcm_pool)) :
+	{
+		. = ALIGN(4);
+		*(.dtcm_map)
+	} >DTCMRAM
+	
+	/* --------------------------- ↓ D1域 ↓ --------------------------- */
+	/* 没有指定的默认放于D1域 */
+	
+	/* --------------------------- ↓ D2域(AHB SRAM1,AHB SRAM2) ↓ --------------------------- */
+	/* D2域内存池 */
+	.sram12_pool 0x30000000 :
+	{
+	    . = ALIGN(64);
+	    *(.sram12_pool)
+	    . = ALIGN(64);
+	} >RAM_D2
+	/* D2域内存管理表 */
+	.sram12_map (ADDR(.sram12_pool) + SIZEOF(.sram12_pool)) :
+	{
+	    . = ALIGN(4);
+	    *(.sram12_map)
+	} >RAM_D2
+	
+	/* --------------------------- ↓ D3域(AHB SRAM4) ↓ --------------------------- */
+	/* D3域内存池 */
+	.sram4_pool 0x38000000 :
+	{
+	    . = ALIGN(64);
+	    *(.sram4_pool)
+	    . = ALIGN(64);
+	} >RAM_D3
+	/* D3域内存管理表 */
+	.sram4_map (ADDR(.sram4_pool) + SIZEOF(.sram4_pool)) :
+	{
+	    . = ALIGN(4);
+	    *(.sram4_map)
+	} >RAM_D3
+
+}
+/* ======================================================== ↑ 用户定义区 ↑ ======================================================== */

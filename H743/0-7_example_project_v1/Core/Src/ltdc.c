@@ -22,6 +22,7 @@
 
 /* USER CODE BEGIN 0 */
 
+static uint32_t Layer0_Buffer;//ltdc刷新缓冲地址
 /* USER CODE END 0 */
 
 LTDC_HandleTypeDef hltdc;
@@ -31,7 +32,7 @@ void MX_LTDC_Init(void)
 {
 
   /* USER CODE BEGIN LTDC_Init 0 */
-
+	Layer0_Buffer = (uint32_t)get_FrontBuf();//获取当前前景
   /* USER CODE END LTDC_Init 0 */
 
   LTDC_LayerCfgTypeDef pLayerCfg = {0};
@@ -79,7 +80,8 @@ void MX_LTDC_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN LTDC_Init 2 */
-
+	__HAL_LTDC_ENABLE_IT(&hltdc, LTDC_IT_LI); 	// 确保行中断(LI)已使能
+	HAL_LTDC_ProgramLineEvent(&hltdc, 0); 		// 在第0行触发中断(垂直消隐期开始)
   /* USER CODE END LTDC_Init 2 */
 
 }
