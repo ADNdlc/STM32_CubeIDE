@@ -5,7 +5,7 @@
 extern "C" {
 #endif 
 
-#include "lvgl.h"
+#include "../lvgl.h"
 #include <assert.h>
 
 #define scr_act_width() lv_obj_get_width(lv_scr_act())   // 获取屏幕宽度

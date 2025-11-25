@@ -8,7 +8,7 @@ extern "C"
 
 // #define NDEBUG
 // #include <stdint.h>
-#include "lvgl.h"
+#include "../lvgl.h"
 #include <stdbool.h>
 #ifndef NDEBUG
 #include <assert.h> //断言

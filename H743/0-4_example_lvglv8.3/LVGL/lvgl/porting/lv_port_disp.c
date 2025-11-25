@@ -9,7 +9,7 @@
 /*********************
  *      INCLUDES
  *********************/
-#include <lv_port_disp.h>
+#include "lv_port_disp.h"
 #include <stdbool.h>
 
 #include <lv_conf.h>

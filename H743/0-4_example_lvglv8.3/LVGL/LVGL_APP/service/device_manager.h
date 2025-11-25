@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "lvgl.h"
+#include "../lvgl.h"
 
 #ifdef __cplusplus
 extern "C" {

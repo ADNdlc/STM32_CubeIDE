@@ -9,7 +9,7 @@
 /*********************
  *      INCLUDES
  *********************/
-#include <lv_port_indev.h>
+#include "lv_port_indev.h"
 #include "lvgl.h"
 #include "touch_GT9147/touch_gt9xxx.h"	// 触摸屏
 /**********************
