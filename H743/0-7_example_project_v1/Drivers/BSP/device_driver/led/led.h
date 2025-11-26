@@ -8,34 +8,54 @@
 #ifndef BSP_DEVICE_DRIVER_LED_LED_H_
 #define BSP_DEVICE_DRIVER_LED_LED_H_
 
-#define USE_HAL_DRIVER
-
 #include <stdint.h>
-#include "operations.h"
 
 // 前向声明
 typedef struct led_t led_t;
-typedef struct gpio_operations gpio_operations_t;
 
-// LED状态枚举
-typedef enum {
-    LED_STATE_OFF = 0,
-    LED_STATE_ON
-} led_state_t;
-
-// GPIO操作函数指针结构体
-struct gpio_operations {
+// 定义 GPIO 操作接口 (硬件抽象层)
+typedef struct {
     void (*write_pin)(void* port, uint16_t pin, uint8_t value);
     uint8_t (*read_pin)(void* port, uint16_t pin);
     void (*toggle_pin)(void* port, uint16_t pin);
+} led_gpio_ops_t;
+
+// 定义虚函数表类型
+typedef struct {
+    void (*on)(led_t *self);
+    void (*off)(led_t *self);
+    void (*toggle)(led_t *self);
+    uint8_t (*get_state)(led_t *self);
+} led_vtable_t;
+
+// 定义基类结构体 (暴露给子类)
+struct led_t {
+    const led_vtable_t *vtable; // 虚表指针必须在第一位
+    
+    // 基类成员变量
+    void* port;
+    uint16_t pin;
+    const led_gpio_ops_t* ops;  // 基础 GPIO 操作
+    uint8_t active_level;
 };
 
-led_t *led_create_with_ops(void* port, uint16_t pin, const gpio_operations_t* ops);
+// 公共 API
+void led_init(led_t *self, void* port, uint16_t pin, const led_gpio_ops_t* ops, uint8_t active_level);
+led_t* led_create(void* port, uint16_t pin, const led_gpio_ops_t* ops, uint8_t active_level);
 void led_delete(led_t *self);
 
+// 多态调用接口
 void led_on(led_t *self);
 void led_off(led_t *self);
 void led_toggle(led_t *self);
-led_state_t led_get_state(led_t *self); // 添加获取LED状态的函数声明
+uint8_t led_get_state(led_t *self);
+
+
+// HAL库依赖实现
+#ifdef USE_HAL_DRIVER
+#define _USE_HAL_DRIVER
+#include "stm32h7xx_hal.h"
+extern const led_operations_t hal_gpio_ops;
+#endif
 
 #endif /* BSP_DEVICE_DRIVER_LED_LED_H_ */

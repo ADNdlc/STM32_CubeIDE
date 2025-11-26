@@ -7,6 +7,7 @@
         "lcd.h": "c",
         "ltdc.h": "c",
         "led.h": "c",
-        "operations.h": "c"
+        "operations.h": "c",
+        "stdlib.h": "c"
     }
 }
