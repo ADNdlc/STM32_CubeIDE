@@ -5,6 +5,8 @@
         "stm32h7xx_hal.h": "c",
         "compare": "c",
         "lcd.h": "c",
-        "ltdc.h": "c"
+        "ltdc.h": "c",
+        "led.h": "c",
+        "operations.h": "c"
     }
 }
