@@ -55,7 +55,6 @@ uint8_t led_get_state(led_t *self);
 #ifdef USE_HAL_DRIVER
 #define _USE_HAL_DRIVER
 #include "stm32h7xx_hal.h"
-extern const led_operations_t hal_gpio_ops;
 #endif
 
 #endif /* BSP_DEVICE_DRIVER_LED_LED_H_ */

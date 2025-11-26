@@ -76,8 +76,7 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
-	led_t* led1 = led_create_with_ops(GPIOB, LED1_Pin, &hal_gpio_ops, 1);
-	led_on(led1);
+
 
 
   /* USER CODE END 1 */

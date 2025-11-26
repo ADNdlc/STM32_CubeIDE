@@ -104,12 +104,7 @@ static uint8_t hal_read_pin(void* port, uint16_t pin) {
     return (uint8_t)HAL_GPIO_ReadPin((GPIO_TypeDef*)port, pin);
 }
 
-// HAL GPIO操作函数集合
-const led_operations_t hal_gpio_ops = {
-    .write_pin = hal_write_pin,
-    .toggle_pin = hal_toggle_pin,
-    .read_pin = hal_read_pin
-};
+
 
 #endif
 
