@@ -8,6 +8,7 @@
         "ltdc.h": "c",
         "led.h": "c",
         "operations.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "pwm_driver.h": "c"
     }
 }

@@ -110,6 +110,7 @@ int main(void)
   MX_RTC_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
+  MX_TIM1_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();

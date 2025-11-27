@@ -12,20 +12,28 @@
  * 这些函数是 GPIO LED 的具体行为
  * ========================================== */
 static void default_led_on(led_t *self) {
-    self->ops->write_pin(self->port, self->pin, self->active_level);
+    if (self->driver && self->driver->ops && self->driver->ops->gpio_write) {
+        self->driver->ops->gpio_write(self->driver, 1);
+    }
 }
 
 static void default_led_off(led_t *self) {
-    self->ops->write_pin(self->port, self->pin, !self->active_level);
+    if (self->driver && self->driver->ops && self->driver->ops->gpio_write) {
+        self->driver->ops->gpio_write(self->driver, 0);
+    }
 }
 
 static void default_led_toggle(led_t *self) {
-    self->ops->toggle_pin(self->port, self->pin);
+    if (self->driver && self->driver->ops && self->driver->ops->gpio_toggle) {
+        self->driver->ops->gpio_toggle(self->driver);
+    }
 }
 
 static uint8_t default_led_get_state(led_t *self) {
-    uint8_t pin_state = self->ops->read_pin(self->port, self->pin);
-    return (pin_state == self->active_level) ? 1 : 0;
+    if (self->driver && self->driver->ops && self->driver->ops->gpio_read) {
+        return self->driver->ops->gpio_read(self->driver);
+    }
+    return 0;
 }
 
 // 基类虚函数表
@@ -66,18 +74,16 @@ uint8_t led_get_state(led_t *self) {
  * 构造与初始化
  * ========================================== */
 
-void led_init(led_t *self, void* port, uint16_t pin, const led_gpio_ops_t* ops, uint8_t active_level) {
+void led_init(led_t *self, gpio_driver_t* driver, uint8_t active_level) {
     self->vtable = &default_vtable; // 绑定基类虚表
-    self->port = port;
-    self->pin = pin;
-    self->ops = ops;
+    self->driver = driver;
     self->active_level = active_level;
 }
 
-led_t* led_create(void* port, uint16_t pin, const led_gpio_ops_t* ops, uint8_t active_level) {
+led_t* led_create(gpio_driver_t* driver, uint8_t active_level) {
     led_t *self = (led_t*)malloc(sizeof(led_t));
     if (self) {
-        led_init(self, port, pin, ops, active_level);
+        led_init(self, driver, active_level);
     }
     return self;
 }
@@ -87,27 +93,3 @@ void led_delete(led_t *self) {
 }
 
 
-/* ----- HAL库依赖的具体实现 ----- */
-#ifdef _USE_HAL_DRIVER
-#include "main.h"
-
-// HAL GPIO操作的具体实现
-static void hal_write_pin(void* port, uint16_t pin, uint8_t value) {
-    HAL_GPIO_WritePin((GPIO_TypeDef*)port, pin, (GPIO_PinState)value);
-}
-
-static void hal_toggle_pin(void* port, uint16_t pin) {
-    HAL_GPIO_TogglePin((GPIO_TypeDef*)port, pin);
-}
-
-static uint8_t hal_read_pin(void* port, uint16_t pin) {
-    return (uint8_t)HAL_GPIO_ReadPin((GPIO_TypeDef*)port, pin);
-}
-
-
-
-#endif
-
-/* ----- 标准库库依赖的具体实现 ----- */
-
-//...

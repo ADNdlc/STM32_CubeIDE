@@ -29,4 +29,16 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>Application/test/FATFS_test</name>
+			<type>2</type>
+			<location>C:/Users/12114/Desktop/STM32HEL/IDE/H743/0-4_example_lvglv8.3/Application/FATFS_test</location>
+		</link>
+		<link>
+			<name>Application/test/SDCARD_test</name>
+			<type>2</type>
+			<location>C:/Users/12114/Desktop/STM32HEL/IDE/H743/0-4_example_lvglv8.3/Application/SDCARD_test</location>
+		</link>
+	</linkedResources>
 </projectDescription>
