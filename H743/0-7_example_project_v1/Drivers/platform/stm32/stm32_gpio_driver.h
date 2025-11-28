@@ -14,7 +14,7 @@
 // STM32 GPIO 驱动结构体
 typedef struct {
     gpio_driver_t base;  // 继承自 gpio_driver_t 基类
-    //stm32 GPIO 端口和引脚
+    //stm32特有 GPIO 端口和引脚 类型
     GPIO_TypeDef* port;
     uint16_t pin;
 } stm32_gpio_driver_t;

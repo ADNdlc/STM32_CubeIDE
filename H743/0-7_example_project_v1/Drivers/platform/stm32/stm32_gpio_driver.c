@@ -5,7 +5,7 @@
  *      Author: 12114
  */
 
-#include "stm32_gpio_adapter.h"
+#include "stm32_gpio.h"
 #include <stdlib.h>
 
 // STM32 GPIO 驱动操作实现
@@ -19,7 +19,7 @@ static uint8_t stm32_gpio_read(gpio_driver_t *self) {
     return (uint8_t)(HAL_GPIO_ReadPin(drv->port, drv->pin));
 }
 
-// STM32 GPIO 驱动操作虚函数表
+// STM32 GPIO 驱动类虚函数表
 static const gpio_driver_ops_t stm32_gpio_ops = {
     .gpio_write = stm32_gpio_write,
     .gpio_read = stm32_gpio_read,

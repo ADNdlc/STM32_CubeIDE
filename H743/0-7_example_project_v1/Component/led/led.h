@@ -22,11 +22,11 @@ typedef struct {
     uint8_t (*get_state)(led_t *self);
 } led_vtable_t;
 
-// 定义基类结构体
+// 定义led类结构体
 struct led_t {
     const led_vtable_t *vtable; // 虚表指针必须在第一位
     
-    // 基类成员变量
+    // led类成员变量
     gpio_driver_t* driver;
     uint8_t active_level;
 };

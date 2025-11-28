@@ -8,6 +8,10 @@
 #ifndef FACTORY_GPIO_FACTORY_H_
 #define FACTORY_GPIO_FACTORY_H_
 
+#include "gpio_driver.h"
+#include "device_mapping.h"
 
+// GPIO工厂函数，通过逻辑标识符获取对应的驱动实例
+gpio_driver_t* gpio_driver_get(gpio_device_id_t id);
 
 #endif /* FACTORY_GPIO_FACTORY_H_ */

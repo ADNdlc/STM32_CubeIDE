@@ -1,49 +1,42 @@
 /*
  * test_pwm_led.c
  *
- *  Created on: Nov 27, 2025
+ *  Created on: Nov 28, 2025
  *      Author: 12114
  */
 
-#include "pwm_led.h"
-#include "stm32_pwm_adapter.h"
-#include <stddef.h>
+#include "pwm_factory.h"
+#include "pwm_driver.h"
 
-// Mock GPIO ops
-void mock_write_pin(void *port, uint16_t pin, uint8_t value) {}
-uint8_t mock_read_pin(void *port, uint16_t pin) { return 0; }
-void mock_toggle_pin(void *port, uint16_t pin) {}
+void test_pwm_led(void) {
+    // 获取PWM驱动实例
+    pwm_driver_t* red_pwm = pwm_driver_get(PWM_LED_RED);
+    pwm_driver_t* green_pwm = pwm_driver_get(PWM_LED_GREEN);
+    pwm_driver_t* blue_pwm = pwm_driver_get(PWM_LED_BLUE);
 
-led_gpio_ops_t mock_gpio_ops = {
-    .write_pin = mock_write_pin,
-    .read_pin = mock_read_pin,
-    .toggle_pin = mock_toggle_pin,
-};
+    // 启动PWM
+    if (red_pwm) {
+        PWM_START(red_pwm);
+    }
 
-// Mock TIM handle
-typedef struct {
-  void *Instance;
-}
-TIM_HandleTypeDef htim1;
+    if (green_pwm) {
+        PWM_START(green_pwm);
+    }
 
-int main(void) {
-  // 1. 创建 STM32 PWM 驱动适配器
-  // 注意：这里需要强制转换 mock 的 handle，实际代码中不需要
-  stm32_pwm_driver_t *stm32_driver = stm32_pwm_driver_create((void *)&htim1, 1);
+    if (blue_pwm) {
+        PWM_START(blue_pwm);
+    }
 
-  // 2. 创建 PWM LED，注入驱动
-  // 假设 port 为 NULL，pin 为 0，因为 PWM 模式下可能不直接操作 GPIO，或者由 HAL
-  // 库接管
-  pwm_led_t *my_pwm_led =
-      pwm_led_create(NULL, 0, &mock_gpio_ops, (pwm_driver_t *)stm32_driver);
+    // 设置占空比测试
+    if (red_pwm) {
+        PWM_SET_DUTY(red_pwm, 500);  // 50% 占空比 (假设周期为1000)
+    }
 
-  // 3. 使用多态接口
-  led_on((led_t *)my_pwm_led);
+    if (green_pwm) {
+        PWM_SET_DUTY(green_pwm, 300);  // 30% 占空比
+    }
 
-  // 4. 使用子类特有接口
-  pwm_led_set_brightness(my_pwm_led, 500);
-
-  led_off((led_t *)my_pwm_led);
-
-  return 0;
+    if (blue_pwm) {
+        PWM_SET_DUTY(blue_pwm, 700);  // 70% 占空比
+    }
 }

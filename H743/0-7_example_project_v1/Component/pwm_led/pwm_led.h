@@ -8,27 +8,38 @@
 #ifndef BSP_DEVICE_DRIVER_PWM_LED_PWM_LED_H_
 #define BSP_DEVICE_DRIVER_PWM_LED_PWM_LED_H_
 
-#include "led/led.h"
+#include <stdint.h>
 #include "pwm_driver.h"
 
-// 子类结构体
-typedef struct pwm_led_t {
-  led_t base;
-  // 依赖注入：持有抽象的 PWM 驱动指针
-  pwm_driver_t *pwm_driver;
-  uint32_t current_duty;
-} pwm_led_t;
+// 前向声明
+typedef struct pwm_led_t pwm_led_t;
 
-// 子类虚函数表 (扩展)
+// 定义虚函数表类型
 typedef struct {
-  led_vtable_t base_vtable; //父类方法
-  void (*set_brightness)(struct pwm_led_t *self, uint32_t duty); // 新增方法
+    void (*on)(pwm_led_t *self);
+    void (*off)(pwm_led_t *self);
+    void (*set_brightness)(pwm_led_t *self, uint16_t brightness);
+    uint16_t (*get_brightness)(pwm_led_t *self);
 } pwm_led_vtable_t;
 
-// 子类构造函数
-pwm_led_t *pwm_led_create(uint32_t freq, pwm_driver_t *pwm_driver);
+// PWM LED 结构体（与 led 同级的基类）
+struct pwm_led_t {
+    const pwm_led_vtable_t *vtable; // 虚表指针必须在第一位
+    
+    // pwm_led 类成员变量
+    pwm_driver_t *pwm_driver;
+    uint32_t current_duty;
+};
 
-// 子类特有方法
+// 公共 API
+void pwm_led_init(pwm_led_t *self, uint32_t freq, pwm_driver_t *pwm_driver);
+pwm_led_t* pwm_led_create(uint32_t freq, pwm_driver_t *pwm_driver);
+void pwm_led_delete(pwm_led_t *self);
+
+// 多态调用接口
+void pwm_led_on(pwm_led_t *self);
+void pwm_led_off(pwm_led_t *self);
 void pwm_led_set_brightness(pwm_led_t *self, uint32_t duty);
+uint8_t pwm_led_get_state(pwm_led_t *self);
 
 #endif /* BSP_DEVICE_DRIVER_PWM_LED_PWM_LED_H_ */

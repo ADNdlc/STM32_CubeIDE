@@ -1,27 +1,34 @@
 /*
  * LVGL_test.c
  *
- *  Created on: Aug 2, 2025
+ *  Created on: Nov 28, 2025
  *      Author: 12114
  */
 
-//#include "src/misc/lv_fs.h"
-#include "lvgl.h"
+#include "gpio_factory.h"
+#include "gpio_driver.h"
 
-void lvgl_basic_test(void){
-    // 按钮
-    lv_obj_t *myBtn = lv_btn_create(lv_scr_act());                               // 创建按钮; 父对象：当前活动屏幕
-    lv_obj_set_pos(myBtn, 10, 10);                                               // 设置坐标
-    lv_obj_set_size(myBtn, 120, 50);                                             // 设置大小
-    // 按钮上的文本
-    lv_obj_t *label_btn = lv_label_create(myBtn);                                // 创建文本标签，父对象：上面的btn按钮
-    lv_obj_align(label_btn, LV_ALIGN_CENTER, 0, 0);                              // 对齐于：父对象
-    lv_label_set_text(label_btn, "Test");                                        // 设置标签的文本
-    // 独立的标签
-    lv_obj_t *myLabel = lv_label_create(lv_scr_act());                           // 创建文本标签; 父对象：当前活动屏幕
-    lv_label_set_text(myLabel, "Hello world!");                                  // 设置标签的文本
-    lv_obj_align(myLabel, LV_ALIGN_CENTER, 0, 0);                                // 对齐于：父对象
-    lv_obj_align_to(myBtn, myLabel, LV_ALIGN_OUT_TOP_MID, 0, -20);               // 对齐于：某对象
+void lvgl_test(void) {
+    // 获取GPIO驱动实例
+    gpio_driver_t* led_red = gpio_driver_get(GPIO_LED_RED);
+    gpio_driver_t* led_green = gpio_driver_get(GPIO_LED_GREEN);
+    gpio_driver_t* button_user = gpio_driver_get(GPIO_BUTTON_USER);
 
+    // 测试GPIO输出
+    if (led_red) {
+        GPIO_WRITE(led_red, 1);  // 点亮红灯
+    }
+
+    if (led_green) {
+        GPIO_WRITE(led_green, 0);  // 关闭绿灯
+    }
+
+    // 测试GPIO输入
+    if (button_user) {
+        uint8_t button_state = GPIO_READ(button_user);
+        // 可以在这里处理按钮状态
+        if (button_state) {
+            // 按钮被按下
+        }
+    }
 }
-

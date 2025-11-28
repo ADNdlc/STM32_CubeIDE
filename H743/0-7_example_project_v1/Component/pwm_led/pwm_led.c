@@ -8,76 +8,103 @@
 #include "pwm_led.h"
 #include <stdlib.h>
 
-// 重写基类虚函数
-static void _pwm_led_on(led_t *base) {
-  pwm_led_t *self = (pwm_led_t *)base;
-  // 开启 PWM，恢复之前的亮度
-  PWM_START(self->pwm_driver);
-  PWM_SET_DUTY(self->pwm_driver, self->current_duty);
+/* ==========================================
+ * 默认实现 (Private / Protected)
+ * ========================================== */
+
+// 实现默认虚函数
+static void default_pwm_led_on(pwm_led_t *self) {
+    if (self && self->pwm_driver && self->pwm_driver->ops && 
+        self->pwm_driver->ops->start) {
+        self->pwm_driver->ops->start(self->pwm_driver);
+        if (self->pwm_driver->ops->set_duty) {
+            self->pwm_driver->ops->set_duty(self->pwm_driver, self->current_duty);
+        }
+    }
 }
 
-static void _pwm_led_off(led_t *base) {
-  pwm_led_t *self = (pwm_led_t *)base;
-  // 停止 PWM
-  PWM_STOP(self->pwm_driver);
+static void default_pwm_led_off(pwm_led_t *self) {
+    if (self && self->pwm_driver && self->pwm_driver->ops && 
+        self->pwm_driver->ops->stop) {
+        self->pwm_driver->ops->stop(self->pwm_driver);
+    }__HAL_TIM_GET_AUTORELOAD
 }
 
-static void _pwm_led_toggle(led_t *base) {
-  // PWM LED toggle 逻辑比较模糊，这里简单定义为：如果是开的就关，关的就开
-  // 或者可以在 0 和 current_duty 之间切换
-  // 这里暂时不做复杂实现，留空或简单调用 on/off
-  // 更好的做法可能需要记录 state
+/* 设置亮度,不是占空比
+ * brightness 亮度值(0~1000)
+ */
+static void default_pwm_led_set_brightness(pwm_led_t *self, uint16_t brightness) {
+    self->current_duty = duty;
+    if (self && self->pwm_driver && self->pwm_driver->ops && 
+        self->pwm_driver->ops->set_duty) {
+        self->pwm_driver->ops->set_duty(self->pwm_driver, duty);
+    }
 }
 
-static uint8_t _pwm_led_get_state(led_t *base) {
-  // 需要记录状态，这里简化处理
-  return 0;
-}
+/*
+ * 
+ */
+static uint8_t default_pwm_led_get_brightness(pwm_led_t *self) {
 
-// 子类特有虚函数实现
-static void _pwm_led_set_brightness(pwm_led_t *self, uint32_t duty) {
-  self->current_duty = duty;
-  PWM_SET_DUTY(self->pwm_driver, duty);
 }
 
 // 虚函数表实例
-static const pwm_led_vtable_t pwm_led_vtable = {
-    .base_vtable =
-        {
-            .on = _pwm_led_on,
-            .off = _pwm_led_off,
-            .toggle = _pwm_led_toggle,
-            .get_state = _pwm_led_get_state,
-        },
-    .set_brightness = _pwm_led_set_brightness,
+static const pwm_led_vtable_t default_pwm_led_vtable = {
+    .on = default_pwm_led_on,
+    .off = default_pwm_led_off,
+    .set_brightness = default_pwm_led_set_brightness,
+    .get_brightness = default_pwm_led_get_brightness
 };
 
-pwm_led_t *pwm_led_create(uint32_t freq,
-                          pwm_driver_t *pwm_driver) {
-  pwm_led_t *self = (pwm_led_t *)malloc(sizeof(pwm_led_t));
-  if (self) {
-    // 初始化基类
-    led_init(&self->base, port, pin, gpio_ops,
-             1); // 默认 active_level 1，可调整
+/* ==========================================
+ * 公共 API 实现 (Dispatch Layer)
+ * ========================================== */
 
-    // 覆盖虚表指针
-    self->base.vtable = (const led_vtable_t *)&pwm_led_vtable;
+void pwm_led_on(pwm_led_t *self) {
+    if(self && self->vtable && self->vtable->on) 
+        self->vtable->on(self); 
+}
 
-    // 初始化子类成员
-    self->pwm_driver = pwm_driver;
-    self->current_duty = 0;
-  }
-  return self;
+void pwm_led_off(pwm_led_t *self) {
+    if(self && self->vtable && self->vtable->off) 
+        self->vtable->off(self);
 }
 
 void pwm_led_set_brightness(pwm_led_t *self, uint32_t duty) {
-  if (self && self->base.vtable) {
-    // 安全检查，确保是 pwm_led_t 类型 (在 C 中比较难完全保证，依赖调用者)
-    // 调用虚函数
-    const pwm_led_vtable_t *vtable =
-        (const pwm_led_vtable_t *)self->base.vtable;
-    if (vtable->set_brightness) {
-      vtable->set_brightness(self, duty);
+    if(self && self->vtable && self->vtable->set_brightness) 
+        self->vtable->set_brightness(self, duty);
+}
+
+uint8_t pwm_led_get_state(pwm_led_t *self) {
+    if(self && self->vtable && self->vtable->get_state) 
+        return self->vtable->get_state(self);
+    return 0;
+}
+
+/* ==========================================
+ * 构造与初始化
+ * ========================================== */
+
+void pwm_led_init(pwm_led_t *self, uint32_t freq, pwm_driver_t *pwm_driver) {
+    self->vtable = &default_pwm_led_vtable; // 绑定虚表
+    self->pwm_driver = pwm_driver;
+    self->frequency = freq;
+    self->current_duty = 0;
+    
+    // 设置频率
+    if (pwm_driver && pwm_driver->ops && pwm_driver->ops->set_freq) {
+        pwm_driver->ops->set_freq(pwm_driver, freq);
     }
-  }
+}
+
+pwm_led_t* pwm_led_create(uint32_t freq, pwm_driver_t *pwm_driver) {
+    pwm_led_t *self = (pwm_led_t*)malloc(sizeof(pwm_led_t));
+    if (self) {
+        pwm_led_init(self, freq, pwm_driver);
+    }
+    return self;
+}
+
+void pwm_led_delete(pwm_led_t *self) {
+    free(self);
 }

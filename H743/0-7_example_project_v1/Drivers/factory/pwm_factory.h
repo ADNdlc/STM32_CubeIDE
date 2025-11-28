@@ -8,6 +8,10 @@
 #ifndef FACTORY_PWM_FACTORY_H_
 #define FACTORY_PWM_FACTORY_H_
 
+#include "pwm_driver.h"
+#include "device_mapping.h"
 
+// PWM工厂函数，通过逻辑标识符获取对应的驱动实例
+pwm_driver_t* pwm_driver_get(pwm_device_id_t id);
 
 #endif /* FACTORY_PWM_FACTORY_H_ */
