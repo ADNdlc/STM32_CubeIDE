@@ -11,6 +11,7 @@
  * 默认实现 (Private / Protected)
  * 这些函数是 GPIO LED 的具体行为
  * ========================================== */
+
 static void default_led_on(led_t *self) {
     if (self->driver && self->driver->ops && self->driver->ops->gpio_write) {
         self->driver->ops->gpio_write(self->driver, 1);
@@ -24,8 +25,9 @@ static void default_led_off(led_t *self) {
 }
 
 static void default_led_toggle(led_t *self) {
-    if (self->driver && self->driver->ops && self->driver->ops->gpio_toggle) {
-        self->driver->ops->gpio_toggle(self->driver);
+    if (self->driver && self->driver->ops && 
+        self->driver->ops->gpio_write && self->driver->ops->gpio_read) {
+        self->driver->ops->gpio_write(self->driver, !self->driver->ops->gpio_read(self->driver));
     }
 }
 

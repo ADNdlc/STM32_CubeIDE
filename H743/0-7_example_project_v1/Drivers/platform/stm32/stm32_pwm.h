@@ -28,7 +28,7 @@ typedef struct {
   uint32_t channel;
 } stm32_pwm_driver_t;
 
-// 构造函数
+// 构造函数(使用stm32特有数据创建)
 stm32_pwm_driver_t *stm32_pwm_driver_create(TIM_HandleTypeDef *htim,
                                             uint32_t channel);
 

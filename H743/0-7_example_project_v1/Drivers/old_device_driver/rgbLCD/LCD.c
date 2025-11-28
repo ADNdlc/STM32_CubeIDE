@@ -5,8 +5,9 @@
  *      Author: 12114
  */
 
+#include "../../old_device_driver/rgbLCD/LCD.h"
+
 #include "ltdc.h"
-#include "LCD.h"
 
 
 static uint16_t ltdc_buf_1[800][480] __attribute__((section(".sdram_section"), aligned(16)));

@@ -14,12 +14,12 @@
 // STM32 GPIO 驱动结构体
 typedef struct {
     gpio_driver_t base;  // 继承自 gpio_driver_t 基类
+    //stm32 GPIO 端口和引脚
     GPIO_TypeDef* port;
     uint16_t pin;
-    GPIO_PinState active_level;
 } stm32_gpio_driver_t;
 
 // 创建 STM32 GPIO 驱动实例
-stm32_gpio_driver_t* stm32_gpio_create(GPIO_TypeDef* port, uint16_t pin, GPIO_PinState active_level);
+stm32_gpio_driver_t* stm32_gpio_create(GPIO_TypeDef* port, uint16_t pin);
 
 #endif /* BSP_DEVICE_DRIVER_LED_STM32_GPIO_ADAPTER_H_ */

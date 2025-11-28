@@ -5,7 +5,7 @@
  *      Author: 12114
  */
 
-#include "W9825G6KH.h"
+#include "../../old_device_driver/sdram/W9825G6KH.h"
 
 static FMC_SDRAM_CommandTypeDef Command;   			//定义SDRAM命令结构体
 #define sdramHandle				hsdram1  			//使用FMC的哪个Bank,这里SDRAM接在了FMC的SDRAM1上

@@ -22,7 +22,7 @@ typedef struct {
     uint8_t (*get_state)(led_t *self);
 } led_vtable_t;
 
-// 定义基类结构体 (暴露给子类)
+// 定义基类结构体
 struct led_t {
     const led_vtable_t *vtable; // 虚表指针必须在第一位
     

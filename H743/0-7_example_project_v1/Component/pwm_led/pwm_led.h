@@ -21,15 +21,12 @@ typedef struct pwm_led_t {
 
 // 子类虚函数表 (扩展)
 typedef struct {
-  led_vtable_t base_vtable;
-  void (*set_brightness)(struct pwm_led_t *self, uint32_t duty); // 新增函数
+  led_vtable_t base_vtable; //父类方法
+  void (*set_brightness)(struct pwm_led_t *self, uint32_t duty); // 新增方法
 } pwm_led_vtable_t;
 
 // 子类构造函数
-// 注意：这里不再传入 handle/channel，而是传入抽象的 pwm_driver
-pwm_led_t *pwm_led_create(void *port, uint16_t pin,
-                          const led_gpio_ops_t *gpio_ops,
-                          pwm_driver_t *pwm_driver);
+pwm_led_t *pwm_led_create(uint32_t freq, pwm_driver_t *pwm_driver);
 
 // 子类特有方法
 void pwm_led_set_brightness(pwm_led_t *self, uint32_t duty);

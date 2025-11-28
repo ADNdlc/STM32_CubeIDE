@@ -52,8 +52,7 @@ static const pwm_led_vtable_t pwm_led_vtable = {
     .set_brightness = _pwm_led_set_brightness,
 };
 
-pwm_led_t *pwm_led_create(void *port, uint16_t pin,
-                          const led_gpio_ops_t *gpio_ops,
+pwm_led_t *pwm_led_create(uint32_t freq,
                           pwm_driver_t *pwm_driver) {
   pwm_led_t *self = (pwm_led_t *)malloc(sizeof(pwm_led_t));
   if (self) {

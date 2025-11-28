@@ -17,7 +17,6 @@ typedef struct gpio_driver_t gpio_driver_t;
 typedef struct {
     void (*gpio_write)(gpio_driver_t *self, uint8_t value);
     uint8_t (*gpio_read)(gpio_driver_t *self);
-    void (*gpio_toggle)(gpio_driver_t *self);
 } gpio_driver_ops_t;
 
 // GPIO 驱动基类
@@ -28,6 +27,5 @@ struct gpio_driver_t {
 // 辅助宏，方便调用
 #define GPIO_WRITE(driver, value) (driver)->ops->gpio_write(driver, value)
 #define GPIO_READ(driver) (driver)->ops->gpio_read(driver)
-#define GPIO_TOGGLE(driver) (driver)->ops->gpio_toggle(driver)
 
 #endif /* BSP_DEVICE_DRIVER_LED_GPIO_DRIVER_H_ */
