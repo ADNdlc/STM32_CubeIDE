@@ -5,79 +5,160 @@
  *      Author: 12114
  */
 
-#include "stm32_pwm.h"
+#include "stm32_pwm_driver.h"
 #include <stdlib.h>
 
-#include "stm32f4xx_ll_tim.h"
-#include "stm32f4xx_ll_rcc.h"
-#include "stm32f4xx_ll_bus.h"
+// 确保包含了对应的 LL 库
+#include "stm32h7xx_ll_tim.h"
+#include "stm32h7xx_ll_rcc.h"
+#include "stm32h7xx_ll_bus.h"
 
-uint32_t Get_TIM_Freq_LL(TIM_TypeDef *TIMx)
+/*
+ * 获取 APB1或 APB2总线 TIM 时钟源频率
+ */
+static uint32_t Get_H7_TIM_Input_Clock(TIM_HandleTypeDef *htim)
 {
-    LL_RCC_ClocksTypeDef rcc_clocks;
-    uint32_t tim_input_clk = 0;
-    
-    // 1. 获取系统各总线时钟频率 (HCLK, PCLK1, PCLK2)
-    // 这一步 LL 库会自动读取寄存器并计算当前各总线频率
-    LL_RCC_GetSystemClocksFreq(&rcc_clocks);
+  uint32_t pclk = 0;
+  uint32_t tim_ker_clk = 0;
+  uint32_t prescaler_bits = 0;
+  uint32_t rcc_cfgr = RCC->CFGR;
+  uint32_t rcc_d2cfgr = RCC->D2CFGR;
 
-    // 2. 根据定时器所在的 APB 总线，利用 LL 宏计算输入时钟
-    // 注意：你需要知道你的 TIMx 挂载在哪个 APB 上
-    if (TIMx == TIM1 || TIMx == TIM8 || TIMx == TIM9 || TIMx == TIM10 || TIMx == TIM11) 
+  // 1. 区分 APB1/APB2 (此处逻辑假设仅处理 D2 域定时器)
+  if (htim->Instance == TIM1 || htim->Instance == TIM8 ||
+      htim->Instance == TIM15 || htim->Instance == TIM16 || htim->Instance == TIM17)
+  {
+    pclk = HAL_RCC_GetPCLK2Freq();
+    prescaler_bits = (rcc_d2cfgr & RCC_D2CFGR_D2PPRE2) >> RCC_D2CFGR_D2PPRE2_Pos;
+  }
+  else // TIM2-7, 12-14
+  {
+    pclk = HAL_RCC_GetPCLK1Freq();
+    prescaler_bits = (rcc_d2cfgr & RCC_D2CFGR_D2PPRE1) >> RCC_D2CFGR_D2PPRE1_Pos;
+  }
+
+  // 2. 计算倍频
+  if ((prescaler_bits & 0x04) == 0) // Div1
+  {
+    tim_ker_clk = pclk;
+  }
+  else
+  {
+    if ((rcc_cfgr & RCC_CFGR_TIMPRE) && (prescaler_bits > 4)) // Div > 2 & TIMPRE=1
     {
-        // === APB2 定时器 ===
-        // 宏会自动处理 "x1" 还是 "x2" 的逻辑
-        tim_input_clk = __LL_RCC_CALC_APB2_TIM_FREQ(rcc_clocks.HCLK_Frequency, 
-                                                    LL_RCC_GetAPB2Prescaler());
+      tim_ker_clk = pclk * 4;
     }
-    else 
+    else
     {
-        // === APB1 定时器 (TIM2, TIM3, TIM4...) ===
-        tim_input_clk = __LL_RCC_CALC_APB1_TIM_FREQ(rcc_clocks.HCLK_Frequency, 
-                                                    LL_RCC_GetAPB1Prescaler());
+      tim_ker_clk = pclk * 2;
     }
+  }
 
-    // 3. 获取定时器内部的预分频系数 (PSC)
-    uint32_t psc = LL_TIM_GetPrescaler(TIMx);
-
-    // 4. 计算最终计数频率
-    return tim_input_clk / (psc + 1);
+  return tim_ker_clk;
 }
 
-
-// STM32 HAL 实现
-static void _stm32_pwm_start(pwm_driver_t *base) {
+static void _stm32_pwm_start(pwm_driver_t *base)
+{
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
 #ifdef USE_HAL_DRIVER
   HAL_TIM_PWM_Start(self->htim, self->channel);
 #endif
 }
 
-static void _stm32_pwm_stop(pwm_driver_t *base) {
+static void _stm32_pwm_stop(pwm_driver_t *base)
+{
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
 #ifdef USE_HAL_DRIVER
   HAL_TIM_PWM_Stop(self->htim, self->channel);
 #endif
 }
 
-static void _stm32_pwm_set_duty(pwm_driver_t *base, uint32_t duty) {
+static void _stm32_pwm_set_duty(pwm_driver_t *base, uint32_t duty)
+{
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
 #ifdef USE_HAL_DRIVER
+  // 直接设置 CCR 寄存器
   __HAL_TIM_SET_COMPARE(self->htim, self->channel, duty);
 #endif
 }
 
-static void _stm32_pwm_set_freq(pwm_driver_t *base, uint32_t freq) {
+static uint32_t _stm32_pwm_get_duty_max(pwm_driver_t *base)
+{
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
 #ifdef USE_HAL_DRIVER
-  HAL_TIM_Base_Start_IT(self->htim);
-  HAL_TIM_Base_SetFrequency(self->htim, freq);
+  return __HAL_TIM_GET_AUTORELOAD(self->htim);
+#endif
 }
 
-static uint32_t _stm32_pwm_get_freq(pwm_driver_t *base) {
+// 【修改3】核心修改：动态计算 PSC 和 ARR
+static void _stm32_pwm_set_freq(pwm_driver_t *base, uint32_t freq)
+{
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
 #ifdef USE_HAL_DRIVER
-  return HAL_TIM_Base_GetFrequency(self->htim);
+  if (freq == 0)
+    return;
+
+  // 1. 获取输入源时钟 (例如 200MHz)
+  uint32_t tim_ker_clk = Get_H7_TIM_Input_Clock(self->htim);
+
+  uint32_t psc = 0;
+  uint32_t arr = 0;
+
+  // 2. 动态计算 PSC 和 ARR
+  // 目标： Timer_Freq = Tim_Ker_Clk / ((PSC+1) * (ARR+1))
+  // 为了高分辨率，我们希望 ARR 尽可能大，PSC 尽可能小
+
+  // 判断定时器位数 (TIM2/TIM5 是32位，其他通常16位)
+  // 这里简单粗暴按16位处理兼容性最好，或者是通过 IS_TIM_32B_COUNTER 宏判断
+  // 假设最大 ARR 为 65535 (16-bit) 以保证兼容性
+  const uint32_t MAX_ARR = 0xFFFF;
+
+  // 计算总的分频因子
+  // cycles = Tim_Ker_Clk / freq
+  uint32_t cycles = tim_ker_clk / freq;
+
+  if (cycles <= MAX_ARR)
+  {
+    // 如果不需要预分频就能装下
+    psc = 0;
+    arr = cycles - 1;
+  }
+  else
+  {
+    // 需要预分频
+    // psc = (cycles / 65536)
+    psc = (cycles / (MAX_ARR + 1));
+    // 重新计算 arr
+    arr = (tim_ker_clk / ((psc + 1) * freq)) - 1;
+  }
+
+  // 3. 写入寄存器
+  __HAL_TIM_SET_PRESCALER(self->htim, psc);
+  __HAL_TIM_SET_AUTORELOAD(self->htim, arr);
+
+  // 4. 重要：更新寄存器（产生 Update Event 载入新的 PSC 和 ARR）
+  // 如果没有这一步，PSC 通常要等到下一次溢出才生效
+  // 注意：这会清空计数器，可能会导致当前周期的波形截断
+  HAL_TIM_GenerateEvent(self->htim, TIM_EVENTSOURCE_UPDATE);
+
+  // 如果定时器还没开启，是否需要开启？ops->start 负责开启。
+  // 这里只管设置参数。
+#endif
+}
+
+static uint32_t _stm32_pwm_get_freq(pwm_driver_t *base)
+{
+  stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
+#ifdef USE_HAL_DRIVER
+  // 获取输入源时钟
+  uint32_t tim_ker_clk = Get_H7_TIM_Input_Clock(self->htim);
+
+  // 获取当前寄存器值
+  uint32_t psc = self->htim->Instance->PSC;
+  uint32_t arr = __HAL_TIM_GET_AUTORELOAD(self->htim);
+
+  // 计算: Freq = Clk / ((PSC+1)*(ARR+1))
+  return tim_ker_clk / ((psc + 1) * (arr + 1));
 #endif
 }
 
@@ -86,14 +167,16 @@ static const pwm_driver_ops_t stm32_pwm_ops = {
     .stop = _stm32_pwm_stop,
     .set_duty = _stm32_pwm_set_duty,
     .set_freq = _stm32_pwm_set_freq,
-    .get_freq = _stm32_pwm_get_freq
-};
+    .get_freq = _stm32_pwm_get_freq,
+    .get_duty_max = _stm32_pwm_get_duty_max};
 
 stm32_pwm_driver_t *stm32_pwm_driver_create(TIM_HandleTypeDef *htim,
-                                            uint32_t channel) {
+                                            uint32_t channel)
+{
   stm32_pwm_driver_t *self =
       (stm32_pwm_driver_t *)malloc(sizeof(stm32_pwm_driver_t));
-  if (self) {
+  if (self)
+  {
     self->base.ops = &stm32_pwm_ops;
     self->htim = htim;
     self->channel = channel;

@@ -6,7 +6,7 @@
  */
 
 #include "gpio_factory.h"
-#include "stm32_gpio.h"
+#include "stm32_gpio_driver.h"
 #include "device_mapping.h"
 
 // 存储已创建的GPIO驱动实例指针数组

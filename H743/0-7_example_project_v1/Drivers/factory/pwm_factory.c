@@ -6,7 +6,7 @@
  */
 
 #include "pwm_factory.h"
-#include "stm32_pwm.h"
+#include "stm32_pwm_driver.h"
 #include "device_mapping.h"
 
 // 存储已创建的PWM驱动实例指针数组

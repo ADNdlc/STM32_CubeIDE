@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "ltdc.h"
 
+
 /* USER CODE BEGIN 0 */
 
 static uint32_t Layer0_Buffer;//ltdc刷新缓冲地址
