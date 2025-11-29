@@ -12,33 +12,34 @@
  * 默认实现 (Private / Protected)
  * ========================================== */
 
-// 实现默认虚函数
-static void default_pwm_led_on(pwm_led_t *self)
-{
-    if (self && self->pwm_driver && self->pwm_driver->ops &&
-        self->pwm_driver->ops->start)
-    {
-        self->pwm_driver->ops->start(self->pwm_driver);
-        if (self->pwm_driver->ops->set_duty)
-        {
-            self->pwm_driver->ops->set_duty(self->pwm_driver, self->current_duty);
-        }
+// 实现子类行为
+static void _pwm_led_on(led_hal_t *self){
+    pwm_led_t *this = (pwm_led_t *)self;
+    if (this && this->pwm_driver && this->pwm_driver->ops && this->pwm_driver->ops->start){
+        PWM_START(self);
     }
 }
 
-static void default_pwm_led_off(pwm_led_t *self)
-{
-    if (self && self->pwm_driver && self->pwm_driver->ops &&
-        self->pwm_driver->ops->stop)
-    {
-        self->pwm_driver->ops->stop(self->pwm_driver);
+static void _pwm_led_off(led_hal_t *self){
+    pwm_led_t *this = (pwm_led_t *)self;
+    if (this && this->pwm_driver && this->pwm_driver->ops && this->pwm_driver->ops->stop){
+        PWM_STOP(self);
     }
+}
+
+static void _pwm_led_change(led_hal_t *self){ 
+    pwm_led_t *this = (pwm_led_t *)self;
+}
+
+static uint32_t _pwm_led_get_brightness(led_hal_t *self){ 
+    pwm_led_t *this = (pwm_led_t *)self;
+    
 }
 
 /* 设置亮度
  * brightness 亮度值(0~1000)
  */
-static void default_pwm_led_set_brightness(pwm_led_t *self, uint16_t brightness)
+static void _pwm_led_set_brightness(pwm_led_t *self, uint16_t brightness)
 {
     if (self && self->pwm_driver && self->pwm_driver->ops &&
         self->pwm_driver->ops->set_duty){

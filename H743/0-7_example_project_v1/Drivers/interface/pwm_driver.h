@@ -31,9 +31,10 @@ struct pwm_driver_t {
 // 辅助宏，方便调用
 #define PWM_START(driver) (driver)->ops->start(driver)
 #define PWM_STOP(driver) (driver)->ops->stop(driver)
-#define PWM_SET_DUTY(driver, d) (driver)->ops->set_duty(driver, d)
-#define PWM_SET_DUTY_MAX(driver, d) (driver)->ops->set_duty_max(driver, d)
-#define PWM_SET_FREQ(driver, f) (driver)->ops->set_freq(driver, f)
+#define PWM_SET_DUTY(driver, duty) (driver)->ops->set_duty(driver, duty)
+#define PWM_SET_FREQ(driver, freq) (driver)->ops->set_freq(driver, freq)
 #define PWM_GET_FREQ(driver) (driver)->ops->get_freq(driver)
+#define PWM_GET_DUTY_MAX(driver) (driver)->ops->get_duty_max(driver)
+
 
 #endif /* BSP_DEVICE_DRIVER_PWM_LED_PWM_DRIVER_H_ */

@@ -9,6 +9,7 @@
         "led.h": "c",
         "operations.h": "c",
         "stdlib.h": "c",
-        "pwm_driver.h": "c"
+        "pwm_driver.h": "c",
+        "led_hal.h": "c"
     }
 }
