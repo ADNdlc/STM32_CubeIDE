@@ -20,7 +20,7 @@ const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
 // PWM 设备映射表定义
 // 注意：这些值应该根据实际硬件连接进行配置     
 const pwm_mapping_t pwm_mappings[PWM_MAX_DEVICES] = {
-    [PWM_LED_RED] = {&htim1, TIM_CHANNEL_1},   // 示例：红灯PWM连接到TIM1_CH1
-    [PWM_LED_GREEN] = {&htim1, TIM_CHANNEL_2}, // 示例：绿灯PWM连接到TIM1_CH2
-    [PWM_LED_BLUE] = {&htim1, TIM_CHANNEL_3}   // 示例：蓝灯PWM连接到TIM1_CH3
+    [PWM_LED_RED] = {&htim4, TIM_CHANNEL_1},   // 示例：红灯PWM连接到TIM1_CH1
+    [PWM_LED_GREEN] = {&htim4, TIM_CHANNEL_2}, // 示例：绿灯PWM连接到TIM1_CH2
+    [PWM_LED_BLUE] = {&htim4, TIM_CHANNEL_3}   // 示例：蓝灯PWM连接到TIM1_CH3
 };

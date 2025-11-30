@@ -29,8 +29,11 @@
 #include "gpio.h"
 #include "fmc.h"
 
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+#include "led_test_app.h"
 
 /* USER CODE END Includes */
 
@@ -75,7 +78,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+	led_test_run();
 
 
 
@@ -110,7 +113,7 @@ int main(void)
   MX_RTC_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
-  MX_TIM1_Init();
+  MX_TIM4_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();

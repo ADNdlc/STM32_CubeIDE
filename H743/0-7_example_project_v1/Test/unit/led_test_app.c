@@ -8,11 +8,11 @@
 #include "led_test_app.h"
 #include "device_mapping.h"
 #include "gpio_factory.h"
-#include "gpio_led.h"
+#include "gpio_led/gpio_led.h"
 #include "main.h" // For HAL_Delay
 #include "pwm_factory.h"
-#include "pwm_led.h"
-#include "rgb_led.h"
+#include "pwm_led/pwm_led.h"
+#include "rgb_led/rgb_led.h"
 
 
 // 延时辅助函数

@@ -19,7 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "ltdc.h"
-
+#include "old_device_driver/rgbLCD/LCD.h"
 
 /* USER CODE BEGIN 0 */
 

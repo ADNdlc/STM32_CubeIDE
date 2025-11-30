@@ -9,7 +9,7 @@
 #define HAL_RGB_LED_RGB_LED_H_
 
 #include "led_hal.h"
-#include "pwm_led.h"
+#include "pwm_led/pwm_led.h"
 #include <stdint.h>
 
 // 前向声明
