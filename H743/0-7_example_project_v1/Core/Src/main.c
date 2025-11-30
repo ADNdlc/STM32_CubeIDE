@@ -78,7 +78,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	led_test_run();
+
 
 
 
@@ -118,6 +118,8 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+
+  led_test_run();
 
   /* USER CODE END 2 */
 
