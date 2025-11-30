@@ -25,4 +25,4 @@ gpio_driver_t* gpio_driver_get(gpio_device_id_t id) {
     }
     // 返回驱动实例
     return gpio_drivers[id];
-}
+}  

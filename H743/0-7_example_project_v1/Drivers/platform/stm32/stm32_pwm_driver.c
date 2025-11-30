@@ -60,41 +60,32 @@ static uint32_t Get_H7_TIM_Input_Clock(TIM_HandleTypeDef *htim)
 static void _stm32_pwm_start(pwm_driver_t *base)
 {
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
-#ifdef USE_HAL_DRIVER
   HAL_TIM_PWM_Start(self->htim, self->channel);
-#endif
 }
 
 static void _stm32_pwm_stop(pwm_driver_t *base)
 {
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
-#ifdef USE_HAL_DRIVER
   HAL_TIM_PWM_Stop(self->htim, self->channel);
-#endif
 }
 
 static void _stm32_pwm_set_duty(pwm_driver_t *base, uint32_t duty)
 {
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
-#ifdef USE_HAL_DRIVER
   // 直接设置 CCR 寄存器
   __HAL_TIM_SET_COMPARE(self->htim, self->channel, duty);
-#endif
 }
 
 static uint32_t _stm32_pwm_get_duty_max(pwm_driver_t *base)
 {
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
-#ifdef USE_HAL_DRIVER
   return __HAL_TIM_GET_AUTORELOAD(self->htim);
-#endif
 }
 
-// 【修改3】核心修改：动态计算 PSC 和 ARR
+// 动态计算 PSC 和 ARR
 static void _stm32_pwm_set_freq(pwm_driver_t *base, uint32_t freq)
 {
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
-#ifdef USE_HAL_DRIVER
   if (freq == 0)
     return;
 
@@ -108,7 +99,7 @@ static void _stm32_pwm_set_freq(pwm_driver_t *base, uint32_t freq)
   // 目标： Timer_Freq = Tim_Ker_Clk / ((PSC+1) * (ARR+1))
   // 为了高分辨率，我们希望 ARR 尽可能大，PSC 尽可能小
 
-  // 判断定时器位数 (TIM2/TIM5 是32位，其他通常16位)
+  // 判断定时器位数 (TIM2/TIM5 是32位，其他通常16位),具体查看型号对应手册
   // 这里简单粗暴按16位处理兼容性最好，或者是通过 IS_TIM_32B_COUNTER 宏判断
   // 假设最大 ARR 为 65535 (16-bit) 以保证兼容性
   const uint32_t MAX_ARR = 0xFFFF;
@@ -136,20 +127,16 @@ static void _stm32_pwm_set_freq(pwm_driver_t *base, uint32_t freq)
   __HAL_TIM_SET_PRESCALER(self->htim, psc);
   __HAL_TIM_SET_AUTORELOAD(self->htim, arr);
 
-  // 4. 重要：更新寄存器（产生 Update Event 载入新的 PSC 和 ARR）
-  // 如果没有这一步，PSC 通常要等到下一次溢出才生效
+  // 4. 更新寄存器（产生 Update Event 载入新的 PSC 和 ARR）
+  // 没有这一步，PSC 要等到下一次溢出才生效
   // 注意：这会清空计数器，可能会导致当前周期的波形截断
   HAL_TIM_GenerateEvent(self->htim, TIM_EVENTSOURCE_UPDATE);
 
-  // 如果定时器还没开启，是否需要开启？ops->start 负责开启。
-  // 这里只管设置参数。
-#endif
 }
 
 static uint32_t _stm32_pwm_get_freq(pwm_driver_t *base)
 {
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
-#ifdef USE_HAL_DRIVER
   // 获取输入源时钟
   uint32_t tim_ker_clk = Get_H7_TIM_Input_Clock(self->htim);
 
@@ -159,7 +146,6 @@ static uint32_t _stm32_pwm_get_freq(pwm_driver_t *base)
 
   // 计算: Freq = Clk / ((PSC+1)*(ARR+1))
   return tim_ker_clk / ((psc + 1) * (arr + 1));
-#endif
 }
 
 static const pwm_driver_ops_t stm32_pwm_ops = {

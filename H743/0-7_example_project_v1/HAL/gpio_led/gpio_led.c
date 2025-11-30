@@ -1,86 +1,86 @@
 /*
- * led.c
+ * gpio_led.c
  *
- *  Created on: Nov 25, 2025
+ *  Created on: Nov 30, 2025
  *      Author: 12114
  */
-#include <stdlib.h>
+
 #include "gpio_led.h"
+#include <stdlib.h>
 
-/* ==========================================
- * 默认实现 (Private / Protected)
- * ========================================== */
-static void _gpio_led_on(led_hal_t *self){
-    if (self && self->driver)
-        GPIO_WRITE(self->driver, self->active_level);
-}
+// 私有函数声明
+static void _gpio_led_on(led_hal_t *base);
+static void _gpio_led_off(led_hal_t *base);
+static void _gpio_led_set_data(led_hal_t *base, uint32_t data);
+static uint32_t _gpio_led_get_data(led_hal_t *base);
+static void _gpio_led_toggle(gpio_led_t *self);
 
-static void _gpio_led_off(led_hal_t *self){
-    if (self && self->driver)
-        GPIO_WRITE(self->driver, !self->active_level);
-}
-
-static uint32_t _gpio_led_set_state(led_hal_t *self, uint32_t data){
-    if (self && self->driver)
-        return GPIO_WRITE(self->driver, data?self->active_level:!self->active_level);
-}
-
-static uint32_t _gpio_led_get_state(led_hal_t *self){
-    if (self && self->driver)
-        return GPIO_READ(self->driver)?self->active_level:!self->active_level;
-}
-
-// LED 类虚函数表实例(实现接口行为)
-led_hal_vtable_t gpio_led_hal_vtable = {
-    .on = _gpio_led_on,
-    .off = _gpio_led_off,
-    .set_data = _gpio_led_set_state,
-    .get_data = _gpio_led_get_state
+// Vtable definition
+static const gpio_led_vtable_t _gpio_led_vtable = {
+    .base_vtable =
+        {
+            .on = _gpio_led_on,
+            .off = _gpio_led_off,
+            .set_data = _gpio_led_set_data,
+            .get_data = _gpio_led_get_data,
+        },
+    .toggle = _gpio_led_toggle,
 };
-
-/* ==========================================
- * 公共 API 实现 (Dispatch Layer)
- * ========================================== */
-void gpio_led_on(led_hal_t *self){
-    if (self && self->vtable && self->vtable->on)
-        LED_ON(self);    
-}
-
-void gpio_led_off(led_hal_t *self){
-    if (self && self->vtable && self->vtable->off)
-        LED_OFF(self);
-}
-
-void gpio_led_set_state(led_hal_t *self, uint32_t data){
-    if (self && self->vtable && self->vtable->change)
-        LED_CHANGE(self);
-}
-
-uint32_t gpio_led_get_state(led_hal_t *self){
-    if (self && self->vtable && self->vtable->get_state)
-        return LED_GET_STATE(self);
-    return 0;
-}
 
 /* ==========================================
  * 构造与初始化
  * ========================================== */
-void gpio_led_init(gpio_led_t *self, gpio_driver_t *driver, uint8_t active_level){
-    self->base.vtable = &gpio_led_hal_vtable;
-    self->driver = driver;
-    self->active_level = active_level; 
+void gpio_led_init(gpio_led_t *self, gpio_driver_t *driver,
+                   uint8_t active_level) {
+  self->base.vtable = (led_hal_vtable_t *)&_gpio_led_vtable;
+  self->driver = driver;
+  self->active_level = active_level;
+  // Set initial state to OFF
+  _gpio_led_off(&self->base);
 }
 
-gpio_led_t *gpio_led_create(gpio_driver_t *driver, uint8_t active_level){
-    gpio_led_t *self = (gpio_led_t *)malloc(sizeof(gpio_led_t));
-    if (self){
-        gpio_led_init(self, driver, active_level);
-    }
-    return self;
+gpio_led_t *gpio_led_create(gpio_driver_t *driver, uint8_t active_level) {
+  gpio_led_t *led = (gpio_led_t *)malloc(sizeof(gpio_led_t));
+  if (led) {
+    gpio_led_init(led, driver, active_level);
+  }
+  return led;
 }
 
-void gpio_led_delete(gpio_led_t *self){
-    if(self){
-        free(self);
-    }
+void gpio_led_delete(gpio_led_t *self) {
+  if (self) {
+    free(self);
+  }
+}
+
+/* ==========================================
+ * 接口实现
+ * ========================================== */
+static void _gpio_led_on(led_hal_t *base) {
+  gpio_led_t *self = (gpio_led_t *)base;
+  GPIO_WRITE(self->driver, self->active_level);
+}
+
+static void _gpio_led_off(led_hal_t *base) {
+  gpio_led_t *self = (gpio_led_t *)base;
+  GPIO_WRITE(self->driver, !self->active_level);
+}
+
+static void _gpio_led_toggle(gpio_led_t *self) {
+  uint8_t current_state = GPIO_READ(self->driver);
+  GPIO_WRITE(self->driver, !current_state);
+}
+
+static void _gpio_led_set_data(led_hal_t *base, uint32_t data) {
+  if (data) {
+    _gpio_led_on(base);
+  } else {
+    _gpio_led_off(base);
+  }
+}
+
+static uint32_t _gpio_led_get_data(led_hal_t *base) {
+  gpio_led_t *self = (gpio_led_t *)base;
+  uint8_t pin_state = GPIO_READ(self->driver);
+  return (pin_state == self->active_level) ? 1 : 0;
 }

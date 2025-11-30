@@ -9,15 +9,7 @@
 #define BSP_DEVICE_DRIVER_PWM_LED_STM32_PWM_ADAPTER_H_
 
 #include "pwm_driver.h"
-
-#ifdef USE_HAL_DRIVER
 #include "stm32h7xx_hal.h" // 根据实际芯片系列调整
-#else
-
-typedef struct {
-  void *Instance;
-} TIM_HandleTypeDef;
-#endif
 
 
 // 基础操作为基类，平台继承并重写自己的特有操作，设备驱动依赖基类
