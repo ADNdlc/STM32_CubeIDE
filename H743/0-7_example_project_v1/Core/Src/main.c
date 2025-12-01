@@ -20,7 +20,6 @@
 #include "main.h"
 #include "dma.h"
 #include "dma2d.h"
-#include "fatfs.h"
 #include "ltdc.h"
 #include "rtc.h"
 #include "sdmmc.h"
@@ -28,7 +27,6 @@
 #include "usart.h"
 #include "gpio.h"
 #include "fmc.h"
-
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -109,7 +107,6 @@ int main(void)
   MX_DMA2D_Init();
   MX_TIM6_Init();
   MX_SDMMC1_SD_Init();
-  MX_FATFS_Init();
   MX_RTC_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
