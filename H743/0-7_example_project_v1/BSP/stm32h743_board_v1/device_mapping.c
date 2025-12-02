@@ -8,19 +8,23 @@
 #include "device_mapping.h"
 #include "tim.h"
 
-// GPIO 设备映射表定义  
-// 注意：这些值应该根据实际硬件连接进行配置     
+// GPIO 设备映射表定义
+// 注意：这些值应该根据实际硬件连接进行配置
 const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
-    [GPIO_LED_RED] = {GPIOB, GPIO_PIN_14},     // 示例：红灯连接到PB14
-    [GPIO_LED_GREEN] = {GPIOB, GPIO_PIN_15},   // 示例：绿灯连接到PB15
-    [GPIO_LED_BLUE] = {GPIOC, GPIO_PIN_0},     // 示例：蓝灯连接到PC0
-    [GPIO_BUTTON_USER] = {GPIOC, GPIO_PIN_13}  // 示例：用户按键连接到PC13
-}; 
+    [GPIO_LED_RED] = {GPIOB, GPIO_PIN_14},    // 示例：红灯连接到PB14
+    [GPIO_LED_GREEN] = {GPIOB, GPIO_PIN_15},  // 示例：绿灯连接到PB15
+    [GPIO_LED_BLUE] = {GPIOC, GPIO_PIN_0},    // 示例：蓝灯连接到PC0
+    [GPIO_BUTTON_USER] = {GPIOC, GPIO_PIN_13} // 示例：用户按键连接到PC13
+};
 
 // PWM 设备映射表定义
-// 注意：这些值应该根据实际硬件连接进行配置     
+// 注意：这些值应该根据实际硬件连接进行配置
 const pwm_mapping_t pwm_mappings[PWM_MAX_DEVICES] = {
     [PWM_LED_RED] = {&htim4, TIM_CHANNEL_1},   // 示例：红灯PWM连接到TIM1_CH1
     [PWM_LED_GREEN] = {&htim4, TIM_CHANNEL_2}, // 示例：绿灯PWM连接到TIM1_CH2
     [PWM_LED_BLUE] = {&htim4, TIM_CHANNEL_3}   // 示例：蓝灯PWM连接到TIM1_CH3
 };
+
+// USART 设备映射表定义
+const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
+    [USART_DEBUG] = {&huart1}};

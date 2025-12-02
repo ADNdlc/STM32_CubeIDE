@@ -60,7 +60,7 @@ void elog_port_deinit(void) {
 void elog_port_output(const char *log, size_t size) {
     
     /* add your code here */
-    
+
 }
 
 /**

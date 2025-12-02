@@ -88,4 +88,7 @@ void ESP_AT_sys_handle(void)
 		}
 	}
 	AT_controller_process();
+	HAL_I2C_Master_Receive_DMA(hi2c, DevAddress, pData, Size);
+	HAL_SPI_Transmit_DMA
+	HAL_I2C_Master_Seq_Transmit_DMA(hi2c, DevAddress, pData, Size, XferOptions)
 }
