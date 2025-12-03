@@ -11,6 +11,8 @@
         "stdlib.h": "c",
         "pwm_driver.h": "c",
         "led_hal.h": "c",
-        "usart_hal.h": "c"
+        "usart_hal.h": "c",
+        "uart_queue.h": "c",
+        "stddef.h": "c"
     }
 }

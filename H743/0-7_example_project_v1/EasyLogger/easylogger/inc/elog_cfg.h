@@ -73,7 +73,7 @@
 /* each asynchronous output's log which must end with newline sign */
 #define ELOG_ASYNC_LINE_OUTPUT
 /* asynchronous output mode using POSIX pthread implementation */
-#define ELOG_ASYNC_OUTPUT_USING_PTHREAD
+//#define ELOG_ASYNC_OUTPUT_USING_PTHREAD
 /*---------------------------------------------------------------------------*/
 /* enable buffered output mode */
 #define ELOG_BUF_OUTPUT_ENABLE

@@ -10,7 +10,7 @@
 
 #define MAX_USART_INSTANCES 8
 static stm32_usart_driver_t *g_usart_instances[MAX_USART_INSTANCES] = {0};
-
+static int stm32_usart_set_callback(usart_driver_t *base, usart_callback_t cb,void *ctx);
 // 实例注册
 static void register_instance(stm32_usart_driver_t *instance) {
   for (int i = 0; i < MAX_USART_INSTANCES; i++) {
@@ -19,15 +19,6 @@ static void register_instance(stm32_usart_driver_t *instance) {
       return;
     }
   }
-}
-
-// 为实例绑定回调
-static int stm32_usart_set_callback(usart_driver_t *base, usart_callback_t cb,
-                                    void *ctx) {
-  stm32_usart_driver_t *self = (stm32_usart_driver_t *)base;
-  self->callback = cb;
-  self->cb_context = ctx;
-  return 0;
 }
 
 // 同步发送函数
@@ -91,7 +82,7 @@ static int stm32_usart_receive_asyn(usart_driver_t *self, uint8_t *buffer,
   }
 
   // 使用DMA模式接收
-  if (HAL_UART_Receive_DMA(driver->huart, buffer, (uint16_t)size) == HAL_OK) {
+  if (HAL_UARTEx_ReceiveToIdle_DMA(driver->huart, buffer, (uint16_t)size) == HAL_OK) {
     return 0;
   }
   return -1;
@@ -120,15 +111,26 @@ stm32_usart_driver_t *stm32_usart_driver_create(UART_HandleTypeDef *huart) {
   return driver;
 }
 
+// 为实例绑定回调
+static int stm32_usart_set_callback(usart_driver_t *base, usart_callback_t cb,
+                                    void *ctx) {
+  stm32_usart_driver_t *self = (stm32_usart_driver_t *)base;
+  self->callback = cb;
+  self->cb_context = ctx;
+  return 0;
+}
+
 // 中断分发处理
-static void dispatch_irq(UART_HandleTypeDef *huart, usart_event_t event) {
+static void dispatch_irq(UART_HandleTypeDef *huart, usart_event_t event, void *args) {
   for (int i = 0; i < MAX_USART_INSTANCES; i++) {
-    if (g_usart_instances[i] && g_usart_instances[i]->huart == huart) {
-      stm32_usart_driver_t *driver = g_usart_instances[i];
+    if (g_usart_instances[i] && g_usart_instances[i]->huart == huart) { //寻找此次中断的所属对象
+      stm32_usart_driver_t *driver = g_usart_instances[i];       //获取stm32_usart_driver_t对象
+      // 处理完成标志
       if(event == USART_EVENT_RX_DATA){driver->R_isbusy = 0;}
       if(event == USART_EVENT_TX_COMPLETE){driver->T_isbusy = 0;}
+      // 调用对象的回调函数
       if (driver->callback) {
-        driver->callback(driver->cb_context, event, NULL);
+        driver->callback(driver->cb_context, event, args);
       }
       break;
     }
@@ -137,15 +139,19 @@ static void dispatch_irq(UART_HandleTypeDef *huart, usart_event_t event) {
 
 // HAL 库回调函数重写
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  dispatch_irq(huart, USART_EVENT_RX_DATA);
+  dispatch_irq(huart, USART_EVENT_RX_DATA, NULL);
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-  dispatch_irq(huart, USART_EVENT_TX_COMPLETE);
+  dispatch_irq(huart, USART_EVENT_TX_COMPLETE, NULL);
+}
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
+  dispatch_irq(huart, USART_EVENT_RX_EVENT, (void *)Size);
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
-  dispatch_irq(huart, USART_EVENT_ERROR);
+  dispatch_irq(huart, USART_EVENT_ERROR, NULL);
 }
 
 // 业务层回调示例

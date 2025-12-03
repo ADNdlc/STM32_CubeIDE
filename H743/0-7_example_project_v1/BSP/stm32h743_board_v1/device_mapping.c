@@ -6,6 +6,7 @@
  */
 
 #include "device_mapping.h"
+#include "usart.h"
 #include "tim.h"
 
 // GPIO 设备映射表定义

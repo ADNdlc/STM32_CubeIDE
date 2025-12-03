@@ -14,13 +14,15 @@
 // 前向声明
 typedef struct usart_driver_t usart_driver_t;
 
-// USART 驱动操作接口 (虚函数表)
 // 事件类型定义
 typedef enum
 {
   USART_EVENT_RX_DATA,     // 接收到数据
   USART_EVENT_TX_COMPLETE, // 发送完成
-  USART_EVENT_ERROR        // 发生错误
+  USART_EVENT_ERROR,        // 发生错误
+  USART_EVENT_RX_EVENT,
+  //USART_EVENT_2,
+  //...
 } usart_event_t;
 
 // 回调函数原型
@@ -41,15 +43,14 @@ typedef struct
   int (*receive_asyn)(usart_driver_t *self, uint8_t *buffer, size_t size);
 
   // 注册回调函数
-  int (*set_callback)(usart_driver_t *self, usart_callback_t cb,
-                      void *cb_context);
+  int (*set_callback)(usart_driver_t *self, // 驱动实例
+                      usart_callback_t cb,  // 回调函数
+                      void *cb_context);    // 用户上下文(对象指针)
 } usart_driver_ops_t;
 
 // USART 驱动基类
-struct usart_driver_t
-{
+struct usart_driver_t{
   const usart_driver_ops_t *ops;
-  // void *user_data; // 通用用户数据指针
 };
 
 // 辅助宏

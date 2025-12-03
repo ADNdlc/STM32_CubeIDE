@@ -53,9 +53,14 @@
 									<listOptionValue builtIn="false" value="../Drivers/SYSTEM"/>
 									<listOptionValue builtIn="false" value="../BSP/stm32h743_board_v1"/>
 									<listOptionValue builtIn="false" value="../Drivers/interface"/>
+									<listOptionValue builtIn="false" value="../EasyLogger/easylogger/inc"/>
 									<listOptionValue builtIn="false" value="../HAL"/>
+									<listOptionValue builtIn="false" value="../Component"/>
 									<listOptionValue builtIn="false" value="../Drivers/factory"/>
 									<listOptionValue builtIn="false" value="../Drivers/platform/stm32"/>
+									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/easylogger"/>
+									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/device/sys"/>
+									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/device"/>
 									<listOptionValue builtIn="false" value="../Test/unit"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.558532041" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
@@ -82,14 +87,19 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.34049228" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1981766995" name="main_test_example.c" rcbsApplicability="disable" resourcePath="Test/unit/main_test_example.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1328602458.2050201959">
+						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1328602458.2050201959" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1328602458">
+							<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1802637220" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="old_device_driver/key|BSP/device_driver/key/key.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="easylogger/plugins" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
+						<entry excluding="easylogger/plugins|easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
+						<entry excluding="unit/main_test_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -166,10 +176,10 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="stm32h743_board_v1" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -199,4 +209,5 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
