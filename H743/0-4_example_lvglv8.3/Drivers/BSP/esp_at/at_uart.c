@@ -31,6 +31,7 @@ void ATuart_driver_init(UART_HandleTypeDef* uart_port) {
     memset(AT_UART.loopbuff, 0, LOOP_BUF_SIZE);
     // Circular模式: DMA将在这个缓冲区上以环形模式运行
     HAL_UART_Receive_DMA(AT_UART.uart_port, AT_UART.loopbuff, LOOP_BUF_SIZE);
+
     //HAL_NVIC_DisableIRQ(DMA1_Stream2_IRQn);
 }
 
@@ -113,6 +114,7 @@ size_t ATuart_read(uint8_t *buffer, size_t len) {
 void ATuart_RxCpltHandle(UART_HandleTypeDef *ituart) {
 	if(ituart == AT_UART.uart_port){
 		HAL_UARTEx_ReceiveToIdle_DMA(ituart, AT_UART.loopbuff, LOOP_BUF_SIZE);
+		//
 	}
 }
 #endif

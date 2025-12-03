@@ -11,10 +11,15 @@
 #include "stm32h7xx_hal.h"
 #include "usart_driver.h"
 
-
 typedef struct {
   usart_driver_t base;
   UART_HandleTypeDef *huart;
+
+  // 回调函数和上下文
+  usart_callback_t callback;
+  void *cb_context;
+  uint8_t T_isbusy;
+  uint8_t R_isbusy;
 } stm32_usart_driver_t;
 
 stm32_usart_driver_t *stm32_usart_driver_create(UART_HandleTypeDef *huart);
