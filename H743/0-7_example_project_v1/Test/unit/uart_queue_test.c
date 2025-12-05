@@ -4,6 +4,8 @@
  *  Created on: Dec 3, 2025
  *      Author: 12114
  */
+#include "all_tests_config.h"
+#if uart_queue_test 
 
 #include "uart_queue_test.h"
 #include "device_mapping.h"
@@ -309,3 +311,5 @@ void uart_queue_test_run(void) {
     }
   }
 }
+
+#endif

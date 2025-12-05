@@ -4,6 +4,8 @@
  *  Created on: Dec 3, 2025
  *      Author: 12114
  */
+#include "all_tests_config.h"
+#if uart_hal_test 
 
 #include "uart_hal_test.h"
 #include "device_mapping.h"
@@ -269,3 +271,5 @@ void uart_hal_test_run(void) {
     }
   }
 }
+
+#endif

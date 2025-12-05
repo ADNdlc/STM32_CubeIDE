@@ -12,7 +12,6 @@
 #include "pwm_driver.h"
 #include <stdint.h>
 
-
 // 前向声明
 typedef struct pwm_led_t pwm_led_t;
 
@@ -28,11 +27,14 @@ struct pwm_led_t {
   // pwm_led 类成员变量
   pwm_driver_t *pwm_driver; // 依赖的驱动
   uint32_t current_duty;    // 当前亮度(data)
+  uint8_t active_level;     // 有效电平
 };
 
 // 公共 API
-void pwm_led_init(pwm_led_t *self, uint32_t freq, pwm_driver_t *pwm_driver);
-pwm_led_t *pwm_led_create(uint32_t freq, pwm_driver_t *pwm_driver);
+void pwm_led_init(pwm_led_t *self, uint32_t freq, uint8_t active_level,
+                  pwm_driver_t *pwm_driver);
+pwm_led_t *pwm_led_create(uint32_t freq, uint8_t active_level,
+                          pwm_driver_t *pwm_driver);
 void pwm_led_delete(pwm_led_t *self);
 
 /**

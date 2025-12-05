@@ -13,6 +13,8 @@
         "led_hal.h": "c",
         "usart_hal.h": "c",
         "uart_queue.h": "c",
-        "stddef.h": "c"
+        "stddef.h": "c",
+        "main.h": "c",
+        "all_tests_config.h": "c"
     }
 }

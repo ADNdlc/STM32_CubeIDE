@@ -28,6 +28,12 @@ struct uart_queue_t {
     bool rx_enabled;          // 接收使能标志
 };
 
+uart_queue_t *uart_queue_create(const usart_hal_t *hal,
+                               uint8_t *tx_buffer, size_t tx_size,
+                               uint8_t *rx_buffer, size_t rx_size);
+
+void uart_queue_destroy(uart_queue_t *queue);                               
+
 // 初始化
 void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
                      uint8_t *tx_buffer, size_t tx_size,

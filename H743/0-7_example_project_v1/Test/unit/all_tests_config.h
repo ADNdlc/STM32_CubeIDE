@@ -8,6 +8,10 @@
 #ifndef TEST_UNIT_ALL_TESTS_H_
 #define TEST_UNIT_ALL_TESTS_H_
 
+#define led_test 1
+#define uart_hal_test 0
+#define uart_queue_test 0
+
 // 运行所有测试用例
 void run_all_tests(void);
 

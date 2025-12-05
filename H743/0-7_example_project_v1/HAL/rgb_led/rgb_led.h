@@ -47,4 +47,13 @@ static inline void rgb_led_set_color(rgb_led_t *self, uint32_t color) {
   led_hal_set_data((led_hal_t *)self, color);
 }
 
+/**
+ * @brief 使用HSV颜色模型设置RGB LED颜色
+ * @param self rgb_led_t 指针
+ * @param h 色相 (0-359) - 色环角度，0=红，120=绿，240=蓝
+ * @param s 饱和度 (0-100) - 颜色纯度，0=灰色，100=纯色
+ * @param v 明度 (0-100) - 亮度，0=黑色，100=最亮
+ */
+void rgb_led_set_hsv(rgb_led_t *self, uint16_t h, uint8_t s, uint8_t v);
+
 #endif /* HAL_RGB_LED_RGB_LED_H_ */

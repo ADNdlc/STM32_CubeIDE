@@ -21,7 +21,6 @@
 #include "dma.h"
 #include "dma2d.h"
 #include "i2c.h"
-#include "i2s.h"
 #include "ltdc.h"
 #include "rtc.h"
 #include "sdmmc.h"
@@ -34,8 +33,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "led_test_app.h"
-
+#include "all_tests_config.h"
+#include "tim4_debug.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -82,8 +81,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
 
-
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -119,14 +116,15 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM4_Init();
   MX_I2C1_Init();
-  MX_I2S1_Init();
   MX_SPI2_Init();
+  MX_TIM3_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+  //tim4_force_start_all_channels();
 
-  led_test_run();
+  run_all_tests();
 
   /* USER CODE END 2 */
 
