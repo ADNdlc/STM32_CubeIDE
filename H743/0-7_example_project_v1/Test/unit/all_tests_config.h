@@ -9,6 +9,7 @@
 #define TEST_UNIT_ALL_TESTS_H_
 
 #define led_test 1
+#define key_test 1
 #define uart_hal_test 0
 #define uart_queue_test 0
 

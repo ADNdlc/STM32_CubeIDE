@@ -34,7 +34,7 @@
 /* USER CODE BEGIN Includes */
 
 #include "all_tests_config.h"
-#include "tim4_debug.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -122,7 +122,6 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  //tim4_force_start_all_channels();
 
   run_all_tests();
 
