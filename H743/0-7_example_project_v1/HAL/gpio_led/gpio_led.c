@@ -8,12 +8,12 @@
 #include "gpio_led.h"
 #include <stdlib.h>
 
-// 私有函数声明
+// 函数声明
 static void _gpio_led_on(led_hal_t *base);
 static void _gpio_led_off(led_hal_t *base);
 static void _gpio_led_set_data(led_hal_t *base, uint32_t data);
 static uint32_t _gpio_led_get_data(led_hal_t *base);
-static void _gpio_led_toggle(gpio_led_t *self);
+void gpio_led_toggle(gpio_led_t *self);
 
 // Vtable definition
 static const gpio_led_vtable_t _gpio_led_vtable = {
@@ -24,7 +24,7 @@ static const gpio_led_vtable_t _gpio_led_vtable = {
             .set_data = _gpio_led_set_data,
             .get_data = _gpio_led_get_data,
         },
-    .toggle = _gpio_led_toggle,
+    .toggle = gpio_led_toggle,
 };
 
 /* ==========================================
@@ -53,6 +53,11 @@ void gpio_led_delete(gpio_led_t *self) {
   }
 }
 
+void gpio_led_toggle(gpio_led_t *self) {
+  uint8_t current_state = GPIO_READ(self->driver);
+  GPIO_WRITE(self->driver, !current_state);
+}
+
 /* ==========================================
  * 接口实现
  * ========================================== */
@@ -64,11 +69,6 @@ static void _gpio_led_on(led_hal_t *base) {
 static void _gpio_led_off(led_hal_t *base) {
   gpio_led_t *self = (gpio_led_t *)base;
   GPIO_WRITE(self->driver, !self->active_level);
-}
-
-static void _gpio_led_toggle(gpio_led_t *self) {
-  uint8_t current_state = GPIO_READ(self->driver);
-  GPIO_WRITE(self->driver, !current_state);
 }
 
 static void _gpio_led_set_data(led_hal_t *base, uint32_t data) {

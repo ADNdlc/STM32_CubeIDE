@@ -35,4 +35,6 @@ void gpio_led_init(gpio_led_t *self, gpio_driver_t *driver,
 gpio_led_t *gpio_led_create(gpio_driver_t *driver, uint8_t active_level);
 void gpio_led_delete(gpio_led_t *self);
 
+void gpio_led_toggle(gpio_led_t *self);
+
 #endif /* HAL_GPIO_LED_GPIO_LED_H_ */

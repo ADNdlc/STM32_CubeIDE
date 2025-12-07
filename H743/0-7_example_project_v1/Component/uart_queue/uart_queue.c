@@ -145,7 +145,7 @@ bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len)
     }
   }
 
-  return written == len;
+  return (written == len);
 }
 
 /**

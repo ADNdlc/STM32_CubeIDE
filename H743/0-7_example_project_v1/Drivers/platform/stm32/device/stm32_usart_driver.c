@@ -10,7 +10,8 @@
 
 #define MAX_USART_INSTANCES 8
 static stm32_usart_driver_t *g_usart_instances[MAX_USART_INSTANCES] = {0};
-static int stm32_usart_set_callback(usart_driver_t *base, usart_callback_t cb,void *ctx);
+static int stm32_usart_set_callback(usart_driver_t *base, usart_callback_t cb,
+                                    void *ctx);
 // 实例注册
 static void register_instance(stm32_usart_driver_t *instance) {
   for (int i = 0; i < MAX_USART_INSTANCES; i++) {
@@ -25,7 +26,7 @@ static void register_instance(stm32_usart_driver_t *instance) {
 static int stm32_usart_transmit(usart_driver_t *self, const uint8_t *data,
                                 size_t size, uint32_t timeout) {
   stm32_usart_driver_t *driver = (stm32_usart_driver_t *)self;
-  
+
   // 使用阻塞模式发送
   if (HAL_UART_Transmit(driver->huart, (uint8_t *)data, (uint16_t)size,
                         timeout) == HAL_OK) {
@@ -57,6 +58,7 @@ static int stm32_usart_transmit_asyn(usart_driver_t *self, const uint8_t *data,
   driver->T_isbusy = 1;
 
   if (driver->callback == NULL) {
+    driver->T_isbusy = 0;
     return -1;
   }
 
@@ -65,6 +67,7 @@ static int stm32_usart_transmit_asyn(usart_driver_t *self, const uint8_t *data,
       HAL_OK) {
     return 0;
   }
+  driver->T_isbusy = 0;
   return -1;
 }
 
@@ -78,13 +81,16 @@ static int stm32_usart_receive_asyn(usart_driver_t *self, uint8_t *buffer,
   driver->R_isbusy = 1;
 
   if (driver->callback == NULL) {
+    driver->R_isbusy = 0;
     return -1;
   }
 
   // 使用DMA模式接收
-  if (HAL_UARTEx_ReceiveToIdle_DMA(driver->huart, buffer, (uint16_t)size) == HAL_OK) {
+  if (HAL_UARTEx_ReceiveToIdle_DMA(driver->huart, buffer, (uint16_t)size) ==
+      HAL_OK) {
     return 0;
   }
+  driver->R_isbusy = 0;
   return -1;
 }
 
@@ -105,6 +111,8 @@ stm32_usart_driver_t *stm32_usart_driver_create(UART_HandleTypeDef *huart) {
     driver->huart = huart;
     driver->callback = NULL;
     driver->cb_context = NULL;
+    driver->T_isbusy = 0;
+    driver->R_isbusy = 0;
 
     register_instance(driver);
   }
@@ -121,13 +129,20 @@ static int stm32_usart_set_callback(usart_driver_t *base, usart_callback_t cb,
 }
 
 // 中断分发处理
-static void dispatch_irq(UART_HandleTypeDef *huart, usart_event_t event, void *args) {
+static void dispatch_irq(UART_HandleTypeDef *huart, usart_event_t event,
+                         void *args) {
   for (int i = 0; i < MAX_USART_INSTANCES; i++) {
-    if (g_usart_instances[i] && g_usart_instances[i]->huart == huart) { //寻找此次中断的所属对象
-      stm32_usart_driver_t *driver = g_usart_instances[i];       //获取stm32_usart_driver_t对象
+    if (g_usart_instances[i] &&
+        g_usart_instances[i]->huart == huart) { // 寻找此次中断的所属对象
+      stm32_usart_driver_t *driver =
+          g_usart_instances[i]; // 获取stm32_usart_driver_t对象
       // 处理完成标志
-      if(event == USART_EVENT_RX_DATA){driver->R_isbusy = 0;}
-      if(event == USART_EVENT_TX_COMPLETE){driver->T_isbusy = 0;}
+      if (event == USART_EVENT_RX_DATA || event == USART_EVENT_RX_EVENT) {
+        driver->R_isbusy = 0;
+      }
+      if (event == USART_EVENT_TX_COMPLETE) {
+        driver->T_isbusy = 0;
+      }
       // 调用对象的回调函数
       if (driver->callback) {
         driver->callback(driver->cb_context, event, args);
@@ -146,7 +161,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
   dispatch_irq(huart, USART_EVENT_TX_COMPLETE, NULL);
 }
 
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   dispatch_irq(huart, USART_EVENT_RX_EVENT, (void *)Size);
 }
 

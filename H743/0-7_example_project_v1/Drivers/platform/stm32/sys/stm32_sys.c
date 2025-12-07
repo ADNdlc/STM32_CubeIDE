@@ -7,7 +7,7 @@
 
 #include "stm32_sys.h"
 #include "main.h"
-#include "sys_hal.h"
+#include "sys_hal/sys_hal.h"
 
 static uint32_t stm32_get_tick(void) { return HAL_GetTick(); }
 

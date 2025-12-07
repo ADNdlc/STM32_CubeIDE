@@ -31,7 +31,7 @@ static uint8_t rx_buffer[RX_BUFFER_SIZE];
 // 1. UART 队列基本发送测试
 static void test_uart_queue_basic_send(void) {
   // 获取 USART 驱动实例
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
 
   if (driver) {
     // 创建 USART HAL 对象
@@ -67,7 +67,7 @@ static void test_uart_queue_basic_send(void) {
 // 2. UART 队列批量发送测试
 static void test_uart_queue_batch_send(void) {
   // 获取 USART 驱动实例
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
 
   if (driver) {
     // 创建 USART HAL 对象
@@ -80,15 +80,15 @@ static void test_uart_queue_batch_send(void) {
                       RX_BUFFER_SIZE);
 
       // 批量发送多条消息
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < 4; i++) {
         char msg[50];
         snprintf(msg, sizeof(msg), "Batch message #%d\r\n", i + 1);
         uart_queue_send(&queue, (const uint8_t *)msg, strlen(msg));
-        delay_ms(50); // 短暂延时，让队列有机会处理
+        //delay_ms(50); // 短暂延时，让队列有机会处理
       }
 
       // 等待所有消息发送完成
-      delay_ms(500);
+      //delay_ms(500);
 
       // 检查队列状态
       size_t remaining = uart_queue_tx_count(&queue);
@@ -97,7 +97,7 @@ static void test_uart_queue_batch_send(void) {
                "TX Queue remaining: %u bytes\r\n", (unsigned int)remaining);
       uart_queue_send(&queue, (const uint8_t *)status_msg, strlen(status_msg));
 
-      delay_ms(100);
+      delay_ms(2000);
 
       // 销毁对象
       usart_hal_destroy(uart_hal);
@@ -108,7 +108,7 @@ static void test_uart_queue_batch_send(void) {
 // 3. UART 队列缓冲区溢出测试
 static void test_uart_queue_overflow(void) {
   // 获取 USART 驱动实例
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
 
   if (driver) {
     // 创建 USART HAL 对象
@@ -145,6 +145,7 @@ static void test_uart_queue_overflow(void) {
       snprintf(result_msg, sizeof(result_msg),
                "Overflow test: %d success, %d failed\r\n", success_count,
                fail_count);
+      //正确情况：
       uart_queue_send(&queue, (const uint8_t *)result_msg, strlen(result_msg));
 
       // 等待队列清空
@@ -159,7 +160,7 @@ static void test_uart_queue_overflow(void) {
 // 4. UART 队列接收测试
 static void test_uart_queue_receive(void) {
   // 获取 USART 驱动实例
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
 
   if (driver) {
     // 创建 USART HAL 对象
@@ -226,7 +227,7 @@ static void test_uart_queue_receive(void) {
 // 5. UART 队列状态查询测试
 static void test_uart_queue_status(void) {
   // 获取 USART 驱动实例
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
 
   if (driver) {
     // 创建 USART HAL 对象
@@ -250,7 +251,7 @@ static void test_uart_queue_status(void) {
       delay_ms(100);
 
       // 添加一些数据后检查状态
-      const char *test_data = "Status test data";
+      const char *test_data = "Status test data\r\n";
       uart_queue_send(&queue, (const uint8_t *)test_data, strlen(test_data));
 
       tx_count = uart_queue_tx_count(&queue);
@@ -269,7 +270,7 @@ static void test_uart_queue_status(void) {
 // 主测试入口
 void uart_queue_test_run(void) {
   // 测试开始提示
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
   if (driver) {
     usart_hal_t *uart_hal = usart_hal_create(driver);
     if (uart_hal) {
@@ -301,7 +302,7 @@ void uart_queue_test_run(void) {
   // delay_ms(500);
 
   // 测试结束提示
-  driver = usart_driver_get(USART_DEBUG);
+  driver = usart_driver_get(USART_LOGGER);
   if (driver) {
     usart_hal_t *uart_hal = usart_hal_create(driver);
     if (uart_hal) {

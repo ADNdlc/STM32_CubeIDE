@@ -7,7 +7,6 @@
 typedef struct usart_hal_t usart_hal_t;
 
 typedef struct {
-  // 修改这里，直接使用 usart_driver_ops_t 而不是包含它
   usart_driver_ops_t base_vtable;
 } usart_hal_vtable_t;
 

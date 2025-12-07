@@ -37,6 +37,7 @@ typedef enum
 typedef enum
 {
   USART_LOGGER = 0,
+  USART_ATCMD,
   //...
   USART_MAX_DEVICES
 } usart_device_id_t;
@@ -55,16 +56,15 @@ typedef struct
   uint32_t channel;
 } pwm_mapping_t;
 
-// 导出映射表
-extern const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES];
-extern const pwm_mapping_t pwm_mappings[PWM_MAX_DEVICES];
-
 // USART 设备映射结构体
 typedef struct
 {
   UART_HandleTypeDef *huart;
 } usart_mapping_t;
 
+// 导出映射表
+extern const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES];
+extern const pwm_mapping_t pwm_mappings[PWM_MAX_DEVICES];
 extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 
 #endif /* STM32H743_BOARD_V1_DEVICE_MAPPING_H_ */

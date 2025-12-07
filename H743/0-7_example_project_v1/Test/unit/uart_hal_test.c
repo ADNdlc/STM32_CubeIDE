@@ -21,7 +21,7 @@ static void delay_ms(uint32_t ms) { HAL_Delay(ms); }
 // 1. UART HAL 同步发送测试
 static void test_uart_hal_sync_transmit(void) {
   // 获取 USART 驱动实例
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
 
   if (driver) {
     // 创建 USART HAL 对象
@@ -56,20 +56,20 @@ static void test_uart_hal_sync_transmit(void) {
 // 2. UART HAL 同步接收测试
 static void test_uart_hal_sync_receive(void) {
   // 获取 USART 驱动实例
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
 
   if (driver) {
     // 创建 USART HAL 对象
     usart_hal_t *uart_hal = usart_hal_create(driver);
 
     if (uart_hal) {
-      const char *prompt_msg = "Please send 10 bytes within 5 seconds...\r\n";
+      const char *prompt_msg = "Please send 10 bytes within 10 seconds...\r\n";
       usart_hal_send(uart_hal, (const uint8_t *)prompt_msg, strlen(prompt_msg),
                      1000);
 
       // 测试同步接收
       uint8_t rx_buffer[10];
-      int result = usart_hal_recv(uart_hal, rx_buffer, sizeof(rx_buffer), 5000);
+      int result = usart_hal_recv(uart_hal, rx_buffer, sizeof(rx_buffer), 10000); // 等待10秒
 
       if (result == 0) {
         // 接收成功，回显数据
@@ -124,7 +124,7 @@ static void uart_test_callback(void *context, usart_event_t event, void *args) {
 // 3. UART HAL 异步发送测试
 static void test_uart_hal_async_transmit(void) {
   // 获取 USART 驱动实例
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
 
   if (driver) {
     // 创建 USART HAL 对象
@@ -174,7 +174,7 @@ static void test_uart_hal_async_transmit(void) {
 // 4. UART HAL 异步接收测试
 static void test_uart_hal_async_receive(void) {
   // 获取 USART 驱动实例
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
 
   if (driver) {
     // 创建 USART HAL 对象
@@ -234,7 +234,7 @@ static void test_uart_hal_async_receive(void) {
 // 主测试入口
 void uart_hal_test_run(void) {
   // 测试开始提示
-  usart_driver_t *driver = usart_driver_get(USART_DEBUG);
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
   if (driver) {
     usart_hal_t *uart_hal = usart_hal_create(driver);
     if (uart_hal) {
@@ -250,18 +250,17 @@ void uart_hal_test_run(void) {
   test_uart_hal_sync_transmit();
   delay_ms(500);
 
+  test_uart_hal_sync_receive();
+  delay_ms(500);
+
   test_uart_hal_async_transmit();
   delay_ms(500);
 
-  // 注意：接收测试需要外部发送数据，可以根据需要启用
-  // test_uart_hal_sync_receive();
-  // delay_ms(500);
-
-  // test_uart_hal_async_receive();
-  // delay_ms(500);
+  test_uart_hal_async_receive();
+  delay_ms(500);
 
   // 测试结束提示
-  driver = usart_driver_get(USART_DEBUG);
+  driver = usart_driver_get(USART_LOGGER);
   if (driver) {
     usart_hal_t *uart_hal = usart_hal_create(driver);
     if (uart_hal) {

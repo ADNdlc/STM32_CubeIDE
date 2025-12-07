@@ -6,17 +6,20 @@
  */
 
 #include "all_tests_config.h"
-#include "all_tests.h"
 #include "led_test.h"
 #include "key_test.h"
+#include "uart_hal_test.h"
+#include "uart_queue_test.h"
 
-void run_all_tests(void) {
+
+void run_all_tests(void)
+{
 #if led_test
     led_test_run();
 #endif
-	
+
 #if key_test
-	key_test_run();
+    key_test_run();
 #endif
 
 #if uart_hal_test
