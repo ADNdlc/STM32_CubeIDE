@@ -137,7 +137,7 @@ static void dispatch_irq(UART_HandleTypeDef *huart, usart_event_t event,
       stm32_usart_driver_t *driver =
           g_usart_instances[i]; // 获取stm32_usart_driver_t对象
       // 处理完成标志
-      if (event == USART_EVENT_RX_DATA || event == USART_EVENT_RX_EVENT) {
+      if (event == USART_EVENT_RX_COMPLETE || event == USART_EVENT_RX_EVENT) {
         driver->R_isbusy = 0;
       }
       if (event == USART_EVENT_TX_COMPLETE) {
@@ -150,11 +150,12 @@ static void dispatch_irq(UART_HandleTypeDef *huart, usart_event_t event,
       break;
     }
   }
+
 }
 
 // HAL 库回调函数重写
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  dispatch_irq(huart, USART_EVENT_RX_DATA, NULL);
+  dispatch_irq(huart, USART_EVENT_RX_COMPLETE, NULL);
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
@@ -172,7 +173,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
 // 业务层回调示例
 /*
 void my_uart_callback(void *context, usart_event_t event, void *args) {
-    if (event == USART_EVENT_RX_DATA) { //在平台对应回调里传入的事件类型判断
+    if (event == USART_EVENT_RX_COMPLETE) { //在平台对应回调里传入的事件类型判断
         // 处理接收到的数据
     }
     else if (event == USART_EVENT_TX_COMPLETE) {

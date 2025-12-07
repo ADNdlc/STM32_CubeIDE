@@ -32,5 +32,5 @@ const pwm_mapping_t pwm_mappings[PWM_MAX_DEVICES] = {
 // USART 设备映射表定义
 const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
     [USART_LOGGER] = {&huart1},	// logger输出
-    [USART_ATCMD] = {&huart2},
+    [USART_ATCMD] = {&huart2}
 };
