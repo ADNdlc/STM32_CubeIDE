@@ -41,7 +41,10 @@ void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
   queue->uart_hal = hal;
   queue->tx_busy = false;
   queue->rx_enabled = false;
+  queue->tx_busy = false;
+  queue->rx_enabled = false;
   queue->tx_current_len = 0;
+  queue->last_rx_pos = 0;
   // 设置回调函数
   usart_hal_set_callback((usart_hal_t *)queue->uart_hal, uart_queue_callback,
                          queue);
@@ -167,11 +170,11 @@ void uart_queue_start_receive(uart_queue_t *queue) {
   if (!queue->rx_enabled) {
     queue->rx_enabled = true;
 
-    // 启动异步接收
-    uint8_t *rx_ptr;
-    size_t rx_len = rb_peek_write(&queue->rx_rb, &rx_ptr);
-    if (rx_len > 0) {
-      usart_hal_receive_asyn((usart_hal_t *)queue->uart_hal, rx_ptr, rx_len);
+    // 启动异步接收 - 使用完整缓冲区以支持循环DMA
+    // 注意：如果是循环模式，DMA将始终在整个缓冲区上循环，这与RingBuffer的逻辑大小一致
+    if (queue->rx_rb.size > 0) {
+      usart_hal_receive_asyn((usart_hal_t *)queue->uart_hal,
+                             queue->rx_rb.buffer, queue->rx_rb.size);
     }
   }
 }
@@ -227,9 +230,22 @@ static void uart_queue_handle_rx_event(uart_queue_t *queue, void *args) {
     // 错误处理...
     return;
   }
-  // 更新接收区写指针 - args是接收到的数据长度
-  size_t rx_len = (size_t)args;
-  rb_advance_head(&queue->rx_rb, rx_len);
+  // 更新接收区写指针 - args是当前DMA传输的缓冲区位置偏移(Circular
+  // Mode)或传输量(Normal Mode) 假设使用 ReceiveToIdle + Circular Mode
+  size_t current_pos = (size_t)args;
+  size_t len_to_advance = 0;
+
+  if (current_pos >= queue->last_rx_pos) {
+    len_to_advance = current_pos - queue->last_rx_pos;
+  } else {
+    // 发生了回绕
+    len_to_advance = (queue->rx_rb.size - queue->last_rx_pos) + current_pos;
+  }
+
+  if (len_to_advance > 0) {
+    rb_advance_head(&queue->rx_rb, len_to_advance);
+    queue->last_rx_pos = current_pos;
+  }
 
 #if restart
   // 重新启动接收

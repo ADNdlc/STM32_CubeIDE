@@ -25,8 +25,23 @@
  * Function: Portable interface for each platform.
  * Created on: 2015-04-28
  */
- 
+
 #include <elog.h>
+#include <stdio.h>
+// 依赖
+#include "device_mapping.h"
+#include "stm32h7xx_hal.h"
+#include "uart_queue/uart_queue.h"
+#include "usart_factory.h"
+#include "usart_hal/usart_hal.h"
+
+
+// EasyLogger 使用的 UART 队列缓冲区
+static uint8_t elog_tx_buffer[4096];
+static uint8_t elog_rx_buffer[128]; // 日志通常只发送，接收缓冲区给小点
+
+static usart_hal_t *g_elog_hal = NULL;
+static uart_queue_t *g_elog_queue = NULL;
 
 /**
  * EasyLogger port initialize
@@ -34,11 +49,26 @@
  * @return result
  */
 ElogErrCode elog_port_init(void) {
-    ElogErrCode result = ELOG_NO_ERR;
+  ElogErrCode result = ELOG_NO_ERR;
 
-    /* add your code here */
-    
-    return result;
+  usart_driver_t *driver = usart_driver_get(USART_LOGGER);
+  if (driver) {
+    g_elog_hal = usart_hal_create(driver);
+    if (g_elog_hal) {
+      g_elog_queue =
+          uart_queue_create(g_elog_hal, elog_tx_buffer, sizeof(elog_tx_buffer),
+                            elog_rx_buffer, sizeof(elog_rx_buffer));
+      if (!g_elog_queue) {
+        result = ELOG_ERR;
+      }
+    } else {
+      result = ELOG_ERR;
+    }
+  } else {
+    result = ELOG_ERR;
+  }
+
+  return result;
 }
 
 /**
@@ -46,9 +76,14 @@ ElogErrCode elog_port_init(void) {
  *
  */
 void elog_port_deinit(void) {
-
-    /* add your code here */
-
+  if (g_elog_queue) {
+    uart_queue_destroy(g_elog_queue);
+    g_elog_queue = NULL;
+  }
+  if (g_elog_hal) {
+    usart_hal_destroy(g_elog_hal);
+    g_elog_hal = NULL;
+  }
 }
 
 /**
@@ -58,28 +93,20 @@ void elog_port_deinit(void) {
  * @param size log size
  */
 void elog_port_output(const char *log, size_t size) {
-    
-    /* add your code here */
-
+  if (g_elog_queue) {
+    uart_queue_send(g_elog_queue, (const uint8_t *)log, size);
+  }
 }
 
 /**
  * output lock
  */
-void elog_port_output_lock(void) {
-    
-    /* add your code here */
-    
-}
+void elog_port_output_lock(void) { /* add your code here */ }
 
 /**
  * output unlock
  */
-void elog_port_output_unlock(void) {
-    
-    /* add your code here */
-    
-}
+void elog_port_output_unlock(void) { /* add your code here */ }
 
 /**
  * get current time interface
@@ -87,9 +114,9 @@ void elog_port_output_unlock(void) {
  * @return current time
  */
 const char *elog_port_get_time(void) {
-    
-    /* add your code here */
-    return "";
+  static char cur_system_time[24] = {0};
+  snprintf(cur_system_time, 24, "%lu", HAL_GetTick());
+  return cur_system_time;
 }
 
 /**
@@ -98,9 +125,9 @@ const char *elog_port_get_time(void) {
  * @return current process name
  */
 const char *elog_port_get_p_info(void) {
-    
-    /* add your code here */
-	return "";
+
+  /* add your code here */
+  return "";
 }
 
 /**
@@ -109,7 +136,7 @@ const char *elog_port_get_p_info(void) {
  * @return current thread name
  */
 const char *elog_port_get_t_info(void) {
-    
-    /* add your code here */
-	return "";
+
+  /* add your code here */
+  return "";
 }

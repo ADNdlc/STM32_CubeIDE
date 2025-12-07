@@ -14,7 +14,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-
 // 前向声明
 typedef struct uart_queue_t uart_queue_t;
 
@@ -28,6 +27,7 @@ struct uart_queue_t {
   bool tx_busy;                // 发送忙标志
   bool rx_enabled;             // 接收使能标志
   size_t tx_current_len;       // 当前发送长度
+  size_t last_rx_pos;          // 记录上一次接收位置(针对循环DMA)
 };
 
 uart_queue_t *uart_queue_create(const usart_hal_t *hal, uint8_t *tx_buffer,
