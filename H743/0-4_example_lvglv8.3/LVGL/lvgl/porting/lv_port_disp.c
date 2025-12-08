@@ -213,7 +213,7 @@ static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
 #else
     	x = area->x2 - area->x1 +1;
     	y = area->y2 - area->y1 +1;
-    	uint32_t dest_addr = (uint32_t)get_BackBuf();
+    	uint32_t dest_addr = (uint32_t)get_BackBuf(); //获取目标地址
     	dest_addr += (area->y1 * disp_drv->hor_res + area->x1) * 2;
     	DMA2D_Copy_IT((void *)(color_p),
     		       (void *)(dest_addr),
