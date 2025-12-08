@@ -12,7 +12,8 @@
 #define key_test 0
 #define uart_hal_test 0
 #define uart_queue_test 0
-#define elog_test 1
+#define elog_test 0
+
 
 // 运行所有测试用例
 void run_all_tests(void);

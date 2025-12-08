@@ -1,3 +1,4 @@
+#include "elog_init.h"
 
 int main(void)
 {
@@ -35,6 +36,12 @@ int main(void)
 
   // 初始化BSP
   bsp_init();
+  
+  // 初始化并配置EasyLogger
+  if (elog_init_and_config() != ELOG_NO_ERR) {
+    // 如果日志初始化失败，可以选择在此处理错误
+    // 在此示例中我们仅继续执行
+  }
 
   /* USER CODE END 2 */
 

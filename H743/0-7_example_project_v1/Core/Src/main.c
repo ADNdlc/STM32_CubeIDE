@@ -33,6 +33,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "logger/elog_init.h"
 #include "all_tests_config.h"
 
 /* USER CODE END Includes */
@@ -122,6 +123,12 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+
+  if(elog_init_and_config() == ELOG_NO_ERR){
+	  log_i("EasyLogger Init Success!");
+  }
+  else{elog_deinit();
+  }
 
   run_all_tests();
 

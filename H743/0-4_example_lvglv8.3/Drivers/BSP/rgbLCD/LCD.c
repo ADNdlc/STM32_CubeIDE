@@ -30,15 +30,11 @@ static void exchange_BackFront(void){
 }
 
 /*	ltdc行中断回调
- * 	配置为0行中断(垂直消隐周期)
+ * 	需要配置为0行中断(垂直消隐周期)
  */
 void HAL_LTDC_LineEventCallback(LTDC_HandleTypeDef *ltdc)
 {
 	exchange_BackFront();
-
-	// 设置新缓冲区地址,不需要只要交换地址
-	//HAL_LTDC_SetAddress_NoReload(&hltdc, (uint32_t)front_buf, 0);
-	//HAL_LTDC_SetAddress(&ltdc, (uint32_t)front_buf, 0);
 }
 
 
@@ -72,7 +68,7 @@ uint16_t* LTDC_Read_Point_vertical(uint16_t x,uint16_t y,uint32_t Layeraddr)
 	return *(uint16_t*)((uint32_t)Layeraddr + 2*(800*(479-x) + y));
 }
 
-/*	DMA2D单色填充
+/*	DMA2D单色填充(为了效率直接操作寄存器)
  *	pDst: 	填充区域的起始内存地址
  *	width:	填充区域的宽
  *	height:	填充区域的高

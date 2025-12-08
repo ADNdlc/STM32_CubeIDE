@@ -37,7 +37,7 @@
 
 
 // EasyLogger 使用的 UART 队列缓冲区
-static uint8_t elog_tx_buffer[4096];
+static uint8_t elog_tx_buffer[2096];
 static uint8_t elog_rx_buffer[128]; // 日志通常只发送，接收缓冲区给小点
 
 static usart_hal_t *g_elog_hal = NULL;
@@ -127,7 +127,7 @@ const char *elog_port_get_time(void) {
 const char *elog_port_get_p_info(void) {
 
   /* add your code here */
-  return "";
+  return ""; //当前没有使用系统
 }
 
 /**
@@ -138,5 +138,5 @@ const char *elog_port_get_p_info(void) {
 const char *elog_port_get_t_info(void) {
 
   /* add your code here */
-  return "";
+  return ""; //当前没有使用系统
 }
