@@ -5,7 +5,7 @@
  *      Author: 
  */
 #include "all_tests_config.h"
-#if key_test
+#if _key_test_
 
 #include "key_test.h"
 #include "device_mapping.h"

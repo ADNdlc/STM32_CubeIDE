@@ -9,7 +9,7 @@
 #include "all_tests_config.h"
 #include "main.h"
 
-#if elog_test
+#if _elog_test_
 
 #include "elog.h"
 #include <stdio.h>

@@ -9,7 +9,8 @@
 #define SDRAM_SDRAM_TEST_H_
 
 #include "sdram/W9825G6KH.h"
-#include "elog.h"  // 引入EasyLogger头文件
+#include "retarget.h"//printf函数重映射
+
 
 void fsmc_sdram_test();
 

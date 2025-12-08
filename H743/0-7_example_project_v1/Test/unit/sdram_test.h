@@ -8,11 +8,8 @@
 #ifndef SDRAM_SDRAM_TEST_H_
 #define SDRAM_SDRAM_TEST_H_
 
-#include "sdram/W9825G6KH.h"
-#include "retarget.h"//printf函数重映射
 
-
-void fsmc_sdram_test();
+void sdram_test();
 
 
 #endif /* SDRAM_SDRAM_TEST_H_ */

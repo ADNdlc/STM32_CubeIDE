@@ -30,8 +30,6 @@
 #include <sys/time.h>
 #include <sys/times.h>
 
-#include "usart/retarget.h"
-
 /* Variables */
 extern int __io_putchar(int ch) __attribute__((weak));
 extern int __io_getchar(void) __attribute__((weak));
@@ -90,7 +88,7 @@ __attribute__((weak)) int _write(int file, char *ptr, int len)
   return len;
 }
 
-#ifndef _INC_RETARGET_H_
+//#ifndef _INC_RETARGET_H_
 int _close(int file)
 {
   (void)file;
@@ -117,7 +115,7 @@ int _lseek(int file, int ptr, int dir)
   (void)dir;
   return 0;
 }
-#endif
+//#endif
 
 int _open(char *path, int flags, ...)
 {

@@ -8,11 +8,12 @@
 #ifndef TEST_UNIT_ALL_TESTS_H_
 #define TEST_UNIT_ALL_TESTS_H_
 
-#define led_test 0
-#define key_test 0
-#define uart_hal_test 0
-#define uart_queue_test 0
-#define elog_test 0
+#define _led_test_ 0
+#define _key_test_ 0
+#define _uart_hal_test_ 0
+#define _uart_queue_test_ 0
+#define _elog_test_ 0
+#define _SDRAM_TEST_ 1
 
 
 // 运行所有测试用例

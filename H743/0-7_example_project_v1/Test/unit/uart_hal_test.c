@@ -5,7 +5,7 @@
  *      Author: 12114
  */
 #include "all_tests_config.h"
-#if uart_hal_test 
+#if _uart_hal_test_
 
 #include "uart_hal_test.h"
 #include "device_mapping.h"

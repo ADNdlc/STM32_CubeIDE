@@ -11,26 +11,31 @@
 #include "led_test.h"
 #include "uart_hal_test.h"
 #include "uart_queue_test.h"
+#include "sdram_test.h"
 
-
-void run_all_tests(void) {
-#if led_test
+void run_all_tests(void)
+{
+#if _led_test_
   led_test_run();
 #endif
 
-#if key_test
+#if _key_test_
   key_test_run();
 #endif
 
-#if uart_hal_test
+#if _uart_hal_test_
   uart_hal_test_run();
 #endif
 
-#if uart_queue_test
+#if _uart_queue_test_
   uart_queue_test_run();
 #endif
 
-#if elog_test
+#if _elog_test_
   elog_test_run();
+#endif
+
+#if _sdram_test_
+  sdram_test();
 #endif
 }

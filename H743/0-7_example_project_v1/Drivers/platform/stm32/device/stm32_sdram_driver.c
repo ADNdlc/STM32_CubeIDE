@@ -50,12 +50,6 @@ static int stm32_sdram_send_command(sdram_driver_t *self, uint32_t command_mode,
 }
 
 static int stm32_sdram_init(sdram_driver_t *self) {
-  // Ported from W9825G6KH.c SDRAM_InitSequence
-  // Assumes hsdram is already initialized by HAL_SDRAM_Init in main/fmc.c
-
-  // We can use the helper send_command or direct HAL call.
-  // Use helper to verify it works.
-
   int ret = 0;
 
   // Step 1: Clock Enable
@@ -83,13 +77,13 @@ static int stm32_sdram_init(sdram_driver_t *self) {
   ret |= stm32_sdram_send_command(self, FMC_SDRAM_CMD_LOAD_MODE,
                                   FMC_SDRAM_CMD_TARGET_BANK1, 1, tmpr);
 
-  // Step 6: Set Refresh Rate
-  // Count = 64ms * 100MHz / 8192 - 20 = 761 (approx)
-  // Old driver used 917 (assuming 120MHz?).
-  // If HCLK is 200MHz, FMC clock is HCLK/2 = 100MHz?
-  // Let's stick to the calculation or value from old driver if clock matches.
-  // Usage in old driver: HAL_SDRAM_ProgramRefreshRate(&sdramHandle, 917);
-  // Let's copy 917 for now, assuming same clock config.
+	/* 设置自刷新速率 */
+
+	//刷新频率计数器(以SDCLK频率计数),计算方法:
+	//COUNT=SDRAM刷新周期/行数-20=SDRAM刷新周期(us)*SDCLK频率(Mhz)/行数
+  	//我们使用的SDRAM刷新周期为64ms,SDCLK=200/2=100Mhz,行数为8192(2^13).
+	//所以,COUNT=64*1000*100/8192-20=761(hsdram=100MHz)s
+	//或  ,COUNT=64*1000*120/8192-20=917(hsdram=120MHz)
   stm32_sdram_impl_t *impl = (stm32_sdram_impl_t *)self;
   HAL_SDRAM_ProgramRefreshRate(impl->public.hsdram, 917);
 

@@ -5,7 +5,7 @@
  *      Author: 12114
  */
 #include "all_tests_config.h"
-#if led_test
+#if _led_test_
 
 #include "device_mapping.h"
 #include "gpio_factory.h"

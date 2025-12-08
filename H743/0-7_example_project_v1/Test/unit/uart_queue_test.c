@@ -5,7 +5,7 @@
  *      Author: 12114
  */
 #include "all_tests_config.h"
-#if uart_queue_test
+#if _uart_queue_test_
 
 #include "device_mapping.h"
 #include "main.h"
