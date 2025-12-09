@@ -12,11 +12,11 @@
 #include "gpio_factory.h"
 #include "gpio_key/gpio_key.h"
 #include "main.h"
-#include <stdio.h>
-#include <string.h>
+
 
 //暂时使用led辅助测试
 #include "gpio_led/gpio_led.h"
+#include "sys.h"
 
 gpio_led_t *led;
 
@@ -51,18 +51,18 @@ static void key1_event_callback(gpio_key_t *key, KeyEvent event) {
             // 双击KEY1使LED闪烁两次
             for (int i = 0; i < 2; i++) {
             	gpio_led_toggle(led);
-                HAL_Delay(400);
+                sys_delay_ms(400);
                 gpio_led_toggle(led);
-                HAL_Delay(400);
+                sys_delay_ms(400);
             }
             break;
         case KeyEvent_TriplePress:
             // 三击KEY1使LED快速闪烁
             for (int i = 0; i < 5; i++) {
             	gpio_led_toggle(led);
-                HAL_Delay(150);
+                sys_delay_ms(150);
             	gpio_led_toggle(led);
-                HAL_Delay(150);
+                sys_delay_ms(150);
             }
             break;
         case KeyEvent_LongPress:
@@ -85,18 +85,18 @@ static void key2_event_callback(gpio_key_t *key, KeyEvent event) {
             // 双击KEY2使LED以较慢频率闪烁
             for (int i = 0; i < 3; i++) {
             	gpio_led_toggle(led);
-                HAL_Delay(500);
+                sys_delay_ms(500);
             	gpio_led_toggle(led);
-                HAL_Delay(500);
+                sys_delay_ms(500);
             }
             break;
         case KeyEvent_TriplePress:
             // 三击KEY2使LED以较快频率闪烁
             for (int i = 0; i < 10; i++) {
             	gpio_led_toggle(led);
-                HAL_Delay(100);
+                sys_delay_ms(100);
             	gpio_led_toggle(led);
-                HAL_Delay(100);
+                sys_delay_ms(100);
             }
             break;
         case KeyEvent_LongPress:
@@ -162,7 +162,7 @@ static void test_gpio_key(void) {
                 Key_Update(key0);
                 Key_Update(key1);
                 Key_Update(key2);
-                HAL_Delay(1);
+                sys_delay_ms(1);
             }
             
             // 注销观察者

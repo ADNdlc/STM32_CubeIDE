@@ -16,8 +16,6 @@
 #include "pwm_led/pwm_led.h"
 #include "rgb_led/rgb_led.h"
 
-// 延时辅助函数
-static void delay_ms(uint32_t ms) { HAL_Delay(ms); }
 
 // 1. GPIO LED 测试用例
 static void test_gpio_led(void) {
@@ -32,10 +30,10 @@ static void test_gpio_led(void) {
       int i = 3;
       while (i--) {
         led_hal_on((led_hal_t *)led);
-        delay_ms(200);
+        sys_delay_ms(200);
 
         led_hal_off((led_hal_t *)led);
-        delay_ms(200);
+        sys_delay_ms(200);
       }
 
       // 销毁对象
@@ -56,25 +54,25 @@ static void test_pwm_led(void) {
     if (led) {
       // 开启 (全亮)
       led_hal_on((led_hal_t *)led);
-      delay_ms(500);
+      sys_delay_ms(500);
 
       // 测试调节亮度 (50%)
       pwm_led_set_brightness(led, 500);
-      delay_ms(500);
+      sys_delay_ms(500);
 
       // 关闭
       led_hal_off((led_hal_t *)led);
-      delay_ms(500);
+      sys_delay_ms(500);
 
       led_hal_on((led_hal_t *)led);
       // 呼吸
       for (int i = 0; i < 100; i++) {
         pwm_led_set_brightness(led, i * 10);
-        delay_ms(25);
+        sys_delay_ms(25);
       }
       for (int i = 100; i > 0; i--) {
         pwm_led_set_brightness(led, i * 10);
-        delay_ms(25);
+        sys_delay_ms(25);
       }
       led_hal_off((led_hal_t *)led);
 
@@ -107,31 +105,31 @@ static void test_rgb_led(void) {
 
         // 测试纯红色 (HSV: H=0, S=100, V=100)
         rgb_led_set_hsv(rgb, 0, 100, 100);
-        delay_ms(500);
+        sys_delay_ms(500);
 
         // 测试纯绿色 (HSV: H=120, S=100, V=100)
         rgb_led_set_hsv(rgb, 120, 100, 100);
-        delay_ms(500);
+        sys_delay_ms(500);
 
         // 测试纯蓝色 (HSV: H=240, S=100, V=100)
         rgb_led_set_hsv(rgb, 240, 100, 100);
-        delay_ms(500);
+        sys_delay_ms(500);
 
         // 测试黄色 (HSV: H=60, S=100, V=100)
         rgb_led_set_hsv(rgb, 60, 100, 100);
-        delay_ms(500);
+        sys_delay_ms(500);
 
         // 测试青色 (HSV: H=180, S=100, V=100)
         rgb_led_set_hsv(rgb, 180, 100, 100);
-        delay_ms(500);
+        sys_delay_ms(500);
 
         // 测试品红色 (HSV: H=300, S=100, V=100)
         rgb_led_set_hsv(rgb, 300, 100, 100);
-        delay_ms(500);
+        sys_delay_ms(500);
 
         // 测试关闭
         led_hal_off((led_hal_t *)rgb);
-        delay_ms(500);
+        sys_delay_ms(500);
 
         // 重新打开
         led_hal_on((led_hal_t *)rgb);
@@ -140,19 +138,19 @@ static void test_rgb_led(void) {
         // 这样颜色变化会非常明显
         for (int h = 0; h < 360; h += 3) {
           rgb_led_set_hsv(rgb, h, 100, 100); // 满饱和度，满亮度
-          delay_ms(20);
+          sys_delay_ms(20);
         }
 
-        delay_ms(500);
+        sys_delay_ms(500);
 
         // 亮度渐变测试 - 固定红色，改变亮度
         for (int v = 0; v <= 100; v += 2) {
           rgb_led_set_hsv(rgb, 0, 100, v); // 红色，满饱和度，亮度渐变
-          delay_ms(50);
+          sys_delay_ms(50);
         }
         for (int v = 100; v >= 0; v -= 2) {
           rgb_led_set_hsv(rgb, 0, 100, v);
-          delay_ms(50);
+          sys_delay_ms(50);
         }
 
         led_hal_off((led_hal_t *)rgb);
@@ -208,13 +206,13 @@ static void test_polymorphism(void) {
           for (int i = 0; i < led_count; i++) {
             led_hal_on(leds[i]);
           }
-          delay_ms(500);
+          sys_delay_ms(500);
 
           // 统一关闭
           for (int i = 0; i < led_count; i++) {
             led_hal_off(leds[i]);
           }
-          delay_ms(500);
+          sys_delay_ms(500);
         }
 
         // 销毁

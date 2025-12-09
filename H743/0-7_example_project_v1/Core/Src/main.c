@@ -33,6 +33,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "SYSTEM/sys.h"
 #include "logger/elog_init.h"
 #include "all_tests_config.h"
 
@@ -124,10 +125,19 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
 
+  sys_bind_ops(SysFactory_GetOps());
+  sys_core_init();
+
   if(elog_init_and_config() == ELOG_NO_ERR){
-	  log_i("EasyLogger Init Success!");
+	  log_a("This is an ASSERT message.");
+	  log_e("This is an ERROR message.");
+	  log_w("This is a WARNING message.");
+	  log_i("This is an INFO message.");
+	  log_d("This is a DEBUG message.");
+	  log_v("This is a VERBOSE message.");
   }
-  else{elog_deinit();
+  else{
+	  elog_deinit();
   }
 
   run_all_tests();

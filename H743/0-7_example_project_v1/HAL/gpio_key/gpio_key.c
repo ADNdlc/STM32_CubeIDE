@@ -6,7 +6,7 @@
  */
 
 #include "gpio_key.h"
-#include "sys_hal/sys_hal.h"
+#include "sys.h"
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -126,7 +126,7 @@ void Key_Update(gpio_key_t *self) {
   if (!self || !self->port)
     return;
 
-  uint32_t now = sys_hal_get_tick(); // 获取当前时间
+  uint32_t now = sys_get_systick_ms(); // 获取当前时间
   uint8_t pin_state = GPIO_READ(self->port);// 读取当前gpio状态
 
   

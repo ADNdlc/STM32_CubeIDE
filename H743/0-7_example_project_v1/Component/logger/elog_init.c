@@ -36,9 +36,6 @@ ElogErrCode elog_init_and_config(void) {
     /* Start EasyLogger */
     elog_start();
     
-    /* Log initialization success */
-    log_i("EasyLogger", "Logger initialized successfully");
-    
     return result;
 }
 

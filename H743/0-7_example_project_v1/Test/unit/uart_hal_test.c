@@ -15,9 +15,6 @@
 #include <string.h>
 
 
-// 延时辅助函数
-static void delay_ms(uint32_t ms) { HAL_Delay(ms); }
-
 // 1. UART HAL 同步发送测试
 static void test_uart_hal_sync_transmit(void) {
   // 获取 USART 驱动实例
@@ -45,7 +42,7 @@ static void test_uart_hal_sync_transmit(void) {
                        1000);
       }
 
-      delay_ms(100);
+      sys_delay_ms(100);
 
       // 销毁对象
       usart_hal_destroy(uart_hal);
@@ -87,7 +84,7 @@ static void test_uart_hal_sync_receive(void) {
                        strlen(timeout_msg), 1000);
       }
 
-      delay_ms(100);
+      sys_delay_ms(100);
 
       // 销毁对象
       usart_hal_destroy(uart_hal);
@@ -144,7 +141,7 @@ static void test_uart_hal_async_transmit(void) {
         // 等待发送完成（最多1秒）
         uint32_t timeout = 1000;
         while (!async_tx_complete && timeout > 0) {
-          delay_ms(10);
+          sys_delay_ms(10);
           timeout -= 10;
         }
 
@@ -163,7 +160,7 @@ static void test_uart_hal_async_transmit(void) {
                        1000);
       }
 
-      delay_ms(100);
+      sys_delay_ms(100);
 
       // 销毁对象
       usart_hal_destroy(uart_hal);
@@ -199,7 +196,7 @@ static void test_uart_hal_async_receive(void) {
         // 等待接收完成（最多5秒）
         uint32_t timeout = 5000;
         while (!async_rx_complete && timeout > 0) {
-          delay_ms(10);
+          sys_delay_ms(10);
           timeout -= 10;
         }
 
@@ -223,7 +220,7 @@ static void test_uart_hal_async_receive(void) {
                        1000);
       }
 
-      delay_ms(100);
+      sys_delay_ms(100);
 
       // 销毁对象
       usart_hal_destroy(uart_hal);
@@ -248,16 +245,16 @@ void uart_hal_test_run(void) {
 
   // 运行各项测试
   test_uart_hal_sync_transmit();
-  delay_ms(500);
+  sys_delay_ms(500);
 
   test_uart_hal_sync_receive();
-  delay_ms(500);
+  sys_delay_ms(500);
 
   test_uart_hal_async_transmit();
-  delay_ms(500);
+  sys_delay_ms(500);
 
   test_uart_hal_async_receive();
-  delay_ms(500);
+  sys_delay_ms(500);
 
   // 测试结束提示
   driver = usart_driver_get(USART_LOGGER);

@@ -16,9 +16,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// 延时辅助函数
-static void delay_ms(uint32_t ms) { HAL_Delay(ms); }
-
 // 定义缓冲区大小
 #define TX_BUFFER_SIZE 2048
 #define RX_BUFFER_SIZE 2048
@@ -53,12 +50,12 @@ static void test_uart_queue_basic_send(void)
       if (result)
       {
         // 等待发送完成
-        delay_ms(100);
+        sys_delay_ms(100);
 
         // 发送第二条消息
         const char *msg2 = "UART Queue Test: Message 2\r\n";
         uart_queue_send(&queue, (const uint8_t *)msg2, strlen(msg2));
-        delay_ms(100);
+        sys_delay_ms(100);
       }
 
       // 销毁对象
@@ -93,7 +90,7 @@ static void test_uart_queue_batch_send(void)
         uart_queue_send(&queue, (const uint8_t *)msg, strlen(msg));
       }
 
-      delay_ms(1);
+      sys_delay_ms(1);
 
       // 检查队列状态
       size_t remaining = uart_queue_tx_count(&queue); // 不延时剩余72,延时1ms剩54
@@ -102,7 +99,7 @@ static void test_uart_queue_batch_send(void)
                "TX Queue remaining: %u bytes\r\n", (unsigned int)remaining);
       uart_queue_send(&queue, (const uint8_t *)status_msg, strlen(status_msg));
 
-      delay_ms(1000);
+      sys_delay_ms(1000);
 
       // 销毁对象
       usart_hal_destroy(uart_hal);
@@ -130,7 +127,7 @@ static void test_uart_queue_overflow(void)
 
       const char *test_msg = "Overflow test: ";
       uart_queue_send(&queue, (const uint8_t *)test_msg, strlen(test_msg));
-      delay_ms(50);
+      sys_delay_ms(50);
 
       // 尝试快速填满缓冲区
       int success_count = 0;
@@ -152,7 +149,7 @@ static void test_uart_queue_overflow(void)
       }
 
       // 报告结果
-      delay_ms(200);
+      sys_delay_ms(200);
       char result_msg[80];
       snprintf(result_msg, sizeof(result_msg),
                "Overflow test: %d success, %d failed\r\n", success_count,
@@ -160,7 +157,7 @@ static void test_uart_queue_overflow(void)
       uart_queue_send(&queue, (const uint8_t *)result_msg, strlen(result_msg));
 
       // 等待队列清空
-      delay_ms(1000);
+      sys_delay_ms(1000);
 
       // 销毁对象
       usart_hal_destroy(uart_hal);
@@ -189,7 +186,7 @@ static void test_uart_queue_receive(void)
       // 发送提示信息
       const char *prompt = "RX test: Please send data within 5 seconds...\r\n";
       uart_queue_send(&queue, (const uint8_t *)prompt, strlen(prompt));
-      delay_ms(100);
+      sys_delay_ms(100);
 
       // 启动接收
       uart_queue_start_receive(&queue);
@@ -222,18 +219,18 @@ static void test_uart_queue_receive(void)
             const char *newline = "\r\n";
             uart_queue_send(&queue, (const uint8_t *)newline, strlen(newline));
 
-            delay_ms(100);
+            sys_delay_ms(100);
           }
         }
 
-        delay_ms(100);
+        sys_delay_ms(100);
         elapsed += 100;
       }
 
       const char *timeout_msg = "RX test: Timeout\r\n";
       uart_queue_send(&queue, (const uint8_t *)timeout_msg,
                       strlen(timeout_msg));
-      delay_ms(100);
+      sys_delay_ms(100);
 
       // 销毁对象
       usart_hal_destroy(uart_hal);
@@ -268,7 +265,7 @@ static void test_uart_queue_status(void)
                "Initial state - TX: %u, RX: %u\r\n", (unsigned int)tx_count,
                (unsigned int)rx_count);
       uart_queue_send(&queue, (const uint8_t *)status_msg, strlen(status_msg));
-      delay_ms(100);
+      sys_delay_ms(100);
 
       // 添加一些数据后检查状态
       const char *test_data = "Status test data\r\n";
@@ -279,13 +276,13 @@ static void test_uart_queue_status(void)
                (unsigned int)tx_count);
       uart_queue_send(&queue, (const uint8_t *)status_msg, strlen(status_msg));
 
-      delay_ms(100);
+      sys_delay_ms(100);
       tx_count = uart_queue_tx_count(&queue);
       snprintf(status_msg, sizeof(status_msg), "After send - TX count: %u\r\n", //tx_count==0
                (unsigned int)tx_count);
       uart_queue_send(&queue, (const uint8_t *)status_msg, strlen(status_msg));
 
-      delay_ms(200);
+      sys_delay_ms(200);
 
       // 销毁对象
       usart_hal_destroy(uart_hal);
@@ -311,23 +308,23 @@ void uart_queue_test_run(void)
     }
   }
 
-  delay_ms(100);
+  sys_delay_ms(100);
 
   // 运行各项测试
-//  test_uart_queue_basic_send();
-//  delay_ms(500);
-//
-//  test_uart_queue_batch_send();
-//  delay_ms(500);
-//
-//  test_uart_queue_overflow();
-//  delay_ms(500);
-//
-//  test_uart_queue_status();
-//  delay_ms(500);
+  test_uart_queue_basic_send();
+  sys_delay_ms(500);
+
+  test_uart_queue_batch_send();
+  sys_delay_ms(500);
+
+  test_uart_queue_overflow();
+  sys_delay_ms(500);
+
+  test_uart_queue_status();
+  sys_delay_ms(500);
 
   test_uart_queue_receive();
-  delay_ms(500);
+  sys_delay_ms(500);
 
   // 测试结束提示
   driver = usart_driver_get(USART_LOGGER);
