@@ -14,6 +14,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// 是否启用自动等待功能的宏定义
+#define UART_QUEUE_AUTO_WAIT_ENABLED 1
+
+// 自动等待时的阻塞时间（毫秒）
+#define UART_QUEUE_AUTO_WAIT_DELAY_MS 3
+
 // 前向声明
 typedef struct uart_queue_t uart_queue_t;
 

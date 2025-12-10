@@ -6,9 +6,12 @@
  */
 
 #include "sdram_factory.h"
+#include "factory_config.h"
 #include "device_mapping.h"
+
+#if (SDRAM_DRIVER_PLATFORM == PLATFORM_STM32)
 #include "stm32_sdram_driver.h"
-#include <stddef.h>
+#endif
 
 static sdram_driver_t *sdram_drivers[SDRAM_MAX_DEVICES] = {NULL};
 
@@ -18,7 +21,13 @@ sdram_driver_t *sdram_driver_get(sdram_device_id_t id) {
   }
   if (sdram_drivers[id] == NULL) {
     const sdram_mapping_t *mapping = &sdram_mappings[id];
-    sdram_drivers[id] = stm32_sdram_create(mapping->hsdram);
+    
+    // 根据平台配置创建相应的SDRAM驱动实例
+    #if (SDRAM_DRIVER_PLATFORM == PLATFORM_STM32)
+        sdram_drivers[id] = stm32_sdram_create(mapping->hsdram);
+    #else
+        #error "未定义SDRAM_DRIVER_PLATFORM或平台不支持"
+    #endif
   }
   return sdram_drivers[id];
 }

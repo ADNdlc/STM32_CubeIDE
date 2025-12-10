@@ -12,14 +12,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#define _led_test_ 1
-#define _key_test_ 1
-#define _uart_hal_test_ 1
-#define _uart_queue_test_ 1
-#define _elog_test_ 1
-#define _sdram_test_ 1
-
-
+#define _sys_test_          1
+#define _led_test_          0
+#define _key_test_          0
+#define _uart_hal_test_     0
+#define _uart_queue_test_   0
+#define _elog_test_         0
+#define _sdram_test_        0
+#define _lcd_test_          0
 // 运行所有测试用例
 void run_all_tests(void);
 

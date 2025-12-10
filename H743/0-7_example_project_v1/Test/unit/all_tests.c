@@ -12,6 +12,8 @@
 #include "uart_hal_test.h"
 #include "uart_queue_test.h"
 #include "sdram_test.h"
+#include "sys_test.h"
+#include "lcd_test.h"
 
 void run_all_tests(void)
 {
@@ -37,5 +39,13 @@ void run_all_tests(void)
 
 #if _sdram_test_
   sdram_test();
+#endif
+
+#if _sys_test_
+  sys_test();
+#endif
+
+#if _lcd_test_
+  lcd_test();
 #endif
 }

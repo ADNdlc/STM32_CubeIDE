@@ -6,12 +6,12 @@
  */
 
 #include "all_tests_config.h"
-#include "sys.h"
-#include "elog.h" // 引入EasyLogger头文件
-#include "sdram_factory.h"
-#include "sdram_driver.h"
 
 #if _sdram_test_
+#include "sys.h"
+#include "elog.h"
+#include "sdram_factory.h"
+#include "sdram_driver.h"
 
 #define SDRAM_BANK_ADDR 0xC0000000
 

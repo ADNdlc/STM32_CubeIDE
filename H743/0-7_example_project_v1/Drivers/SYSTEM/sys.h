@@ -1,14 +1,14 @@
-/*
- * sys.h
- *
- *  Created on: Dec 9, 2025
- *      Author: 12114
- */
-
 #ifndef SYSTEM_SYS_H_
 #define SYSTEM_SYS_H_
 
+#include <stddef.h>
 #include <stdint.h>
+
+typedef enum {
+  SYS_MEM_INTERNAL = 0,
+  SYS_MEM_EXTERNAL,
+  SYS_MEM_CUSTOM,
+} SysMemTag;
 
 typedef struct {
   // 毫秒级延时
@@ -19,6 +19,12 @@ typedef struct {
   uint32_t (*get_systick_ms)(void);
   // 获取系统滴答数（单位：us）
   uint32_t (*get_systick_us)(void);
+  // 内存分配
+  void *(*malloc)(SysMemTag tag, uint32_t size);
+  // 内存释放
+  void (*free)(SysMemTag tag, void *ptr);
+  // 重新分配内存
+  void *(*realloc)(SysMemTag tag, void *ptr, uint32_t size);
   // 初始化
   int (*init)(void);
 } SysCoreOps;
@@ -40,6 +46,26 @@ static inline uint32_t sys_get_systick_ms(void) {
 
 static inline uint32_t sys_get_systick_us(void) {
   return g_sys_core_ops->get_systick_us();
+}
+
+static inline void *sys_malloc(SysMemTag tag, uint32_t size) {
+  if (g_sys_core_ops->malloc) {
+    return g_sys_core_ops->malloc(tag, size);
+  }
+  return NULL;
+}
+
+static inline void sys_free(SysMemTag tag, void *ptr) {
+  if (g_sys_core_ops->free) {
+    g_sys_core_ops->free(tag, ptr);
+  }
+}
+
+static inline void *sys_realloc(SysMemTag tag, void *ptr, uint32_t size) {
+  if (g_sys_core_ops->realloc) {
+    return g_sys_core_ops->realloc(tag, ptr, size);
+  }
+  return NULL;
 }
 
 static inline int sys_core_init(void) { return g_sys_core_ops->init(); }

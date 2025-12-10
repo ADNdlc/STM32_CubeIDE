@@ -11,17 +11,13 @@
 
 // --- DWT (Cycle Counter) 初始化函数 ---
 // 需要包含 #include "core_cm7.h" (通常在 stm32h7xx.h 中已包含)
-static void DWT_Init(void)
-{
+static void DWT_Init(void){
     // 使能DWT外设的TRC功能
-    if (!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk))
-    {
+    if (!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)){
         CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
     }
-
     // 复位周期计数器
     DWT->CYCCNT = 0;
-
     // 使能周期计数器
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }

@@ -7,6 +7,7 @@
 
 #include "uart_queue.h"
 #include "stm32h7xx_hal.h"
+#include "sys.h"
 
 #define restart 0
 
@@ -22,6 +23,7 @@ static void uart_queue_callback(void *context, usart_event_t event, void *args);
 static void uart_queue_handle_tx_complete(uart_queue_t *queue);
 static void uart_queue_handle_rx_complete(uart_queue_t *queue);
 static void uart_queue_handle_rx_event(uart_queue_t *queue, void *args);
+static void uart_queue_try_start_tx(uart_queue_t *queue);
 
 /**
  * @brief 初始化UART队列
@@ -55,7 +57,7 @@ uart_queue_t *uart_queue_create(const usart_hal_t *hal, uint8_t *tx_buffer,
                                 size_t rx_size) {
   uart_queue_t *queue = (uart_queue_t *)malloc(sizeof(uart_queue_t));
   if (!queue) {
-    return;
+    return NULL;
   }
   uart_queue_init(queue, hal, tx_buffer, tx_size, rx_buffer, rx_size);
   return queue;
@@ -101,18 +103,12 @@ static void uart_queue_callback(void *context, usart_event_t event,
 }
 
 /**
- * @brief 发送数据到队列
+ * @brief 尝试启动发送
  *
  * @param queue 队列实例
- * @param data 要发送的数据
- * @param len 数据长度
- * @return bool 是否成功加入队列
  */
-bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len) {
-  size_t written = rb_write(&queue->tx_rb, data, len);
-
-  // 如果有数据写入且当前没有在发送，则启动发送
-  if (written > 0 && !queue->tx_busy) {
+static void uart_queue_try_start_tx(uart_queue_t *queue) {
+  if (!queue->tx_busy) {	//检查是否忙
     uint8_t *tx_ptr;
     size_t tx_len = rb_peek(&queue->tx_rb, &tx_ptr);
     if (tx_len > 0) {
@@ -125,7 +121,39 @@ bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len) {
       }
     }
   }
+}
 
+/**
+ * @brief 发送数据到队列
+ *
+ * @param queue 队列实例
+ * @param data 要发送的数据
+ * @param len 数据长度
+ * @return bool 是否成功加入队列
+ */
+bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len) {
+#if UART_QUEUE_AUTO_WAIT_ENABLED
+  // 检查是否有足够的空间来存放数据
+  size_t free_space = rb_free_space(&queue->tx_rb);
+  // 为警告消息预留空间（假设警告消息不超过16字节）
+  const size_t warning_msg_len = 16;
+  // 如果空间不足，发送警告消息并等待
+  if (free_space < len + warning_msg_len) {
+    const char *warning_msg = "\r\n[UART OVF]\r\n";
+    // 忽略警告消息写入结果，主要是为了腾出空间
+    rb_write(&queue->tx_rb, (const uint8_t *)warning_msg, strlen(warning_msg));
+    // 如果当前没有在发送，启动发送
+    uart_queue_try_start_tx(queue);
+    // 等待一段时间，让数据发送出去以腾出空间
+    sys_delay_ms(UART_QUEUE_AUTO_WAIT_DELAY_MS);
+  }
+#endif
+
+  size_t written = rb_write(&queue->tx_rb, data, len);
+  // 如果有数据写入且当前没有在发送，则启动发送
+  if (written > 0) {
+    uart_queue_try_start_tx(queue);
+  }
   return (written == len);
 }
 
