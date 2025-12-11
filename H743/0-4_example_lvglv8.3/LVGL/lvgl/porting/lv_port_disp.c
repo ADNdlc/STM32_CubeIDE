@@ -41,7 +41,7 @@
 static void disp_init(void);
 
 static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p);	//刷新
-//static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,	//DMA2D
+//static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
 //			   const lv_area_t * fill_area, lv_color_t color);
 
 
@@ -225,7 +225,7 @@ static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
 #endif
 	}
     else{
-    	lv_disp_flush_ready(disp_drv);//刷新被禁止
+    	lv_disp_flush_ready(disp_drv);
     }
     /*IMPORTANT!!!
      *Inform the graphics library that you are ready with the flushing*/

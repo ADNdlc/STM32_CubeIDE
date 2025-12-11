@@ -50,11 +50,11 @@ static inline void lcd_hal_draw_bitmap(lcd_hal_t *self, uint16_t x, uint16_t y,
   self->vtable->base_vtable.draw_bitmap(&self->base, x, y, w, h, pSrc);
 }
 
-static inline void lcd_hal_copy_buffer(lcd_hal_t *self, void *pDst,
+static inline void lcd_hal_copy_buffer(lcd_hal_t *self, void *pSrc,
                                        uint32_t xSize, uint32_t ySize,
                                        uint32_t OffLineSrc, uint32_t OffLineDst,
                                        uint32_t PixelFormat) {
-  self->vtable->base_vtable.copy_buffer(&self->base, pDst, xSize, ySize,
+  self->vtable->base_vtable.copy_buffer(&self->base, pSrc, xSize, ySize,
                                         OffLineSrc, OffLineDst, PixelFormat);
 }
 

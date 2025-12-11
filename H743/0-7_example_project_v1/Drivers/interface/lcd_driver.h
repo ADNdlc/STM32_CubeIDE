@@ -35,7 +35,7 @@ typedef struct {
                       uint16_t h, const void *pSrc);
   // 缓冲区拷贝(将已绘制的数据块拷贝到绘制区)
   void (*copy_buffer)(lcd_driver_t *self,    // lcd对象 (目标)
-                      void *pDst,            // 源
+                      void *pSrc,            // 源
                       uint32_t xSize,        // 宽度
                       uint32_t ySize,        // 高度
                       uint32_t OffLineSrc,   // 源偏移
@@ -45,6 +45,7 @@ typedef struct {
   // 控制
   void (*set_orientation)(lcd_driver_t *self,
                           lcd_orientation_t orientation); // 设置显示方向
+  void (*set_size)(lcd_driver_t *self, uint16_t width, uint16_t height); // 设置显示尺寸
   void (*swap_buffer)(
       lcd_driver_t *self); // 交换活动缓冲区(如果使用双缓冲，请实现此接口)
   uint16_t *(*get_drawbuf)(lcd_driver_t *self);              // 获取绘制缓冲区
@@ -81,6 +82,9 @@ struct lcd_driver_t {
 
 #define LCD_SET_ORIENTATION(driver, orientation)                               \
   (driver)->ops->set_orientation(driver, orientation)
+
+#define LCD_SET_SIZE(driver, width, height)                                    \
+  (driver)->ops->set_size(driver, width, height)
 
 #define LCD_SWAP_BUFFER(driver) (driver)->ops->swap_buffer(driver)
 #define LCD_GET_DRAWBUF(driver) (driver)->ops->get_drawbuf(driver)

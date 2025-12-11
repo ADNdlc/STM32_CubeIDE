@@ -4,16 +4,16 @@
  *  Created on: Dec 8, 2025
  *      Author: 12114
  */
-#if 0
-#include "lvgl_handler.h"
-#include "stm32h7xx_it.h"
+#if 1
+#include "main.h"
+#include "lcd_hal/lcd_hal.h"
 #include "lvgl.h"
 
-extern lv_disp_drv_t *it_disp_drv; // 显示屏句柄
+extern lv_disp_drv_t *it_disp_drv; // lvgl显示屏句柄
+extern lcd_hal_t *lvgl_display;		//底层lcd
 
 // 在dma2d传输完成中断中通知lvgl刷新完成
-void HAL_DMA2D_CLUTLoadingCpltCallback(DMA2D_HandleTypeDef *hdma2d)
-{
+void HAL_DMA2D_CLUTLoadingCpltCallback(DMA2D_HandleTypeDef *hdma2d){
     if ((DMA2D->ISR & DMA2D_FLAG_TC) != 0)
     {
         DMA2D->IFCR = DMA2D_FLAG_TC; // 清除“传输完成”中断标志位
@@ -31,4 +31,15 @@ void HAL_DMA2D_CLUTLoadingCpltCallback(DMA2D_HandleTypeDef *hdma2d)
         }
     }
 }
+
+/*	ltdc行中断回调
+ * 	需要配置为0行中断(垂直消隐周期)
+ */
+void HAL_LTDC_LineEventCallback(LTDC_HandleTypeDef *ltdc)
+{
+	lcd_hal_swap_buffer(lvgl_display);
+}
+
 #endif
+
+

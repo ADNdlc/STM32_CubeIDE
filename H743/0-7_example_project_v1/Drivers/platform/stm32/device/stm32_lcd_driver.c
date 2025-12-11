@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // --- Private Helper Functions ---
 
 static inline void _dma2d_fill(void *pDst, uint32_t width, uint32_t height,
@@ -146,11 +145,11 @@ static void stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y,
   }
 }
 
-static void stm32_lcd_copy_buffer(lcd_driver_t *self, void *pDst,
+static void stm32_lcd_copy_buffer(lcd_driver_t *self, void *pSrc,
                                   uint32_t xSize, uint32_t ySize,
                                   uint32_t OffLineSrc, uint32_t OffLineDst,
                                   uint32_t PixelFormat) {
-  _dma2d_copy(self->draw_buffer, pDst, xSize, ySize, OffLineSrc, OffLineDst,
+  _dma2d_copy(self->draw_buffer, pSrc, xSize, ySize, OffLineSrc, OffLineDst,
               PixelFormat);
 }
 
@@ -203,6 +202,17 @@ static void stm32_lcd_set_displaybuf(lcd_driver_t *self, uint16_t *buffer) {
   }
 }
 
+static void stm32_lcd_set_size(lcd_driver_t *self, uint16_t width, uint16_t height) {
+  stm32_lcd_driver_t *impl = (stm32_lcd_driver_t *)self;
+  self->width = width;
+  self->height = height;
+  
+  // 调用HAL库方法设置窗口大小
+  if (impl->hltdc) {
+    HAL_LTDC_SetWindowSize(impl->hltdc, width, height, 0);
+  }
+}
+
 // Driver operations table
 static const lcd_driver_ops_t stm32_lcd_ops = {
     .draw_point = stm32_lcd_draw_point,
@@ -211,6 +221,7 @@ static const lcd_driver_ops_t stm32_lcd_ops = {
     .draw_bitmap = stm32_lcd_draw_bitmap,
     .copy_buffer = stm32_lcd_copy_buffer,
     .set_orientation = stm32_lcd_set_orientation,
+    .set_size = stm32_lcd_set_size,
     .swap_buffer = stm32_lcd_swap_buffer,
     .get_drawbuf = stm32_lcd_get_drawbuf,
     .get_displaybuf = stm32_lcd_get_displaybuf,
@@ -230,6 +241,9 @@ lcd_driver_t *stm32_lcd_driver_create(LTDC_HandleTypeDef *hltdc) {
     driver->base.width = 800;
     driver->base.height = 480;
   }
+
+  __HAL_LTDC_ENABLE_IT(driver->hltdc, LTDC_IT_LI); 	// 确保行中断(LI)已使能
+  HAL_LTDC_ProgramLineEvent(driver->hltdc, 0); 		// 在第0行触发中断(垂直消隐期开始)
 
   return (lcd_driver_t *)driver;
 }

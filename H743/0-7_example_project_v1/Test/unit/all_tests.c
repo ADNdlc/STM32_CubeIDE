@@ -14,6 +14,7 @@
 #include "sdram_test.h"
 #include "sys_test.h"
 #include "lcd_test.h"
+#include "lvgl_test.h"
 
 void run_all_tests(void)
 {
@@ -47,5 +48,9 @@ void run_all_tests(void)
 
 #if _lcd_test_
   lcd_test_run();
+#endif
+
+#if _lvgl_test_
+  lvgl_test_run();
 #endif
 }

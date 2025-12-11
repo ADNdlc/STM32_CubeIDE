@@ -79,8 +79,7 @@ void MX_LTDC_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN LTDC_Init 2 */
-//	__HAL_LTDC_ENABLE_IT(&hltdc, LTDC_IT_LI); 	// 确保行中断(LI)已使能
-//	HAL_LTDC_ProgramLineEvent(&hltdc, 0); 		// 在第0行触发中断(垂直消隐期开始)
+
   /* USER CODE END LTDC_Init 2 */
 
 }
