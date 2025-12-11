@@ -8,6 +8,6 @@
 #ifndef UNIT_LCD_TEST_H_
 #define UNIT_LCD_TEST_H_
 
-void lcd_test(void);
+void lcd_test_run(void);
 
 #endif /* UNIT_LCD_TEST_H_ */

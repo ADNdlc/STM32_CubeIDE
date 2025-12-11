@@ -6,6 +6,7 @@
  */
 
 #include "pwm_led.h"
+#include "sys.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -42,7 +43,7 @@ void pwm_led_init(pwm_led_t *self, uint32_t freq, uint8_t active_level,
 
 pwm_led_t *pwm_led_create(uint32_t freq, uint8_t active_level,
                           pwm_driver_t *pwm_driver) {
-  pwm_led_t *self = (pwm_led_t *)malloc(sizeof(pwm_led_t));
+  pwm_led_t *self = (pwm_led_t *)sys_malloc(PWMLED_MEMSOURCE, sizeof(pwm_led_t));
   if (self) {
     pwm_led_init(self, freq, active_level, pwm_driver);
   }
@@ -56,7 +57,7 @@ void pwm_led_delete(pwm_led_t *self) {
         self->pwm_driver->ops->stop) {
       PWM_STOP(self->pwm_driver);
     }
-    free(self);
+    sys_free(PWMLED_MEMSOURCE, self);
   }
 }
 

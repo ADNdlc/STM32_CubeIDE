@@ -12,6 +12,9 @@
 #include "pwm_driver.h"
 #include <stdint.h>
 
+//从哪里分配
+#define PWMLED_MEMSOURCE  SYS_MEM_INTERNAL
+
 // 前向声明
 typedef struct pwm_led_t pwm_led_t;
 

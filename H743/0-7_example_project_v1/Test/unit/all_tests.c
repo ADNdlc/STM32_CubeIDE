@@ -46,6 +46,6 @@ void run_all_tests(void)
 #endif
 
 #if _lcd_test_
-  lcd_test();
+  lcd_test_run();
 #endif
 }

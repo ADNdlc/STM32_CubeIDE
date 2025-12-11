@@ -9,16 +9,19 @@
 #define UART_QUEUE_UART_QUEUE_H_
 
 #include "ring_buffer/ring_buffer.h"
+#include "sys.h"
 #include "usart_hal/usart_hal.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-// 是否启用自动等待功能的宏定义
-#define UART_QUEUE_AUTO_WAIT_ENABLED 1
 
-// 自动等待时的阻塞时间（毫秒）
-#define UART_QUEUE_AUTO_WAIT_DELAY_MS 3
+// 从哪里分配
+#define UARTQUEUE_MEMSOURCE SYS_MEM_INTERNAL
+
+
+#define UART_QUEUE_AUTO_WAIT_DELAY_MS   5		// 每次自动等待时的阻塞时间（毫秒）
+#define UART_QUEUE_AUTO_WAIT_MAX_COUNT  100 // 自动等待最大次数
 
 // 前向声明
 typedef struct uart_queue_t uart_queue_t;
@@ -34,6 +37,7 @@ struct uart_queue_t {
   bool rx_enabled;             // 接收使能标志
   size_t tx_current_len;       // 当前发送长度
   size_t last_rx_pos;          // 记录上一次接收位置(针对循环DMA)
+  bool auto_wait;              // 是否启用发送缓冲区满自动等待
 };
 
 uart_queue_t *uart_queue_create(const usart_hal_t *hal, uint8_t *tx_buffer,
@@ -49,6 +53,9 @@ void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
 
 // 发送数据到队列
 bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len);
+
+// 设置是否启用发送缓冲区满自动等待
+void uart_queue_set_auto_wait(uart_queue_t *queue, bool enabled);
 
 // 从接收队列读取数据
 size_t uart_queue_getdata(uart_queue_t *queue, uint8_t *data, size_t max_len);

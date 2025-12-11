@@ -1,4 +1,5 @@
 #include "usart_hal.h"
+#include "sys.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -68,7 +69,7 @@ void usart_hal_init(usart_hal_t *self, usart_driver_t *driver) {
 }
 
 usart_hal_t *usart_hal_create(usart_driver_t *driver) {
-  usart_hal_t *self = (usart_hal_t *)malloc(sizeof(usart_hal_t));
+  usart_hal_t *self = (usart_hal_t *)sys_malloc(USART_MEMSOURCE, sizeof(usart_hal_t));
   if (self) {
     usart_hal_init(self, driver);
   }
@@ -79,5 +80,5 @@ void usart_hal_destroy(usart_hal_t *self) {
   if (!self) {
     return;
   }
-  free(self);
+  sys_free(USART_MEMSOURCE, self);
 }

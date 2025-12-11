@@ -16,10 +16,12 @@ extern "C"
 #include "gpio_driver.h"
 #include <stdint.h>
 
-  typedef struct gpio_key_t gpio_key_t;
+//从哪里分配
+#define GPIOKEY_MEMSOURCE  SYS_MEM_INTERNAL
 
-  typedef enum
-  {
+typedef struct gpio_key_t gpio_key_t;
+
+typedef enum{
     KeyEvent_SinglePress = 0,
     KeyEvent_DoublePress,
     KeyEvent_TriplePress,

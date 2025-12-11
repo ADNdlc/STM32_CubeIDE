@@ -7,9 +7,11 @@
 
 #include "uart_queue.h"
 #include "stm32h7xx_hal.h"
+#include "string.h"
 #include "sys.h"
+#include "stdio.h"
 
-#define restart 0
+#define Rx_Manual_restart 0
 
 /**
  * @brief UART中断回调函数
@@ -47,6 +49,7 @@ void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
   queue->rx_enabled = false;
   queue->tx_current_len = 0;
   queue->last_rx_pos = 0;
+  queue->auto_wait = false; // Default to false
   // 设置回调函数
   usart_hal_set_callback((usart_hal_t *)queue->uart_hal, uart_queue_callback,
                          queue);
@@ -55,7 +58,8 @@ void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
 uart_queue_t *uart_queue_create(const usart_hal_t *hal, uint8_t *tx_buffer,
                                 size_t tx_size, uint8_t *rx_buffer,
                                 size_t rx_size) {
-  uart_queue_t *queue = (uart_queue_t *)malloc(sizeof(uart_queue_t));
+  uart_queue_t *queue =
+      (uart_queue_t *)sys_malloc(UARTQUEUE_MEMSOURCE, sizeof(uart_queue_t));
   if (!queue) {
     return NULL;
   }
@@ -65,7 +69,14 @@ uart_queue_t *uart_queue_create(const usart_hal_t *hal, uint8_t *tx_buffer,
 
 void uart_queue_destroy(uart_queue_t *queue) {
   if (queue) {
-    free(queue);
+    sys_free(UARTQUEUE_MEMSOURCE, queue);
+  }
+}
+
+// 设置是否启用发送缓冲区满自动等待
+void uart_queue_set_auto_wait(uart_queue_t *queue, bool enabled) {
+  if (queue) {
+    queue->auto_wait = enabled;
   }
 }
 
@@ -108,7 +119,7 @@ static void uart_queue_callback(void *context, usart_event_t event,
  * @param queue 队列实例
  */
 static void uart_queue_try_start_tx(uart_queue_t *queue) {
-  if (!queue->tx_busy) {	//检查是否忙
+  if (!queue->tx_busy) { // 检查是否忙
     uint8_t *tx_ptr;
     size_t tx_len = rb_peek(&queue->tx_rb, &tx_ptr);
     if (tx_len > 0) {
@@ -132,23 +143,34 @@ static void uart_queue_try_start_tx(uart_queue_t *queue) {
  * @return bool 是否成功加入队列
  */
 bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len) {
-#if UART_QUEUE_AUTO_WAIT_ENABLED
-  // 检查是否有足够的空间来存放数据
-  size_t free_space = rb_free_space(&queue->tx_rb);
-  // 为警告消息预留空间（假设警告消息不超过16字节）
-  const size_t warning_msg_len = 16;
-  // 如果空间不足，发送警告消息并等待
-  if (free_space < len + warning_msg_len) {
-    const char *warning_msg = "\r\n[UART OVF]\r\n";
-    // 忽略警告消息写入结果，主要是为了腾出空间
-    rb_write(&queue->tx_rb, (const uint8_t *)warning_msg, strlen(warning_msg));
-    // 如果当前没有在发送，启动发送
-    uart_queue_try_start_tx(queue);
-    // 等待一段时间，让数据发送出去以腾出空间
-    sys_delay_ms(UART_QUEUE_AUTO_WAIT_DELAY_MS);
-  }
-#endif
+  if (queue->auto_wait) {
+    // 检查是否有足够的空间来存放数据
+    size_t free_space = rb_free_space(&queue->tx_rb);
+    int count = UART_QUEUE_AUTO_WAIT_MAX_COUNT;
+    
+#define WARNING_MESSAGELEN 25
 
+    // 如果空间不足，开始等待并记录等待开始时间
+    if (free_space < (len + WARNING_MESSAGELEN)) { // 为警告消息预留更多空间
+      uint32_t start_time;    
+      start_time = sys_get_systick_ms();
+      
+      // 等待直到有足够的空间或者达到最大等待次数
+      while (free_space < (len + WARNING_MESSAGELEN) && count-- > 0) {
+        // 等待一段时间，让数据发送出去以腾出空间
+        sys_delay_ms(UART_QUEUE_AUTO_WAIT_DELAY_MS);
+        // 重新检查可用空间
+        free_space = rb_free_space(&queue->tx_rb);
+      }
+      
+      // 准备警告消息，包含等待时间信息
+      char warning_msg[WARNING_MESSAGELEN] = "0";
+      snprintf(warning_msg, sizeof(warning_msg), "\r\n[UARTOVF]:%lums\r\n", (sys_get_systick_ms() - start_time));
+      // 写入警告消息
+      rb_write(&queue->tx_rb, (const uint8_t *)warning_msg, WARNING_MESSAGELEN);
+      uart_queue_try_start_tx(queue);
+    }
+  } 
   size_t written = rb_write(&queue->tx_rb, data, len);
   // 如果有数据写入且当前没有在发送，则启动发送
   if (written > 0) {
@@ -275,7 +297,7 @@ static void uart_queue_handle_rx_event(uart_queue_t *queue, void *args) {
     queue->last_rx_pos = current_pos;
   }
 
-#if restart
+#if Rx_Manual_restart
   // 重新启动接收
   if (queue->rx_enabled) {
     uint8_t *rx_ptr;

@@ -11,7 +11,7 @@
 
 extern lv_disp_drv_t *it_disp_drv; // 显示屏句柄
 
-// 在dma2d传输完成中断中通知lvgl刷新
+// 在dma2d传输完成中断中通知lvgl刷新完成
 void HAL_DMA2D_CLUTLoadingCpltCallback(DMA2D_HandleTypeDef *hdma2d)
 {
     if ((DMA2D->ISR & DMA2D_FLAG_TC) != 0)

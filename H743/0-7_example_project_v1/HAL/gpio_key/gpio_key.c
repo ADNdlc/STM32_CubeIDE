@@ -50,7 +50,7 @@ void Key_Init(gpio_key_t *self, gpio_driver_t *port, uint8_t active_level) {
 
 // 动态创建
 gpio_key_t *Key_Create(gpio_driver_t *port, uint8_t active_level) {
-  gpio_key_t *key = (gpio_key_t *)malloc(sizeof(gpio_key_t));
+  gpio_key_t *key = (gpio_key_t *)sys_malloc(GPIOKEY_MEMSOURCE, sizeof(gpio_key_t));
   if (key) {
     Key_Init(key, port, active_level);
   }
@@ -60,7 +60,7 @@ gpio_key_t *Key_Create(gpio_driver_t *port, uint8_t active_level) {
 // 销毁
 void Key_Delete(gpio_key_t *self) {
   if (self) {
-    free(self);
+    sys_free(GPIOKEY_MEMSOURCE, self);
   }
 }
 

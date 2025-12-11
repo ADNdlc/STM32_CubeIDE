@@ -5,8 +5,11 @@
  *      Author: 12114
  */
 
+#include "sys.h"
 #include "gpio_led.h"
 #include <stdlib.h>
+
+#define GPIO_LED_SOURCE SYS_MEM_INTERNAL
 
 // 函数声明
 static void _gpio_led_on(led_hal_t *base);
@@ -40,7 +43,7 @@ void gpio_led_init(gpio_led_t *self, gpio_driver_t *driver,
 }
 
 gpio_led_t *gpio_led_create(gpio_driver_t *driver, uint8_t active_level) {
-  gpio_led_t *led = (gpio_led_t *)malloc(sizeof(gpio_led_t));
+  gpio_led_t *led = (gpio_led_t *)sys_malloc(GPIOLED_MEMSOURCE, sizeof(gpio_led_t));
   if (led) {
     gpio_led_init(led, driver, active_level);
   }
@@ -49,7 +52,7 @@ gpio_led_t *gpio_led_create(gpio_driver_t *driver, uint8_t active_level) {
 
 void gpio_led_delete(gpio_led_t *self) {
   if (self) {
-    free(self);
+    sys_free(GPIOLED_MEMSOURCE, self);
   }
 }
 

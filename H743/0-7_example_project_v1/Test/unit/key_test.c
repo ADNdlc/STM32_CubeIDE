@@ -158,11 +158,11 @@ static void test_gpio_key(void) {
             
             // 模拟主循环中更新按键状态
             // 实际应用中应在主循环或定时器中调用Key_Update
-            for(int i = 0; i < 10000; i++) {  // 运行约10秒用于测试
+            while(1) {
                 Key_Update(key0);
                 Key_Update(key1);
                 Key_Update(key2);
-                sys_delay_ms(1);
+                //sys_delay_ms(1);
             }
             
             // 注销观察者

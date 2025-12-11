@@ -12,6 +12,9 @@
 #include "led_hal.h"
 #include <stdint.h>
 
+//从哪里分配
+#define GPIOLED_MEMSOURCE  SYS_MEM_INTERNAL
+
 // 前向声明
 typedef struct gpio_led_t gpio_led_t;
 

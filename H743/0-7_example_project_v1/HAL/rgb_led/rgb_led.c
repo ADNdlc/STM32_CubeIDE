@@ -6,6 +6,7 @@
  */
 
 #include "rgb_led.h"
+#include "sys.h"
 #include <stdlib.h>
 
 // 私有函数声明
@@ -37,7 +38,7 @@ void rgb_led_init(rgb_led_t *self, pwm_led_t *red, pwm_led_t *green,
 }
 
 rgb_led_t *rgb_led_create(pwm_led_t *red, pwm_led_t *green, pwm_led_t *blue) {
-  rgb_led_t *self = (rgb_led_t *)malloc(sizeof(rgb_led_t));
+  rgb_led_t *self = (rgb_led_t *)sys_malloc(RGBLED_MEMSOURCE, sizeof(rgb_led_t));
   if (self) {
     rgb_led_init(self, red, green, blue);
   }
@@ -47,7 +48,7 @@ rgb_led_t *rgb_led_create(pwm_led_t *red, pwm_led_t *green, pwm_led_t *blue) {
 void rgb_led_delete(rgb_led_t *self) {
   if (self) {
     // rgb_led 不负责销毁传入的 pwm_led
-    free(self);
+    sys_free(RGBLED_MEMSOURCE, self);
   }
 }
 

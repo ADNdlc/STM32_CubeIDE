@@ -8,8 +8,9 @@
 #include "stm32_lcd_driver.h"
 #include "dma2d.h"
 #include "ltdc.h"
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+
 
 // --- Private Helper Functions ---
 
@@ -65,7 +66,8 @@ static void stm32_lcd_draw_point(lcd_driver_t *self, uint16_t x, uint16_t y,
   if (self->orientation == LCD_ORIENTATION_PORTRAIT) {
     if (x >= 480 || y >= 800)
       return;
-    uint32_t addr = (uint32_t)impl->base.draw_buffer + 2 * (800 * (479 - x) + y);
+    uint32_t addr =
+        (uint32_t)impl->base.draw_buffer + 2 * (800 * (479 - x) + y);
     *(uint16_t *)addr = (uint16_t)color;
   } else {
     if (x >= 800 || y >= 480)
@@ -83,7 +85,8 @@ static uint32_t stm32_lcd_read_point(lcd_driver_t *self, uint16_t x,
   if (self->orientation == LCD_ORIENTATION_PORTRAIT) {
     if (x >= 480 || y >= 800)
       return 0;
-    uint32_t addr = (uint32_t)impl->base.draw_buffer + 2 * (800 * (479 - x) + y);
+    uint32_t addr =
+        (uint32_t)impl->base.draw_buffer + 2 * (800 * (479 - x) + y);
     color = *(uint16_t *)addr;
   } else {
     if (x >= 800 || y >= 480)
@@ -143,10 +146,12 @@ static void stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y,
   }
 }
 
-static void stm32_lcd_copy_buffer(lcd_driver_t *self, void *pDst, uint32_t xSize,
-                                  uint32_t ySize, uint32_t OffLineSrc,
-                                  uint32_t OffLineDst, uint32_t PixelFormat) {
-  _dma2d_copy(self->draw_buffer, pDst, xSize, ySize, OffLineSrc, OffLineDst, PixelFormat);
+static void stm32_lcd_copy_buffer(lcd_driver_t *self, void *pDst,
+                                  uint32_t xSize, uint32_t ySize,
+                                  uint32_t OffLineSrc, uint32_t OffLineDst,
+                                  uint32_t PixelFormat) {
+  _dma2d_copy(self->draw_buffer, pDst, xSize, ySize, OffLineSrc, OffLineDst,
+              PixelFormat);
 }
 
 static void stm32_lcd_set_orientation(lcd_driver_t *self,
@@ -175,14 +180,27 @@ static void stm32_lcd_swap_buffer(lcd_driver_t *self) {
   }
 }
 
-static uint16_t* stm32_lcd_get_drawbuf(lcd_driver_t *self) {
+static uint16_t *stm32_lcd_get_drawbuf(lcd_driver_t *self) {
   stm32_lcd_driver_t *impl = (stm32_lcd_driver_t *)self;
   return impl->base.draw_buffer;
 }
 
-static uint16_t* stm32_lcd_get_displaybuf(lcd_driver_t *self) {
+static uint16_t *stm32_lcd_get_displaybuf(lcd_driver_t *self) {
   stm32_lcd_driver_t *impl = (stm32_lcd_driver_t *)self;
   return impl->base.display_buffer;
+}
+
+static void stm32_lcd_set_drawbuf(lcd_driver_t *self, uint16_t *buffer) {
+  stm32_lcd_driver_t *impl = (stm32_lcd_driver_t *)self;
+  impl->base.draw_buffer = buffer;
+}
+
+static void stm32_lcd_set_displaybuf(lcd_driver_t *self, uint16_t *buffer) {
+  stm32_lcd_driver_t *impl = (stm32_lcd_driver_t *)self;
+  impl->base.display_buffer = buffer;
+  if (impl->hltdc) {
+    HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)impl->base.display_buffer, 0);
+  }
 }
 
 // Driver operations table
@@ -195,12 +213,14 @@ static const lcd_driver_ops_t stm32_lcd_ops = {
     .set_orientation = stm32_lcd_set_orientation,
     .swap_buffer = stm32_lcd_swap_buffer,
     .get_drawbuf = stm32_lcd_get_drawbuf,
-    .get_displaybuf = stm32_lcd_get_displaybuf};
+    .get_displaybuf = stm32_lcd_get_displaybuf,
+    .set_drawbuf = stm32_lcd_set_drawbuf,
+    .set_displaybuf = stm32_lcd_set_displaybuf};
 
 lcd_driver_t *stm32_lcd_driver_create(LTDC_HandleTypeDef *hltdc) {
   stm32_lcd_driver_t *driver =
       (stm32_lcd_driver_t *)malloc(sizeof(stm32_lcd_driver_t));
-  
+
   if (driver) {
     memset(driver, 0, sizeof(stm32_lcd_driver_t));
     driver->base.ops = &stm32_lcd_ops;

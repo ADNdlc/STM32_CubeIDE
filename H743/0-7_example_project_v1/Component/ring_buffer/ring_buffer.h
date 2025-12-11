@@ -12,6 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+//从哪里分配
+#define RINGBUF_MEMSOURCE  SYS_MEM_INTERNAL
 
 // 环形缓冲区
 typedef struct {

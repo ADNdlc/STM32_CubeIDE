@@ -4,6 +4,9 @@
 #include "usart_driver.h"
 #include <stddef.h>
 
+//从哪里分配
+#define USART_MEMSOURCE  SYS_MEM_INTERNAL
+
 typedef struct usart_hal_t usart_hal_t;
 
 typedef struct {

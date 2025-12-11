@@ -8,6 +8,7 @@
 #include "ring_buffer.h"
 #include <stdlib.h>
 #include <string.h>
+#include "sys.h"
 
 /**
  * @brief 获取两个值中的较小值
@@ -21,7 +22,7 @@
  * @return 成功返回环形缓冲区对象指针，失败返回NULL
  */
 ring_buffer_t* rb_create(uint8_t *buffer, size_t size) {
-    ring_buffer_t *rb = (ring_buffer_t *)malloc(sizeof(ring_buffer_t));
+    ring_buffer_t *rb = (ring_buffer_t *)sys_malloc(RINGBUF_MEMSOURCE, sizeof(ring_buffer_t));
     if (!rb) return NULL;
     rb_init(rb, buffer, size);
     return rb;
@@ -33,7 +34,7 @@ ring_buffer_t* rb_create(uint8_t *buffer, size_t size) {
  */
 void rb_destroy(ring_buffer_t *rb) {
   if (rb) {
-    free(rb);
+	  sys_free(RINGBUF_MEMSOURCE, rb);
   }
 }
 

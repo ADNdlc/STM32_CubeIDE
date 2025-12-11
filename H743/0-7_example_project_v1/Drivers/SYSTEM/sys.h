@@ -27,6 +27,10 @@ typedef struct {
   void *(*realloc)(SysMemTag tag, void *ptr, uint32_t size);
   // 初始化
   int (*init)(void);
+  // 内部内存池初始化
+  void (*mem_init_internal)(void);
+  // 外部/其他内存池初始化
+  void (*mem_init_external)(void);
 } SysCoreOps;
 
 // 全局接口实例（业务层通过该实例调用接口）
@@ -69,5 +73,17 @@ static inline void *sys_realloc(SysMemTag tag, void *ptr, uint32_t size) {
 }
 
 static inline int sys_core_init(void) { return g_sys_core_ops->init(); }
+
+static inline void sys_mem_init_internal(void) {
+  if (g_sys_core_ops->mem_init_internal) {
+    g_sys_core_ops->mem_init_internal();
+  }
+}
+
+static inline void sys_mem_init_external(void) {
+  if (g_sys_core_ops->mem_init_external) {
+    g_sys_core_ops->mem_init_external();
+  }
+}
 
 #endif /* SYSTEM_SYS_H_ */

@@ -60,7 +60,7 @@ void sdram_test()
 		else if (temp <= sval)
 			break;																  // 后面读出的数据一定要比第一次读到的数据大.
 		log_i("SDRAM Capacity: %dKB", (uint16_t)(temp - sval + 1) * 16); // 打印SDRAM容量
-		sys_delay_ms(5);
+		sys_delay_ms(3);
 	}
 	log_i("Read test completed");
 }

@@ -12,6 +12,9 @@
 #include "pwm_led/pwm_led.h"
 #include <stdint.h>
 
+//从哪里分配
+#define RGBLED_MEMSOURCE  SYS_MEM_INTERNAL
+
 // 前向声明
 typedef struct rgb_led_t rgb_led_t;
 

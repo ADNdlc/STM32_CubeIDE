@@ -98,7 +98,7 @@ static void memory_speed_test(uint8_t memx, const char *mem_name)
 
     __enable_irq();
 
-    (void)temp_val; // 防止编译器警告 "variable set but not used"
+    (void)temp_val;
 
     // 计算性能数据
     elapsed_cycles = end_cycles - start_cycles;
