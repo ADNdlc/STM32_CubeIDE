@@ -34,7 +34,7 @@ static inline void _dma2d_fill(void *pDst, uint32_t width, uint32_t height,
   }
 }
 
-static inline void _dma2d_copy(void *pSrc, void *pDst, uint32_t xSize,
+static inline void _dma2d_copy(void *pDst, void *pSrc, uint32_t xSize,
                                uint32_t ySize, uint32_t OffLineSrc,
                                uint32_t OffLineDst, uint32_t PixelFormat) {
 	DMA2D->IFCR = 0x3FUL;	// 清除中断标志
@@ -146,12 +146,12 @@ static void stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y,
   }
 }
 
-static void stm32_lcd_copy_buffer(lcd_driver_t *self, void *pDst,
+static void stm32_lcd_copy_buffer(lcd_driver_t *self, void *pSrc,
                                   uint32_t xSize, uint32_t ySize,
                                   uint32_t OffLineSrc, uint32_t OffLineDst,
                                   uint32_t PixelFormat) {
-  _dma2d_copy(self->draw_buffer, pDst, xSize, ySize, OffLineSrc, OffLineDst,
-              PixelFormat);
+			// 目标buffer, 源buffer
+  _dma2d_copy(self->draw_buffer, pSrc, xSize, ySize, OffLineSrc, OffLineDst,PixelFormat);
 }
 
 static void stm32_lcd_set_orientation(lcd_driver_t *self,
