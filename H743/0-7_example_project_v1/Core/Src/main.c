@@ -33,10 +33,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "SYSTEM/sys.h"
-#include "all_tests_config.h"
-#include "factory.h"
-#include "logger/elog_init.h"
+#include "hal_init.h"
 
 /* USER CODE END Includes */
 
@@ -125,39 +122,7 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
 
-  sys_bind_ops(SysFactory_GetOps());
-  sys_core_init();
-  sys_mem_init_internal();  //内存池初始化
-
-  if (elog_init_and_config() == ELOG_NO_ERR) {
-    log_a("This is an ASSERT message.");
-    log_e("This is an ERROR message.");
-    log_w("This is a WARNING message.");
-    log_i("This is an INFO message.");
-    log_d("This is a DEBUG message.");
-    log_v("This is a VERBOSE message.");
-  } else {
-    elog_deinit();
-  }
-
-  log_i("SystemCoreClock:%dMHz", SystemCoreClock / 1000000);
-  
-  // 外部sdram初始化,注意顺序
-  sdram_driver_t *driver = sdram_driver_get(SDRAM_MAIN);
-  if (driver == NULL) {
-    log_e("Failed to get SDRAM driver instance");
-    while (1)
-      ;
-  }
-  if (SDRAM_INIT(driver) != 0) {
-    log_e("Failed to initialize SDRAM device");
-    while (1)
-      ;
-  }
-  log_i("SDRAM initialization completed");
-
-  // 外部内存池初始化,注意顺序
-  sys_mem_init_external();
+  hal_init();
 
   // module testing
   run_all_tests();
@@ -166,7 +131,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1) {
+  while (1)
+  {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -283,7 +249,8 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  while (1) {
+  while (1)
+  {
   }
   /* USER CODE END Error_Handler_Debug */
 }

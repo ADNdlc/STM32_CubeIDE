@@ -59,12 +59,14 @@
 									<listOptionValue builtIn="false" value="../Component"/>
 									<listOptionValue builtIn="false" value="../Drivers/factory"/>
 									<listOptionValue builtIn="false" value="../Drivers/platform/stm32"/>
-									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/easylogger"/>
-									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/device/sys"/>
 									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/device"/>
+									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/device/sys"/>
+									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/easylogger"/>
+									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/lvgl/porting"/>
 									<listOptionValue builtIn="false" value="../Test/unit"/>
-									<listOptionValue builtIn="false" value="../LVGL/lvgl-release-v8.2"/>
-									<listOptionValue builtIn="false" value="../LVGL/lvgl-release-v8.2/demos"/>
+									<listOptionValue builtIn="false" value="../LVGL/lvgl-release-v8.3"/>
+									<listOptionValue builtIn="false" value="../LVGL/lvgl-release-v8.3/demos"/>
+									<listOptionValue builtIn="false" value="../HAL/hal_init"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.558532041" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -90,45 +92,16 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.34049228" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
-					<folderInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1813320130" name="/" resourcePath="Drivers/old_device_driver/lvgl">
-						<toolChain id="com.st.stm32cube.ide.mcu.gnu.managedbuild.toolchain.exe.debug.8774281" name="MCU ARM GCC" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.toolchain.exe.debug" unusedChildren="">
-							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu.1216315994.1848711721" name="MCU" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu.1216315994"/>
-							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_cpuid.833937829.591388140" name="CPU" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_cpuid.833937829"/>
-							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_coreid.1596699880.2102808227" name="Core" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_coreid.1596699880"/>
-							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.926736696.287413053" name="Floating-point unit" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.926736696"/>
-							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.1377341137.1094473096" name="Floating-point ABI" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.1377341137"/>
-							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board.383372280.1705052189" name="Board" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board.383372280"/>
-							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults.781472851.2089731325" name="Defaults" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults.781472851"/>
-							<option id="com.st.stm32cube.ide.mcu.debug.option.cpuclock.1865678726.1717085732" name="Cpu clock frequence" superClass="com.st.stm32cube.ide.mcu.debug.option.cpuclock.1865678726"/>
-							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.nanoprintffloat.1291033499.1508987967" name="Use float with printf from newlib-nano (-u _printf_float)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.nanoprintffloat.1291033499"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.386489727" name="MCU/MPU GCC Assembler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.1366897826">
-								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.2089360988" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
-							</tool>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.224375110" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1328602458">
-								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.189559612" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
-							</tool>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.397275426" name="MCU/MPU G++ Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.127704236"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.1082130484" name="MCU/MPU GCC Linker" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.1716649069"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.2008373604" name="MCU/MPU G++ Linker" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.164717718"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.archiver.497383707" name="MCU/MPU GCC Archiver" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.archiver.154325708"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.size.948300480" name="MCU Size" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.size.909090007"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objdump.listfile.1391014238" name="MCU Output Converter list file" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objdump.listfile.1320103924"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.hex.1895915375" name="MCU Output Converter Hex" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.hex.580492706"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.binary.1043386983" name="MCU Output Converter Binary" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.binary.1654897973"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.verilog.232878131" name="MCU Output Converter Verilog" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.verilog.1396593437"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.srec.427091216" name="MCU Output Converter Motorola S-rec" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.srec.601154448"/>
-							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.294306058" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.34049228"/>
-						</toolChain>
-					</folderInfo>
 					<sourceEntries>
+						<entry excluding="hal_init" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL"/>
+						<entry excluding="unit/main_test_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
+						<entry excluding="easylogger/plugins|easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
+						<entry excluding="lvgl-release-v8.3/examples|lvgl-release-v8.2/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LVGL"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL/hal_init"/>
 						<entry excluding="old_device_driver/lvgl|old_device_driver/rgbLCD|old_device_driver/sdram|old_device_driver/test|platform/stm32/sys/delay.h|platform/stm32/sys/delay.c|SYSTEM/usart|old_device_driver/key|BSP/device_driver/key/key.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="easylogger/plugins|easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL"/>
-						<entry excluding="lvgl-release-v8.2/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LVGL"/>
-						<entry excluding="unit/main_test_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -205,11 +178,11 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="stm32h743_board_v1" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LVGL"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

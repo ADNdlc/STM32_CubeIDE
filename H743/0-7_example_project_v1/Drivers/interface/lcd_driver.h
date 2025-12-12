@@ -43,11 +43,8 @@ typedef struct {
                       uint32_t PixelFormat); // 像素格式
 
   // 控制
-  void (*set_orientation)(lcd_driver_t *self,
-                          lcd_orientation_t orientation); // 设置显示方向
-  void (*set_size)(lcd_driver_t *self, uint16_t width, uint16_t height); // 设置显示尺寸
-  void (*swap_buffer)(
-      lcd_driver_t *self); // 交换活动缓冲区(如果使用双缓冲，请实现此接口)
+  void (*set_orientation)(lcd_driver_t *self, lcd_orientation_t orientation); // 设置显示方向
+  void (*swap_buffer)(lcd_driver_t *self); // 交换活动缓冲区(如果使用双缓冲，请实现此接口)
   uint16_t *(*get_drawbuf)(lcd_driver_t *self);              // 获取绘制缓冲区
   uint16_t *(*get_displaybuf)(lcd_driver_t *self);           // 获取显示缓冲区
   void (*set_drawbuf)(lcd_driver_t *self, uint16_t *buffer); // 设置绘制缓冲区

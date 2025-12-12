@@ -6,6 +6,8 @@
 
 static uint32_t g_fac_us = 0; /* us延时倍乘数 */
 
+#define SYS_MEM_INTERNAL_SRAM12   //使用内部SRAM12来作为内部主内存池(AXI大部分分配给了lvgl)
+
 static void stm32_delay_us(uint32_t us) {
   uint32_t ticks = us * g_fac_us;
   uint32_t told, tnow, tcnt = 0;
@@ -64,7 +66,11 @@ static void *stm32_sys_malloc(SysMemTag tag, uint32_t size) {
   uint8_t memx;
   switch (tag) {
   case SYS_MEM_INTERNAL:
+#ifdef SYS_MEM_INTERNAL_SRAM12
+    memx = SRAM12;
+#else
     memx = SRAMIN;
+#endif
     break;
   case SYS_MEM_EXTERNAL:
     memx = SRAMEX;
@@ -82,7 +88,11 @@ static void stm32_sys_free(SysMemTag tag, void *ptr) {
   uint8_t memx;
   switch (tag) {
   case SYS_MEM_INTERNAL:
+#ifdef SYS_MEM_INTERNAL_SRAM12
+    memx = SRAM12;
+#else
     memx = SRAMIN;
+#endif
     break;
   case SYS_MEM_EXTERNAL:
     memx = SRAMEX;
@@ -100,7 +110,11 @@ static void *stm32_sys_realloc(SysMemTag tag, void *ptr, uint32_t size) {
   uint8_t memx;
   switch (tag) {
   case SYS_MEM_INTERNAL:
+#ifdef SYS_MEM_INTERNAL_SRAM12
+    memx = SRAM12;
+#else
     memx = SRAMIN;
+#endif
     break;
   case SYS_MEM_EXTERNAL:
     memx = SRAMEX;
@@ -123,7 +137,11 @@ static int stm32_sys_init(void) {
 }
 
 static void stm32_sys_mem_init_internal(void) {
+#ifdef SYS_MEM_INTERNAL_SRAM12
+  my_mem_init(SRAM12);
+#else
   my_mem_init(SRAMIN);
+#endif
   my_mem_init(SRAMDTCM);
 }
 

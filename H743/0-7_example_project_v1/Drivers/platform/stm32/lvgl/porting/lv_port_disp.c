@@ -3,16 +3,17 @@
  *
  */
 
- /*Copy this file as "lv_port_disp.c" and set this value to "1" to enable content*/
-#if 1
+/*Copy this file as "lv_port_disp.c" and set this value to "1" to enable content*/
+#if 0
 
 /*********************
  *      INCLUDES
  *********************/
-#include <lvgl/porting/lv_port_disp.h>
-#include "lvgl.h"
+#include "lv_port_disp.h"
+#include <stdbool.h>
 
-//依赖
+// 移植依赖
+#include "tim.h"
 #include "sys.h"
 #include "device_mapping.h"
 #include "elog.h"
@@ -22,21 +23,20 @@
 /*********************
  *      DEFINES
  *********************/
-#define MY_DISP_HOR_RES    800  // 实际宽度
-#define MY_DISP_VER_RES    480  // 实际高
-#define SIZEOF_PIXEL       sizeof(uint16_t)
+#define MY_DISP_HOR_RES 800 // 实际宽度
+#define MY_DISP_VER_RES 480 // 实际高
+#define SIZEOF_PIXEL sizeof(uint16_t)
+#define LVGL_BUFFER_SIZE (MY_DISP_HOR_RES * MY_DISP_VER_RES * PIXEL_SIZE_BYTE)
 
 #ifndef MY_DISP_HOR_RES
-    #warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen width, default value 320 is used for now.
-    #define MY_DISP_HOR_RES    320
+#warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen width, default value 320 is used for now.
+#define MY_DISP_HOR_RES 320
 #endif
 
 #ifndef MY_DISP_VER_RES
-    #warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen height, default value 240 is used for now.
-    #define MY_DISP_VER_RES    240
+#warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen height, default value 240 is used for now.
+#define MY_DISP_VER_RES 240
 #endif
-
-#define LVGL_BUFFER_SIZE (MY_DISP_HOR_RES * MY_DISP_VER_RES * PIXEL_SIZE_BYTE)
 
 /**********************
  *      TYPEDEFS
@@ -47,16 +47,15 @@
  **********************/
 static void disp_init(void);
 
-static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p);
-//static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
-//        const lv_area_t * fill_area, lv_color_t color);
+static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p);
+// static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
+//         const lv_area_t * fill_area, lv_color_t color);
 
 /**********************
  *  STATIC VARIABLES
  **********************/
-
-lv_disp_drv_t* it_disp_drv; // 用于在中断中访问
-//lcd_hal相关
+lv_disp_drv_t *it_disp_drv; // 用于在中断中访问
+// lcd_hal相关
 static lcd_driver_t *lcd_driver = NULL;
 lcd_hal_t *lvgl_display = NULL;
 static uint16_t *lvgl_displaybuf = NULL;
@@ -65,10 +64,8 @@ static uint16_t *lvgl_drawbuf = NULL;
 /**********************
  *      MACROS
  **********************/
-
-#define BufferConfig 		1	//使用哪一种缓冲配置
-#define Always_Whol_Redrawn 0	//总是全屏重绘
-#define externalbuf  		0
+#define BufferConfig 1        // 使用哪一种缓冲配置
+#define Always_Whol_Redrawn 0 // 总是全屏重绘
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -79,8 +76,11 @@ void lv_port_disp_init(void)
     /*-------------------------
      * Initialize your display
      * -----------------------*/
-    disp_init();
+	HAL_TIM_Base_Start_IT(&htim6); // 开启lvgl时基
 
+	log_i("lvgl display init start...");
+    disp_init();
+    log_i("lvgl display init success...");
     /*-----------------------------
      * Create a buffer for drawing
      *----------------------------*/
@@ -105,32 +105,33 @@ void lv_port_disp_init(void)
      *      This way LVGL will always provide the whole rendered screen in `flush_cb`
      *      and you only need to change the frame buffer's address.
      */
+
 #if BufferConfig == 1
     /* Example for 1) */
     static lv_disp_draw_buf_t draw_buf_dsc_1;
-    static lv_color_t buf_1[MY_DISP_HOR_RES * 240];
-    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, MY_DISP_HOR_RES * 240);   /*Initialize the display buffer*/
+    static lv_color_t buf_1[MY_DISP_HOR_RES * 240];		//内部缓冲区 = 384K
+    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, MY_DISP_HOR_RES * 240); /*Initialize the display buffer*/
 #endif
 #if BufferConfig == 2
     /* Example for 2) */
     static lv_disp_draw_buf_t draw_buf_dsc_2;
-    static lv_color_t buf_2_1[MY_DISP_HOR_RES * 10];                        /*A buffer for 10 rows*/
-    static lv_color_t buf_2_2[MY_DISP_HOR_RES * 10];                        /*An other buffer for 10 rows*/
-    lv_disp_draw_buf_init(&draw_buf_dsc_2, buf_2_1, buf_2_2, MY_DISP_HOR_RES * 10);   /*Initialize the display buffer*/
+    static lv_color_t buf_2_1[MY_DISP_HOR_RES * 10];                                /*A buffer for 10 rows*/
+    static lv_color_t buf_2_2[MY_DISP_HOR_RES * 10];                                /*An other buffer for 10 rows*/
+    lv_disp_draw_buf_init(&draw_buf_dsc_2, buf_2_1, buf_2_2, MY_DISP_HOR_RES * 10); /*Initialize the display buffer*/
 #endif
 #if BufferConfig == 3
     /* Example for 3) also set disp_drv.full_refresh = 1 below*/
     static lv_disp_draw_buf_t draw_buf_dsc_3;
-    static lv_color_t buf_3_1[MY_DISP_HOR_RES * MY_DISP_VER_RES];            /*A screen sized buffer*/
-    static lv_color_t buf_3_2[MY_DISP_HOR_RES * MY_DISP_VER_RES];            /*Another screen sized buffer*/
-    lv_disp_draw_buf_init(&draw_buf_dsc_3, buf_3_1, buf_3_2, MY_DISP_VER_RES * LV_VER_RES_MAX);   /*Initialize the display buffer*/
+    static lv_color_t buf_3_1[MY_DISP_HOR_RES * MY_DISP_VER_RES];                               /*A screen sized buffer*/
+    static lv_color_t buf_3_2[MY_DISP_HOR_RES * MY_DISP_VER_RES];                               /*Another screen sized buffer*/
+    lv_disp_draw_buf_init(&draw_buf_dsc_3, buf_3_1, buf_3_2, MY_DISP_VER_RES * LV_VER_RES_MAX); /*Initialize the display buffer*/
 #endif
     /*-----------------------------------
      * Register the display in LVGL
      *----------------------------------*/
 
-    static lv_disp_drv_t disp_drv;                         /*Descriptor of a display driver*/
-    lv_disp_drv_init(&disp_drv);                    /*Basic initialization*/
+    static lv_disp_drv_t disp_drv; /*Descriptor of a display driver*/
+    lv_disp_drv_init(&disp_drv);   /*Basic initialization*/
 
     /*Set up the functions to access to your display*/
 
@@ -143,28 +144,27 @@ void lv_port_disp_init(void)
 
     /*Set a display buffer*/
 #if BufferConfig == 1
-	disp_drv.draw_buf = &draw_buf_dsc_1;
+    disp_drv.draw_buf = &draw_buf_dsc_1;
 #endif
 #if BufferConfig == 2
-	disp_drv.draw_buf = &draw_buf_dsc_2;
+    disp_drv.draw_buf = &draw_buf_dsc_2;
 #endif
 #if BufferConfig == 3
-	disp_drv.draw_buf = &draw_buf_dsc_3;
+    disp_drv.draw_buf = &draw_buf_dsc_3;
 #endif
 
     /*Required for Example 3)*/
-#if	Always_Whol_Redrawn
-    disp_drv.full_refresh = 1;	// 总是重绘整个屏幕
+#if Always_Whol_Redrawn
+    disp_drv.full_refresh = 1; // 总是重绘整个屏幕
 #endif
 
     /* Fill a memory array with a color if you have GPU.
      * Note that, in lv_conf.h you can enable GPUs that has built-in support in LVGL.
      * But if you have a different GPU you can use with this callback.*/
-    //disp_drv.gpu_fill_cb = gpu_fill;
-
-    it_disp_drv = &disp_drv; // 保存驱动描述符的地址
+    // disp_drv.gpu_fill_cb = gpu_fill;
 
     /*Finally register the driver*/
+    it_disp_drv = &disp_drv; // 保存驱动描述符的地址
     lv_disp_drv_register(&disp_drv);
 }
 
@@ -176,69 +176,87 @@ void lv_port_disp_init(void)
 static void disp_init(void)
 {
     /*You code here*/
-    //初始化lcd相关
-    lcd_driver = lcd_driver_get(LCD_MAIN, 800, 480);//获取平台驱动
+    // 初始化lcd相关
+    lcd_driver = lcd_driver_get(LCD_MAIN, 800, 480); // 获取平台驱动
+    if(!lcd_driver){
+        log_e("Failed to get LCD driver instance");
+    }
     lvgl_drawbuf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, MY_DISP_HOR_RES * MY_DISP_VER_RES * SIZEOF_PIXEL);
     lvgl_displaybuf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, MY_DISP_HOR_RES * MY_DISP_VER_RES * SIZEOF_PIXEL);
+    if (!lvgl_drawbuf || !lvgl_displaybuf){
+        log_e("Failed to allocate memory for LCD buffer");
+    }
     lvgl_display = lcd_hal_create(lcd_driver, lvgl_drawbuf, lvgl_displaybuf);
-    log_i("lvgl display init");
+    if (!lvgl_display){
+        log_e("Failed to create LCD HAL instance");
+    }
+}
 
+volatile bool disp_flush_enabled = true;
 
+/* Enable updating the screen (the flushing process) when disp_flush() is called by LVGL
+ */
+void disp_enable_update(void)
+{
+    disp_flush_enabled = true;
+}
+
+/* Disable updating the screen (the flushing process) when disp_flush() is called by LVGL
+ */
+void disp_disable_update(void)
+{
+    disp_flush_enabled = false;
 }
 
 /*Flush the content of the internal buffer the specific area on the display
  *You can use DMA or any hardware acceleration to do this operation in the background but
  *'lv_disp_flush_ready()' has to be called when finished.*/
-static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
+static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
-#define example_flush 0
-#if example_flush
-    /*The most simple case (but also the slowest) to put all pixels to the screen one-by-one*/
+    if (disp_flush_enabled)
+    {
+        /*The most simple case (but also the slowest) to put all pixels to the screen one-by-one*/
+        // int32_t x;
+        // int32_t y;
+        // for(y = area->y1; y <= area->y2; y++) {
+        //     for(x = area->x1; x <= area->x2; x++) {
+        //         /*Put a pixel to the display. For example:*/
+        //         /*put_px(x, y, *color_p)*/
+        //         color_p++;
+        //     }
+        // }
 
-    int32_t x;
-    int32_t y;
-    for(y = area->y1; y <= area->y2; y++) {
-        for(x = area->x1; x <= area->x2; x++) {
-            /*Put a pixel to the display. For example:*/
-            /*put_px(x, y, *color_p)*/
-            color_p++;
-        }
+        int32_t x;
+        int32_t y;
+        x = area->x2 - area->x1 + 1;
+        y = area->y2 - area->y1 + 1;
+        size_t dest_addr = (size_t)lcd_hal_get_drawbuf(lvgl_display);
+        dest_addr += (area->y1 * disp_drv->hor_res + area->x1) * 2;
+        lcd_hal_copy_buffer(lvgl_display, (void *)color_p, x, y, 0, (disp_drv->hor_res - x), LTDC_PIXEL_FORMAT_RGB565);
     }
 
     /*IMPORTANT!!!
      *Inform the graphics library that you are ready with the flushing*/
     lv_disp_flush_ready(disp_drv);
-#else
-    int32_t x;
-    int32_t y;
-	x = area->x2 - area->x1 +1;
-	y = area->y2 - area->y1 +1;
-    size_t dest_addr = (size_t)lcd_hal_get_drawbuf(lvgl_display);
-    dest_addr += (area->y1 * disp_drv->hor_res + area->x1) * 2;
-    lcd_hal_copy_buffer(lvgl_display, (void*)color_p,  x, y, 0, (disp_drv->hor_res-x), LTDC_PIXEL_FORMAT_RGB565);
-#endif
-    //lv_disp_flush_ready(disp_drv);//在行中断中调用
-
 }
 
 /*OPTIONAL: GPU INTERFACE*/
 
 /*If your MCU has hardware accelerator (GPU) then you can use it to fill a memory with a color*/
-//static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
-//                    const lv_area_t * fill_area, lv_color_t color)
+// static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
+//                     const lv_area_t * fill_area, lv_color_t color)
 //{
-//    /*It's an example code which should be done by your GPU*/
-//    int32_t x, y;
-//    dest_buf += dest_width * fill_area->y1; /*Go to the first line*/
+//     /*It's an example code which should be done by your GPU*/
+//     int32_t x, y;
+//     dest_buf += dest_width * fill_area->y1; /*Go to the first line*/
 //
-//    for(y = fill_area->y1; y <= fill_area->y2; y++) {
-//        for(x = fill_area->x1; x <= fill_area->x2; x++) {
-//            dest_buf[x] = color;
-//        }
-//        dest_buf+=dest_width;    /*Go to the next line*/
-//    }
-//}
-
+//     for(y = fill_area->y1; y <= fill_area->y2; y++) {
+//         for(x = fill_area->x1; x <= fill_area->x2; x++) {
+//             dest_buf[x] = color;
+//         }
+//         dest_buf+=dest_width;    /*Go to the next line*/
+//     }
+// }
 
 #else /*Enable this file at the top*/
 

@@ -25,15 +25,11 @@ lcd_driver_t *lcd_driver_get(lcd_device_id_t id, uint16_t width, uint16_t height
 
 // 根据平台配置创建相应的LCD驱动实例
 #if (LCD_DRIVER_PLATFORM == PLATFORM_STM32)
-    lcd_drivers[id] = stm32_lcd_driver_create(mapping->hltdc);
+    lcd_drivers[id] = stm32_lcd_driver_create(mapping->hltdc, width, height);
 #else
 #error "未定义LCD_DRIVER_PLATFORM或平台不支持"
 #endif
 
-    // 设置LCD尺寸
-    if (lcd_drivers[id] != NULL && width > 0 && height > 0) {
-      lcd_drivers[id]->ops->set_size(lcd_drivers[id], width, height);
-    }
   }
   return lcd_drivers[id];
 }
