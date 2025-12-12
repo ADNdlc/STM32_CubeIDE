@@ -376,7 +376,9 @@ void LTDC_ER_IRQHandler(void)
 
   /* USER CODE END LTDC_ER_IRQn 1 */
 }
-
+#include "lvgl.h"
+#include "elog.h"
+extern lv_disp_drv_t *it_disp_drv;
 /**
   * @brief This function handles DMA2D global interrupt.
   */
@@ -384,6 +386,18 @@ void DMA2D_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2D_IRQn 0 */
 
+//	  if ((DMA2D->ISR & DMA2D_FLAG_TC) != 0) {
+//	    DMA2D->IFCR = DMA2D_FLAG_TC; // 清除“传输完成”中断标志位
+//	    if (it_disp_drv != NULL) {
+//	      lv_disp_flush_ready(it_disp_drv); // 调用 lv_disp_flush_ready()
+//	      log_i(".");
+//	    }
+//	  } else if ((DMA2D->ISR & DMA2D_FLAG_TE) != 0) { // 处理可能发生的错误中断
+//	    DMA2D->IFCR = DMA2D_FLAG_TE;                  // 清除“传输错误”中断标志位
+//	    if (it_disp_drv != NULL) {
+//	      lv_disp_flush_ready(it_disp_drv);
+//	    }
+//	  }
   /* USER CODE END DMA2D_IRQn 0 */
   HAL_DMA2D_IRQHandler(&hdma2d);
   /* USER CODE BEGIN DMA2D_IRQn 1 */

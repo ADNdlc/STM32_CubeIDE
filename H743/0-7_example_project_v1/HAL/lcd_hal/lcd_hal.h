@@ -58,13 +58,14 @@ static inline void lcd_hal_draw_bitmap(lcd_hal_t *self, uint16_t x, uint16_t y,
   }
 }
 
-static inline void lcd_hal_copy_buffer(lcd_hal_t *self, void *pDst,
+static inline void lcd_hal_copy_buffer(lcd_hal_t *self, void *pSrc,
                                        uint32_t xSize, uint32_t ySize,
                                        uint32_t OffLineSrc, uint32_t OffLineDst,
                                        uint32_t PixelFormat) {
-  if (self && self->driver && self->driver->ops &&
-      self->driver->ops->copy_buffer) {
-    self->driver->ops->copy_buffer(self->driver, pDst, xSize, ySize, OffLineSrc,
+  if (self && self->driver && self->driver->ops && self->driver->ops->copy_buffer) {
+    self->driver->ops->copy_buffer(self->driver,
+    								pSrc,
+			xSize, ySize, OffLineSrc,
                                    OffLineDst, PixelFormat);
   }
 }

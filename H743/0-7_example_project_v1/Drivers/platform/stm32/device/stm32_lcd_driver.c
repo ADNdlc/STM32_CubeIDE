@@ -34,12 +34,15 @@ static inline void _dma2d_fill(void *pDst, uint32_t width, uint32_t height,
   }
 }
 
-static inline void _dma2d_copy(void *pSrc, void *pDst, uint32_t xSize,
+#define IT 0
+
+static inline void _dma2d_copy(void *pDst, void *pSrc, uint32_t xSize,
                                uint32_t ySize, uint32_t OffLineSrc,
                                uint32_t OffLineDst, uint32_t PixelFormat) {
+#if IT
 	DMA2D->IFCR = 0x3FUL;	// 清除中断标志
 
-	/* DMA2D采用存储器到存储器模式, 这种模式是前景层作为DMA2D输入 */
+	/* DMA2D采用存储器到存储器模式 */
 	DMA2D->CR      = 0x00000000UL | (1 << 9);
 	DMA2D->FGMAR   = (uint32_t)pSrc;// 前景地址(源)
 	DMA2D->OMAR    = (uint32_t)pDst;// 目标地址
@@ -55,6 +58,26 @@ static inline void _dma2d_copy(void *pSrc, void *pDst, uint32_t xSize,
 	DMA2D->CR |= DMA2D_CR_TCIE | DMA2D_CR_TEIE;	 //中断:传输完成,传输错误
 	/* 启动传输 */
 	DMA2D->CR |= DMA2D_CR_START;
+#else
+	DMA2D->CR      = 0x00000000UL | (1 << 9);
+	DMA2D->FGMAR   = (uint32_t)pSrc;//前景地址(源)
+	DMA2D->OMAR    = (uint32_t)pDst;//目标地址
+	DMA2D->FGOR    = OffLineSrc;//前景偏移
+	DMA2D->OOR     = OffLineDst;//输出地址偏移
+
+	/* 前景层和输出区域都采用的RGB565颜色格式 */
+	DMA2D->FGPFCCR = LTDC_PIXEL_FORMAT_RGB565;
+	DMA2D->OPFCCR  = LTDC_PIXEL_FORMAT_RGB565;
+
+	DMA2D->NLR     = (uint32_t)(xSize << 16) | (uint16_t)ySize;//行数
+
+	DMA2D->CR |= DMA2D_IT_TC|DMA2D_IT_TE|DMA2D_IT_CE;	//中断:传输完成,两个错误
+	/* 启动传输 */
+	DMA2D->CR |= DMA2D_CR_START;
+
+	/* 等待DMA2D传输完成 */
+	while (DMA2D->CR & DMA2D_CR_START) {}
+#endif
 }
 
 // --- Driver Implementation Functions ---
@@ -146,11 +169,11 @@ static void stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y,
   }
 }
 
-static void stm32_lcd_copy_buffer(lcd_driver_t *self, void *pDst,
+static void stm32_lcd_copy_buffer(lcd_driver_t *self, void *pSrc,
                                   uint32_t xSize, uint32_t ySize,
                                   uint32_t OffLineSrc, uint32_t OffLineDst,
                                   uint32_t PixelFormat) {
-  _dma2d_copy(self->draw_buffer, pDst, xSize, ySize, OffLineSrc, OffLineDst,
+  _dma2d_copy(self->draw_buffer, pSrc, xSize, ySize, OffLineSrc, OffLineDst,
               PixelFormat);
 }
 
@@ -176,7 +199,7 @@ static void stm32_lcd_swap_buffer(lcd_driver_t *self) {
 
   // Update LTDC Address
   if (impl->hltdc) {
-    HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)impl->base.display_buffer, 0);
+    HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)impl->base.display_buffer, LTDC_LAYER_1);
   }
 }
 
@@ -231,6 +254,7 @@ lcd_driver_t *stm32_lcd_driver_create(LTDC_HandleTypeDef *hltdc, uint16_t width,
     driver->base.height = height;
   }
   HAL_LTDC_SetWindowSize(hltdc, width, height, LTDC_LAYER_1);
+
   __HAL_LTDC_ENABLE_IT(hltdc, LTDC_IT_LI); 	// 确保行中断(LI)已使能
   HAL_LTDC_ProgramLineEvent(hltdc, 0); 		// 在第0行触发中断(垂直消隐期开始)
 

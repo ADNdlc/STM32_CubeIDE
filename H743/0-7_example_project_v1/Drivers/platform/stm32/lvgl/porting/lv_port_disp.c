@@ -26,7 +26,7 @@
 #define MY_DISP_HOR_RES 800 // 实际宽度
 #define MY_DISP_VER_RES 480 // 实际高
 #define SIZEOF_PIXEL sizeof(uint16_t)
-#define LVGL_BUFFER_SIZE (MY_DISP_HOR_RES * MY_DISP_VER_RES * PIXEL_SIZE_BYTE)
+#define LVGL_BUFFER_SIZE (MY_DISP_HOR_RES * MY_DISP_VER_RES * SIZEOF_PIXEL)
 
 #ifndef MY_DISP_HOR_RES
 #warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen width, default value 320 is used for now.
@@ -181,8 +181,8 @@ static void disp_init(void)
     if(!lcd_driver){
         log_e("Failed to get LCD driver instance");
     }
-    lvgl_drawbuf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, MY_DISP_HOR_RES * MY_DISP_VER_RES * SIZEOF_PIXEL);
-    lvgl_displaybuf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, MY_DISP_HOR_RES * MY_DISP_VER_RES * SIZEOF_PIXEL);
+    lvgl_drawbuf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, LVGL_BUFFER_SIZE);
+    lvgl_displaybuf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, LVGL_BUFFER_SIZE);
     if (!lvgl_drawbuf || !lvgl_displaybuf){
         log_e("Failed to allocate memory for LCD buffer");
     }
@@ -237,7 +237,7 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
 
     /*IMPORTANT!!!
      *Inform the graphics library that you are ready with the flushing*/
-    //lv_disp_flush_ready(disp_drv);	//在dma2d传输完成中调用
+    lv_disp_flush_ready(disp_drv);	//dma2d为中断模式需要在dma2d传输完成中调用
 }
 
 /*OPTIONAL: GPU INTERFACE*/

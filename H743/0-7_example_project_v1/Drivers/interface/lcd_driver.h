@@ -36,8 +36,8 @@ typedef struct
   void (*draw_bitmap)(lcd_driver_t *self, uint16_t x, uint16_t y, uint16_t w,
                       uint16_t h, const void *pSrc);
   // 缓冲区拷贝(将已绘制的数据块拷贝到绘制区)
-  void (*copy_buffer)(lcd_driver_t *self,    // lcd对象 (目标)
-                      void *pDst,            // 源
+  void (*copy_buffer)(lcd_driver_t *self,    // 目的(lcd对象)
+                      void *pSrc,            // 源
                       uint32_t xSize,        // 宽度
                       uint32_t ySize,        // 高度
                       uint32_t OffLineSrc,   // 源偏移
