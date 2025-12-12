@@ -133,6 +133,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+#if LVGL_INIT
+	lv_timer_handler();
+#endif
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

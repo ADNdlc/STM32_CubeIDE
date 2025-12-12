@@ -33,7 +33,7 @@ int hal_init(void){
     log_i("SDRAM&MEM initialization completed...");
 
 
-#if 0
+#if LVGL_INIT
     /* ---- LVGL硬件初始化 ---- */
     lv_init();           // LVGL 初始化
     log_i("LVGL initialization completed...");

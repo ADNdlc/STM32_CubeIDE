@@ -4,12 +4,12 @@
  *  Created on: Dec 8, 2025
  *      Author: 12114
  */
-#if 0
+#if 1
 #include "lcd_hal/lcd_hal.h"
 #include "lvgl.h"
 #include "main.h"
 #include "tim.h"
-
+#include "elog.h"
 
 extern lv_disp_drv_t *it_disp_drv; // lvgl显示屏句柄
 extern lcd_hal_t *lvgl_display;    // 底层lcd
@@ -17,6 +17,7 @@ extern lcd_hal_t *lvgl_display;    // 底层lcd
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   if (htim == &htim6) {
     lv_tick_inc(1); // 给lvgl提供时基
+
   }
 }
 
@@ -26,6 +27,7 @@ void HAL_DMA2D_CLUTLoadingCpltCallback(DMA2D_HandleTypeDef *hdma2d) {
     DMA2D->IFCR = DMA2D_FLAG_TC; // 清除“传输完成”中断标志位
     if (it_disp_drv != NULL) {
       lv_disp_flush_ready(it_disp_drv); // 调用 lv_disp_flush_ready()
+      log_i(".");
     }
   } else if ((DMA2D->ISR & DMA2D_FLAG_TE) != 0) { // 处理可能发生的错误中断
     DMA2D->IFCR = DMA2D_FLAG_TE;                  // 清除“传输错误”中断标志位

@@ -24,7 +24,7 @@
 
 void lcd_test_run(void) {
   log_i("LCD Test Start");
-  lcd_driver_t *lcd_driver = lcd_driver_get(LCD_MAIN);
+  lcd_driver_t *lcd_driver = lcd_driver_get(LCD_MAIN, LCD_WIDTH, LCD_HEIGHT);
   if (lcd_driver == NULL) {
     log_e("LCD Driver get failed");
     return;

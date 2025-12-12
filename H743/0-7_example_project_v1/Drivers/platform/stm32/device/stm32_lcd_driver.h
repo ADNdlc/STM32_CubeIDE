@@ -19,6 +19,6 @@ typedef struct stm32_lcd_driver {
 
 // Public constructor/init function
 //lcd_driver_t *stm32_lcd_driver_create(LTDC_HandleTypeDef *hltdc, uint16_t width, uint16_t height);
-lcd_driver_t *stm32_lcd_driver_create(LTDC_HandleTypeDef *hltdc);
+lcd_driver_t *stm32_lcd_driver_create(LTDC_HandleTypeDef *hltdc, uint16_t width, uint16_t height);
 
 #endif /* BSP_DEVICE_DRIVER_PLATFORM_STM32_DEVICE_STM32_LCD_DRIVER_H_ */
