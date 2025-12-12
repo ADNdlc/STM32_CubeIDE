@@ -173,8 +173,8 @@ static void stm32_lcd_copy_buffer(lcd_driver_t *self, void *pSrc,
                                   uint32_t xSize, uint32_t ySize,
                                   uint32_t OffLineSrc, uint32_t OffLineDst,
                                   uint32_t PixelFormat) {
-  _dma2d_copy(self->draw_buffer, pSrc, xSize, ySize, OffLineSrc, OffLineDst,
-              PixelFormat);
+			// 目标buffer, 源buffer
+  _dma2d_copy(self->draw_buffer, pSrc, xSize, ySize, OffLineSrc, OffLineDst,PixelFormat);
 }
 
 static void stm32_lcd_set_orientation(lcd_driver_t *self,
