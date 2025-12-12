@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <string.h>
 
+
 // 800x480 resolution
 #define LCD_WIDTH 800
 #define LCD_HEIGHT 480
@@ -23,7 +24,7 @@
 
 void lcd_test_run(void) {
   log_i("LCD Test Start");
-  lcd_driver_t *lcd_driver = lcd_driver_get(LCD_MAIN, LCD_WIDTH, LCD_HEIGHT);
+  lcd_driver_t *lcd_driver = lcd_driver_get(LCD_MAIN);
   if (lcd_driver == NULL) {
     log_e("LCD Driver get failed");
     return;
@@ -81,12 +82,12 @@ void lcd_test_run(void) {
     y += dy;
 
     // Collision detection
-    if (x < 0 || x + box_w >= LCD_WIDTH) { // x坐标碰撞
+    if (x < 0 || x + box_w >= LCD_WIDTH) {
       dx = -dx;
       x += dx;
       color = (color == 0xF800) ? 0x07E0 : 0xF800; // Toggle Red/Green
     }
-    if (y < 0 || y + box_h >= LCD_HEIGHT) { // y坐标碰撞
+    if (y < 0 || y + box_h >= LCD_HEIGHT) {
       dy = -dy;
       y += dy;
       color = (color == 0xF800) ? 0x001F : 0xF800; // Toggle to Blue if red

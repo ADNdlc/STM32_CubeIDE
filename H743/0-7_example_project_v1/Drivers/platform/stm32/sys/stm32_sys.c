@@ -22,7 +22,7 @@ static void stm32_delay_us(uint32_t us) {
         tcnt += reload - tnow + told;
       }
       told = tnow;
-      if (tcnt >= ticks) {
+      if (tcnt  >= ticks) {
         break;
       }
     }
