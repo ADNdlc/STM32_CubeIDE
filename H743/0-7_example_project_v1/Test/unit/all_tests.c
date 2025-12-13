@@ -15,6 +15,7 @@
 #include "sys_test.h"
 #include "lcd_test.h"
 #include "lvgl_test.h"
+#include "touch_test.h"
 
 void run_all_tests(void)
 {
@@ -53,4 +54,9 @@ void run_all_tests(void)
 #if _lvgl_test_
   lvgl_test_run();
 #endif
+
+#if _touch_test_
+  touch_test_run();
+#endif
+
 }

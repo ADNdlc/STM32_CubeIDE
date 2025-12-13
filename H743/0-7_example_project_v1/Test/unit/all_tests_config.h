@@ -21,6 +21,7 @@
 #define _sdram_test_ 0
 #define _lcd_test_ 0
 #define _lvgl_test_ 0
+#define _touch_test_ 1
 
 // 运行所有测试用例
 void run_all_tests(void);
