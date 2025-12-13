@@ -32,7 +32,7 @@ void DMA2D_IRQHandler(void) {
   if ((DMA2D->ISR & DMA2D_FLAG_TC) != 0) {
     DMA2D->IFCR = DMA2D_FLAG_TC; // 清除"传输完成"中断标志位
     if (it_disp_drv != NULL) {
-      lv_disp_flush_ready(it_disp_drv); // 调用 lv_disp_flush_ready()
+      lv_disp_flush_ready(it_disp_drv);
       // DMA2D传输完成，标记有内容待交换
       pending_swap = 1;
     }
@@ -59,8 +59,6 @@ void HAL_LTDC_LineEventCallback(LTDC_HandleTypeDef *ltdc) {
     lcd_hal_swap_buffer(lvgl_display);
     HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
   }
-  // 重新编程下一次行中断
-  HAL_LTDC_ProgramLineEvent(ltdc, 0);
 }
 
 #endif
