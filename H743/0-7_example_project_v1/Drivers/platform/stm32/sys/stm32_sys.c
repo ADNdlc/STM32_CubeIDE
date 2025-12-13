@@ -6,7 +6,7 @@
 
 static uint32_t g_fac_us = 0; /* us延时倍乘数 */
 
-#define SYS_MEM_INTERNAL_SRAM12   //使用内部SRAM12来作为内部主内存池(AXI大部分分配给了lvgl)
+//#define SYS_MEM_INTERNAL_SRAM12   //使用内部SRAM12来作为内部主内存池(AXI大部分分配给了lvgl)
 
 static void stm32_delay_us(uint32_t us) {
   uint32_t ticks = us * g_fac_us;

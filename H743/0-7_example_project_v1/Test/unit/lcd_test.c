@@ -123,7 +123,7 @@ void lcd_test_run(void) {
     log_e("Bitmap Test Failed: Read %04X %04X %04X %04X", p00, p01, p10, p11);
   }
 
-  // 6. Copy Buffer Test
+  // 6. Copy&Swap Buffer Test
   // Draw a Blue box directly to memory using a temporary buffer and copy_buffer
   uint16_t blue_w = 20, blue_h = 20;
   uint32_t blue_size = blue_w * blue_h * sizeof(uint16_t);
@@ -136,19 +136,38 @@ void lcd_test_run(void) {
     // Copy to (400, 400)
     // OffLineSrc = 0 (contiguous)
     // OffLineDst = LCD_WIDTH - blue_w
-    lcd_hal_copy_buffer(lcd_hal, blue_buf, blue_w, blue_h, 0,
-                        LCD_WIDTH - blue_w, 0);
+    lcd_hal_copy_buffer(
+        lcd_hal,
+        (uint16_t *)draw_buf +
+            (400 + LCD_WIDTH *
+                       400), // Destination in draw_buf
+                             // buffer(此时没有交换内存是不会显示的，但仍可读出)
+        blue_buf,           // Source buffer
+        blue_w,             // Width
+        blue_h,             // Height
+        0,                  // OffLineSrc
+        LCD_WIDTH - blue_w, // OffLineDst
+        0);                 // PixelFormat (assuming 0 is RGB565)
+
+    HAL_Delay(10); // 添加延迟，确保DMA2D传输完成
 
     read_color = lcd_hal_read_point(lcd_hal, 410, 410);
     if ((uint16_t)read_color != 0x001F) {
       log_e("Copy Buffer Failed: Expected 0x001F, Got 0x%04X", read_color);
     } else {
-      log_i("Copy Buffer Test Passed");
+      log_i("Copy Buffer Test Passed. Point at (410,410) is: 0x%04X",
+            read_color);
     }
     sys_free(SYS_MEM_INTERNAL, blue_buf);
   } else {
     log_w("Skipping Copy Buffer Test (Malloc failed)");
   }
+
+  lcd_hal_swap_buffer(lcd_hal);
+  HAL_Delay(1000); // 现在应该是可见的(屏幕中间的小蓝块)
+  read_color = lcd_hal_read_point(lcd_hal, 410, 410);
+  log_i("Post-Swap Read Point at (410,410) is: 0x%04X",
+        read_color); // 经过交换后应该读不到颜色
 
   // 7. Orientation Test
   // Note: changing orientation might affect coordinate system for subsequent

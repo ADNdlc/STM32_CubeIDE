@@ -34,6 +34,7 @@ static void exchange_BackFront(void){
  */
 void HAL_LTDC_LineEventCallback(LTDC_HandleTypeDef *ltdc)
 {
+
 	exchange_BackFront();
 }
 

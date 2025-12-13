@@ -8,7 +8,7 @@
 #ifndef APPLICATION_HAL_INIT_HAL_INIT_H_
 #define APPLICATION_HAL_INIT_HAL_INIT_H_
 
-#define LVGL_INIT 0
+#define LVGL_INIT 1
 
 #include "SYSTEM/sys.h"
 #include "all_tests_config.h"

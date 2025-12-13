@@ -130,11 +130,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 #define usart1_echo 		1
 #define sdram_base_test 	0
-#define memory_speed_test 	1  // malloc
+#define memory_speed_test 	0  // malloc
 #define fatfs_base_test 	0  // 直接操作fatfs
 #define lvgl_base_test 		0  // lvgl基本显示测试(方块图)
 #define benchmark 			0  // lvgl性能测试
-#define lvgl_ui_test   		0  // ui测试
+#define lvgl_ui_test   		1  // ui测试
 
 
 /* USER CODE END 0 */
