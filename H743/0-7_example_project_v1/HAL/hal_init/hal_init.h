@@ -8,7 +8,7 @@
 #ifndef APPLICATION_HAL_INIT_HAL_INIT_H_
 #define APPLICATION_HAL_INIT_HAL_INIT_H_
 
-#define LVGL_INIT 0
+#define LVGL_INIT 1
 
 #include "SYSTEM/sys.h"
 #include "all_tests_config.h"
@@ -16,10 +16,10 @@
 #include "logger/elog_init.h"
 #if LVGL_INIT
 #include "lv_port_disp.h"
+#include "lv_port_indev.h"
 #include "lvgl.h"
 #endif
 
 int hal_init(void);
-
 
 #endif /* APPLICATION_HAL_INIT_HAL_INIT_H_ */

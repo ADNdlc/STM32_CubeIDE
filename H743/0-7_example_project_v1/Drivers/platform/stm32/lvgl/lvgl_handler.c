@@ -12,7 +12,6 @@
 #include "main.h"
 #include "tim.h"
 
-
 extern lv_disp_drv_t *it_disp_drv; // lvgl显示屏句柄
 extern lcd_hal_t *lvgl_display;    // 底层lcd
 
@@ -57,8 +56,9 @@ void HAL_LTDC_LineEventCallback(LTDC_HandleTypeDef *ltdc) {
   if (pending_swap) {
     pending_swap = 0; // 清除标志
     lcd_hal_swap_buffer(lvgl_display);
-    HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
   }
+  // 重新使能行中断（HAL库会在处理中断后禁用行中断）
+  HAL_LTDC_ProgramLineEvent(ltdc, 0);
 }
 
 #endif

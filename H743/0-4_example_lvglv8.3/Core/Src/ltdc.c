@@ -33,7 +33,7 @@ void MX_LTDC_Init(void)
 {
 
   /* USER CODE BEGIN LTDC_Init 0 */
-	Layer0_Buffer = (uint32_t)get_FrontBuf();//获取当前前景
+	Layer0_Buffer = (uint32_t)get_FrontBuf();//获取当前前景的地址
   /* USER CODE END LTDC_Init 0 */
 
   LTDC_LayerCfgTypeDef pLayerCfg = {0};

@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // --- Private Helper Functions ---
 
 static inline void _dma2d_fill(void *pDst, uint32_t width, uint32_t height,
@@ -193,24 +192,41 @@ static void stm32_lcd_swap_buffer(lcd_driver_t *self) {
   stm32_lcd_driver_t *impl = (stm32_lcd_driver_t *)self;
 
   // Swap pointers
-  uint16_t *temp = impl->base.display_buffer;
+  uint16_t *temp;
+  temp = impl->base.display_buffer;
   impl->base.display_buffer = impl->base.draw_buffer;
   impl->base.draw_buffer = temp;
 
   // 更新LTDC硬件使用新的显示缓冲区地址
   if (impl->hltdc) {
-    HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)impl->base.display_buffer, 0);
+    HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)impl->base.display_buffer,
+                        LTDC_LAYER_1);
   }
+
+  // 将新的 display_buffer 内容同步到新的 draw_buffer
+  // 这确保了 LVGL 进行脏区域更新时，draw_buffer 中未更新的区域包含正确的内容
+  // 使用同步DMA2D拷贝来确保内容一致
+  DMA2D->CR = 0x00000000UL; // Memory to memory mode
+  DMA2D->FGMAR = (uint32_t)impl->base.display_buffer;
+  DMA2D->OMAR = (uint32_t)impl->base.draw_buffer;
+  DMA2D->FGOR = 0;
+  DMA2D->OOR = 0;
+  DMA2D->FGPFCCR = LTDC_PIXEL_FORMAT_RGB565;
+  DMA2D->OPFCCR = LTDC_PIXEL_FORMAT_RGB565;
+  DMA2D->NLR = (uint32_t)(self->width << 16) | (uint16_t)self->height;
+  DMA2D->CR |= DMA2D_CR_START;
+  while (DMA2D->CR & DMA2D_CR_START) {
+  } // 等待完成
 }
 
 static uint16_t *stm32_lcd_get_drawbuf(lcd_driver_t *self) {
   stm32_lcd_driver_t *impl = (stm32_lcd_driver_t *)self;
-  return impl->base.draw_buffer;
+  return (impl->base.draw_buffer);
 }
 
 static uint16_t *stm32_lcd_get_displaybuf(lcd_driver_t *self) {
   stm32_lcd_driver_t *impl = (stm32_lcd_driver_t *)self;
-  return impl->base.display_buffer;
+  return (impl->base.display_buffer);
 }
 
 static void stm32_lcd_set_drawbuf(lcd_driver_t *self, uint16_t *buffer) {
@@ -222,7 +238,8 @@ static void stm32_lcd_set_displaybuf(lcd_driver_t *self, uint16_t *buffer) {
   stm32_lcd_driver_t *impl = (stm32_lcd_driver_t *)self;
   impl->base.display_buffer = buffer;
   if (impl->hltdc) {
-    HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)impl->base.display_buffer, 0);
+    HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)(impl->base.display_buffer),
+                        LTDC_LAYER_1);
   }
 }
 
@@ -254,10 +271,11 @@ lcd_driver_t *stm32_lcd_driver_create(LTDC_HandleTypeDef *hltdc, uint16_t width,
     driver->base.width = width;
     driver->base.height = height;
   }
-  HAL_LTDC_SetWindowSize(hltdc, width, height, LTDC_LAYER_1);
+  HAL_LTDC_SetWindowSize(driver->hltdc, width, height, LTDC_LAYER_1);
 
-  __HAL_LTDC_ENABLE_IT(hltdc, LTDC_IT_LI); // 确保行中断(LI)已使能
-  HAL_LTDC_ProgramLineEvent(hltdc, 0);     // 在第0行触发中断(垂直消隐期开始)
+  __HAL_LTDC_ENABLE_IT(driver->hltdc, LTDC_IT_LI); // 确保行中断(LI)已使能
+  HAL_LTDC_ProgramLineEvent(driver->hltdc,
+                            0); // 在第0行触发中断(垂直消隐期开始)
 
   return (lcd_driver_t *)driver;
 }

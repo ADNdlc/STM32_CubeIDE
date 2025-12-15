@@ -17,6 +17,8 @@
 #include <string.h>
 
 // 800x480 resolution
+static uint16_t display_buffer[800][480] __attribute__((section(".sdram_section"), aligned(16)));
+static uint16_t draw_buffer[800][480] __attribute__((section(".sdram_section"), aligned(16)));
 #define LCD_WIDTH 800
 #define LCD_HEIGHT 480
 #define BUFFER_SIZE (LCD_WIDTH * LCD_HEIGHT * 2)
@@ -30,8 +32,10 @@ void lcd_test_run(void) {
   }
 
   // Allocate buffers in external memory (SDRAM)
-  uint16_t *display_buf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, BUFFER_SIZE);
-  uint16_t *draw_buf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, BUFFER_SIZE);
+//  uint16_t *display_buf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, BUFFER_SIZE);
+//  uint16_t *draw_buf = (uint16_t *)sys_malloc(SYS_MEM_EXTERNAL, BUFFER_SIZE);
+  uint16_t *display_buf = display_buffer;
+  uint16_t *draw_buf = draw_buffer;
 
   if (!display_buf || !draw_buf) {
     log_e("Buffer allocation failed");

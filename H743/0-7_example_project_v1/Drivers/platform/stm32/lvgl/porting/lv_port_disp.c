@@ -239,8 +239,8 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area,
     int32_t y;
     x = area->x2 - area->x1 + 1;
     y = area->y2 - area->y1 + 1;
-    // 正确的双缓冲逻辑：绘制到后台缓冲区(drawbuf)，swap后才会显示
     size_t dest_addr = (size_t)lcd_hal_get_drawbuf(lvgl_display);
+    //size_t dest_addr = (size_t)lcd_hal_get_displaybuf(lvgl_display); /交换错误
     dest_addr += (area->y1 * disp_drv->hor_res + area->x1) * 2;
     lcd_hal_copy_buffer(lvgl_display, (void *)dest_addr, (void *)color_p, x, y,
                         0, (disp_drv->hor_res - x), LTDC_PIXEL_FORMAT_RGB565);

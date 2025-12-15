@@ -69,12 +69,12 @@ void Error_Handler(void);
 #define LED0_GPIO_Port GPIOB
 #define dht11_D_Pin GPIO_PIN_11
 #define dht11_D_GPIO_Port GPIOB
-#define CT_IIC_SCL_GPIO_PORT_Pin GPIO_PIN_6
-#define CT_IIC_SCL_GPIO_PORT_GPIO_Port GPIOH
-#define GT9XXX_INT_GPIO_PORT_Pin GPIO_PIN_7
-#define GT9XXX_INT_GPIO_PORT_GPIO_Port GPIOH
-#define CT_IIC_SDA_GPIO_PORT_Pin GPIO_PIN_3
-#define CT_IIC_SDA_GPIO_PORT_GPIO_Port GPIOI
+#define touch_SCL_Pin GPIO_PIN_6
+#define touch_SCL_GPIO_Port GPIOH
+#define touch_INT_Pin GPIO_PIN_7
+#define touch_INT_GPIO_Port GPIOH
+#define touch_SDA_Pin GPIO_PIN_3
+#define touch_SDA_GPIO_Port GPIOI
 
 /* USER CODE BEGIN Private defines */
 

@@ -22,14 +22,15 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#define LVGLHandler 1
 
-#if LVGLHandler
-#include "lvgl.h"
-#include "elog.h"
-extern lv_disp_drv_t *it_disp_drv;
-#define LOG "D2D"
-#endif
+#define LVGLHandler 1
+#define HAL_DMA2DHandler 0
+//#if LVGLHandler
+//#include "lvgl.h"
+//#include "elog.h"
+//extern lv_disp_drv_t *it_disp_drv;
+//#define LOG "D2D"	//test
+//#endif
 
 /* USER CODE END Includes */
 
@@ -382,6 +383,8 @@ void LTDC_ER_IRQHandler(void)
   /* USER CODE END LTDC_ER_IRQn 0 */
   HAL_LTDC_IRQHandler(&hltdc);
   /* USER CODE BEGIN LTDC_ER_IRQn 1 */
+}
+#if HAL_DMA2DHandler		// 移到lvgl移植的处理中
 
   /* USER CODE END LTDC_ER_IRQn 1 */
 }
@@ -389,31 +392,31 @@ void LTDC_ER_IRQHandler(void)
 /**
   * @brief This function handles DMA2D global interrupt.
   */
-//void DMA2D_IRQHandler(void)
-//{
-//  /* USER CODE BEGIN DMA2D_IRQn 0 */
-//
-//#if LVGLHandler
-//	  if ((DMA2D->ISR & DMA2D_FLAG_TC) != 0) {
-//	    DMA2D->IFCR = DMA2D_FLAG_TC; // 清除“传输完成”中断标志位
-//	    if (it_disp_drv != NULL) {
-//	      lv_disp_flush_ready(it_disp_drv); // 调用 lv_disp_flush_ready()
-//	      //log_i(LOG);
-//	    }
-//	  } else if ((DMA2D->ISR & DMA2D_FLAG_TE) != 0) { // 处理可能发生的错误中断
-//	    DMA2D->IFCR = DMA2D_FLAG_TE;                  // 清除“传输错误”中断标志位
-//	    if (it_disp_drv != NULL) {
-//	      lv_disp_flush_ready(it_disp_drv);
-//	    }
-//	  }
-//#endif
-//  /* USER CODE END DMA2D_IRQn 0 */
-//  HAL_DMA2D_IRQHandler(&hdma2d);
-//  /* USER CODE BEGIN DMA2D_IRQn 1 */
-//
-//  /* USER CODE END DMA2D_IRQn 1 */
-//}
+void DMA2D_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2D_IRQn 0 */
+
+#if LVGLHandler
+	  if ((DMA2D->ISR & DMA2D_FLAG_TC) != 0) {
+	    DMA2D->IFCR = DMA2D_FLAG_TC; // 清除“传输完成”中断标志位
+	    if (it_disp_drv != NULL) {
+	      lv_disp_flush_ready(it_disp_drv); // 调用 lv_disp_flush_ready()
+	      //log_i(LOG);
+	    }
+	  } else if ((DMA2D->ISR & DMA2D_FLAG_TE) != 0) { // 处理可能发生的错误中断
+	    DMA2D->IFCR = DMA2D_FLAG_TE;                  // 清除“传输错误”中断标志位
+	    if (it_disp_drv != NULL) {
+	      lv_disp_flush_ready(it_disp_drv);
+	    }
+	  }
+#endif
+  /* USER CODE END DMA2D_IRQn 0 */
+  HAL_DMA2D_IRQHandler(&hdma2d);
+  /* USER CODE BEGIN DMA2D_IRQn 1 */
+
+  /* USER CODE END DMA2D_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
-
+#endif
 /* USER CODE END 1 */

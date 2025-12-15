@@ -17,7 +17,7 @@ typedef struct lcd_driver_t lcd_driver_t;
 // 定义显示方向
 typedef enum
 {
-  LCD_ORIENTATION_PORTRAIT = 0,
+  LCD_ORIENTATION_PORTRAIT = 0, // 竖屏
   LCD_ORIENTATION_LANDSCAPE
 } lcd_orientation_t;
 

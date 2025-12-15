@@ -20,8 +20,8 @@
 #define _elog_test_ 0
 #define _sdram_test_ 0
 #define _lcd_test_ 0
-#define _lvgl_test_ 0
-#define _touch_test_ 1
+#define _lvgl_test_ 1
+#define _touch_test_ 0
 
 // 运行所有测试用例
 void run_all_tests(void);

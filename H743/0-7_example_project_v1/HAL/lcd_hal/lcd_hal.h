@@ -13,7 +13,6 @@ typedef struct lcd_hal_t lcd_hal_t;
 // 虚表定义
 // HAL结构体定义
 struct lcd_hal_t {
-  // 依赖驱动指针 (避免对象切片问题)
   lcd_driver_t *driver;
 };
 
