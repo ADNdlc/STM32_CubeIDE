@@ -1,4 +1,4 @@
-#include "app_manager.h"
+﻿#include "app_manager.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -15,7 +15,7 @@ void app_manager_init(void) {
 }
 
 void app_manager_register(const app_def_t *app_def) {
-  if (registry_count < MAX_APPS) {
+  if (registry_count < MAX_APPS && app_def) {
     registry[registry_count++] = app_def;
   }
 }
@@ -51,7 +51,8 @@ static void free_app_instance(app_t *app) {
 
 // 创建app的实例并运行
 void app_manager_start_app(const char *name) {
-  const app_def_t *def = app_manager_find_by_name(name);  // 查找app定义
+
+  const app_def_t *def = app_manager_find_by_name(name); // 查找app定义
   if (!def)
     return;
 
@@ -62,9 +63,14 @@ void app_manager_start_app(const char *name) {
 
   // lvgl相关内存都使用lv_mem_alloc申请，需保证lv_conf配置了足够大小
   app_t *new_app = lv_mem_alloc(sizeof(app_t));
+  if (!new_app) {
+    LV_LOG_ERROR("Failed to allocate memory for app: %s", name);
+    return;
+  }
+
   new_app->def = def;
-  new_app->root_obj = def->create();  // 调用app的create回调
-  new_app->user_data = NULL;  
+  new_app->root_obj = def->create(); // 调用app的create回调
+  new_app->user_data = NULL;
 
   new_app->prev = app_stack;
   app_stack = new_app; // Push
@@ -73,6 +79,8 @@ void app_manager_start_app(const char *name) {
   if (new_app->root_obj) {
     lv_scr_load_anim(new_app->root_obj, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0,
                      false); // 关闭自动删除
+  } else {
+    LV_LOG_WARN("App %s created with NULL root object", name);
   }
 }
 

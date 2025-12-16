@@ -14,52 +14,54 @@ LV_IMG_DECLARE(icon_wifi);
 /*********************
  *  STATIC VARIABLES
  *********************/
-static lv_obj_t *panel_bg = NULL;      // The full-screen background
-static lv_obj_t *panel_content = NULL; // The actual panel content
-static bool is_panel_active = false;   // Active state
+static lv_obj_t *panel_bg = NULL;      // 
+static lv_obj_t *panel_content = NULL; //
+static bool is_panel_active = false;   // 
 
 /*********************
  *  STATIC PROTOTYPES
  *********************/
-static void event_panel_drag_cb(lv_event_t *e);
-static void delete_anim_ready_cb(lv_anim_t *anim);
-static void event_vol_cb(lv_event_t *e);
-static void event_bri_cb(lv_event_t *e);
-static void event_wifi_cb(lv_event_t *e);
+static void event_panel_drag_cb(lv_event_t *e);   // 拖动回调
+static void delete_anim_ready_cb(lv_anim_t *anim);// 删除动画完成回调
+static void event_vol_cb(lv_event_t *e);    // 音量调节回调
+static void event_bri_cb(lv_event_t *e);    // 亮度调节回调
+static void event_wifi_cb(lv_event_t *e);   // WiFi开关回调
 
 /*********************
  *   STYLE HELPERS
  *********************/
-static void obj_style_set(lv_obj_t *obj) {
-  lv_obj_set_style_shadow_width(obj, 0, LV_PART_MAIN);
-  lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN);
-  lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE);
+// 设置菜单主体样式和属性(纯粹背景)
+static void obj_style_set(lv_obj_t *obj){
+    lv_obj_set_style_shadow_width(obj, 0, LV_PART_MAIN); // 阴影
+    lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN); // 边框
+    lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);      // 不可滚动
+    lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE);       // 不可点击，防止遮挡手势
 }
 
 /**
- * @brief Create a child container block for the menu grid
+ * @brief 下拉菜单子项容器创建(不可见,不可点击,不可滚动)
+ * @param Parent  父类
+ * @param x       x坐标
+ * @param span_x  x跨度
+ * @param y       y坐标
+ * @param span_y  y跨度
+ * @return       返回一个容器块背景
  */
 static lv_obj_t *menu_child_container_create(lv_obj_t *parent, uint8_t col,
                                              uint8_t col_span, uint8_t row,
                                              uint8_t row_span) {
-  // Block container for alignment
+  // 块容器(不可见,用于对齐组件)
   lv_obj_t *block = lv_obj_create(parent);
+  //lv_obj_set_style_opa(block, 0, LV_PART_MAIN); //不要让整体透明， 这会影响子项
   lv_obj_set_style_bg_opa(block, 0, LV_PART_MAIN);
   obj_style_set(block);
   lv_obj_set_grid_cell(block, LV_GRID_ALIGN_STRETCH, col, col_span,
-                       LV_GRID_ALIGN_STRETCH, row, row_span);
+                       LV_GRID_ALIGN_STRETCH, row, row_span);   //x-y拉伸对齐
 
-  // Content background
+  // 子组件背景(可见用于样式)
   lv_obj_t *block_bg = lv_obj_create(block);
-  lv_obj_set_size(block_bg, LV_PCT(100),
-                  LV_PCT(100)); // Will be adjusted by padding if needed, but
-                                // grid usually handles it
-  // Wait, Popup.c used update_layout and manual size. Grid cell with stretch is
-  // better. Popup.c: lv_obj_set_size(block_bg, lv_obj_get_width(block) - 20,
-  // lv_obj_get_height(block) - 20); Let's use padding on the block instead?
-  // Following Popup.c logic closer for safety:
-  lv_obj_set_size(block_bg, LV_PCT(90), LV_PCT(90)); // Approx 20px buffer
+  lv_obj_update_layout(block_bg);
+  lv_obj_set_size(block_bg, lv_obj_get_width(block)- 20, lv_obj_get_height(block)- 20);
   lv_obj_align(block_bg, LV_ALIGN_CENTER, 0, 0);
 
   obj_style_set(block_bg);

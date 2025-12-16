@@ -1,4 +1,4 @@
-#ifndef _CORE_APP_H
+﻿#ifndef _CORE_APP_H
 #define _CORE_APP_H
 
 #include "lvgl.h"

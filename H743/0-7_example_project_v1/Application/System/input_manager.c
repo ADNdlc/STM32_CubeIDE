@@ -1,4 +1,4 @@
-#include "input_manager.h"
+﻿#include "input_manager.h"
 #include <stdio.h>
 
 #define EDGE_HEIGHT 30       // 手势区域高度
@@ -65,7 +65,7 @@ static void gesture_event_cb(lv_event_t *e) {
  * @brief 创建一个手势区
  *
  */
-*/ lv_obj_t *create_gesture_zone(lv_obj_t *parent, lv_coord_t w, lv_coord_t h) {
+  lv_obj_t *create_gesture_zone(lv_obj_t *parent, lv_coord_t w, lv_coord_t h) {
   lv_obj_t *zone = lv_obj_create(parent);
   lv_obj_set_size(zone, w, h);
   lv_obj_set_style_bg_opa(zone, LV_OPA_TRANSP, 0);

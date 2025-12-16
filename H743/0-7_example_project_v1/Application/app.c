@@ -1,4 +1,4 @@
-/*
+﻿/*
  * app.c
  *
  *  Created on: Dec 15, 2025
@@ -6,9 +6,9 @@
  */
 
 #include "app.h"
-#include "ui.h"
+#include "UI/ui.h"
 #include "lvgl.h"
-#include "elog.h"
+
 
 int app_init(void) {
   ui_init();

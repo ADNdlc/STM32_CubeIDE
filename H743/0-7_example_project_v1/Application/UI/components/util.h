@@ -1,4 +1,4 @@
-/*
+﻿/*
  * util.h
  *
  *  Created on: Dec 16, 2025
@@ -8,6 +8,7 @@
 #ifndef UI_COMPONENTS_UTIL_H_
 #define UI_COMPONENTS_UTIL_H_
 
+#include "lvgl.h"
 /**
  * @brief 这里是DEBUG用的测试函数
  * 
