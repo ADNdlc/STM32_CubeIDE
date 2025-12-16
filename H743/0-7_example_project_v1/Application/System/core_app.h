@@ -9,28 +9,29 @@ extern "C" {
 
 struct app_t; // Forward declaration
 
-// Callbacks
+// 回调接口类型
 typedef lv_obj_t *(*app_create_cb)(void);
 typedef void (*app_destroy_cb)(struct app_t *app);
 typedef void (*app_pause_cb)(struct app_t *app);
 typedef void (*app_resume_cb)(struct app_t *app);
 
-// The immutable definition of an app (registered at startup)
+// app类定义
 typedef struct {
-  const char *name;
-  const void *icon;
-  app_create_cb create;
-  app_destroy_cb destroy;
-  app_pause_cb pause;
-  app_resume_cb resume;
+  const char *name; // 名称
+  const void *icon; // 图标(可缺省)
+  // 必须实现的回调
+  app_create_cb create;   // 创建
+  app_destroy_cb destroy; // 销毁
+  app_pause_cb pause;     // 暂停
+  app_resume_cb resume;   // 恢复
 } app_def_t;
 
-// The runtime instance of an app
+// app活动实例
 typedef struct app_t {
-  const app_def_t *def;
-  lv_obj_t *root_obj;
-  void *user_data;
-  struct app_t *prev; // Linked list for stack
+  const app_def_t *def; // app对象
+  lv_obj_t *root_obj;   // lvgl根对象
+  void *user_data;      // 用户数据
+  struct app_t *prev;   // 列表指针
 } app_t;
 
 #ifdef __cplusplus

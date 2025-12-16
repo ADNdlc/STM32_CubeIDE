@@ -11,11 +11,10 @@ extern "C" {
 #include "screens/ui_screen_home.h"
 #include "ui_events.h"
 
-
-// Global UI Init
+// 全局UI入口
 void ui_init(void);
 
-// Resources
+// 资源声明
 LV_IMG_DECLARE(icon_home);
 LV_IMG_DECLARE(wallpaper);
 

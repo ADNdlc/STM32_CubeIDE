@@ -8,7 +8,6 @@
 #ifndef APP_H_
 #define APP_H_
 
-
 int app_init(void);
 void app_run(void);
 

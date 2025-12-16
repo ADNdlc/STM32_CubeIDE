@@ -1,71 +1,89 @@
 #include "ui_screen_home.h"
-#include "Act_manager.h"
+#include "elog.h"
+#include "core_app.h"
+#include "util.h"
 #include <stdio.h>
+
 
 lv_obj_t *ui_screen_home;
 lv_obj_t *ui_home_tileview;
 
 // --- 配置区域 ---
-#define PAGE_COUNT 3
-#define PAGE_COL 8
-#define PAGE_ROW 5
-#define STATUS_BAR_H 30
+#define PAGE_COUNT 3    // 页面数量
+#define PAGE_COL 10     // 每页app列数
+#define PAGE_ROW 7      // 每页app行数
+#define STATUS_BAR_H 30 // 状态栏高度(网络布局第一行高度)
 
-// 定义 APP 在哪一页 (替代 messy CSV)
+// 网格描述符 (Buffer)
+static lv_coord_t col_dsc[PAGE_COL + 2]; // 需要加上空行和结束符
+static lv_coord_t row_dsc[PAGE_ROW + 2];  
+
+// 定义 APP 在哪一页
 typedef struct {
   const char *name;
   uint8_t page_index;
 } app_placement_t;
 
+// app布局表
 static const app_placement_t APP_PLACEMENTS[] = {
     {"Settings", 0}, {"Control", 0}, {"ColorWheel", 0},
     {"test1", 1},    {"File", 2},
     // 添加更多...
 };
-#define APP_PLACEMENT_COUNT (sizeof(APP_PLACEMENTS) / sizeof(APP_PLACEMENTS[0]))
-
-// 网格描述符 (Buffer)
-static lv_coord_t col_dsc[PAGE_COL + 1];
-static lv_coord_t row_dsc[PAGE_ROW + 1];
+#define APP_PLACEMENT_COUNT                                                    \
+  (sizeof(APP_PLACEMENTS) / sizeof(APP_PLACEMENTS[0])) // 计算app布局数量
 
 // 页面追踪
 typedef struct {
-  lv_obj_t *tile;
-  uint8_t current_app_count;
+  lv_obj_t *tile;            // 页面对象(TileView的tile)
+  uint8_t current_app_count; // 当前页面上的app数量
 } home_page_t;
-static home_page_t pages[PAGE_COUNT];
+static home_page_t pages[PAGE_COUNT]; // 缓存页面对象
 
 // --- 辅助函数：布局计算 (Refactored from old ui) ---
 static void setup_grid_layout(lv_obj_t *tile) {
-  lv_coord_t screen_h = 480; // 假设高度，实际应该 scr_act_height()
-  lv_coord_t screen_w = 800; // 假设宽度
-
-  // 简单化的网格计算
-  uint8_t middle_rows = PAGE_ROW - 1;
-  lv_coord_t col_w = screen_w / PAGE_COL;
-
-  // 列
-  for (int i = 0; i < PAGE_COL; i++)
-    col_dsc[i] = LV_GRID_FR(1); // 均分
-  col_dsc[PAGE_COL] = LV_GRID_TEMPLATE_LAST;
-
-  // 行
-  row_dsc[0] = STATUS_BAR_H; // 第一行留给状态栏
-  lv_coord_t remain_h = screen_h - STATUS_BAR_H;
-  lv_coord_t row_h = remain_h / middle_rows;
-
-  for (int i = 1; i < PAGE_ROW; i++)
-    row_dsc[i] = row_h;
-  // 补齐像素余数到最后一行
-  row_dsc[PAGE_ROW - 1] += (remain_h % middle_rows);
-  row_dsc[PAGE_ROW] = LV_GRID_TEMPLATE_LAST;
-
-  lv_obj_set_grid_dsc_array(tile, col_dsc, row_dsc);
-
   // 清除默认边距
-  lv_obj_set_style_pad_all(tile, 0, 0);
-  lv_obj_set_style_border_width(tile, 0, 0);
-  lv_obj_set_style_bg_opa(tile, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_pad_all(tile, 0, 0);      // 容器内边距
+  lv_obj_set_style_border_width(tile, 0, 0); // 边框
+  lv_obj_set_style_pad_gap(tile, 0, 0); // 单元格子间距(方便计算布局)
+  lv_obj_set_style_bg_opa(tile, LV_OPA_TRANSP, 0); // 背景透明
+
+  lv_coord_t screen_h = scr_act_height();
+  lv_coord_t screen_w = scr_act_width();
+  lv_coord_t remaining_h = screen_h - row_dsc[0]; // 可用行高(第一行空给状态栏)
+  uint8_t col_width = screen_w / PAGE_COL; // 每列宽度
+
+  // 计算列(图标宽度)描述符
+  for (int i = 0; i < PAGE_COL; i++) { // 按照定义行数平均分
+    col_dsc[i] = LV_GRID_FR(1);        // 均分列
+  }
+  col_dsc[PAGE_COL] = LV_GRID_TEMPLATE_LAST; // 结束符
+
+  // 计算行描述符
+  if (PAGE_COL > 0) {
+    row_dsc[0] = STATUS_BAR_H;
+  } // 第一行给状态栏
+  if (PAGE_COL > 1) {
+    if (remaining_h >= PAGE_ROW * col_width) {
+      for (int i = 1; i < (PAGE_ROW - 1); i++) {
+        // DEBUG
+        row_dsc[i] = col_width; // 正方形图标
+        remaining_h -= col_width;
+      }
+      row_dsc[PAGE_ROW] = remaining_h; // 最后一行占满剩余
+    } else {
+      lv_coord_t base_row_h = remaining_h / PAGE_ROW;
+      lv_coord_t leftover_h = remaining_h % PAGE_ROW;
+      for (int i = 1; i < (PAGE_ROW - 1); i++) {
+        // DEBUG
+        row_dsc[i] = base_row_h; // 均分行高
+      }
+      row_dsc[PAGE_ROW] = base_row_h + leftover_h; // 最后一行占满剩余
+    }
+  }
+
+  // 应用布局描述符
+  lv_obj_set_grid_dsc_array(tile, col_dsc, row_dsc);
 }
 
 // --- 辅助函数：查找 APP 应该在哪一页 ---
@@ -80,32 +98,32 @@ static int get_preferred_page(const char *app_name) {
 
 // --- 核心初始化 ---
 void ui_screen_home_init(void) {
-  // 1. 创建屏幕
+  // 创建屏幕
   ui_screen_home = lv_obj_create(NULL);
   lv_obj_clear_flag(ui_screen_home, LV_OBJ_FLAG_SCROLLABLE);
 
-  // 2. 创建背景
+  // 设置背景
   lv_obj_t *bg = lv_img_create(ui_screen_home);
   lv_img_set_src(bg, &wallpaper);
 
-  // 3. 创建 TileView
+  // 使用TileView作为主体
   ui_home_tileview = lv_tileview_create(ui_screen_home);
   lv_obj_set_style_bg_opa(ui_home_tileview, LV_OPA_TRANSP, 0);
-  lv_obj_remove_style(ui_home_tileview, NULL, LV_PART_SCROLLBAR);
+  lv_obj_remove_style(ui_home_tileview, NULL, LV_PART_SCROLLBAR); // 移除滚动条
 
-  // 4. 初始化页面
+  // 初始化TileView,添加页面并设置布局
   for (int i = 0; i < PAGE_COUNT; i++) {
     pages[i].tile = lv_tileview_add_tile(ui_home_tileview, i, 0,
                                          LV_DIR_LEFT | LV_DIR_RIGHT);
     pages[i].current_app_count = 0;
-    setup_grid_layout(pages[i].tile);
+    setup_grid_layout(pages[i].tile); // 配置网格布局(根据设置计算)
   }
 
-  // 5. 遍历并放置 APP
-  uint8_t total_apps = activity_manager_get_registered_count();
+  // 遍历并放置 APP (从 App Manager 获取)
+  uint8_t total_apps = app_manager_get_app_count();
 
   for (int i = 0; i < total_apps; i++) {
-    const app_def_t *app = activity_manager_get_def_by_index(i);
+    const app_def_t *app = app_manager_get_app_by_index(i);  //获取每个app定义,创建对应图标
     if (strcmp(app->name, "HOME") == 0)
       continue;
 
@@ -146,11 +164,15 @@ void ui_screen_home_init(void) {
     // 里我们给 img 加了 flag，但最好在这里统一加 event 获取 img 子对象
     // (假设child 0)
     lv_obj_t *img = lv_obj_get_child(icon_comp, 0);
-    lv_obj_add_event_cb(img, ui_event_app_icon_click, LV_EVENT_CLICKED,
-                        (void *)app);
+    lv_obj_add_event_cb(img, ui_event_app_icon_click, LV_EVENT_CLICKED, (void *)app); // 回调参数中传递 app_def_t 指针
 
     pages[page_idx].current_app_count++;
   }
+
+#ifndef NODEBUG
+  // 布局测试 (可选)
+  test_layout_grid(pages[0].tile, PAGE_ROW, PAGE_COL);
+#endif
 
   // 6. 初始化状态栏 (简略)
   // StatusBar_init(ui_screen_home);

@@ -6,7 +6,6 @@
 #include "SystemUI/ui_sys_panel.h"
 #include "screens/ui_screen_home.h"
 
-
 // --- Bridge Functions ---
 static void on_gesture_home(void) { app_manager_go_home(); }
 
@@ -34,24 +33,24 @@ static app_def_t home_app_def = {
 
 // --- Main Init ---
 void ui_init(void) {
-  // 1. Core System
+  // 初始化核心服务
   sys_state_init();
   app_manager_init();
   input_manager_init();
 
-  // 2. Register Apps
+  // 注册app
   app_manager_register(&home_app_def);
   // TODO: Register other apps here
   // app_manager_register(&settings_app_def);
 
-  // 3. System UI
+  // 初始化系统UI
   ui_sys_bar_init();
   // Panel lazy loads
 
-  // 4. Input Binds
+  // 绑定输入事件
   input_manager_set_home_gesture_cb(on_gesture_home);
   input_manager_set_pulldown_cb(on_gesture_pulldown);
 
-  // 5. Start Home
+  // 启动主界面
   app_manager_start_app("HOME");
 }

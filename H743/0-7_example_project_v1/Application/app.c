@@ -6,15 +6,13 @@
  */
 
 #include "app.h"
+#include "ui.h"
+#include "lvgl.h"
 #include "elog.h"
-#include "UI/ui.h"
 
-
-int app_init(void) { 
-    ui_init(); 
-    return 0;
+int app_init(void) {
+  ui_init();
+  return 0;
 }
 
-void app_run(void) { 
-    lv_timer_handler(); 
-}
+void app_run(void) { lv_timer_handler(); }

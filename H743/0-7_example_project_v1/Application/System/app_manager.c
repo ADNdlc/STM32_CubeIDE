@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_APPS 20
+#define MAX_APPS 20 // 最大注册app数量
 
-static const app_def_t *registry[MAX_APPS];
-static int registry_count = 0;
+static const app_def_t *registry[MAX_APPS]; // app注册表
+static int registry_count = 0;              // 注册数量
 
-static app_t *app_stack = NULL; // Top of stack
+static app_t *app_stack = NULL; // 活动app实例栈顶(当前运行的app)
 
 void app_manager_init(void) {
   registry_count = 0;
@@ -36,12 +36,12 @@ const app_def_t *app_manager_find_by_name(const char *name) {
   return NULL;
 }
 
-// Internal: Free app instance
+// Internal: 释放一个app实例
 static void free_app_instance(app_t *app) {
   if (!app)
     return;
   if (app->def->destroy)
-    app->def->destroy(app);
+    app->def->destroy(app); // 调用app的destroy回调
   // Note: LVGL objects are usually deleted by screen transition or parent
   // deletion but if the app created a screen, it should be deleted. If the
   // transition deleted it, fine. If not, we might need manual cleanup. Assuming
@@ -49,29 +49,30 @@ static void free_app_instance(app_t *app) {
   lv_mem_free(app);
 }
 
+// 创建app的实例并运行
 void app_manager_start_app(const char *name) {
-  const app_def_t *def = app_manager_find_by_name(name);
+  const app_def_t *def = app_manager_find_by_name(name);  // 查找app定义
   if (!def)
     return;
 
-  // Pause current
+  // 挂起当前app
   if (app_stack && app_stack->def->pause) {
     app_stack->def->pause(app_stack);
   }
 
-  // Create new
+  // lvgl相关内存都使用lv_mem_alloc申请，需保证lv_conf配置了足够大小
   app_t *new_app = lv_mem_alloc(sizeof(app_t));
   new_app->def = def;
-  new_app->prev = app_stack;
-  new_app->root_obj = def->create();
-  new_app->user_data = NULL;
+  new_app->root_obj = def->create();  // 调用app的create回调
+  new_app->user_data = NULL;  
 
+  new_app->prev = app_stack;
   app_stack = new_app; // Push
 
-  // Animate
+  // 使用Animate切换屏幕
   if (new_app->root_obj) {
     lv_scr_load_anim(new_app->root_obj, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0,
-                     false);
+                     false); // 关闭自动删除
   }
 }
 
@@ -79,26 +80,23 @@ void app_manager_go_back(void) {
   if (!app_stack || !app_stack->prev)
     return; // Cannot go back from root (Home)
 
-  app_t *current = app_stack;
-  app_t *prev = current->prev;
+  app_t *current = app_stack;  // 获取栈顶实例
+  app_t *prev = current->prev; // 上一个实例
 
   app_stack = prev; // Pop
 
-  // Resume prev
+  // 恢复上一个实例
   if (prev->def->resume) {
     prev->def->resume(prev);
   }
 
   // Animate back
   if (prev->root_obj) {
-    // "auto_del: true" causes the current screen (current->root_obj) to be
-    // deleted
-    lv_scr_load_anim(prev->root_obj, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 300, 0, true);
+    lv_scr_load_anim(prev->root_obj, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 300, 0,
+                     true); // 开启自动删除
   }
 
-  // Free current instance Logic
-  // Since auto_del=true deletes the lv_obj, we just need to free the struct and
-  // call destroy cb
+  // 释放当前实例
   if (current->def->destroy) {
     current->def->destroy(current);
   }
@@ -109,7 +107,7 @@ void app_manager_go_home(void) {
   if (!app_stack)
     return;
 
-  // Find Home (assuming bottom of stack)
+  // 获取到栈底实例,即主界面
   app_t *home = app_stack;
   while (home->prev) {
     home = home->prev;
@@ -118,12 +116,12 @@ void app_manager_go_home(void) {
   if (app_stack == home)
     return; // Already home
 
-  // Load Home Screen
+  // 切换回主界面
   if (home->root_obj) {
     lv_scr_load_anim(home->root_obj, LV_SCR_LOAD_ANIM_OUT_TOP, 300, 0, true);
   }
 
-  // Clean up everything in between
+  // 释放除栈底的所有实例
   while (app_stack != home) {
     app_t *temp = app_stack;
     app_stack = app_stack->prev;

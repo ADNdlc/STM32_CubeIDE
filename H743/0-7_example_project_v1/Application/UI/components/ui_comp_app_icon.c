@@ -22,10 +22,10 @@ lv_obj_t *ui_comp_app_icon_create(lv_obj_t *parent, const void *icon_src,
                                   const char *name) {
   // 1. 创建容器
   lv_obj_t *comp = lv_obj_create(parent);
-  lv_obj_clear_flag(comp, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_clear_flag(comp, LV_OBJ_FLAG_SCROLLABLE); // 移除滚动
   lv_obj_set_style_bg_opa(comp, LV_OPA_TRANSP, 0); // 透明
-  lv_obj_set_style_border_width(comp, 0, 0);
-  lv_obj_set_style_pad_all(comp, 0, 0);
+  lv_obj_set_style_border_width(comp, 0, 0);       // 无边框
+  lv_obj_set_style_pad_all(comp, 0, 0);            // 无内边距
 
   // 2. 创建图片
   lv_obj_t *img = lv_img_create(comp);
@@ -50,7 +50,7 @@ void ui_comp_app_icon_update_layout(lv_obj_t *comp, lv_coord_t row_height) {
   lv_obj_t *img = lv_obj_get_child(comp, 0);
   lv_obj_t *label = lv_obj_get_child(comp, 1);
 
-  // 动态调整 (逻辑参考 Home.c)
+  // 动态调整图标和字体大小
   lv_img_set_zoom(img, (256 * row_height) / 100);
   lv_obj_align(img, LV_ALIGN_CENTER, 0, -row_height / 15);
 
