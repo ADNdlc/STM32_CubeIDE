@@ -5,17 +5,23 @@
  *      Author: 12114
  */
 
+#define USE_OLD_UI 0
+
+
 #include "app.h"
-//#include "UI/ui.h"
 #include "lvgl.h"
-
-#include "Act_Manager.h"
-
+#if USE_OLD_UI
+#include "ui/Act_Manager.h"
+#else
+#include "UI/ui.h"
+#endif
 
 int app_init(void) {
-  //ui_init();
-	act_manager_init();
-
+#if USE_OLD_UI
+  act_manager_init();	// 旧ui入口
+#else
+  ui_init();
+#endif
   return 0;
 }
 

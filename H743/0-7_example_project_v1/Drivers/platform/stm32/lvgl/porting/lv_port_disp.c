@@ -20,7 +20,7 @@
 #include "lcd_hal/lcd_hal.h"
 #include "sys.h"
 #include "tim.h"
-
+extern void lvgl_handler_set_pending_swap(void);
 
 /*********************
  *      DEFINES
@@ -223,35 +223,37 @@ void disp_disable_update(void) { disp_flush_enabled = false; }
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area,
                        lv_color_t *color_p) {
   if (disp_flush_enabled) {
-    /*The most simple case (but also the slowest) to put all pixels to the
-     * screen one-by-one*/
-    // int32_t x;
-    // int32_t y;
-    // for(y = area->y1; y <= area->y2; y++) {
-    //     for(x = area->x1; x <= area->x2; x++) {
-    //         /*Put a pixel to the display. For example:*/
-    //         /*put_px(x, y, *color_p)*/
-    //         color_p++;
-    //     }
-    // }
+    uint32_t x = area->x2 - area->x1 + 1;
+    uint32_t y = area->y2 - area->y1 + 1;
+    uint32_t offset = (area->y1 * disp_drv->hor_res + area->x1) * 2;
 
-    int32_t x;
-    int32_t y;
-    x = area->x2 - area->x1 + 1;
-    y = area->y2 - area->y1 + 1;
-    size_t dest_addr = (size_t)lcd_hal_get_drawbuf(lvgl_display);
-    //size_t dest_addr = (size_t)lcd_hal_get_displaybuf(lvgl_display); /交换错误
-    dest_addr += (area->y1 * disp_drv->hor_res + area->x1) * 2;
-    lcd_hal_copy_buffer(lvgl_display, (void *)dest_addr, (void *)color_p, x, y,
-                        0, (disp_drv->hor_res - x), LTDC_PIXEL_FORMAT_RGB565);
-  } else {
-    lv_disp_flush_ready(disp_drv);
+    /* 获取当前双缓冲区的物理地址 */
+    uint16_t *draw_buf = lcd_hal_get_drawbuf(lvgl_display);
+    uint16_t *disp_buf = lcd_hal_get_displaybuf(lvgl_display);
+
+    /*
+     * 策略：同步双路拷贝
+     * 1. 拷贝到当前的绘图缓冲区 (draw_buffer)
+     * 2. 拷贝到当前的显示缓冲区 (display_buffer)
+     * 确保两边内容在更新区域上保持同步。
+     */
+
+    // 拷贝到 draw_buffer
+    lcd_hal_copy_buffer(lvgl_display, (void *)((size_t)draw_buf + offset),
+                        (void *)color_p, x, y, 0, (disp_drv->hor_res - x),
+                        LTDC_PIXEL_FORMAT_RGB565);
+
+    // 拷贝到 display_buffer
+    lcd_hal_copy_buffer(lvgl_display, (void *)((size_t)disp_buf + offset),
+                        (void *)color_p, x, y, 0, (disp_drv->hor_res - x),
+                        LTDC_PIXEL_FORMAT_RGB565);
+
+    /* 标记内容已就绪，在下一个 Vsync 触发时交换显示地址 */
+    lvgl_handler_set_pending_swap();
   }
 
-  /*IMPORTANT!!!
-   *Inform the graphics library that you are ready with the flushing*/
-  // lv_disp_flush_ready(disp_drv);
-  // //dma2d为中断模式需要在dma2d传输完成中调用
+  /* 通知 LVGL 刷新完成 (同步模式) */
+  lv_disp_flush_ready(disp_drv);
 }
 
 /*OPTIONAL: GPU INTERFACE*/

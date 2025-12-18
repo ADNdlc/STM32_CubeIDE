@@ -33,7 +33,7 @@ static inline void _dma2d_fill(void *pDst, uint32_t width, uint32_t height,
   }
 }
 
-#define IT 1
+#define IT 0
 
 static inline void _dma2d_copy(void *pDst, void *pSrc, uint32_t xSize,
                                uint32_t ySize, uint32_t OffLineSrc,
@@ -203,20 +203,8 @@ static void stm32_lcd_swap_buffer(lcd_driver_t *self) {
                         LTDC_LAYER_1);
   }
 
-  // 将新的 display_buffer 内容同步到新的 draw_buffer
-  // 这确保了 LVGL 进行脏区域更新时，draw_buffer 中未更新的区域包含正确的内容
-  // 使用同步DMA2D拷贝来确保内容一致
-  DMA2D->CR = 0x00000000UL; // Memory to memory mode
-  DMA2D->FGMAR = (uint32_t)impl->base.display_buffer;
-  DMA2D->OMAR = (uint32_t)impl->base.draw_buffer;
-  DMA2D->FGOR = 0;
-  DMA2D->OOR = 0;
-  DMA2D->FGPFCCR = LTDC_PIXEL_FORMAT_RGB565;
-  DMA2D->OPFCCR = LTDC_PIXEL_FORMAT_RGB565;
-  DMA2D->NLR = (uint32_t)(self->width << 16) | (uint16_t)self->height;
-  DMA2D->CR |= DMA2D_CR_START;
-  while (DMA2D->CR & DMA2D_CR_START) {
-  } // 等待完成
+  // 注意：不再在这里进行全屏拷贝同步。
+  // 同步逻辑已移至 lv_port_disp.c 的 disp_flush 中（双重区域拷贝策略）。
 }
 
 static uint16_t *stm32_lcd_get_drawbuf(lcd_driver_t *self) {
