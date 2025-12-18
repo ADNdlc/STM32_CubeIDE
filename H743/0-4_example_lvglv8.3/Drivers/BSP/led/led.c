@@ -99,3 +99,4 @@ void led_control_init(void){
         printf("[Error]LED: Failed to register device\r\n");
     }
 }
+

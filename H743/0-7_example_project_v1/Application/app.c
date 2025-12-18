@@ -6,12 +6,16 @@
  */
 
 #include "app.h"
-#include "UI/ui.h"
+//#include "UI/ui.h"
 #include "lvgl.h"
+
+#include "Act_Manager.h"
 
 
 int app_init(void) {
-  ui_init();
+  //ui_init();
+	act_manager_init();
+
   return 0;
 }
 
