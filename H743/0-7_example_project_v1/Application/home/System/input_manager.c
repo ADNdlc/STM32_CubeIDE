@@ -1,6 +1,5 @@
 #include "input_manager.h"
 #include <stdlib.h>
-#include "elog.h"
 
 #define LOG_TAG "INPUT_MGR"
 #include "elog.h"
@@ -80,9 +79,7 @@ static void gesture_event_cb(lv_event_t *e) {
 
     if (target == top_zone &&
         dy > GESTURE_THRESHOLD) { // 最初触发手势的是top_zone ,且dy超过阈值
-#ifndef NODEBUG
-      printf("InputManager: Top swipe down detected (dy=%d)\n", dy);
-#endif
+      log_d("InputManager: Top swipe down detected (dy=%d)", dy);
       fire_gesture(GESTURE_TOP_SWIPE_DOWN); // 顶部下拉(无需松开)
       is_tracking = false;                  // 停止跟踪，避免重复触发
       lv_indev_reset(indev, NULL);          // 移交当前输入给panel_bg(没有松开)
@@ -97,9 +94,7 @@ static void gesture_event_cb(lv_event_t *e) {
 
     if (target == bottom_zone &&
         dy < -GESTURE_THRESHOLD) { // 最初触发手势的是bottom_zone ,且dy超过阈值
-#ifndef NODEBUG
-      printf("InputManager: Bottom swipe up detected (dy=%d)\n", dy);
-#endif
+      log_d("InputManager: Bottom swipe up detected (dy=%d)", dy);
       fire_gesture(GESTURE_BOTTOM_SWIPE_UP); // 底部上滑(需要松开)
     }
     is_tracking = false;

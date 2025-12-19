@@ -1,4 +1,4 @@
-﻿#include "ui.h"
+#include "ui.h"
 #include "app_manager.h"
 #include "input_manager.h"
 #include "sys_state.h"
@@ -6,11 +6,12 @@
 #include "SystemUI/ui_sys_panel.h"
 #include "screens/ui_screen_home.h"
 
+#define LOG_TAG "UI"
+#include "elog.h"
+
 // --- Bridge Functions ---
 static void on_gesture_home(void) {
-#ifndef NODEBUG
-  printf("UI: Home gesture triggered at ui.c level\n");
-#endif
+  log_d("UI: Home gesture triggered at ui.c level");
   app_manager_go_home();
 }
 
@@ -51,9 +52,8 @@ void ui_init(void) {
   ui_sys_bar_init();   // 系统顶部状态栏
   ui_sys_panel_init(); // 系统下拉面板
 
-  // 绑定输入事件
-  input_manager_register_callback(GESTURE_BOTTOM_SWIPE_UP,
-                                  on_gesture_home); // 上滑回调
+  // 绑定主页面输入事件
+  input_manager_register_callback(GESTURE_BOTTOM_SWIPE_UP, on_gesture_home); // 上滑回调
 
   // 启动主界面
   app_manager_start_app("HOME");

@@ -3,6 +3,9 @@
 #include "sys_state.h"
 #include "ui_helpers.h"
 
+#define LOG_TAG "UI_SYS_PANEL"
+#include "elog.h"
+
 /*********************
  *      DEFINES
  *********************/
@@ -344,9 +347,7 @@ static void pd_menu_set_focus_mode(lv_obj_t *focused_bg,
 
   // 遍历 Top_parent 下的所有子对象
   uint32_t child_count = lv_obj_get_child_cnt(Top_parent); // 子项数量
-#ifdef NDEBUG
-  printf("focus_mode:child_count=%d\r\n", child_count);
-#endif
+  log_d("focus_mode:child_count=%d", child_count);
   for (uint32_t i = 0; i < child_count; i++)
   {
     lv_obj_t *child = lv_obj_get_child(Top_parent, i);
@@ -397,9 +398,7 @@ void ui_sys_panel_show(void)
   if (!panel_content)
   {
     lv_obj_del(panel_bg);
-#ifndef NODEBUG
-    printf("ui_sys_panel_show: panel_content create failed\r\n");
-#endif
+    log_e("ui_sys_panel_show: panel_content create failed");
     return;
   }
 
@@ -418,9 +417,7 @@ static void ui_sys_panel_begin_close(void)
 {
   if (!is_panel_active || !panel_bg || !panel_content)
     return;
-#ifndef NDEBUG
-  printf("pulldown_menu_begin_close\r\n");
-#endif
+  log_d("pulldown_menu_begin_close");
 
   // 重新为菜单背景绑定事件处理器，让它能再次响应拖动
   lv_obj_add_event_cb(panel_bg, event_panel_drag_cb, LV_EVENT_ALL, NULL);
@@ -547,9 +544,7 @@ static void event_bri_cb(lv_event_t *e)
   {
     int32_t value = lv_slider_get_value(slider);         // 滑块值
     lv_obj_t *bright_icon = lv_obj_get_child(slider, 0); // 图标
-#ifndef NDEBUG
-    printf("bright_slider_value:%d\r\n", value);
-#endif
+    log_d("bright_slider_value:%d", value);
     // 设置系统状态
     sys_state_set_brightness(value);
 
@@ -564,18 +559,14 @@ static void event_bri_cb(lv_event_t *e)
   // 事件2：当手指按下时，开启聚焦模式
   else if (event_code == LV_EVENT_PRESSED)
   {
-#ifndef NDEBUG
-    printf("bright: Focus Mode\r\n");
-#endif
+    log_d("bright: Focus Mode");
     pd_menu_set_focus_mode(slider, 3, true); // 聚焦
   }
   // 事件3：当手指松开或移出时，关闭聚焦模式
   else if (event_code == LV_EVENT_RELEASED ||
            event_code == LV_EVENT_PRESS_LOST)
   {
-#ifndef NDEBUG
-    printf("bright: Exit Focus Mode\r\n");
-#endif
+    log_d("bright: Exit Focus Mode");
     pd_menu_set_focus_mode(slider, 3, false); // 恢复
   }
 }
@@ -604,10 +595,8 @@ static void event_wifi_cb(lv_event_t *e)
 
 static void on_pulldown_gesture(void)
 {
-#ifndef NODEBUG
-  printf("UiSysPanel: Pulldown gesture received. Panel visible: %d\n",
+  log_d("UiSysPanel: Pulldown gesture received. Panel visible: %d",
          ui_sys_panel_is_visible());
-#endif
   // 只有在面板不可见时才显示
   if (!ui_sys_panel_is_visible())
   {
@@ -617,10 +606,8 @@ static void on_pulldown_gesture(void)
 
 static void on_close_gesture(void)
 {
-#ifndef NODEBUG
-  printf("UiSysPanel: Close gesture received. Panel visible: %d\n",
+  log_d("UiSysPanel: Close gesture received. Panel visible: %d",
          ui_sys_panel_is_visible());
-#endif
   // 只有在面板可见时才处理关闭
   if (ui_sys_panel_is_visible())
   {
