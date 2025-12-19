@@ -1,7 +1,8 @@
-﻿#include "ui_sys_panel.h"
-#include "sys_state.h"
+#include "ui_sys_panel.h"
 #include "input_manager.h"
+#include "sys_state.h"
 #include "ui_helpers.h"
+
 
 /*********************
  *      DEFINES
@@ -206,22 +207,6 @@ static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent) {
   // 初始时让它和父容器一样大，但要把它放在屏幕外
   lv_obj_set_size(content_container, scr_act_width(), scr_act_height());
   lv_obj_set_y(content_container, -scr_act_height()); // 完全隐藏在屏幕上方
-  // 底部拖拽区
-  lv_obj_t *obj_line = lv_obj_create(content_container);
-  lv_obj_set_style_bg_color(obj_line, lv_color_hex(0x000000), LV_PART_MAIN);
-  lv_obj_set_style_bg_opa(obj_line, 40, LV_PART_MAIN); // 注意子项和父项重叠区opa会叠加,实际上是在设置子比父深多少
-  container_style_set(obj_line);
-  lv_obj_set_grid_cell(obj_line, LV_GRID_ALIGN_STRETCH, 0, 9,LV_GRID_ALIGN_STRETCH, 5, 1);
-  static lv_point_t line_points[] = {{0, 0}, {60, 0}};
-  lv_obj_t *line = lv_line_create(obj_line);
-  lv_line_set_points(line, line_points, 2);           // 设置线条坐标点,创建线条
-  lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);          // 设置位置
-  lv_obj_set_style_line_width(line, 5, LV_PART_MAIN); // 设线的宽度
-  lv_obj_set_style_line_color(line, lv_color_hex(0x353535),
-                              LV_PART_MAIN);               // 线的颜色
-  lv_obj_set_style_line_rounded(line, true, LV_PART_MAIN); // 设置线条圆角
-  lv_obj_set_grid_cell(line, LV_GRID_ALIGN_STRETCH, 5, 1, LV_GRID_ALIGN_STRETCH,
-                       5, 1);
   /* 主体样式 */
   lv_obj_set_style_bg_color(content_container, lv_color_hex(0x000000),
                             LV_PART_MAIN);
@@ -238,6 +223,26 @@ static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent) {
   lv_obj_set_style_pad_all(content_container, 0,
                            0); // 边距(是整体边距,不是子项间的距离)
   lv_obj_set_style_pad_gap(content_container, 20, 20); // 子项边距
+  
+  // 底部拖拽区
+  lv_obj_t *obj_line = lv_obj_create(content_container);
+  lv_obj_set_style_bg_color(obj_line, lv_color_hex(0x000000), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(
+      obj_line, 40,
+      LV_PART_MAIN); // 注意子项和父项重叠区opa会叠加,实际上是在设置子比父深多少
+  container_style_set(obj_line);
+  lv_obj_set_grid_cell(obj_line, LV_GRID_ALIGN_STRETCH, 0, 9,
+                       LV_GRID_ALIGN_STRETCH, 5, 1);
+  static lv_point_t line_points[] = {{0, 0}, {60, 0}};
+  lv_obj_t *line = lv_line_create(obj_line);
+  lv_line_set_points(line, line_points, 2);           // 设置线条坐标点,创建线条
+  lv_obj_align(line, LV_ALIGN_CENTER, 0, 0);          // 设置位置
+  lv_obj_set_style_line_width(line, 5, LV_PART_MAIN); // 设线的宽度
+  lv_obj_set_style_line_color(line, lv_color_hex(0x353535),
+                              LV_PART_MAIN);               // 线的颜色
+  lv_obj_set_style_line_rounded(line, true, LV_PART_MAIN); // 设置线条圆角
+  lv_obj_set_grid_cell(line, LV_GRID_ALIGN_STRETCH, 5, 1, LV_GRID_ALIGN_STRETCH,
+                       5, 1);
 
   // 获取系统状态
   const sys_state_t *state = sys_state_get();
@@ -256,6 +261,8 @@ static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent) {
   // #include "components/util.h"
   //   test_layout_grid(content_container, , );
   // #endif
+  
+  return content_container; // 添加返回语句
 }
 
 /*********************
@@ -357,14 +364,7 @@ void ui_sys_panel_show(void) {
   lv_obj_clear_flag(panel_bg, LV_OBJ_FLAG_SCROLLABLE);
 
   // 创建内容
-  //panel_content = ui_sys_panel_content_create(panel_bg);
-
-
-  //test
-  panel_content = lv_obj_create(panel_bg);
-  lv_obj_set_size(panel_content, scr_act_width(), scr_act_height());
-  lv_obj_set_style_bg_opa(panel_content, 80, LV_PART_MAIN);
-
+  panel_content = ui_sys_panel_content_create(panel_bg); // 使用完整实现而非测试代码
 
   if (!panel_content) {
     lv_obj_del(panel_bg);
@@ -400,6 +400,9 @@ static void ui_sys_panel_begin_close(void) {
   lv_point_t p;
   lv_indev_get_point(lv_indev_get_act(), &p);
   lv_obj_set_y(panel_content, p.y - content_h); // 下边沿吸附
+  
+  // 添加这一行来重置输入设备，使手势能够继续跟踪
+  lv_indev_reset(lv_indev_get_act(), NULL);
 }
 
 bool ui_sys_panel_is_visible(void) { return is_panel_active; }

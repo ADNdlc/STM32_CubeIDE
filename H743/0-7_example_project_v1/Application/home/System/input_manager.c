@@ -18,7 +18,7 @@ static lv_obj_t *top_zone;
 static lv_obj_t *bottom_zone;
 
 static lv_point_t start_pos;     // 手势开始位置
-static bool is_tracking = false; // 是否正在跟踪手势()
+static bool is_tracking = false; // 是否正在跟踪手势
 
 /**
  * @brief 触发特定类型的手势回调
@@ -82,7 +82,7 @@ static void gesture_event_cb(lv_event_t *e) {
 #endif
       fire_gesture(GESTURE_TOP_SWIPE_DOWN); // 顶部下拉(无需松开)
       is_tracking = false;                  // 停止跟踪，避免重复触发
-      lv_indev_reset(indev, NULL);  // 移交当前输入给panel_bg(没有松开)
+      lv_indev_reset(indev, NULL);          // 移交当前输入给panel_bg(没有松开)
     }
   }
   /* 释放手势 */

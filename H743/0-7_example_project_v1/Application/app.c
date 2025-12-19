@@ -13,7 +13,7 @@
 #if USE_OLD_UI
 #include "ui/Act_Manager.h"
 #else
-#include "UI/ui.h"
+#include "ui.h"
 #endif
 
 int app_init(void) {

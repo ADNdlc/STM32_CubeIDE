@@ -12,7 +12,6 @@
 extern "C" {
 #endif
 
-
 int app_init(void);
 void app_run(void);
 
