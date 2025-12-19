@@ -1,6 +1,9 @@
-﻿#include "app_manager.h"
-#include <stdio.h>
+#include "app_manager.h"
 #include <string.h>
+#include "elog.h"
+
+#define LOG_TAG "APP_MGR"
+#include "elog.h"
 
 #define MAX_APPS 20 // 最大注册app数量
 
@@ -12,27 +15,38 @@ static app_t *app_stack = NULL; // 活动app实例栈顶(当前运行的app)
 void app_manager_init(void) {
   registry_count = 0;
   app_stack = NULL;
+  log_i("Initialized");
 }
 
 void app_manager_register(const app_def_t *app_def) {
   if (registry_count < MAX_APPS && app_def) {
     registry[registry_count++] = app_def;
+    log_i("Registered app: %s", app_def->name);
+  } else {
+    log_w("Failed to register app, registry full or invalid app");
   }
 }
 
-int app_manager_get_app_count(void) { return registry_count; }
+int app_manager_get_app_count(void) { 
+  log_d("App count: %d", registry_count);
+  return registry_count; 
+}
 
 const app_def_t *app_manager_get_app_by_index(int index) {
   if (index >= 0 && index < registry_count)
     return registry[index];
+  log_w("Invalid index %d", index);
   return NULL;
 }
 
 const app_def_t *app_manager_find_by_name(const char *name) {
   for (int i = 0; i < registry_count; i++) {
-    if (strcmp(registry[i]->name, name) == 0)
+    if (strcmp(registry[i]->name, name) == 0) {
+      log_d("Found app by name: %s", name);
       return registry[i];
+    }
   }
+  log_w("App not found by name: %s", name);
   return NULL;
 }
 

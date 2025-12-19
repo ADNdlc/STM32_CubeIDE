@@ -1,6 +1,9 @@
-﻿#include "input_manager.h"
-#include <stdio.h>
+#include "input_manager.h"
 #include <stdlib.h>
+#include "elog.h"
+
+#define LOG_TAG "INPUT_MGR"
+#include "elog.h"
 
 #define EDGE_HEIGHT 30       // 手势区域高度
 #define GESTURE_THRESHOLD 30 // 触发手势的最小位移
@@ -29,7 +32,7 @@ static void fire_gesture(gesture_type_t type) {
   if (type >= GESTURE_TYPE_MAX)
     return;
 #ifndef NODEBUG
-  printf("InputManager: Fire gesture type %d\n", type);
+  log_d("Fire gesture type %d", type);
 #endif
   gesture_node_t *node = gesture_heads[type]; // 按照事件类型获取对应的回调链表
   int count = 0;

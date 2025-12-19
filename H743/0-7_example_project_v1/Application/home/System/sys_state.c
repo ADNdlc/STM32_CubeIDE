@@ -1,5 +1,9 @@
 #include "sys_state.h"
 #include <stddef.h>
+#include "elog.h"
+
+#define LOG_TAG "SYS_STATE"
+#include "elog.h"
 
 #define MAX_OBSERVERS 8
 
@@ -14,6 +18,7 @@ static void notify_observers(void) {
       g_observers[i](&g_state);
     }
   }
+  log_d("Notified %d observers", g_observer_count);
 }
 
 /**
@@ -25,6 +30,7 @@ void sys_state_init(void) {
   g_state.brightness = 80;
   g_state.wifi_connected = false;
   g_state.battery_level = 100;
+  log_i("System state initialized");
 }
 
 /**
@@ -32,7 +38,10 @@ void sys_state_init(void) {
  * 
  * @return const sys_state_t* 
  */
-const sys_state_t *sys_state_get(void) { return &g_state; }
+const sys_state_t *sys_state_get(void) { 
+  log_d("State accessed");
+  return &g_state; 
+}
 
 /**
  * @brief 设置系统音量
