@@ -1,5 +1,5 @@
+#include <home.h>
 #include "app_manager.h" // Update path if needed, strictly it's ../System/app_manager.h but include paths might vary
-#include "ui.h"
 #include "elog.h"
 
 #define LOG_TAG "UI_EVENTS"

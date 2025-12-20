@@ -1,4 +1,4 @@
-#include "ui.h"
+#include <home.h>
 #include "app_manager.h"
 #include "input_manager.h"
 #include "sys_state.h"
@@ -38,16 +38,15 @@ static app_def_t home_app_def = {
     // .destroy is trivial if we rely on LVGL to delete the screen
 };
 
-// --- Main Init ---
-void ui_init(void) {
+void home_init(void) {
   // 初始化核心服务
   sys_state_init();     // 系统状态初始化
   app_manager_init();   // 应用管理器初始化
   input_manager_init(); // 输入管理器初始化
 
-  // 注册app
+  // 注册home
   app_manager_register(&home_app_def);
-
+  
   // 初始化系统UI
   ui_sys_bar_init();   // 系统顶部状态栏
   ui_sys_panel_init(); // 系统下拉面板
@@ -55,6 +54,11 @@ void ui_init(void) {
   // 绑定主页面输入事件
   input_manager_register_callback(GESTURE_BOTTOM_SWIPE_UP, on_gesture_home); // 上滑回调
 
+
+}
+
+void ui_Start(void) {
+  log_i("UI started");
   // 启动主界面
   app_manager_start_app("HOME");
 }

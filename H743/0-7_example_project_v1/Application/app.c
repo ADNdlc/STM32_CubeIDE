@@ -17,7 +17,8 @@
 #if USE_OLD_UI
 #include "ui/Act_Manager.h"
 #else
-#include "ui.h"
+#include "home.h"
+#include "Colorwheel/colorwheel.h"
 #endif
 
 int app_init(void)
@@ -26,7 +27,11 @@ int app_init(void)
   act_manager_init(); // 旧ui入口
   log_i("Old UI initialized");
 #else
-  ui_init();
+  home_init();
+ 
+  colorwheel_app_register(); // 注册 ColorWheel 应用
+
+  ui_Start();
   log_i("New UI initialized");
 #endif
   return 0;

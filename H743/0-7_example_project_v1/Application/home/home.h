@@ -11,8 +11,8 @@ extern "C" {
 #include "screens/ui_screen_home.h"
 #include "ui_events.h"
 
-// 全局UI入口
-void ui_init(void);
+void home_init(void);   // ui功能初始化(初始化后注册)
+void ui_Start(void);    // ui启动
 
 // 资源声明
 LV_IMG_DECLARE(icon_home);

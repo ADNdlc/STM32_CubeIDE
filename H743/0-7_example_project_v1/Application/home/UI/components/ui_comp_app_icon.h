@@ -1,7 +1,7 @@
 #ifndef _UI_COMP_APP_ICON_H
 #define _UI_COMP_APP_ICON_H
 
-#include "../ui.h"
+#include <home.h>
 
 // 创建一个 APP 图标组件
 // parent: 父对象

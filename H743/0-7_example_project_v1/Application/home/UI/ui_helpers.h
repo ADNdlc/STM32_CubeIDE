@@ -1,7 +1,7 @@
 #ifndef _UI_HELPERS_H
 #define _UI_HELPERS_H
 
-#include "ui.h"
+#include <home.h>
 
 #ifdef __cplusplus
 extern "C" {

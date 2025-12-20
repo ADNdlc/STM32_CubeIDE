@@ -1,7 +1,7 @@
 #ifndef _UI_EVENTS_H
 #define _UI_EVENTS_H
 
-#include "ui.h"
+#include <home.h>
 
 #ifdef __cplusplus
 extern "C" {

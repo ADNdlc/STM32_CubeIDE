@@ -69,7 +69,7 @@ void colorwheel_demo(lv_obj_t* Screens) {
     lv_colorwheel_set_mode(cw, LV_COLORWHEEL_MODE_HUE);//色相模式
 
     /*=========================================================HVS相关====================================================================*/
-        //色相值显示
+    //色相值显示
     value = lv_label_create(Screens);                                    //创建色相值显示标签
     lv_obj_align_to(value, cw, LV_ALIGN_OUT_TOP_MID, -12, -12);                 //对齐外右,稍微偏移些
     lv_label_set_text_fmt(value, "H: %d", 120);                                   //设置色相值显示文本(初始为绿色,色相值为120)
