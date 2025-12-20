@@ -10,6 +10,9 @@ extern "C" {
 // Screen initialization
 void ui_screen_colorwheel_init(void);
 
+// Screen deinitialization
+void ui_screen_colorwheel_deinit(void);
+
 // Register the app with the app manager
 void colorwheel_app_register(int page_index);
 

@@ -5,7 +5,6 @@
 #define LOG_TAG "ColorWheel"
 #include "elog.h"
 
-// 使用观察者模式，将 ColorWheel 控件作为一个数据模型
 typedef struct {
     lv_color_hsv_t hsv;
     lv_color_t rgb;
@@ -44,18 +43,44 @@ static lv_obj_t* value_b;  // 蓝色通道值显示
 // 用于在颜色为灰度时保存上一个有效的色相值
 static uint16_t last_hue = 120;
 
-// Private function declarations
-static void update_controls_from_model(void);
+// 回调
 static void colorwheel_event_cb(lv_event_t* e);
 static void slider_hsv_event_cb(lv_event_t* e);
 static void slider_rgb_event_cb(lv_event_t* e);
-static void update_model_from_hsv(void);
-static void update_model_from_rgb(void);
+// 更新
+static void update_controls_from_model(void); // 更新ui控件
+static void update_model_from_hsv(void);    // 从HSV更新数据模型
+static void update_model_from_rgb(void);    // 从RGB更新数据模型
+
+/**
+ * @brief 创建自定义样式滑块
+ * @param color  颜色
+ * @param Screens 
+ * @return 
+ */
+static lv_obj_t* slider_create(lv_color_t color, lv_obj_t* parent) {
+    lv_obj_t* slider = lv_slider_create(parent);                      //创建滑块部件
+    lv_obj_set_size(slider, scr_act_width() / 3, scr_act_height() / 20);    //设置滑块大小
+    lv_slider_set_range(slider, 0, 100);
+
+    lv_obj_set_style_bg_color(slider, color, LV_PART_INDICATOR);            //设置滑块"指示器"颜色
+    lv_obj_set_style_bg_color(slider, color, LV_PART_MAIN);                 //设置滑块"主体"颜色
+    lv_obj_set_style_bg_opa(slider, 100, LV_PART_MAIN);                     //设置滑块"主体"透明度(0~255,0为全透明,255为不透明)
+
+    lv_obj_remove_style(slider, NULL, LV_PART_KNOB);                        //移除手柄部分
+
+    return slider;
+}
 
 /**
  * @brief 初始化 ColorWheel 屏幕
  */
 void ui_screen_colorwheel_init(void) {
+    // 检查是否已经初始化
+    if (ui_screen_colorwheel) {
+        return;
+    }
+    
     ui_screen_colorwheel = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_screen_colorwheel, LV_OBJ_FLAG_SCROLLABLE);
 
@@ -91,9 +116,7 @@ void ui_screen_colorwheel_init(void) {
     lv_obj_set_style_text_font(label_H, &lv_font_montserrat_24, LV_PART_MAIN);
 
     // 饱和度滑块
-    slider_S = lv_slider_create(ui_screen_colorwheel);
-    lv_obj_set_style_bg_color(slider_S, lv_color_hex(0x666666), LV_PART_INDICATOR);
-    lv_slider_set_range(slider_S, 0, 100);
+    slider_S = slider_create(lv_color_hex(0x0000ff), ui_screen_colorwheel);
     lv_obj_align(slider_S, LV_ALIGN_TOP_MID, scr_act_height() / 3, scr_act_height() * 2 / 3);
     lv_slider_set_value(slider_S, color_model.hsv.s, LV_ANIM_OFF);
     lv_obj_add_event_cb(slider_S, slider_hsv_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -111,9 +134,7 @@ void ui_screen_colorwheel_init(void) {
     lv_obj_set_style_text_font(value_S, &lv_font_montserrat_24, LV_PART_MAIN);
 
     // 明度滑块
-    slider_V = lv_slider_create(ui_screen_colorwheel);
-    lv_obj_set_style_bg_color(slider_V, lv_color_hex(0x999d99), LV_PART_INDICATOR);
-    lv_slider_set_range(slider_V, 0, 100);
+    slider_V = slider_create(lv_color_hex(0x999d99), ui_screen_colorwheel);
     lv_obj_align_to(slider_V, slider_S, LV_ALIGN_OUT_BOTTOM_LEFT, 0, scr_act_height() / 20);
     lv_slider_set_value(slider_V, color_model.hsv.v, LV_ANIM_OFF);
     lv_obj_add_event_cb(slider_V, slider_hsv_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -132,9 +153,7 @@ void ui_screen_colorwheel_init(void) {
 
     /*=================================== RGB 控件 ================================*/
     // 红色通道滑块
-    slider_r = lv_slider_create(ui_screen_colorwheel);
-    lv_obj_set_style_bg_color(slider_r, lv_color_hex(0xff0000), LV_PART_INDICATOR);
-    lv_slider_set_range(slider_r, 0, 255);
+    slider_r = slider_create(lv_color_hex(0xff0000), ui_screen_colorwheel);
     lv_obj_align(slider_r, LV_ALIGN_TOP_MID, scr_act_height() / 3, scr_act_height() / 5);
     lv_slider_set_value(slider_r, color_model.rgb.ch.red, LV_ANIM_OFF);
     lv_obj_add_event_cb(slider_r, slider_rgb_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -152,9 +171,7 @@ void ui_screen_colorwheel_init(void) {
     lv_obj_set_style_text_font(value_r, &lv_font_montserrat_24, LV_PART_MAIN);
 
     // 绿色通道滑块
-    slider_g = lv_slider_create(ui_screen_colorwheel);
-    lv_obj_set_style_bg_color(slider_g, lv_color_hex(0x00ff00), LV_PART_INDICATOR);
-    lv_slider_set_range(slider_g, 0, 255);
+    slider_g = slider_create(lv_color_hex(0x00ff00), ui_screen_colorwheel);
     lv_obj_align_to(slider_g, slider_r, LV_ALIGN_OUT_BOTTOM_LEFT, 0, scr_act_height() / 20);
     lv_slider_set_value(slider_g, color_model.rgb.ch.green, LV_ANIM_OFF);
     lv_obj_add_event_cb(slider_g, slider_rgb_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -172,9 +189,7 @@ void ui_screen_colorwheel_init(void) {
     lv_obj_set_style_text_font(value_g, &lv_font_montserrat_24, LV_PART_MAIN);
 
     // 蓝色通道滑块
-    slider_b = lv_slider_create(ui_screen_colorwheel);
-    lv_obj_set_style_bg_color(slider_b, lv_color_hex(0x0000ff), LV_PART_INDICATOR);
-    lv_slider_set_range(slider_b, 0, 255);
+    slider_b = slider_create(lv_color_hex(0x0000ff), ui_screen_colorwheel);
     lv_obj_align_to(slider_b, slider_g, LV_ALIGN_OUT_BOTTOM_LEFT, 0, scr_act_height() / 20);
     lv_slider_set_value(slider_b, color_model.rgb.ch.blue, LV_ANIM_OFF);
     lv_obj_add_event_cb(slider_b, slider_rgb_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -196,9 +211,40 @@ void ui_screen_colorwheel_init(void) {
 }
 
 /**
+ * @brief 销毁 ColorWheel 屏幕
+ */
+void ui_screen_colorwheel_deinit(void) {
+    if (ui_screen_colorwheel) {
+        // 重置所有静态指针
+        ui_screen_colorwheel = NULL;
+        cw = NULL;
+        preview_obj = NULL;
+        slider_S = NULL;
+        slider_V = NULL;
+        label_H = NULL;
+        label_S = NULL;
+        label_V = NULL;
+        value_S = NULL;
+        value_V = NULL;
+        slider_r = NULL;
+        slider_g = NULL;
+        slider_b = NULL;
+        label_r = NULL;
+        label_g = NULL;
+        label_b = NULL;
+        value_r = NULL;
+        value_g = NULL;
+        value_b = NULL;
+    }
+}
+
+/**
  * @brief 更新所有控件显示
  */
 static void update_controls_from_model(void) {
+    // 检查对象是否有效
+    if (!ui_screen_colorwheel) return;
+    
     // 更新预览方块颜色
     lv_obj_set_style_bg_color(preview_obj, color_model.rgb, LV_PART_MAIN);
     

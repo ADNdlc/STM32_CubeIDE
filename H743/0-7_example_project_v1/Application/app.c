@@ -19,6 +19,7 @@
 #else
 #include "home.h"
 #include "Colorwheel/colorwheel.h"
+#include "device_control/device_control.h"
 #endif
 
 int app_init(void)
@@ -27,11 +28,13 @@ int app_init(void)
   act_manager_init(); // 旧ui入口
   log_i("Old UI initialized");
 #else
-  home_init();
- 
-  colorwheel_app_register(0); // 注册 ColorWheel 应用
+  home_init();  // 初始化核心功能
 
-  ui_Start();
+  /* 注册各模块功能 */
+  colorwheel_app_register(0);		// 注册 ColorWheel
+  device_control_app_register(0);	// 注册 Control
+
+  ui_Start();  // 启动 UI 系统
   log_i("New UI initialized");
 #endif
   return 0;

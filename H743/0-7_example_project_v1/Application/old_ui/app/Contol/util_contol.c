@@ -1,10 +1,6 @@
 ﻿#include "util_contol.h"
 #include "style.h"
 
-//创建测试卡片
-
-
-
 /**
  * @brief 平面化tabview样式(关闭了动画)
  * @param tabview  选项卡对象
