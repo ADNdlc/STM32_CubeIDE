@@ -12,6 +12,6 @@
 /**
  * @brief 注册 ColorWheel 应用
  */
-void colorwheel_app_register(void);
+void colorwheel_app_register(int page_index);
 
 #endif /* APPS_COLORWHEEL_COLORWHEEL_H_ */

@@ -1,13 +1,19 @@
 #include "app_manager.h"
-#include <string.h>
 #include "elog.h"
+#include <string.h>
+
 
 #define LOG_TAG "APP_MGR"
 #include "elog.h"
 
 #define MAX_APPS 20 // 最大注册app数量
 
-static const app_def_t *registry[MAX_APPS]; // app注册表
+typedef struct {
+  const app_def_t *def;
+  int page_index;
+} registered_app_t;
+
+static registered_app_t registry[MAX_APPS]; // app注册表
 static int registry_count = 0;              // 注册数量
 
 static app_t *app_stack = NULL; // 活动app实例栈顶(当前运行的app)
@@ -18,36 +24,61 @@ void app_manager_init(void) {
   log_i("Initialized");
 }
 
-void app_manager_register(const app_def_t *app_def) {
+void app_manager_register(const app_def_t *app_def, int page_index) {
   if (registry_count < MAX_APPS && app_def) {
-    registry[registry_count++] = app_def;
-    log_i("Registered app: %s", app_def->name);
+    registry[registry_count].def = app_def;
+    registry[registry_count].page_index = page_index;
+    registry_count++;
+    log_i("Registered app: %s at page: %d", app_def->name, page_index);
   } else {
     log_w("Failed to register app, registry full or invalid app");
   }
 }
 
-int app_manager_get_app_count(void) { 
+int app_manager_get_app_count(void) {
   log_d("App count: %d", registry_count);
-  return registry_count; 
+  return registry_count;
 }
 
 const app_def_t *app_manager_get_app_by_index(int index) {
   if (index >= 0 && index < registry_count)
-    return registry[index];
+    return registry[index].def;
   log_w("Invalid index %d", index);
   return NULL;
 }
 
 const app_def_t *app_manager_find_by_name(const char *name) {
   for (int i = 0; i < registry_count; i++) {
-    if (strcmp(registry[i]->name, name) == 0) {
+    if (strcmp(registry[i].def->name, name) == 0) {
       log_d("Found app by name: %s", name);
-      return registry[i];
+      return registry[i].def;
     }
   }
   log_w("App not found by name: %s", name);
   return NULL;
+}
+
+int app_manager_get_page_index(const app_def_t *app_def) {
+  if (!app_def)
+    return -1;
+  for (int i = 0; i < registry_count; i++) {
+    if (registry[i].def == app_def) {
+      return registry[i].page_index;
+    }
+  }
+  return -1;
+}
+
+void app_manager_set_page_index(const char *name, int page_index) {
+  if (!name)
+    return;
+  for (int i = 0; i < registry_count; i++) {
+    if (strcmp(registry[i].def->name, name) == 0) {
+      registry[i].page_index = page_index;
+      log_i("App %s page index updated to %d", name, page_index);
+      return;
+    }
+  }
 }
 
 // Internal: 释放一个app实例

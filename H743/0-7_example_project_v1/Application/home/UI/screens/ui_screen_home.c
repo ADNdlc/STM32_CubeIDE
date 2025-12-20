@@ -22,21 +22,6 @@ lv_obj_t *ui_home_tileview;
 static lv_coord_t col_dsc[PAGE_COL + 2]; // 需要加上空行和结束符
 static lv_coord_t row_dsc[PAGE_ROW + 2];
 
-// 定义 APP 在哪一页
-typedef struct {
-  const char *name;
-  uint8_t page_index;
-} app_placement_t;
-
-// app布局表
-static const app_placement_t APP_PLACEMENTS[] = {
-    {"Settings", 0}, {"Control", 0}, {"ColorWheel", 0},
-    {"test1", 1},    {"File", 2},
-    // 添加更多...
-};
-#define APP_PLACEMENT_COUNT                                                    \
-  (sizeof(APP_PLACEMENTS) / sizeof(APP_PLACEMENTS[0])) // 计算app布局数量
-
 // 页面追踪
 typedef struct {
   lv_obj_t *tile;            // 页面对象(TileView的tile)
@@ -92,16 +77,6 @@ static void setup_grid_layout(lv_obj_t *tile) {
   lv_obj_set_grid_dsc_array(tile, col_dsc, row_dsc);
 }
 
-// --- 辅助函数：查找 APP 应该在哪一页 ---
-static int get_preferred_page(const char *app_name) {
-  for (int i = 0; i < APP_PLACEMENT_COUNT; i++) {
-    if (strcmp(APP_PLACEMENTS[i].name, app_name) == 0) {
-      return APP_PLACEMENTS[i].page_index;
-    }
-  }
-  return -1; // 自动分配
-}
-
 // --- 核心初始化 ---
 void ui_screen_home_init(void) {
   // 创建屏幕
@@ -119,7 +94,8 @@ void ui_screen_home_init(void) {
   // 使用TileView作为主体
   ui_home_tileview = lv_tileview_create(ui_screen_home);
   lv_obj_set_style_bg_opa(ui_home_tileview, LV_OPA_TRANSP, 0);
-  //lv_obj_remove_style(ui_home_tileview, NULL, LV_PART_SCROLLBAR); // 移除滚动条
+  // lv_obj_remove_style(ui_home_tileview, NULL, LV_PART_SCROLLBAR); //
+  // 移除滚动条
 
   // 初始化TileView,添加页面并设置布局
   for (int i = 0; i < PAGE_COUNT; i++) {
@@ -151,8 +127,8 @@ void ui_screen_home_init(void) {
     if (strcmp(app->name, "HOME") == 0)
       continue;
 
-    // 确定页面
-    int page_idx = get_preferred_page(app->name);
+    // 确定页面 (从 App Manager 获取偏好页码)
+    int page_idx = app_manager_get_page_index(app);
 
     // 如果首选页面无效或已满，寻找空位
     int max_apps_per_page = PAGE_ROW * PAGE_COL;

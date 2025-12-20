@@ -11,7 +11,7 @@ extern "C" {
 void ui_screen_colorwheel_init(void);
 
 // Register the app with the app manager
-void colorwheel_app_register(void);
+void colorwheel_app_register(int page_index);
 
 // Screen object
 extern lv_obj_t * ui_screen_colorwheel;

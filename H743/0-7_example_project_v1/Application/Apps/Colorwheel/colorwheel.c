@@ -25,8 +25,8 @@ static app_def_t colorwheel_app_def = {
 /**
  * @brief 注册 ColorWheel 应用
  */
-void colorwheel_app_register(void) {
-    app_manager_register(&colorwheel_app_def);
+void colorwheel_app_register(int page_index) {
+    app_manager_register(&colorwheel_app_def, page_index);
 }
 
 /**

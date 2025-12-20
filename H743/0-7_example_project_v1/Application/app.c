@@ -29,7 +29,7 @@ int app_init(void)
 #else
   home_init();
  
-  colorwheel_app_register(); // 注册 ColorWheel 应用
+  colorwheel_app_register(0); // 注册 ColorWheel 应用
 
   ui_Start();
   log_i("New UI initialized");

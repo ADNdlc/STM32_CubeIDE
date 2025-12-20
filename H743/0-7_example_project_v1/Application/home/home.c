@@ -45,7 +45,7 @@ void home_init(void) {
   input_manager_init(); // 输入管理器初始化
 
   // 注册home
-  app_manager_register(&home_app_def);
+  app_manager_register(&home_app_def, 0);
   
   // 初始化系统UI
   ui_sys_bar_init();   // 系统顶部状态栏
