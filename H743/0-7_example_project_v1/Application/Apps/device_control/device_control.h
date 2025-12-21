@@ -1,10 +1,3 @@
-/*
- * device_control.h
- *
- *  Created on: Dec 20, 2025
- *      Author: 12114
- */
-
 #ifndef APPS_DEVICE_CONTROL_DEVICE_CONTROL_H_
 #define APPS_DEVICE_CONTROL_DEVICE_CONTROL_H_
 

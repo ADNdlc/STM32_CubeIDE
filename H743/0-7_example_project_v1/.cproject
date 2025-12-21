@@ -99,16 +99,16 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="old_ui/img/sys_icon|old_ui/img/sys_bg|lvgl_app/old_ui/app" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
+						<entry excluding="old_device_driver/rgbLCD|platform/stm32/sys/delay.h|old_device_driver/lvgl|old_device_driver/sdram|old_device_driver/key|platform/stm32/sys/delay.c|SYSTEM/usart|BSP/device_driver/key/key.c|old_driver|old_device_driver/test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry excluding="hal_init" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL"/>
+						<entry excluding="unit/main_test_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
+						<entry excluding="easylogger/plugins|easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
+						<entry excluding="lvgl-release-v8.3/examples|lvgl-release-v8.2/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LVGL"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry excluding="old_device_driver/rgbLCD|platform/stm32/sys/delay.h|old_device_driver/lvgl|old_device_driver/sdram|old_device_driver/key|platform/stm32/sys/delay.c|SYSTEM/usart|BSP/device_driver/key/key.c|old_driver|old_device_driver/test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="easylogger/plugins|easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
-						<entry excluding="hal_init" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL/hal_init"/>
-						<entry excluding="lvgl-release-v8.3/examples|lvgl-release-v8.2/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LVGL"/>
-						<entry excluding="unit/main_test_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
+						<entry excluding="old_ui/img/sys_icon|old_ui/img/sys_bg|lvgl_app/old_ui/app" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -186,11 +186,11 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
 						<entry excluding="stm32h743_board_v1" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LVGL"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

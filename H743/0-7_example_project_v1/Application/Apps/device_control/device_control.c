@@ -1,10 +1,3 @@
-/*
- * device_control.c
- *
- *  Created on: Dec 20, 2025
- *      Author: 12114
- */
-
 #include "app_manager.h"
 #include "core_app.h"
 
