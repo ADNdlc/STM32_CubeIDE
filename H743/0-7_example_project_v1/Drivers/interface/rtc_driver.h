@@ -8,6 +8,9 @@
 #ifndef INTERFACE_RTC_DRIVER_H_
 #define INTERFACE_RTC_DRIVER_H_
 
+#include "stdbool.h"
+#include <stdint.h>
+
 // 前向声明
 typedef struct rtc_driver_t rtc_driver_t;
 
@@ -35,16 +38,16 @@ typedef struct {
 	bool (*get_initflag)(rtc_driver_t *rtc);
 } rtc_driver_ops_t;
 
-struct led_hal_t {
+struct rtc_driver_t {
 	const rtc_driver_ops_t *ops;
 };
 
 // 辅助宏
-#define RTC_SET_TIME(rtc, time) (rtc)->ops->set_time(rtc, time)
-#define RTC_GET_TIME(rtc, time) (rtc)->ops->get_time(rtc, time)
-#define RTC_SET_DATE(rtc, date) (rtc)->ops->set_date(rtc, date)
-#define RTC_GET_DATE(rtc, date) (rtc)->ops->get_date(rtc, date)
-#define RTC_SET_INITFLAG(rtc) (rtc)->ops->set_initflag(rtc)
-#define RTC_GET_INITFLAG(rtc) (rtc)->ops->get_initflag(rtc)
+#define RTC_SET_TIME(_rtc, _time) (_rtc)->ops->set_time(_rtc, _time)
+#define RTC_GET_TIME(_rtc, _time) (_rtc)->ops->get_time(_rtc, _time)
+#define RTC_SET_DATE(_rtc, _date) (_rtc)->ops->set_date(_rtc, _date)
+#define RTC_GET_DATE(_rtc, _date) (_rtc)->ops->get_date(_rtc, _date)
+#define RTC_SET_INITFLAG(_rtc) (_rtc)->ops->set_initflag(_rtc)
+#define RTC_GET_INITFLAG(_rtc) (_rtc)->ops->get_initflag(_rtc)
 
 #endif /* INTERFACE_RTC_DRIVER_H_ */

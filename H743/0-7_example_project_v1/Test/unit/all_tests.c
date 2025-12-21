@@ -16,6 +16,7 @@
 #include "lcd_test.h"
 #include "lvgl_test.h"
 #include "touch_test.h"
+#include "rtc_test.h"
 
 void run_all_tests(void)
 {
@@ -59,4 +60,7 @@ void run_all_tests(void)
   touch_test_run();
 #endif
 
+#if _rtc_test_
+  rtc_test_run();
+#endif
 }

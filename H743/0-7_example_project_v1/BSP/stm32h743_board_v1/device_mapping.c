@@ -8,6 +8,7 @@
 #include "device_mapping.h"
 #include "fmc.h"
 #include "ltdc.h"
+#include "rtc.h"
 #include "tim.h"
 #include "usart.h"
 
@@ -69,3 +70,6 @@ const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES] = {
             .i2c_addr_mode = 0x14, // 使用0x14地址模式 (复位时INT=HIGH)
         },
 };
+
+// RTC 设备映射表定义
+const rtc_mapping_t rtc_mappings[RTC_MAX_DEVICES] = {[RTC_DEVICE_0] = {&hrtc}};

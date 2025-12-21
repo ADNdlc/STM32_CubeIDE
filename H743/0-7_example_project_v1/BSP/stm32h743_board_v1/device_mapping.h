@@ -114,6 +114,18 @@ typedef struct {
   uint8_t i2c_addr_mode;        // I2C 地址模式 (0x14 或 0x5D)
 } touch_mapping_t;
 
+// RTC 设备逻辑标识枚举
+typedef enum {
+  RTC_DEVICE_0 = 0,
+  // ...
+  RTC_MAX_DEVICES
+} rtc_device_id_t;
+
+// RTC 设备映射结构体
+typedef struct {
+  RTC_HandleTypeDef *hrtc;
+} rtc_mapping_t;
+
 // 导出映射表
 extern const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES];
 extern const pwm_mapping_t pwm_mappings[PWM_MAX_DEVICES];
@@ -122,5 +134,6 @@ extern const lcd_mapping_t lcd_mappings[LCD_MAX_DEVICES];
 extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 extern const i2c_soft_mapping_t i2c_soft_mappings[I2C_SOFT_MAX_DEVICES];
 extern const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES];
+extern const rtc_mapping_t rtc_mappings[RTC_MAX_DEVICES];
 
 #endif /* STM32H743_BOARD_V1_DEVICE_MAPPING_H_ */
