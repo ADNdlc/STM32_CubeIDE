@@ -58,6 +58,7 @@
 									<listOptionValue builtIn="false" value="../HAL"/>
 									<listOptionValue builtIn="false" value="../Component"/>
 									<listOptionValue builtIn="false" value="../Drivers/factory"/>
+									<listOptionValue builtIn="false" value="../Drivers/device"/>
 									<listOptionValue builtIn="false" value="../Drivers/platform/stm32"/>
 									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/device"/>
 									<listOptionValue builtIn="false" value="../Drivers/platform/stm32/device/sys"/>

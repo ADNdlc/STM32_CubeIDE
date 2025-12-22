@@ -11,7 +11,7 @@
 #include "device_mapping.h"
 #include "factory_config.h"
 #include "gpio_factory.h"
-#include "device/gt9xxx_touch_driver.h"
+#include "gt9xxx_touch/gt9xxx_touch_driver.h"
 #include "i2c_factory.h"
 
 
