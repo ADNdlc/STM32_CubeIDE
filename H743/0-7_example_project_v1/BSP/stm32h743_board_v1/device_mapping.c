@@ -24,6 +24,8 @@ const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
     // 触摸屏控制引脚
     [GPIO_TOUCH_RST] = {GPIOI, GPIO_PIN_8}, // 触摸屏 RST 引脚 (PI8)
     [GPIO_TOUCH_INT] = {GPIOH, GPIO_PIN_7}, // 触摸屏 INT 引脚 (PH7)
+	// esp8266硬件复位引脚
+    [GPIO_ESP_RST] = {GPIOB, GPIO_PIN_2},
 };
 
 // PWM 设备映射表定义
@@ -38,7 +40,7 @@ const pwm_mapping_t pwm_mappings[PWM_MAX_DEVICES] = {
 // USART 设备映射表定义
 const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
     [USART_LOGGER] = {&huart1}, // logger输出
-    [USART_ATCMD] = {&huart2}};
+    [USART_ATCMD] = {&huart2}};	// AT控制器
 
 // LCD 设备映射表定义
 const lcd_mapping_t lcd_mappings[LCD_MAX_DEVICES] = {[LCD_MAIN] = {&hltdc}};

@@ -106,7 +106,7 @@
 						<entry excluding="easylogger/plugins|easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="EasyLogger"/>
 						<entry excluding="lvgl-release-v8.3/examples|lvgl-release-v8.2/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LVGL"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
+						<entry excluding="old_esp_app" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL/hal_init"/>
 						<entry excluding="old_ui/img/sys_icon|old_ui/img/sys_bg|lvgl_app/old_ui/app" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>

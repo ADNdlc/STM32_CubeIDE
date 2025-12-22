@@ -20,6 +20,8 @@ typedef enum {
   // 触摸屏控制引脚
   GPIO_TOUCH_RST,
   GPIO_TOUCH_INT,
+  // esp8266复位
+  GPIO_ESP_RST,
   //...
   GPIO_MAX_DEVICES
 } gpio_device_id_t;

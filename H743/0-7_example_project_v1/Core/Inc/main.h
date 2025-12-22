@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define btn0_GPIO_Port GPIOH
 #define LED0_Pin GPIO_PIN_1
 #define LED0_GPIO_Port GPIOB
+#define ESP_RST_Pin GPIO_PIN_2
+#define ESP_RST_GPIO_Port GPIOB
 #define dht11_D_Pin GPIO_PIN_11
 #define dht11_D_GPIO_Port GPIOB
 #define touch_SCL_Pin GPIO_PIN_6

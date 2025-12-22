@@ -8,18 +8,18 @@
 #include "all_tests_config.h"
 #include "elog_test.h"
 #include "key_test.h"
+#include "lcd_test.h"
 #include "led_test.h"
-#include "uart_hal_test.h"
-#include "uart_queue_test.h"
+#include "lvgl_test.h"
+#include "rtc_test.h"
 #include "sdram_test.h"
 #include "sys_test.h"
-#include "lcd_test.h"
-#include "lvgl_test.h"
 #include "touch_test.h"
-#include "rtc_test.h"
+#include "uart_hal_test.h"
+#include "uart_queue_test.h"
+#include "wifi_test.h"
 
-void run_all_tests(void)
-{
+void run_all_tests(void) {
 #if _led_test_
   led_test_run();
 #endif
@@ -62,5 +62,9 @@ void run_all_tests(void)
 
 #if _rtc_test_
   rtc_test_run();
+#endif
+
+#if _wifi_test_
+  wifi_test_run();
 #endif
 }
