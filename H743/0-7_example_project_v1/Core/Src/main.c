@@ -125,7 +125,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   hal_init(); // HAL初始化(绑定平台实现)
-  app_init(); // 应用初始化
+  //app_init(); // 应用初始化
 
   // module testing
   run_all_tests(); // 运行所有开启的单元测试
