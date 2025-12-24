@@ -7,6 +7,7 @@
 
 #include "all_tests_config.h"
 #include "elog_test.h"
+#include "flash_test.h"
 #include "key_test.h"
 #include "lcd_test.h"
 #include "led_test.h"
@@ -18,6 +19,7 @@
 #include "uart_hal_test.h"
 #include "uart_queue_test.h"
 #include "wifi_test.h"
+
 
 void run_all_tests(void) {
 #if _led_test_
@@ -66,5 +68,9 @@ void run_all_tests(void) {
 
 #if _wifi_test_
   wifi_test_run();
+#endif
+
+#if _flash_test_
+  flash_test_run();
 #endif
 }
