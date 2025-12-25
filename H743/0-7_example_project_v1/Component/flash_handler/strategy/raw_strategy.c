@@ -12,30 +12,23 @@ typedef struct {
 
 static int _raw_mount(flash_strategy_t *self, block_device_t *dev) {
   self->dev = dev;
-  return BLOCK_DEV_INIT(dev);
+  return BLOCK_DEV_INIT(self->dev); // 调用设备的初始化
 }
 
 static int _raw_unmount(flash_strategy_t *self) {
   if (self->dev) {
-    BLOCK_DEV_DEINIT(self->dev);
+    BLOCK_DEV_DEINIT(self->dev);  // 设备反初始化
     self->dev = NULL;
   }
   return 0;
 }
-
-// Raw strategy treats path as offset if possible, or ignores path
-// For simplicity, let's assume usage is generic read/write and path is ignored
-// or parsed as offset But user requirement says:
-// "根据路径的前缀，决定调用哪个文件系统实例". So Handler decides strategy.
-// Strategy handles the rest. For Raw, maybe we just use the offset passed in
-// arg.
 
 static int _raw_read(flash_strategy_t *self, const char *path, uint32_t offset,
                      uint8_t *buf, size_t size) {
   // Lock fine-grained mutex
   if (!self->dev)
     return -1;
-  // Interpret offset as absolute address
+  // 直接使用offset作为地址读取，忽略path
   return BLOCK_DEV_READ(self->dev, offset, buf, size);
   // Unlock
 }

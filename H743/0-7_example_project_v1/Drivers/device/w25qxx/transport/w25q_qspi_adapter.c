@@ -5,8 +5,8 @@
 #define W25Q_QSPI_MEMSOURCE SYS_MEM_INTERNAL
 
 typedef struct {
-  w25q_adapter_t parent;
-  qspi_hal_t *hal;
+  w25q_adapter_t parent;  // 适配器行为
+  qspi_hal_t *hal;        // QSPI HAL
 } w25q_qspi_adapter_impl_t;
 
 // Commands
@@ -19,7 +19,7 @@ typedef struct {
 #define CMD_CHIP_ERASE 0xC7
 #define CMD_READ_STATUS_REG 0x05
 
-// Helper to fill command structure
+// 命令填充函数
 static void _fill_cmd(qspi_command_t *cmd, uint8_t inst, uint32_t addr,
                       uint8_t inst_mode, uint8_t addr_mode, uint8_t data_mode,
                       uint8_t dummy_cycles, size_t size) {
@@ -35,7 +35,7 @@ static void _fill_cmd(qspi_command_t *cmd, uint8_t inst, uint32_t addr,
 }
 
 static int _qspi_init(w25q_adapter_t *self) {
-  // Basic QSPI init done by HAL, no specific CS control needed
+  // 保留函数，实际create时应该传入一个初始化完成的qspi_hal对象
   return 0;
 }
 

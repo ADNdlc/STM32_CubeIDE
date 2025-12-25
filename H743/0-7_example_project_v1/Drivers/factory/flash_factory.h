@@ -2,6 +2,7 @@
 #define DRIVERS_FACTORY_FLASH_FACTORY_H_
 
 #include "block_device.h"
+#include "device_mapping.h"
 
 /**
  * @brief Create a Block Device for Flash based on TAG

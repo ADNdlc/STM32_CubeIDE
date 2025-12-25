@@ -8,9 +8,6 @@
 // (like thread safety at HAL level). For now, we follow the pattern of
 // wrapping.
 
-// In usart_hal, there was a vtable for the HAL struct itself.
-// Let's implement that consistency.
-
 int _spi_hal_transmit(spi_driver_t *self, const uint8_t *data, size_t size,
                       uint32_t timeout) {
   spi_hal_t *hal = (spi_hal_t *)self;

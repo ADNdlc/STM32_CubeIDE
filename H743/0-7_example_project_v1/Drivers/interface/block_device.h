@@ -10,65 +10,67 @@
 #include <stdint.h>
 
 /**
- * @brief Block Device Information
+ * @brief Block Device 定义
  */
-typedef struct {
-  uint32_t capacity;    ///< Total capacity in bytes
-  uint32_t block_size;  ///< Erase block size in bytes
-  uint32_t page_size;   ///< Program page size in bytes
-  uint32_t sector_size; ///< Sector size (min erase unit)
-  uint8_t erase_value;  ///< Value of erased byte (usually 0xFF)
+typedef struct
+{
+  uint32_t capacity;    // 容量(bytes)
+  uint32_t block_size;  // 擦除块大小(bytes)
+  uint32_t page_size;   // 页大小(bytes)
+  uint32_t sector_size; // 扇区大小(block)
+  uint8_t erase_value;  // 擦除块填充值(通常 0xFF)
 } block_dev_info_t;
 
 typedef struct block_device_t block_device_t;
 
 /**
- * @brief Block Device Operations
+ * @brief Block Device 操作
  */
-typedef struct {
+typedef struct
+{
   /**
-   * @brief Initialize the device
+   * @brief 初始化
    * @return 0 on success, negative on error
    */
   int (*init)(block_device_t *const self);
 
   /**
-   * @brief Deinitialize the device
+   * @brief 反初始化
    * @return 0 on success, negative on error
    */
   int (*deinit)(block_device_t *const self);
 
   /**
-   * @brief Read data from device
-   * @param addr Address to read from
-   * @param out_buf Buffer to store data
-   * @param size Number of bytes to read
+   * @brief 从设备读取数据
+   * @param addr 起始地址
+   * @param out_buf 缓冲区
+   * @param size 读取大小(bytes)
    * @return 0 on success, negative on error
    */
   int (*read)(block_device_t *const self, uint32_t addr, uint8_t *out_buf,
               size_t size);
 
   /**
-   * @brief Program data to device
-   * @param addr Address to write to
-   * @param in_buf Buffer containing data
-   * @param size Number of bytes to write
+   * @brief 写数据到设备
+   * @param addr 起始地址
+   * @param in_buf 缓冲区
+   * @param size 写入大小(bytes)
    * @return 0 on success, negative on error
    */
   int (*program)(block_device_t *const self, uint32_t addr,
                  const uint8_t *in_buf, size_t size);
 
   /**
-   * @brief Erase a block/sector
+   * @brief 擦除(block/sector)
    * @param addr Address of the block/sector
-   * @param size Size to erase (must be aligned with erase block size)
+   * @param size 擦除大小 (必须对齐 block 大小)
    * @return 0 on success, negative on error
    */
   int (*erase)(block_device_t *const self, uint32_t addr, size_t size);
 
   /**
-   * @brief Get device information
-   * @param info Pointer to info structure
+   * @brief 获取设备信息
+   * @param info 输出
    * @return 0 on success, negative on error
    */
   int (*get_info)(block_device_t *const self, block_dev_info_t *info);
@@ -82,9 +84,10 @@ typedef struct {
 } block_device_ops_t;
 
 /**
- * @brief Block Device Base Structure
+ * @brief Block Device 基本结构
  */
-struct block_device_t {
+struct block_device_t
+{
   const block_device_ops_t *ops;
   void *user_data;
 };

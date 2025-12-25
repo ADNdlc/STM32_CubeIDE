@@ -28,7 +28,7 @@ touch_driver_t *touch_driver_get(touch_device_id_t id) {
   if (touch_drivers[id] == NULL) {
     const touch_mapping_t *mapping = &touch_mappings[id];
 
-    // 获取依赖的驱动实例
+    // 获取依赖的驱动实例(使用其他工厂函数获取)
     i2c_driver_t *i2c = i2c_soft_driver_get(mapping->i2c_id);
     gpio_driver_t *rst_gpio = gpio_driver_get(mapping->rst_gpio_id);
     gpio_driver_t *int_gpio = gpio_driver_get(mapping->int_gpio_id);

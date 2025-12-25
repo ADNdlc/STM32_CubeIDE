@@ -11,8 +11,9 @@ void flash_integration_test(void) {
   // 1. Initialize Handler
   flash_handler_init();
 
-  // 2. Create Device via Factory (using SPI by default config)
-  block_device_t *dev = flash_factory_create("FLASH_SPI_EXT");
+  // 2. Create Device via Factory (using ID directly)
+  // Was: "FLASH_SPI_EXT" -> Now: FLASH_EXT_SPI (enum)
+  block_device_t *dev = flash_factory_get(FLASH_EXT_SPI);
   if (!dev) {
     printf("Flash Factory Failed\n");
     return;
@@ -35,19 +36,7 @@ void flash_integration_test(void) {
   uint8_t write_buf[16] = "Hello Flash 123";
   uint8_t read_buf[16] = {0};
 
-  // Erase first (sector 0)
-  // Note: Handler currently only exposes read/write via strategy ops
-  // We assume write handles erase if needed, OR we need to expose erase via
-  // strategy In our implementation, `w25q_program` does NOT erase
-  // automatically. For raw strategy, we might need a way to erase. However, our
-  // `raw_strategy.c` `write` calls `BLOCK_DEV_PROGRAM`. We should probably add
-  // `ioctl` or `erase` to strategy for full support. For this simple test, we
-  // assume the area is erased or we rely on overwriting (which fails on flash
-  // without erase).
-
-  // To fix this for the test, let's cheat and use the device API directly to
-  // erase, since we have the dev pointer. In a real app, we should add `erase`
-  // to strategy interface.
+  // Erase
   BLOCK_DEV_ERASE(dev, 0, 4096);
 
   // Write

@@ -5,10 +5,10 @@
 #include "strategy/flash_strategy.h"
 
 
-// Initialize Handler
+// 初始化
 int flash_handler_init(void);
 
-// Register a device with a path prefix and strategy
+// 注册带有路径前缀和策略的设备
 int flash_handler_register(const char *prefix, block_device_t *dev,
                            flash_strategy_t *strategy);
 

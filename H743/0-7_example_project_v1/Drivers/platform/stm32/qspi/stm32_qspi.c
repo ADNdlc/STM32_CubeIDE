@@ -3,7 +3,7 @@
 
 #define STM32_QSPI_MEMSOURCE SYS_MEM_INTERNAL
 
-// Helper to convert generic command to STM32 QSPI Command
+// 将qspi_command_t 转换为 HAL_QSPI_CommandTypeDef
 static void _convert_cmd(qspi_command_t *src, QSPI_CommandTypeDef *dst) {
   dst->Instruction = src->instruction;
   dst->Address = src->address;

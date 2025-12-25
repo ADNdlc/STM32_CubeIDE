@@ -20,8 +20,8 @@
 #include "main.h"
 #include "dma.h"
 #include "dma2d.h"
-#include "i2c.h"
 #include "ltdc.h"
+#include "quadspi.h"
 #include "rtc.h"
 #include "sdmmc.h"
 #include "spi.h"
@@ -116,9 +116,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM2_Init();
   MX_TIM4_Init();
-  MX_I2C1_Init();
   MX_TIM3_Init();
   MX_SPI1_Init();
+  MX_QUADSPI_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();

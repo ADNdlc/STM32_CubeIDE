@@ -13,11 +13,11 @@
  * @brief QSPI Command Structure
  */
 typedef struct {
-  uint8_t instruction;     ///< Command Instruction
-  uint32_t address;        ///< Address (if applicable)
-  uint32_t alternate_byte; ///< Alternate Byte (if applicable)
-  uint32_t dummy_cycles;   ///< Number of dummy cycles
-  uint32_t data_size;      ///< Size of data to transfer
+  uint8_t instruction;     // 命令
+  uint32_t address;        // 地址(如果需要)
+  uint32_t alternate_byte; // 交替字节(如果需要)
+  uint32_t dummy_cycles;   // 延迟周期
+  uint32_t data_size;      // 数据大小
 
   // Mode configuration (implementation dependent, usually enums for 1/2/4
   // lines)
@@ -32,7 +32,7 @@ typedef struct {
 typedef struct qspi_driver_t qspi_driver_t;
 
 /**
- * @brief QSPI Driver Operations
+ * @brief QSPI 驱动操作
  */
 typedef struct {
   /**
@@ -51,13 +51,13 @@ typedef struct {
   int (*receive)(qspi_driver_t *self, uint8_t *data, uint32_t timeout);
 
   /**
-   * @brief Configure Automatic Polling Mode (optional)
+   * @brief 配置自动轮询模式（可选）
    */
   int (*auto_polling)(qspi_driver_t *self, qspi_command_t *cmd,
                       qspi_command_t *cfg, uint32_t timeout);
 
   /**
-   * @brief Memory Mapped Mode (optional)
+   * @brief 配置内存映射模式（可选）
    */
   int (*memory_mapped)(qspi_driver_t *self, qspi_command_t *cmd);
 
@@ -75,7 +75,7 @@ struct qspi_driver_t {
 #define QSPI_COMMAND(drv, cmd, t) ((drv)->ops->command(drv, cmd, t))
 #define QSPI_TRANSMIT(drv, d, t) ((drv)->ops->transmit(drv, d, t))
 #define QSPI_RECEIVE(drv, d, t) ((drv)->ops->receive(drv, d, t))
-#define QSPI_AUTO_POLLING(drv, c, cfg, t)                                      \
+#define QSPI_AUTO_POLLING(drv, c, cfg, t)\
   ((drv)->ops->auto_polling(drv, c, cfg, t))
 #define QSPI_MEMORY_MAPPED(drv, c) ((drv)->ops->memory_mapped(drv, c))
 
