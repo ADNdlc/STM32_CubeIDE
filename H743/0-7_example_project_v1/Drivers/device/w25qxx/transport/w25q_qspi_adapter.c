@@ -6,7 +6,7 @@
 
 typedef struct {
   w25q_adapter_t parent;  // 适配器行为
-  qspi_hal_t *hal;        // QSPI HAL
+  qspi_driver_t *driver;        // QSPI驱动
 } w25q_qspi_adapter_impl_t;
 
 // Commands
@@ -35,7 +35,7 @@ static void _fill_cmd(qspi_command_t *cmd, uint8_t inst, uint32_t addr,
 }
 
 static int _qspi_init(w25q_adapter_t *self) {
-  // 保留函数，实际create时应该传入一个初始化完成的qspi_hal对象
+  // 保留函数，实际create时应该传入一个初始化完成的qspi_driver对象
   return 0;
 }
 
@@ -45,7 +45,7 @@ static int _qspi_write_enable(w25q_adapter_t *self) {
   _fill_cmd(&cmd, CMD_WRITE_ENABLE, 0, QSPI_INSTRUCTION_1_LINE,
             QSPI_ADDRESS_NONE, QSPI_DATA_NONE, 0, 0);
 
-  return qspi_hal_command(impl->hal, &cmd, 100);
+  return QSPI_COMMAND(impl->driver, &cmd, 100);
 }
 
 static int _qspi_read_id(w25q_adapter_t *self, uint32_t *id) {
@@ -56,9 +56,9 @@ static int _qspi_read_id(w25q_adapter_t *self, uint32_t *id) {
   _fill_cmd(&cmd, CMD_READ_ID, 0, QSPI_INSTRUCTION_1_LINE, QSPI_ADDRESS_NONE,
             QSPI_DATA_1_LINE, 0, 3);
 
-  if (qspi_hal_command(impl->hal, &cmd, 100) != 0)
+  if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0)
     return -1;
-  if (qspi_hal_receive(impl->hal, buf, 100) != 0)
+  if (QSPI_RECEIVE(impl->driver, buf, 100) != 0)
     return -1;
 
   *id = (buf[0] << 16) | (buf[1] << 8) | buf[2];
@@ -76,9 +76,9 @@ static int _qspi_read(w25q_adapter_t *self, uint32_t addr, uint8_t *buf,
   _fill_cmd(&cmd, CMD_READ_DATA, addr, QSPI_INSTRUCTION_1_LINE,
             QSPI_ADDRESS_4_LINES, QSPI_DATA_4_LINES, 6, size);
 
-  if (qspi_hal_command(impl->hal, &cmd, 100) != 0)
+  if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0)
     return -1;
-  if (qspi_hal_receive(impl->hal, buf, 1000) != 0)
+  if (QSPI_RECEIVE(impl->driver, buf, 1000) != 0)
     return -1;
   return 0;
 }
@@ -93,9 +93,9 @@ static int _qspi_program_page(w25q_adapter_t *self, uint32_t addr,
   _fill_cmd(&cmd, CMD_PAGE_PROGRAM, addr, QSPI_INSTRUCTION_1_LINE,
             QSPI_ADDRESS_1_LINE, QSPI_DATA_4_LINES, 0, size);
 
-  if (qspi_hal_command(impl->hal, &cmd, 100) != 0)
+  if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0)
     return -1;
-  if (qspi_hal_transmit(impl->hal, buf, 1000) != 0)
+  if (QSPI_TRANSMIT(impl->driver, buf, 1000) != 0)
     return -1;
   return 0;
 }
@@ -105,7 +105,7 @@ static int _qspi_erase_sector(w25q_adapter_t *self, uint32_t addr) {
   qspi_command_t cmd;
   _fill_cmd(&cmd, CMD_SECTOR_ERASE, addr, QSPI_INSTRUCTION_1_LINE,
             QSPI_ADDRESS_1_LINE, QSPI_DATA_NONE, 0, 0);
-  return qspi_hal_command(impl->hal, &cmd, 100);
+  return QSPI_COMMAND(impl->driver, &cmd, 100);
 }
 
 static int _qspi_erase_block(w25q_adapter_t *self, uint32_t addr) {
@@ -113,7 +113,7 @@ static int _qspi_erase_block(w25q_adapter_t *self, uint32_t addr) {
   qspi_command_t cmd;
   _fill_cmd(&cmd, CMD_BLOCK_ERASE, addr, QSPI_INSTRUCTION_1_LINE,
             QSPI_ADDRESS_1_LINE, QSPI_DATA_NONE, 0, 0);
-  return qspi_hal_command(impl->hal, &cmd, 100);
+  return QSPI_COMMAND(impl->driver, &cmd, 100);
 }
 
 static int _qspi_erase_chip(w25q_adapter_t *self) {
@@ -121,7 +121,7 @@ static int _qspi_erase_chip(w25q_adapter_t *self) {
   qspi_command_t cmd;
   _fill_cmd(&cmd, CMD_CHIP_ERASE, 0, QSPI_INSTRUCTION_1_LINE, QSPI_ADDRESS_NONE,
             QSPI_DATA_NONE, 0, 0);
-  return qspi_hal_command(impl->hal, &cmd, 100);
+  return QSPI_COMMAND(impl->driver, &cmd, 100);
 }
 
 static int _qspi_wait_busy(w25q_adapter_t *self, uint32_t timeout) {
@@ -138,7 +138,7 @@ static int _qspi_wait_busy(w25q_adapter_t *self, uint32_t timeout) {
   cfg.instruction = QSPI_MATCH_MODE_AND; // Mode
   cfg.data_size = 1;                     // Status byte size
 
-  return qspi_hal_auto_polling(impl->hal, &cmd, &cfg, timeout);
+  return QSPI_AUTO_POLLING(impl->driver, &cmd, &cfg, timeout);
 }
 
 static const w25q_adapter_ops_t w25q_qspi_ops = {
@@ -153,13 +153,13 @@ static const w25q_adapter_ops_t w25q_qspi_ops = {
     .wait_busy = _qspi_wait_busy,
 };
 
-w25q_adapter_t *w25q_qspi_adapter_create(qspi_hal_t *hal) {
+w25q_adapter_t *w25q_qspi_adapter_create(qspi_driver_t *qspi_driver) {
   w25q_qspi_adapter_impl_t *adapter = (w25q_qspi_adapter_impl_t *)sys_malloc(
       W25Q_QSPI_MEMSOURCE, sizeof(w25q_qspi_adapter_impl_t));
   if (adapter) {
     adapter->parent.ops = &w25q_qspi_ops;
     adapter->parent.user_data = adapter;
-    adapter->hal = hal;
+    adapter->driver = qspi_driver;
     return &adapter->parent;
   }
   return NULL;

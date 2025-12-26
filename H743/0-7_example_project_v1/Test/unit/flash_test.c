@@ -13,7 +13,7 @@ void flash_integration_test(void) {
 
   // 2. Create Device via Factory (using ID directly)
   // Was: "FLASH_SPI_EXT" -> Now: FLASH_EXT_SPI (enum)
-  block_device_t *dev = flash_factory_get(FLASH_EXT_SPI);
+  block_device_t *dev = flash_factory_get(FLASH_EXT_QSPI);
   if (!dev) {
     printf("Flash Factory Failed\n");
     return;

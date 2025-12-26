@@ -1,9 +1,9 @@
 #include "flash_factory.h"
 #include "device_mapping.h"
 #include "qspi_factory.h"
-#include "qspi_hal/qspi_hal.h"
+#include "qspi_driver.h"
 #include "spi_factory.h"
-#include "spi_hal/spi_hal.h"
+#include "spi_driver.h"
 #include "w25qxx/w25qxx.h"
 #include "w25qxx/transport/w25q_qspi_adapter.h"
 #include "w25qxx/transport/w25q_spi_adapter.h"
@@ -26,26 +26,16 @@ block_device_t *flash_factory_get(flash_device_id_t id) {
       if (!spi_drv)
         return NULL;
 
-      // 2. Wrap in HAL
-      // Note: We create a new HAL instance here.
-      // Ideally, the factory should manage singletons of HALs too if they share
-      // state? But HAL is lightweight wrapper.
-      spi_hal_t *hal = spi_hal_create(spi_drv);
-      if (!hal)
-        return NULL;
-
-      // 3. Adapter
-      w25q_adapter_t *adapter = w25q_spi_adapter_create(hal);
+      // 2. Create adapter directly with SPI driver (no HAL needed)
+      w25q_adapter_t *adapter = w25q_spi_adapter_create(spi_drv);
       if (!adapter) {
-        spi_hal_destroy(hal);
         return NULL;
       }
 
-      // 4. Device
+      // 3. Create device with adapter
       flash_devices[id] = w25qxx_create(adapter);
       if (!flash_devices[id]) {
         w25q_spi_adapter_destroy(adapter);
-        spi_hal_destroy(hal);
       }
 
     } else if (mapping->type == FLASH_TYPE_QSPI) {
@@ -53,20 +43,15 @@ block_device_t *flash_factory_get(flash_device_id_t id) {
       if (!qspi_drv)
         return NULL;
 
-      qspi_hal_t *hal = qspi_hal_create(qspi_drv);
-      if (!hal)
-        return NULL;
-
-      w25q_adapter_t *adapter = w25q_qspi_adapter_create(hal);
+      // Create adapter directly with QSPI driver (no HAL needed)
+      w25q_adapter_t *adapter = w25q_qspi_adapter_create(qspi_drv);
       if (!adapter) {
-        qspi_hal_destroy(hal);
         return NULL;
       }
 
       flash_devices[id] = w25qxx_create(adapter);
       if (!flash_devices[id]) {
         w25q_qspi_adapter_destroy(adapter);
-        qspi_hal_destroy(hal);
       }
     }
   }

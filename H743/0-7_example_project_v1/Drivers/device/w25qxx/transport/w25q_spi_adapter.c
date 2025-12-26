@@ -29,9 +29,9 @@ static int _spi_write_enable(w25q_adapter_t *self) {
   w25q_spi_adapter_impl_t *impl = (w25q_spi_adapter_impl_t *)self;
   uint8_t cmd = CMD_WRITE_ENABLE;
 
-  spi_hal_cs_control(impl->hal, 0);
-  spi_hal_transmit(impl->hal, &cmd, 1, 100);
-  spi_hal_cs_control(impl->hal, 1);
+  SPI_CS_CONTROL(impl->driver, 0);
+  SPI_TRANSMIT(impl->driver, &cmd, 1, 100);
+  SPI_CS_CONTROL(impl->driver, 1);
   return 0;
 }
 
@@ -40,10 +40,10 @@ static int _spi_read_id(w25q_adapter_t *self, uint32_t *id) {
   uint8_t cmd = CMD_READ_ID;
   uint8_t buf[3];
 
-  spi_hal_cs_control(impl->hal, 0);
-  spi_hal_transmit(impl->hal, &cmd, 1, 100);
-  spi_hal_receive(impl->hal, buf, 3, 100);
-  spi_hal_cs_control(impl->hal, 1);
+  SPI_CS_CONTROL(impl->driver, 0);
+  SPI_TRANSMIT(impl->driver, &cmd, 1, 100);
+  SPI_RECEIVE(impl->driver, buf, 3, 100);
+  SPI_CS_CONTROL(impl->driver, 1);
 
   *id = (buf[0] << 16) | (buf[1] << 8) | buf[2];
   return 0;
@@ -58,10 +58,10 @@ static int _spi_read(w25q_adapter_t *self, uint32_t addr, uint8_t *buf,
   cmd[2] = (addr >> 8) & 0xFF;
   cmd[3] = addr & 0xFF;
 
-  spi_hal_cs_control(impl->hal, 0);
-  spi_hal_transmit(impl->hal, cmd, 4, 100);
-  spi_hal_receive(impl->hal, buf, size, 1000);
-  spi_hal_cs_control(impl->hal, 1);
+  SPI_CS_CONTROL(impl->driver, 0);
+  SPI_TRANSMIT(impl->driver, cmd, 4, 100);
+  SPI_RECEIVE(impl->driver, buf, size, 1000);
+  SPI_CS_CONTROL(impl->driver, 1);
 
   return 0;
 }
@@ -75,10 +75,10 @@ static int _spi_program_page(w25q_adapter_t *self, uint32_t addr,
   cmd[2] = (addr >> 8) & 0xFF;
   cmd[3] = addr & 0xFF;
 
-  spi_hal_cs_control(impl->hal, 0);
-  spi_hal_transmit(impl->hal, cmd, 4, 100);
-  spi_hal_transmit(impl->hal, buf, size, 1000);
-  spi_hal_cs_control(impl->hal, 1);
+  SPI_CS_CONTROL(impl->driver, 0);
+  SPI_TRANSMIT(impl->driver, cmd, 4, 100);
+  SPI_TRANSMIT(impl->driver, buf, size, 1000);
+  SPI_CS_CONTROL(impl->driver, 1);
 
   return 0;
 }
@@ -91,9 +91,9 @@ static int _spi_erase_sector(w25q_adapter_t *self, uint32_t addr) {
   cmd[2] = (addr >> 8) & 0xFF;
   cmd[3] = addr & 0xFF;
 
-  spi_hal_cs_control(impl->hal, 0);
-  spi_hal_transmit(impl->hal, cmd, 4, 100);
-  spi_hal_cs_control(impl->hal, 1);
+  SPI_CS_CONTROL(impl->driver, 0);
+  SPI_TRANSMIT(impl->driver, cmd, 4, 100);
+  SPI_CS_CONTROL(impl->driver, 1);
 
   return 0;
 }
@@ -106,9 +106,9 @@ static int _spi_erase_block(w25q_adapter_t *self, uint32_t addr) {
   cmd[2] = (addr >> 8) & 0xFF;
   cmd[3] = addr & 0xFF;
 
-  spi_hal_cs_control(impl->hal, 0);
-  spi_hal_transmit(impl->hal, cmd, 4, 100);
-  spi_hal_cs_control(impl->hal, 1);
+  SPI_CS_CONTROL(impl->driver, 0);
+  SPI_TRANSMIT(impl->driver, cmd, 4, 100);
+  SPI_CS_CONTROL(impl->driver, 1);
 
   return 0;
 }
@@ -117,9 +117,9 @@ static int _spi_erase_chip(w25q_adapter_t *self) {
   w25q_spi_adapter_impl_t *impl = (w25q_spi_adapter_impl_t *)self;
   uint8_t cmd = CMD_CHIP_ERASE;
 
-  spi_hal_cs_control(impl->hal, 0);
-  spi_hal_transmit(impl->hal, &cmd, 1, 100);
-  spi_hal_cs_control(impl->hal, 1);
+  SPI_CS_CONTROL(impl->driver, 0);
+  SPI_TRANSMIT(impl->driver, &cmd, 1, 100);
+  SPI_CS_CONTROL(impl->driver, 1);
 
   return 0;
 }
@@ -131,10 +131,10 @@ static int _spi_wait_busy(w25q_adapter_t *self, uint32_t timeout) {
   uint32_t tick = 0; // Should use proper tick get
 
   do {
-    spi_hal_cs_control(impl->hal, 0);
-    spi_hal_transmit(impl->hal, &cmd, 1, 100);
-    spi_hal_receive(impl->hal, &status, 1, 100);
-    spi_hal_cs_control(impl->hal, 1);
+    SPI_CS_CONTROL(impl->driver, 0);
+    SPI_TRANSMIT(impl->driver, &cmd, 1, 100);
+    SPI_RECEIVE(impl->driver, &status, 1, 100);
+    SPI_CS_CONTROL(impl->driver, 1);
 
     if ((status & 0x01) == 0)
       return 0;
