@@ -1,6 +1,6 @@
 #include "qspi_factory.h"
 #include "factory_config.h"
-#include "stm32_qspi.h"
+#include "qspi/stm32_qspi.h"
 
 static qspi_driver_t *qspi_drivers[QSPI_MAX_DEVICES] = {NULL};
 

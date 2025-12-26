@@ -1,7 +1,8 @@
 #include "device_mapping.h"
-#include "spi.h"
 #include <string.h>
-// #include "quadspi.h" // Assuming this will exist or is manually added
+// stm32外设头文件
+#include "spi.h"
+#include "quadspi.h"
 #include "fmc.h"
 #include "ltdc.h"
 #include "rtc.h"

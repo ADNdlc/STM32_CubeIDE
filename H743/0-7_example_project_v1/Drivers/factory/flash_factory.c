@@ -1,12 +1,12 @@
 #include "flash_factory.h"
 #include "device_mapping.h"
 #include "qspi_factory.h"
-#include "qspi_hal.h"
+#include "qspi_hal/qspi_hal.h"
 #include "spi_factory.h"
-#include "spi_hal.h"
-#include "w25q_qspi_adapter.h"
-#include "w25q_spi_adapter.h"
-#include "w25qxx.h"
+#include "spi_hal/spi_hal.h"
+#include "w25qxx/w25qxx.h"
+#include "w25qxx/transport/w25q_qspi_adapter.h"
+#include "w25qxx/transport/w25q_spi_adapter.h"
 #include <stddef.h>
 
 

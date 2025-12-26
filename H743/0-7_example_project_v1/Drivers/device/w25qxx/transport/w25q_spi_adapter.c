@@ -6,7 +6,7 @@
 
 typedef struct {
   w25q_adapter_t parent;
-  spi_hal_t *hal;
+  spi_driver_t *driver;
 } w25q_spi_adapter_impl_t;
 
 // Commands
@@ -21,7 +21,7 @@ typedef struct {
 
 static int _spi_init(w25q_adapter_t *self) {
   w25q_spi_adapter_impl_t *impl = (w25q_spi_adapter_impl_t *)self;
-  spi_hal_cs_control(impl->hal, 1); // High (Inactive)
+
   return 0;
 }
 
@@ -158,13 +158,13 @@ static const w25q_adapter_ops_t w25q_spi_ops = {
     .wait_busy = _spi_wait_busy,
 };
 
-w25q_adapter_t *w25q_spi_adapter_create(spi_hal_t *hal) {
+w25q_adapter_t *w25q_spi_adapter_create(spi_driver_t *spi_driver){
   w25q_spi_adapter_impl_t *adapter = (w25q_spi_adapter_impl_t *)sys_malloc(
       W25Q_SPI_MEMSOURCE, sizeof(w25q_spi_adapter_impl_t));
   if (adapter) {
     adapter->parent.ops = &w25q_spi_ops;
     adapter->parent.user_data = adapter;
-    adapter->hal = hal;
+    adapter->driver = spi_driver;
     return &adapter->parent;
   }
   return NULL;

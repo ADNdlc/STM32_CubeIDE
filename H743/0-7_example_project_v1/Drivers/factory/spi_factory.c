@@ -1,6 +1,6 @@
 #include "spi_factory.h"
 #include "factory_config.h"
-#include "stm32_spi.h"
+#include "spi/stm32_spi.h"
 
 static spi_driver_t *spi_drivers[SPI_MAX_DEVICES] = {NULL};
 

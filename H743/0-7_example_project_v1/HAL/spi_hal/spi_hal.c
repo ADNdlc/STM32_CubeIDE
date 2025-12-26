@@ -44,10 +44,11 @@ void _spi_hal_cs_control(spi_driver_t *self, uint8_t state) {
 }
 
 spi_hal_vtable_t spi_hal_vtable = {
-    .base_vtable = {.transmit = _spi_hal_transmit,
-                    .receive = _spi_hal_receive,
-                    .transmit_receive = _spi_hal_transmit_receive,
-                    .cs_control = _spi_hal_cs_control}};
+    .base_vtable = {
+    		.transmit = _spi_hal_transmit,
+			.receive = _spi_hal_receive,
+			.transmit_receive = _spi_hal_transmit_receive,
+			.cs_control = _spi_hal_cs_control}};
 
 void spi_hal_init(spi_hal_t *self, spi_driver_t *driver) {
   self->vtable = &spi_hal_vtable;
