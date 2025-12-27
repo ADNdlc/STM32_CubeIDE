@@ -21,7 +21,7 @@
 
 
 #define UART_QUEUE_AUTO_WAIT_DELAY_MS   5		// 每次自动等待时的阻塞时间（毫秒）
-#define UART_QUEUE_AUTO_WAIT_MAX_COUNT  100 // 自动等待最大次数
+#define UART_QUEUE_AUTO_WAIT_MAX_COUNT  20 // 自动等待最大次数
 
 // 前向声明
 typedef struct uart_queue_t uart_queue_t;

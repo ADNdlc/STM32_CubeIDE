@@ -55,7 +55,9 @@ struct spi_driver_t {
 #define SPI_TRANSMIT_RECEIVE(d, tx, rx, s, t)                                  \
   ((d)->ops->transmit_receive(d, tx, rx, s, t))
 #define SPI_CS_CONTROL(drv, state)                                             \
-  if ((drv)->ops->cs_control)                                                  \
-  (drv)->ops->cs_control(drv, state)
+  do {                                                                         \
+    if ((drv)->ops->cs_control)                                                \
+      (drv)->ops->cs_control(drv, state);                                      \
+  } while (0)
 
 #endif /* DRIVERS_INTERFACE_SPI_DRIVER_H_ */

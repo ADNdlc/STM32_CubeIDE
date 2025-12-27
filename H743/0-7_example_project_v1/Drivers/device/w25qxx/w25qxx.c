@@ -1,162 +1,164 @@
 #include "w25qxx.h"
+#include "../../interface/block_device.h" // Help lint/compiler find it
+#include "elog.h"
 #include "sys.h"
 #include <stdlib.h>
 #include <string.h>
+
+
+#define LOG_TAG "W25Q"
 
 #define W25Q_MEMSOURCE SYS_MEM_INTERNAL
 
 // W25Qxx Manufacturer and Device IDs
 #define WINBOND_MANUFACTURER_ID 0xEF
-#define W25Q_MEMORY_TYPE        0x40
-
-// Specific device IDs
-#define W25Q10_ID 0xEF10
-#define W25Q20_ID 0xEF11
-#define W25Q40_ID 0xEF12
-#define W25Q80_ID 0xEF13
-#define W25Q16_ID 0xEF14
-#define W25Q32_ID 0xEF15
-#define W25Q64_ID 0xEF16
-#define W25Q128_ID 0xEF17
-#define W25Q256_ID 0xEF18
+#define W25Q_MEMORY_TYPE 0x40
 
 static int w25q_init(block_device_t *const self) {
+  log_d("Starting W25Q initialization");
   w25qxx_t *dev = (w25qxx_t *)self;
+  log_d("Device structure cast successful");
+  
   if (dev->adapter && dev->adapter->ops->init) {
-    if (dev->adapter->ops->init(dev->adapter) != 0)
+    log_d("Calling adapter init function");
+    if (dev->adapter->ops->init(dev->adapter) != 0) {
+      log_e("Adapter init failed");
       return -1;
+    }
+    log_i("Adapter init successful");
+  } else {
+    log_w("Adapter or init function is NULL");
+    if (!dev->adapter) {
+      log_e("Adapter is NULL");
+      return -1;
+    }
+    if (!dev->adapter->ops) {
+      log_e("Adapter ops is NULL");
+      return -1;
+    }
+    if (!dev->adapter->ops->init) {
+      log_e("Adapter init function is NULL");
+      return -1;
+    }
   }
 
-  // 读取ID
+  // 1. Read ID
+  log_d("Attempting to read Flash ID");
   uint32_t id = 0;
-  if (dev->adapter->ops->read_id(dev->adapter, &id) != 0)
+  if (dev->adapter->ops->read_id(dev->adapter, &id) != 0) {
+    log_e("Read ID failed");
     return -1;
+  }
+  log_i("Found Flash ID: 0x%06X", id);
 
-  // 验证ID信息
+  // 2. Parse ID
   uint8_t manuf_id = (id >> 16) & 0xFF;
   uint8_t mem_type = (id >> 8) & 0xFF;
   uint8_t cap_id = id & 0xFF;
-  
+
+  log_d("Parsed Flash ID - Manufacturer: 0x%02X, Memory Type: 0x%02X, Capacity ID: 0x%02X", manuf_id, mem_type, cap_id);
   if (manuf_id != WINBOND_MANUFACTURER_ID || mem_type != W25Q_MEMORY_TYPE) {
-    return -1; // Not a W25Q series flash
+    log_w("Unexpected Chip: Manuf 0x%02X, Type 0x%02X", manuf_id, mem_type);
   }
 
-  // 根据ID信息设定 block_device信息
+  // 3. Set Geometry
+  log_d("Setting flash geometry based on capacity ID: 0x%02X", cap_id);
   switch (cap_id) {
-    case 0x10: // W25Q10 (1Mbit = 128KB)
-      dev->info.capacity = 128 * 1024;      // 128KB
-      dev->info.block_size = 64 * 1024;     // 64KB block
-      dev->info.sector_size = 4 * 1024;     // 4KB sector
-      dev->info.page_size = 256;            // 256B page
-      break;
-    case 0x11: // W25Q20 (2Mbit = 256KB)
-      dev->info.capacity = 256 * 1024;      // 256KB
-      dev->info.block_size = 64 * 1024;
-      dev->info.sector_size = 4 * 1024;
-      dev->info.page_size = 256;
-      break;
-    case 0x12: // W25Q40 (4Mbit = 512KB)
-      dev->info.capacity = 512 * 1024;      // 512KB
-      dev->info.block_size = 64 * 1024;
-      dev->info.sector_size = 4 * 1024;
-      dev->info.page_size = 256;
-      break;
-    case 0x13: // W25Q80 (8Mbit = 1MB)
-      dev->info.capacity = 1 * 1024 * 1024; // 1MB
-      dev->info.block_size = 64 * 1024;
-      dev->info.sector_size = 4 * 1024;
-      dev->info.page_size = 256;
-      break;
-    case 0x14: // W25Q16 (16Mbit = 2MB)
-      dev->info.capacity = 2 * 1024 * 1024; // 2MB
-      dev->info.block_size = 64 * 1024;
-      dev->info.sector_size = 4 * 1024;
-      dev->info.page_size = 256;
-      break;
-    case 0x15: // W25Q32 (32Mbit = 4MB)
-      dev->info.capacity = 4 * 1024 * 1024; // 4MB
-      dev->info.block_size = 64 * 1024;
-      dev->info.sector_size = 4 * 1024;
-      dev->info.page_size = 256;
-      break;
-    case 0x16: // W25Q64 (64Mbit = 8MB)
-      dev->info.capacity = 8 * 1024 * 1024; // 8MB
-      dev->info.block_size = 64 * 1024;
-      dev->info.sector_size = 4 * 1024;
-      dev->info.page_size = 256;
-      break;
-    case 0x17: // W25Q128 (128Mbit = 16MB)
-      dev->info.capacity = 16 * 1024 * 1024; // 16MB
-      dev->info.block_size = 64 * 1024;
-      dev->info.sector_size = 4 * 1024;
-      dev->info.page_size = 256;
-      break;
-    case 0x18: // W25Q256 (256Mbit = 32MB)
-      dev->info.capacity = 32 * 1024 * 1024; // 32MB
-      dev->info.block_size = 64 * 1024;
-      dev->info.sector_size = 4 * 1024;
-      dev->info.page_size = 256;
-      break;
-    default:
-      return -1; // Unsupported device
+  case 0x10:
+    dev->info.capacity = 128 * 1024;
+    break;
+  case 0x11:
+    dev->info.capacity = 256 * 1024;
+    break;
+  case 0x12:
+    dev->info.capacity = 512 * 1024;
+    break;
+  case 0x13:
+    dev->info.capacity = 1024 * 1024;
+    break;
+  case 0x14:
+    dev->info.capacity = 2 * 1024 * 1024;
+    break;
+  case 0x15:
+    dev->info.capacity = 4 * 1024 * 1024;
+    break;
+  case 0x16:
+    dev->info.capacity = 8 * 1024 * 1024;
+    break;
+  case 0x17:
+    dev->info.capacity = 16 * 1024 * 1024;
+    break;
+  case 0x18:
+    dev->info.capacity = 32 * 1024 * 1024;
+    break;
+  default:
+    log_e("Unsupported capacity ID: 0x%02X", cap_id);
+    return -1;
   }
-
+  dev->info.block_size = 64 * 1024;
+  dev->info.sector_size = 4 * 1024;
+  dev->info.page_size = 256;
   dev->info.erase_value = 0xFF;
 
+  log_i("Flash Geometry: %d KB capacity", (int)(dev->info.capacity / 1024));
+  log_d("W25Q initialization completed successfully");
   return 0;
 }
 
-static int w25q_deinit(block_device_t *const self) { return 0; }
+static int w25q_deinit(block_device_t *const self) { 
+  log_d("W25Q deinit called");
+  return 0; 
+}
 
-static int w25q_read(block_device_t *const self, uint32_t addr,
-                     uint8_t *out_buf, size_t size) {
+static int w25q_read(block_device_t *const self, uint32_t addr, uint8_t *buf,
+                     size_t size) {
   w25qxx_t *dev = (w25qxx_t *)self;
-  return dev->adapter->ops->read(dev->adapter, addr, out_buf, size);
+  log_d("W25Q read called: addr=0x%08X, size=%d", addr, (int)size);
+  int result = dev->adapter->ops->read(dev->adapter, addr, buf, size);
+  log_d("W25Q read completed with result: %d", result);
+  return result;
 }
 
 static int w25q_program(block_device_t *const self, uint32_t addr,
-                        const uint8_t *in_buf, size_t size) {
+                        const uint8_t *buf, size_t size) {
   w25qxx_t *dev = (w25qxx_t *)self;
-  uint32_t current_addr = addr;
+  log_d("W25Q program called: addr=0x%08X, size=%d", addr, (int)size);
+  uint32_t cur_addr = addr;
   uint32_t end_addr = addr + size;
-  const uint8_t *data_ptr = in_buf;
+  const uint8_t *ptr = buf;
 
-  while (current_addr < end_addr) {
-    uint32_t page_offset = current_addr % dev->info.page_size;
-    uint32_t bytes_left_in_page = dev->info.page_size - page_offset;
-    uint32_t chunk_size = (end_addr - current_addr) < bytes_left_in_page
-                              ? (end_addr - current_addr)
-                              : bytes_left_in_page;
+  while (cur_addr < end_addr) {
+    uint32_t remains = dev->info.page_size - (cur_addr % dev->info.page_size);
+    uint32_t chunk =
+        (end_addr - cur_addr < remains) ? (end_addr - cur_addr) : remains;
 
     if (dev->adapter->ops->write_enable(dev->adapter) != 0)
       return -1;
-    if (dev->adapter->ops->program_page(dev->adapter, current_addr, data_ptr,
-                                        chunk_size) != 0)
+    if (dev->adapter->ops->program_page(dev->adapter, cur_addr, ptr, chunk) !=
+        0)
       return -1;
     if (dev->adapter->ops->wait_busy(dev->adapter, 1000) != 0)
       return -1;
 
-    current_addr += chunk_size;
-    data_ptr += chunk_size;
+    cur_addr += chunk;
+    ptr += chunk;
   }
   return 0;
 }
 
 static int w25q_erase(block_device_t *const self, uint32_t addr, size_t size) {
   w25qxx_t *dev = (w25qxx_t *)self;
-  // Simple implementation: erase sectors
-  // Needs alignment check in real world
-  uint32_t current_addr = addr;
+  uint32_t cur_addr = addr;
   uint32_t end_addr = addr + size;
 
-  while (current_addr < end_addr) {
+  while (cur_addr < end_addr) {
     if (dev->adapter->ops->write_enable(dev->adapter) != 0)
       return -1;
-    if (dev->adapter->ops->erase_sector(dev->adapter, current_addr) != 0)
+    if (dev->adapter->ops->erase_sector(dev->adapter, cur_addr) != 0)
       return -1;
     if (dev->adapter->ops->wait_busy(dev->adapter, 1000) != 0)
       return -1;
-    current_addr += dev->info.sector_size;
+    cur_addr += dev->info.sector_size;
   }
   return 0;
 }
@@ -208,7 +210,6 @@ block_device_t *w25qxx_create(w25q_adapter_t *adapter) {
 }
 
 void w25qxx_destroy(block_device_t *dev) {
-  if (dev) {
+  if (dev)
     sys_free(W25Q_MEMSOURCE, dev);
-  }
 }

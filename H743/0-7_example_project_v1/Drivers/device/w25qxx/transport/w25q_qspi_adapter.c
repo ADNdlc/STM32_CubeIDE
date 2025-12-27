@@ -1,66 +1,150 @@
 #include "w25q_qspi_adapter.h"
+#include "../../../interface/qspi_driver.h" // Ensure visibility of generic enums
+#include "elog.h"
 #include "sys.h"
 #include <stdlib.h>
+
+#define LOG_TAG "W25Q_QSPI"
 
 #define W25Q_QSPI_MEMSOURCE SYS_MEM_INTERNAL
 
 typedef struct {
-  w25q_adapter_t parent;  // 适配器行为
-  qspi_driver_t *driver;        // QSPI驱动
+  w25q_adapter_t parent;
+  qspi_driver_t *driver;
 } w25q_qspi_adapter_impl_t;
 
 // Commands
 #define CMD_WRITE_ENABLE 0x06
 #define CMD_READ_ID 0x9F
-#define CMD_READ_DATA 0xEB    // Quad I/O Fast Read
-#define CMD_PAGE_PROGRAM 0x32 // Quad Page Program
+#define CMD_READ_DATA 0xEB
+#define CMD_PAGE_PROGRAM 0x32
 #define CMD_SECTOR_ERASE 0x20
 #define CMD_BLOCK_ERASE 0xD8
 #define CMD_CHIP_ERASE 0xC7
-#define CMD_READ_STATUS_REG 0x05
+#define CMD_READ_STATUS_REG1 0x05
+#define CMD_READ_STATUS_REG2 0x35
+#define CMD_WRITE_STATUS_REG2 0x31
+#define CMD_EXIT_QPI_MODE 0xFF
 
-// 命令填充函数
+#define SR2_QE_MASK 0x02
+
 static void _fill_cmd(qspi_command_t *cmd, uint8_t inst, uint32_t addr,
-                      uint8_t inst_mode, uint8_t addr_mode, uint8_t data_mode,
-                      uint8_t dummy_cycles, size_t size) {
+                      qspi_mode_t inst_mode, qspi_mode_t addr_mode,
+                      qspi_mode_t data_mode, uint8_t dummy_cycles,
+                      size_t size) {
   cmd->instruction = inst;
   cmd->address = addr;
   cmd->instruction_mode = inst_mode;
   cmd->address_mode = addr_mode;
-  cmd->address_size = QSPI_ADDRESS_24_BITS; // Default 24
-  cmd->alternate_byte_mode = QSPI_ALTERNATE_BYTES_NONE;
+  cmd->address_size = QSPI_ADDR_24_BITS;
+  cmd->alternate_byte_mode = QSPI_MODE_NONE;
   cmd->data_mode = data_mode;
   cmd->dummy_cycles = dummy_cycles;
   cmd->data_size = size;
 }
 
 static int _qspi_init(w25q_adapter_t *self) {
-  // 保留函数，实际create时应该传入一个初始化完成的qspi_driver对象
+  log_d("Starting QSPI adapter initialization");
+  w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
+
+  if (!impl || !impl->driver) {
+    log_e("QSPI adapter or driver is NULL");
+    return -1;
+  }
+
+  log_d("QSPI adapter driver is valid, proceeding with initialization");
+  qspi_command_t cmd;
+  uint8_t sr2 = 0;
+
+  // Step 1: 退出QPI模式 (以防芯片之前进入了QPI模式，导致SPI命令无法正常工作)
+  // 使用4线传输指令模式发送 Exit QPI Mode 命令 (0xFF)
+  log_d("Step 1: Exiting QPI mode if chip is in it");
+  _fill_cmd(&cmd, CMD_EXIT_QPI_MODE, 0, QSPI_MODE_4_LINES, QSPI_MODE_NONE,
+            QSPI_MODE_NONE, 0, 0);
+  int result =
+      QSPI_COMMAND(impl->driver, &cmd, 5000); // 忽略返回值，芯片可能不在QPI模式
+  log_d("QPI mode exit command result: %d", result);
+
+  // Step 2: 读取状态寄存器2 (SPI单线模式)
+  log_d("Step 2: Reading status register 2");
+  _fill_cmd(&cmd, CMD_READ_STATUS_REG2, 0, QSPI_MODE_1_LINE, QSPI_MODE_NONE,
+            QSPI_MODE_1_LINE, 0, 1);
+  if (QSPI_COMMAND(impl->driver, &cmd, 5000) != 0 ||
+      QSPI_RECEIVE(impl->driver, &sr2, 5000) != 0) {
+    log_e("Failed to read status register 2");
+    return -1;
+  }
+  log_d("Successfully read status register 2, value: 0x%02X", sr2);
+
+  // Step 3: 使能Quad Enable (QE) 位 - SR2 bit 1
+  if (!(sr2 & SR2_QE_MASK)) {
+    log_d("Step 3: QE bit is not set, enabling Quad Enable");
+    sr2 |= SR2_QE_MASK;
+
+    // 3.1 发送写使能命令
+    log_d("Sending write enable command");
+    _fill_cmd(&cmd, CMD_WRITE_ENABLE, 0, QSPI_MODE_1_LINE, QSPI_MODE_NONE,
+              QSPI_MODE_NONE, 0, 0);
+    if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0) {
+      log_e("Failed to send write enable command");
+      return -1;
+    }
+
+    // 3.2 写入状态寄存器2
+    log_d("Writing status register 2 to enable QE bit");
+    _fill_cmd(&cmd, CMD_WRITE_STATUS_REG2, 0, QSPI_MODE_1_LINE, QSPI_MODE_NONE,
+              QSPI_MODE_1_LINE, 0, 1);
+    if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0 ||
+        QSPI_TRANSMIT(impl->driver, &sr2, 100) != 0) {
+      log_e("Failed to write status register 2");
+      return -1;
+    }
+
+    // 3.3 等待芯片完成写入 (轮询SR1的BUSY位)
+    log_d("Waiting for flash chip to complete write operation");
+    uint8_t status;
+    uint32_t timeout = 1000;
+    do {
+      _fill_cmd(&cmd, CMD_READ_STATUS_REG1, 0, QSPI_MODE_1_LINE, QSPI_MODE_NONE,
+                QSPI_MODE_1_LINE, 0, 1);
+      if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0 ||
+          QSPI_RECEIVE(impl->driver, &status, 100) != 0) {
+        log_e("Error reading status register 1 during QE enable");
+        return -1;
+      }
+      if (--timeout == 0) {
+        log_e("Timeout waiting for flash operation to complete");
+        return -1; // 超时
+      }
+    } while (status & 0x01);
+    log_i("Quad Enable bit successfully set");
+  } else {
+    log_d("QE bit is already enabled");
+  }
+
+  log_i("QSPI adapter initialization completed successfully");
   return 0;
 }
 
 static int _qspi_write_enable(w25q_adapter_t *self) {
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
-  _fill_cmd(&cmd, CMD_WRITE_ENABLE, 0, QSPI_INSTRUCTION_1_LINE,
-            QSPI_ADDRESS_NONE, QSPI_DATA_NONE, 0, 0);
-
-  return QSPI_COMMAND(impl->driver, &cmd, 100);
+  _fill_cmd(&cmd, CMD_WRITE_ENABLE, 0, QSPI_MODE_1_LINE, QSPI_MODE_NONE,
+            QSPI_MODE_NONE, 0, 0);
+  int result = QSPI_COMMAND(impl->driver, &cmd, 100);
+  log_d("Write enable command result: %d", result);
+  return result;
 }
 
 static int _qspi_read_id(w25q_adapter_t *self, uint32_t *id) {
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
   uint8_t buf[3];
-
-  _fill_cmd(&cmd, CMD_READ_ID, 0, QSPI_INSTRUCTION_1_LINE, QSPI_ADDRESS_NONE,
-            QSPI_DATA_1_LINE, 0, 3);
-
-  if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0)
+  _fill_cmd(&cmd, CMD_READ_ID, 0, QSPI_MODE_1_LINE, QSPI_MODE_NONE,
+            QSPI_MODE_1_LINE, 0, 3);
+  if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0 ||
+      QSPI_RECEIVE(impl->driver, buf, 100) != 0)
     return -1;
-  if (QSPI_RECEIVE(impl->driver, buf, 100) != 0)
-    return -1;
-
   *id = (buf[0] << 16) | (buf[1] << 8) | buf[2];
   return 0;
 }
@@ -69,16 +153,10 @@ static int _qspi_read(w25q_adapter_t *self, uint32_t addr, uint8_t *buf,
                       size_t size) {
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
-
-  // Using Quad Fast Read (0xEB)
-  // Inst: 1 line, Addr: 4 lines, Data: 4 lines, Dummy: 6 cycles (check
-  // datasheet) Actually standard W25Q256 0xEB needs 6 dummy cycles
-  _fill_cmd(&cmd, CMD_READ_DATA, addr, QSPI_INSTRUCTION_1_LINE,
-            QSPI_ADDRESS_4_LINES, QSPI_DATA_4_LINES, 6, size);
-
-  if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0)
-    return -1;
-  if (QSPI_RECEIVE(impl->driver, buf, 1000) != 0)
+  _fill_cmd(&cmd, CMD_READ_DATA, addr, QSPI_MODE_1_LINE, QSPI_MODE_4_LINES,
+            QSPI_MODE_4_LINES, 6, size);
+  if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0 ||
+      QSPI_RECEIVE(impl->driver, buf, 1000) != 0)
     return -1;
   return 0;
 }
@@ -87,15 +165,10 @@ static int _qspi_program_page(w25q_adapter_t *self, uint32_t addr,
                               const uint8_t *buf, size_t size) {
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
-
-  // Quad Input Page Program (0x32)
-  // Inst: 1, Addr: 1, Data: 4
-  _fill_cmd(&cmd, CMD_PAGE_PROGRAM, addr, QSPI_INSTRUCTION_1_LINE,
-            QSPI_ADDRESS_1_LINE, QSPI_DATA_4_LINES, 0, size);
-
-  if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0)
-    return -1;
-  if (QSPI_TRANSMIT(impl->driver, buf, 1000) != 0)
+  _fill_cmd(&cmd, CMD_PAGE_PROGRAM, addr, QSPI_MODE_1_LINE, QSPI_MODE_1_LINE,
+            QSPI_MODE_4_LINES, 0, size);
+  if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0 ||
+      QSPI_TRANSMIT(impl->driver, buf, 1000) != 0)
     return -1;
   return 0;
 }
@@ -103,41 +176,37 @@ static int _qspi_program_page(w25q_adapter_t *self, uint32_t addr,
 static int _qspi_erase_sector(w25q_adapter_t *self, uint32_t addr) {
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
-  _fill_cmd(&cmd, CMD_SECTOR_ERASE, addr, QSPI_INSTRUCTION_1_LINE,
-            QSPI_ADDRESS_1_LINE, QSPI_DATA_NONE, 0, 0);
+  _fill_cmd(&cmd, CMD_SECTOR_ERASE, addr, QSPI_MODE_1_LINE, QSPI_MODE_1_LINE,
+            QSPI_MODE_NONE, 0, 0);
   return QSPI_COMMAND(impl->driver, &cmd, 100);
 }
 
 static int _qspi_erase_block(w25q_adapter_t *self, uint32_t addr) {
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
-  _fill_cmd(&cmd, CMD_BLOCK_ERASE, addr, QSPI_INSTRUCTION_1_LINE,
-            QSPI_ADDRESS_1_LINE, QSPI_DATA_NONE, 0, 0);
-  return QSPI_COMMAND(impl->driver, &cmd, 100);
+  _fill_cmd(&cmd, CMD_BLOCK_ERASE, addr, QSPI_MODE_1_LINE, QSPI_MODE_1_LINE,
+            QSPI_MODE_NONE, 0, 0);
+  return QSPI_COMMAND(impl->driver, &cmd, 5000);
 }
 
 static int _qspi_erase_chip(w25q_adapter_t *self) {
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
-  _fill_cmd(&cmd, CMD_CHIP_ERASE, 0, QSPI_INSTRUCTION_1_LINE, QSPI_ADDRESS_NONE,
-            QSPI_DATA_NONE, 0, 0);
-  return QSPI_COMMAND(impl->driver, &cmd, 100);
+  _fill_cmd(&cmd, CMD_CHIP_ERASE, 0, QSPI_MODE_1_LINE, QSPI_MODE_NONE,
+            QSPI_MODE_NONE, 0, 0);
+  return QSPI_COMMAND(impl->driver, &cmd, 5000);
 }
 
 static int _qspi_wait_busy(w25q_adapter_t *self, uint32_t timeout) {
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
-  qspi_command_t cfg; // Used for auto polling config
-
-  // Configure auto polling for Status Register 1, bit 0 (BUSY) to be 0
-  _fill_cmd(&cmd, CMD_READ_STATUS_REG, 0, QSPI_INSTRUCTION_1_LINE,
-            QSPI_ADDRESS_NONE, QSPI_DATA_1_LINE, 0, 1);
-
-  cfg.address = 0;                       // Match 0
-  cfg.alternate_byte = 1;                // Mask 1 (Bit 0)
-  cfg.instruction = QSPI_MATCH_MODE_AND; // Mode
-  cfg.data_size = 1;                     // Status byte size
-
+  qspi_command_t cfg;
+  _fill_cmd(&cmd, CMD_READ_STATUS_REG1, 0, QSPI_MODE_1_LINE, QSPI_MODE_NONE,
+            QSPI_MODE_1_LINE, 0, 1);
+  cfg.address = 0;
+  cfg.alternate_byte = 1;
+  cfg.instruction = QSPI_MATCH_AND;
+  cfg.data_size = 1;
   return QSPI_AUTO_POLLING(impl->driver, &cmd, &cfg, timeout);
 }
 
@@ -166,7 +235,6 @@ w25q_adapter_t *w25q_qspi_adapter_create(qspi_driver_t *qspi_driver) {
 }
 
 void w25q_qspi_adapter_destroy(w25q_adapter_t *adapter) {
-  if (adapter) {
+  if (adapter)
     sys_free(W25Q_QSPI_MEMSOURCE, adapter);
-  }
 }

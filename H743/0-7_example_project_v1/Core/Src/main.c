@@ -135,8 +135,11 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    //app_run(); // 应用运行
-
+   // app_run(); // 应用运行
+#if 1
+	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+	  HAL_Delay(500);
+#endif
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

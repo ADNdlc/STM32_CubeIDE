@@ -37,7 +37,7 @@
 
 
 // EasyLogger 使用的 UART 队列缓冲区
-static uint8_t elog_tx_buffer[2096];
+static uint8_t elog_tx_buffer[4096];
 static uint8_t elog_rx_buffer[128]; // 日志通常只发送，接收缓冲区给小点
 
 static usart_hal_t *g_elog_hal = NULL;
@@ -50,6 +50,8 @@ static uart_queue_t *g_elog_queue = NULL;
  */
 ElogErrCode elog_port_init(void) {
   ElogErrCode result = ELOG_NO_ERR;
+
+  /* user code here */
 
   usart_driver_t *driver = usart_driver_get(USART_LOGGER);
   if (driver) {

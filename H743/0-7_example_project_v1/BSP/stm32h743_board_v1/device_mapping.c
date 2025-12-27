@@ -1,11 +1,11 @@
 #include "device_mapping.h"
 #include <string.h>
 // stm32外设头文件
-#include "spi.h"
-#include "quadspi.h"
 #include "fmc.h"
 #include "ltdc.h"
+#include "quadspi.h"
 #include "rtc.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 
@@ -77,7 +77,7 @@ const spi_mapping_t spi_mappings[SPI_MAX_DEVICES] = {
 
 // QSPI 设备映射表定义
 const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES] = {
-    [QSPI_1] = {.hqspi = NULL}};
+    [QSPI_1] = {.hqspi = &hqspi}};
 
 // Flash 设备映射表定义
 const flash_mapping_t flash_mappings[FLASH_MAX_DEVICES] = {
