@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 #define LOG_TAG "W25Q"
 
 #define W25Q_MEMSOURCE SYS_MEM_INTERNAL
@@ -18,7 +17,7 @@ static int w25q_init(block_device_t *const self) {
   log_d("Starting W25Q initialization");
   w25qxx_t *dev = (w25qxx_t *)self;
   log_d("Device structure cast successful");
-  
+
   if (dev->adapter && dev->adapter->ops->init) {
     log_d("Calling adapter init function");
     if (dev->adapter->ops->init(dev->adapter) != 0) {
@@ -56,7 +55,9 @@ static int w25q_init(block_device_t *const self) {
   uint8_t mem_type = (id >> 8) & 0xFF;
   uint8_t cap_id = id & 0xFF;
 
-  log_d("Parsed Flash ID - Manufacturer: 0x%02X, Memory Type: 0x%02X, Capacity ID: 0x%02X", manuf_id, mem_type, cap_id);
+  log_d("Parsed Flash ID - Manufacturer: 0x%02X, Memory Type: 0x%02X, Capacity "
+        "ID: 0x%02X",
+        manuf_id, mem_type, cap_id);
   if (manuf_id != WINBOND_MANUFACTURER_ID || mem_type != W25Q_MEMORY_TYPE) {
     log_w("Unexpected Chip: Manuf 0x%02X, Type 0x%02X", manuf_id, mem_type);
   }
@@ -80,15 +81,18 @@ static int w25q_init(block_device_t *const self) {
     dev->info.capacity = 2 * 1024 * 1024;
     break;
   case 0x15:
-    dev->info.capacity = 4 * 1024 * 1024;
+    dev->info.capacity = 2 * 1024 * 1024;
     break;
   case 0x16:
-    dev->info.capacity = 8 * 1024 * 1024;
+    dev->info.capacity = 4 * 1024 * 1024;
     break;
   case 0x17:
-    dev->info.capacity = 16 * 1024 * 1024;
+    dev->info.capacity = 8 * 1024 * 1024;
     break;
   case 0x18:
+    dev->info.capacity = 16 * 1024 * 1024;
+    break;
+  case 0x19:
     dev->info.capacity = 32 * 1024 * 1024;
     break;
   default:
@@ -100,14 +104,27 @@ static int w25q_init(block_device_t *const self) {
   dev->info.page_size = 256;
   dev->info.erase_value = 0xFF;
 
+  // 4. Handle 4-byte address mode for capacity > 16MB (W25Q256 and above)
+  if (dev->info.capacity > 16 * 1024 * 1024) {
+    if (dev->adapter->ops->enter_4byte_addr_mode) {
+      log_i("Capacity > 16MB, enabling 4-byte address mode");
+      if (dev->adapter->ops->enter_4byte_addr_mode(dev->adapter) != 0) {
+        log_e("Failed to enter 4-byte address mode");
+        return -1;
+      }
+    } else {
+      log_w("4-byte address mode required but not supported by adapter");
+    }
+  }
+
   log_i("Flash Geometry: %d KB capacity", (int)(dev->info.capacity / 1024));
   log_d("W25Q initialization completed successfully");
   return 0;
 }
 
-static int w25q_deinit(block_device_t *const self) { 
+static int w25q_deinit(block_device_t *const self) {
   log_d("W25Q deinit called");
-  return 0; 
+  return 0;
 }
 
 static int w25q_read(block_device_t *const self, uint32_t addr, uint8_t *buf,
@@ -174,8 +191,8 @@ static int w25q_get_info(block_device_t *const self, block_dev_info_t *info) {
 
 /**
  * @brief 同步
- * 
- * @param self  w25qxx设备句柄 
+ *
+ * @param self  w25qxx设备句柄
  * @return int  0 成功，-1 失败
  */
 static int w25q_sync(block_device_t *const self) {
@@ -195,9 +212,9 @@ static const block_device_ops_t w25q_ops = {
 
 /**
  * @brief 创建W25Q系列flash设备
- * 
+ *
  * @param adapter           传输适配器
- * @return block_device_t*  设备句柄 
+ * @return block_device_t*  设备句柄
  */
 block_device_t *w25qxx_create(w25q_adapter_t *adapter) {
   w25qxx_t *dev = (w25qxx_t *)sys_malloc(W25Q_MEMSOURCE, sizeof(w25qxx_t));

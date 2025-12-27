@@ -35,7 +35,6 @@
 #include "usart_factory.h"
 #include "usart_hal/usart_hal.h"
 
-
 // EasyLogger 使用的 UART 队列缓冲区
 static uint8_t elog_tx_buffer[4096];
 static uint8_t elog_rx_buffer[128]; // 日志通常只发送，接收缓冲区给小点
@@ -47,6 +46,7 @@ static uart_queue_t *g_elog_queue = NULL;
  * EasyLogger port initialize
  *
  * @return result
+ *
  */
 ElogErrCode elog_port_init(void) {
   ElogErrCode result = ELOG_NO_ERR;
@@ -68,6 +68,13 @@ ElogErrCode elog_port_init(void) {
     }
   } else {
     result = ELOG_ERR;
+  }
+
+  if (g_elog_queue) {
+    // 低波特率 (如 9600) 下，1000 字节约需 1s 发完。
+    // 这里设置每次等待 10ms，最多等待 100 次，总计 1s。
+    uart_queue_set_wait_config(g_elog_queue, 10, 100);
+    uart_queue_set_auto_wait(g_elog_queue, 1);
   }
 
   return result;
@@ -129,7 +136,7 @@ const char *elog_port_get_time(void) {
 const char *elog_port_get_p_info(void) {
 
   /* add your code here */
-  return ""; //当前没有使用系统
+  return ""; // 当前没有使用系统
 }
 
 /**
@@ -140,5 +147,5 @@ const char *elog_port_get_p_info(void) {
 const char *elog_port_get_t_info(void) {
 
   /* add your code here */
-  return ""; //当前没有使用系统
+  return ""; // 当前没有使用系统
 }

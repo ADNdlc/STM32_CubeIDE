@@ -6,10 +6,10 @@
  */
 
 #include "uart_queue.h"
+#include "stdio.h"
 #include "stm32h7xx_hal.h"
 #include "string.h"
 #include "sys.h"
-#include "stdio.h"
 
 #define Rx_Manual_restart 0
 
@@ -39,7 +39,8 @@ static void uart_queue_try_start_tx(uart_queue_t *queue);
  */
 void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
                      uint8_t *tx_buffer, size_t tx_size, uint8_t *rx_buffer,
-                     size_t rx_size) {
+                     size_t rx_size)
+{
   rb_init(&queue->tx_rb, tx_buffer, tx_size);
   rb_init(&queue->rx_rb, rx_buffer, rx_size);
   queue->uart_hal = hal;
@@ -50,6 +51,8 @@ void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
   queue->tx_current_len = 0;
   queue->last_rx_pos = 0;
   queue->auto_wait = false; // Default to false
+  queue->wait_delay_ms = UART_QUEUE_AUTO_WAIT_DELAY_MS;
+  queue->wait_max_count = UART_QUEUE_AUTO_WAIT_MAX_COUNT;
   // 设置回调函数
   usart_hal_set_callback((usart_hal_t *)queue->uart_hal, uart_queue_callback,
                          queue);
@@ -57,26 +60,42 @@ void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
 
 uart_queue_t *uart_queue_create(const usart_hal_t *hal, uint8_t *tx_buffer,
                                 size_t tx_size, uint8_t *rx_buffer,
-                                size_t rx_size) {
+                                size_t rx_size)
+{
   uart_queue_t *queue =
       (uart_queue_t *)sys_malloc(UARTQUEUE_MEMSOURCE, sizeof(uart_queue_t));
-  if (!queue) {
+  if (!queue)
+  {
     return NULL;
   }
   uart_queue_init(queue, hal, tx_buffer, tx_size, rx_buffer, rx_size);
   return queue;
 }
 
-void uart_queue_destroy(uart_queue_t *queue) {
-  if (queue) {
+void uart_queue_destroy(uart_queue_t *queue)
+{
+  if (queue)
+  {
     sys_free(UARTQUEUE_MEMSOURCE, queue);
   }
 }
 
 // 设置是否启用发送缓冲区满自动等待
-void uart_queue_set_auto_wait(uart_queue_t *queue, bool enabled) {
-  if (queue) {
+void uart_queue_set_auto_wait(uart_queue_t *queue, bool enabled)
+{
+  if (queue)
+  {
     queue->auto_wait = enabled;
+  }
+}
+
+void uart_queue_set_wait_config(uart_queue_t *queue, uint32_t delay_ms,
+                                uint16_t max_count)
+{
+  if (queue)
+  {
+    queue->wait_delay_ms = delay_ms;
+    queue->wait_max_count = max_count;
   }
 }
 
@@ -88,13 +107,15 @@ void uart_queue_set_auto_wait(uart_queue_t *queue, bool enabled) {
  * @param args 事件参数
  */
 static void uart_queue_callback(void *context, usart_event_t event,
-                                void *args) {
+                                void *args)
+{
   uart_queue_t *queue = (uart_queue_t *)context;
 
   // test
   // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
 
-  switch (event) {
+  switch (event)
+  {
   case USART_EVENT_RX_COMPLETE:
     uart_queue_handle_rx_complete(queue);
     break;
@@ -118,15 +139,19 @@ static void uart_queue_callback(void *context, usart_event_t event,
  *
  * @param queue 队列实例
  */
-static void uart_queue_try_start_tx(uart_queue_t *queue) {
-  if (!queue->tx_busy) { // 检查是否忙
+static void uart_queue_try_start_tx(uart_queue_t *queue)
+{
+  if (!queue->tx_busy)
+  { // 检查是否忙
     uint8_t *tx_ptr;
     size_t tx_len = rb_peek(&queue->tx_rb, &tx_ptr);
-    if (tx_len > 0) {
+    if (tx_len > 0)
+    {
       queue->tx_busy = true;
       queue->tx_current_len = tx_len;
       if (usart_hal_transmit_asyn((usart_hal_t *)queue->uart_hal, tx_ptr,
-                                  tx_len) != 0) {
+                                  tx_len) != 0)
+      {
         queue->tx_busy = false;
         queue->tx_current_len = 0;
       }
@@ -142,38 +167,48 @@ static void uart_queue_try_start_tx(uart_queue_t *queue) {
  * @param len 数据长度
  * @return bool 是否成功加入队列
  */
-bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len) {
-  if (queue->auto_wait) {
+bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len)
+{
+  if (queue->auto_wait)
+  {
     // 检查是否有足够的空间来存放数据
     size_t free_space = rb_free_space(&queue->tx_rb);
-    int count = UART_QUEUE_AUTO_WAIT_MAX_COUNT;
-    
+
 #define WARNING_MESSAGELEN 25
 
-    // 如果空间不足，开始等待并记录等待开始时间
-    if (free_space < (len + WARNING_MESSAGELEN)) { // 为警告消息预留更多空间
-      uint32_t start_time;    
-      start_time = sys_get_systick_ms();
-      
-      // 等待直到有足够的空间或者达到最大等待次数
-      while (free_space < (len + WARNING_MESSAGELEN) && count-- > 0) {
-        // 等待一段时间，让数据发送出去以腾出空间
-        sys_delay_ms(UART_QUEUE_AUTO_WAIT_DELAY_MS);
-        // 重新检查可用空间
+    // 如果空间不足，开始尝试等待
+    if (free_space < (len + WARNING_MESSAGELEN))
+    {
+      uint32_t start_time = sys_get_systick_ms();
+      int count = queue->wait_max_count;
+
+      // 等待 设定时间 直到有 足够空间 或 超过设定超时时间
+      while (free_space < (len + WARNING_MESSAGELEN) && count > 0){
+        sys_delay_ms(queue->wait_delay_ms);
         free_space = rb_free_space(&queue->tx_rb);
+        count--;
       }
-      
-      // 准备警告消息，包含等待时间信息
-      char warning_msg[WARNING_MESSAGELEN] = "0";
-      snprintf(warning_msg, sizeof(warning_msg), "\r\n[UARTOVF]:%lums\r\n", (sys_get_systick_ms() - start_time));
-      // 写入警告消息
-      rb_write(&queue->tx_rb, (const uint8_t *)warning_msg, WARNING_MESSAGELEN);
-      uart_queue_try_start_tx(queue);
+
+      uint32_t total_wait = sys_get_systick_ms() - start_time;
+      char wait_msg[WARNING_MESSAGELEN];
+      snprintf(wait_msg, sizeof(wait_msg), "[WAIT:%lums]", total_wait);
+      rb_write(&queue->tx_rb, (const uint8_t *)wait_msg, strlen(wait_msg));
+
+      // 如果仍然没有足够空间，丢弃数据并记录丢弃信息
+      if (free_space < (len + WARNING_MESSAGELEN))
+      {
+        // 彻底溢出
+        char ovf_msg[WARNING_MESSAGELEN];
+        snprintf(ovf_msg, sizeof(ovf_msg), "\r\n[DROP]\r\n");
+        rb_write(&queue->tx_rb, (const uint8_t *)ovf_msg, strlen(ovf_msg));
+        uart_queue_try_start_tx(queue);
+        return false;
+      }
     }
-  } 
+  }
   size_t written = rb_write(&queue->tx_rb, data, len);
-  // 如果有数据写入且当前没有在发送，则启动发送
-  if (written > 0) {
+  if (written > 0)
+  {
     uart_queue_try_start_tx(queue);
   }
   return (written == len);
@@ -187,7 +222,8 @@ bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len) {
  * @param max_len 缓冲区最大长度
  * @return size_t 实际读取的数据长度
  */
-size_t uart_queue_getdata(uart_queue_t *queue, uint8_t *data, size_t max_len) {
+size_t uart_queue_getdata(uart_queue_t *queue, uint8_t *data, size_t max_len)
+{
   return rb_read(&queue->rx_rb, data, max_len);
 }
 
@@ -197,7 +233,8 @@ size_t uart_queue_getdata(uart_queue_t *queue, uint8_t *data, size_t max_len) {
  * @param queue 队列实例
  * @return size_t 发送队列中的数据数量
  */
-size_t uart_queue_tx_count(uart_queue_t *queue) {
+size_t uart_queue_tx_count(uart_queue_t *queue)
+{
   return rb_available(&queue->tx_rb);
 }
 
@@ -207,7 +244,8 @@ size_t uart_queue_tx_count(uart_queue_t *queue) {
  * @param queue 队列实例
  * @return size_t 接收队列中的数据数量
  */
-size_t uart_queue_rx_count(uart_queue_t *queue) {
+size_t uart_queue_rx_count(uart_queue_t *queue)
+{
   return rb_available(&queue->rx_rb);
 }
 
@@ -216,13 +254,16 @@ size_t uart_queue_rx_count(uart_queue_t *queue) {
  *
  * @param queue 队列实例
  */
-void uart_queue_start_receive(uart_queue_t *queue) {
-  if (!queue->rx_enabled) {
+void uart_queue_start_receive(uart_queue_t *queue)
+{
+  if (!queue->rx_enabled)
+  {
     queue->rx_enabled = true;
 
     // 启动异步接收 - 使用完整缓冲区以支持循环DMA
     // 注意：如果是循环模式，DMA将始终在整个缓冲区上循环，这与RingBuffer的逻辑大小一致
-    if (queue->rx_rb.size > 0) {
+    if (queue->rx_rb.size > 0)
+    {
       usart_hal_receive_asyn((usart_hal_t *)queue->uart_hal,
                              queue->rx_rb.buffer, queue->rx_rb.size);
     }
@@ -234,9 +275,11 @@ void uart_queue_start_receive(uart_queue_t *queue) {
  *
  * @param queue 队列实例
  */
-static void uart_queue_handle_tx_complete(uart_queue_t *queue) {
+static void uart_queue_handle_tx_complete(uart_queue_t *queue)
+{
   // 更新发送缓冲区的读指针 - 使用上次发送的实际长度
-  if (queue->tx_current_len > 0) {
+  if (queue->tx_current_len > 0)
+  {
     rb_advance(&queue->tx_rb, queue->tx_current_len);
     queue->tx_current_len = 0;
   }
@@ -244,10 +287,13 @@ static void uart_queue_handle_tx_complete(uart_queue_t *queue) {
   uint8_t *tx_ptr;
   // 检查是否还有数据需要发送
   size_t tx_len = rb_peek(&queue->tx_rb, &tx_ptr);
-  if (tx_len > 0) {
+  if (tx_len > 0)
+  {
     queue->tx_current_len = tx_len;
     usart_hal_transmit_asyn((usart_hal_t *)queue->uart_hal, tx_ptr, tx_len);
-  } else {
+  }
+  else
+  {
     queue->tx_busy = false;
   }
 }
@@ -257,12 +303,15 @@ static void uart_queue_handle_tx_complete(uart_queue_t *queue) {
  *
  * @param queue 队列实例
  */
-static void uart_queue_handle_rx_complete(uart_queue_t *queue) {
+static void uart_queue_handle_rx_complete(uart_queue_t *queue)
+{
   // 重新启动接收
-  if (queue->rx_enabled) {
+  if (queue->rx_enabled)
+  {
     uint8_t *rx_ptr;
     size_t available_len = rb_peek_write(&queue->rx_rb, &rx_ptr);
-    if (available_len > 0) {
+    if (available_len > 0)
+    {
       usart_hal_receive_asyn((usart_hal_t *)queue->uart_hal, rx_ptr,
                              available_len);
     }
@@ -275,8 +324,10 @@ static void uart_queue_handle_rx_complete(uart_queue_t *queue) {
  * @param queue 队列实例
  * @param data 接收到的数据
  */
-static void uart_queue_handle_rx_event(uart_queue_t *queue, void *args) {
-  if (NULL == args) {
+static void uart_queue_handle_rx_event(uart_queue_t *queue, void *args)
+{
+  if (NULL == args)
+  {
     // 错误处理...
     return;
   }
@@ -285,24 +336,30 @@ static void uart_queue_handle_rx_event(uart_queue_t *queue, void *args) {
   size_t current_pos = (size_t)args;
   size_t len_to_advance = 0;
 
-  if (current_pos >= queue->last_rx_pos) {
+  if (current_pos >= queue->last_rx_pos)
+  {
     len_to_advance = current_pos - queue->last_rx_pos;
-  } else {
+  }
+  else
+  {
     // 发生了回绕
     len_to_advance = (queue->rx_rb.size - queue->last_rx_pos) + current_pos;
   }
 
-  if (len_to_advance > 0) {
+  if (len_to_advance > 0)
+  {
     rb_advance_head(&queue->rx_rb, len_to_advance);
     queue->last_rx_pos = current_pos;
   }
 
 #if Rx_Manual_restart
   // 重新启动接收
-  if (queue->rx_enabled) {
+  if (queue->rx_enabled)
+  {
     uint8_t *rx_ptr;
     size_t available_len = rb_peek_write(&queue->rx_rb, &rx_ptr);
-    if (available_len > 0) {
+    if (available_len > 0)
+    {
       usart_hal_receive_asyn((usart_hal_t *)queue->uart_hal, rx_ptr,
                              available_len);
     }

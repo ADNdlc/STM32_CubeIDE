@@ -10,6 +10,7 @@
 typedef struct {
   w25q_adapter_t parent;
   spi_driver_t *driver;
+  uint8_t addr_size; // 3 or 4
 } w25q_spi_adapter_impl_t;
 
 // Commands
@@ -21,6 +22,8 @@ typedef struct {
 #define CMD_BLOCK_ERASE 0xD8
 #define CMD_CHIP_ERASE 0xC7
 #define CMD_READ_STATUS_REG 0x05
+#define CMD_ENTER_4BYTE_ADDR 0xB7
+#define CMD_EXIT_4BYTE_ADDR 0xE9
 
 static int _spi_init(w25q_adapter_t *self) {
   log_d("SPI adapter init called");
@@ -30,7 +33,7 @@ static int _spi_init(w25q_adapter_t *self) {
     log_e("SPI adapter or driver is NULL");
     return -1;
   }
-  
+
   log_i("SPI adapter initialization completed");
   return 0;
 }
@@ -62,7 +65,7 @@ static int _spi_read_id(w25q_adapter_t *self, uint32_t *id) {
     log_e("SPI read ID failed with result: %d", result);
     return result;
   }
-  
+
   *id = (buf[0] << 16) | (buf[1] << 8) | buf[2];
   log_d("SPI read ID successful, ID: 0x%06X", *id);
   return 0;
@@ -90,15 +93,21 @@ static int _spi_read(w25q_adapter_t *self, uint32_t addr, uint8_t *buf,
 static int _spi_program_page(w25q_adapter_t *self, uint32_t addr,
                              const uint8_t *buf, size_t size) {
   w25q_spi_adapter_impl_t *impl = (w25q_spi_adapter_impl_t *)self;
-  uint8_t cmd[4];
-  cmd[0] = CMD_PAGE_PROGRAM;
-  cmd[1] = (addr >> 16) & 0xFF;
-  cmd[2] = (addr >> 8) & 0xFF;
-  cmd[3] = addr & 0xFF;
+  uint8_t cmd[5];
+  uint8_t cmd_len = 0;
 
-  log_d("SPI program page: addr=0x%08X, size=%d", addr, (int)size);
+  cmd[cmd_len++] = CMD_PAGE_PROGRAM;
+  if (impl->addr_size == 4) {
+    cmd[cmd_len++] = (addr >> 24) & 0xFF;
+  }
+  cmd[cmd_len++] = (addr >> 16) & 0xFF;
+  cmd[cmd_len++] = (addr >> 8) & 0xFF;
+  cmd[cmd_len++] = addr & 0xFF;
+
+  log_d("SPI program page: addr=0x%08X, size=%d, addr_size=%d", addr, (int)size,
+        impl->addr_size);
   SPI_CS_CONTROL(impl->driver, 0);
-  SPI_TRANSMIT(impl->driver, cmd, 4, 100);
+  SPI_TRANSMIT(impl->driver, cmd, cmd_len, 100);
   int result = SPI_TRANSMIT(impl->driver, buf, size, 1000);
   SPI_CS_CONTROL(impl->driver, 1);
 
@@ -108,17 +117,21 @@ static int _spi_program_page(w25q_adapter_t *self, uint32_t addr,
 
 static int _spi_erase_sector(w25q_adapter_t *self, uint32_t addr) {
   w25q_spi_adapter_impl_t *impl = (w25q_spi_adapter_impl_t *)self;
-  uint8_t cmd[4];
-  cmd[0] = CMD_SECTOR_ERASE;
-  cmd[1] = (addr >> 16) & 0xFF;
-  cmd[2] = (addr >> 8) & 0xFF;
-  cmd[3] = addr & 0xFF;
+  uint8_t cmd[5];
+  uint8_t cmd_len = 0;
 
-  log_d("SPI sector erase: addr=0x%08X", addr);
+  cmd[cmd_len++] = CMD_SECTOR_ERASE;
+  if (impl->addr_size == 4) {
+    cmd[cmd_len++] = (addr >> 24) & 0xFF;
+  }
+  cmd[cmd_len++] = (addr >> 16) & 0xFF;
+  cmd[cmd_len++] = (addr >> 8) & 0xFF;
+  cmd[cmd_len++] = addr & 0xFF;
+
+  log_d("SPI sector erase: addr=0x%08X, addr_size=%d", addr, impl->addr_size);
   SPI_CS_CONTROL(impl->driver, 0);
-  SPI_TRANSMIT(impl->driver, cmd, 4, 100);
+  int result = SPI_TRANSMIT(impl->driver, cmd, cmd_len, 100);
   SPI_CS_CONTROL(impl->driver, 1);
-  int result = 0;
 
   log_d("SPI sector erase completed with result: %d", result);
   return result;
@@ -126,14 +139,19 @@ static int _spi_erase_sector(w25q_adapter_t *self, uint32_t addr) {
 
 static int _spi_erase_block(w25q_adapter_t *self, uint32_t addr) {
   w25q_spi_adapter_impl_t *impl = (w25q_spi_adapter_impl_t *)self;
-  uint8_t cmd[4];
-  cmd[0] = CMD_BLOCK_ERASE;
-  cmd[1] = (addr >> 16) & 0xFF;
-  cmd[2] = (addr >> 8) & 0xFF;
-  cmd[3] = addr & 0xFF;
+  uint8_t cmd[5];
+  uint8_t cmd_len = 0;
+
+  cmd[cmd_len++] = CMD_BLOCK_ERASE;
+  if (impl->addr_size == 4) {
+    cmd[cmd_len++] = (addr >> 24) & 0xFF;
+  }
+  cmd[cmd_len++] = (addr >> 16) & 0xFF;
+  cmd[cmd_len++] = (addr >> 8) & 0xFF;
+  cmd[cmd_len++] = addr & 0xFF;
 
   SPI_CS_CONTROL(impl->driver, 0);
-  SPI_TRANSMIT(impl->driver, cmd, 4, 100);
+  SPI_TRANSMIT(impl->driver, cmd, cmd_len, 100);
   SPI_CS_CONTROL(impl->driver, 1);
 
   return 0;
@@ -172,6 +190,36 @@ static int _spi_wait_busy(w25q_adapter_t *self, uint32_t timeout) {
   return -1;
 }
 
+static int _spi_enter_4byte_addr_mode(w25q_adapter_t *self) {
+  w25q_spi_adapter_impl_t *impl = (w25q_spi_adapter_impl_t *)self;
+  uint8_t cmd = CMD_ENTER_4BYTE_ADDR;
+
+  log_d("SPI entering 4-byte address mode");
+  SPI_CS_CONTROL(impl->driver, 0);
+  int result = SPI_TRANSMIT(impl->driver, &cmd, 1, 100);
+  SPI_CS_CONTROL(impl->driver, 1);
+
+  if (result == 0) {
+    impl->addr_size = 4;
+  }
+  return result;
+}
+
+static int _spi_exit_4byte_addr_mode(w25q_adapter_t *self) {
+  w25q_spi_adapter_impl_t *impl = (w25q_spi_adapter_impl_t *)self;
+  uint8_t cmd = CMD_EXIT_4BYTE_ADDR;
+
+  log_d("SPI exiting 4-byte address mode");
+  SPI_CS_CONTROL(impl->driver, 0);
+  int result = SPI_TRANSMIT(impl->driver, &cmd, 1, 100);
+  SPI_CS_CONTROL(impl->driver, 1);
+
+  if (result == 0) {
+    impl->addr_size = 3;
+  }
+  return result;
+}
+
 static const w25q_adapter_ops_t w25q_spi_ops = {
     .init = _spi_init,
     .read_id = _spi_read_id,
@@ -182,15 +230,18 @@ static const w25q_adapter_ops_t w25q_spi_ops = {
     .erase_block = _spi_erase_block,
     .erase_chip = _spi_erase_chip,
     .wait_busy = _spi_wait_busy,
+    .enter_4byte_addr_mode = _spi_enter_4byte_addr_mode,
+    .exit_4byte_addr_mode = _spi_exit_4byte_addr_mode,
 };
 
-w25q_adapter_t *w25q_spi_adapter_create(spi_driver_t *spi_driver){
+w25q_adapter_t *w25q_spi_adapter_create(spi_driver_t *spi_driver) {
   w25q_spi_adapter_impl_t *adapter = (w25q_spi_adapter_impl_t *)sys_malloc(
       W25Q_SPI_MEMSOURCE, sizeof(w25q_spi_adapter_impl_t));
   if (adapter) {
     adapter->parent.ops = &w25q_spi_ops;
     adapter->parent.user_data = adapter;
     adapter->driver = spi_driver;
+    adapter->addr_size = 3;
     return &adapter->parent;
   }
   return NULL;
