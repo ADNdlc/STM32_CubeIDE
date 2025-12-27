@@ -13,6 +13,15 @@
 
 #define Rx_Manual_restart 0
 
+// 定义消息宏
+#define WAIT_MESSAGE_PREFIX "\r\n[WAIT:"
+#define WAIT_MESSAGE_SUFFIX "ms]\r\n"
+#define DROP_MESSAGE "\r\n[DROP]\r\n"
+
+// 最大可能的消息长度
+// 最长的消息是 "\r\n[WAIT:4294967295ms]\r\n"
+#define WARNING_MESSAGELEN 25
+
 /**
  * @brief UART中断回调函数
  *
@@ -174,8 +183,6 @@ bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len)
     // 检查是否有足够的空间来存放数据
     size_t free_space = rb_free_space(&queue->tx_rb);
 
-#define WARNING_MESSAGELEN 25
-
     // 如果空间不足，开始尝试等待
     if (free_space < (len + WARNING_MESSAGELEN))
     {
@@ -191,16 +198,14 @@ bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len)
 
       uint32_t total_wait = sys_get_systick_ms() - start_time;
       char wait_msg[WARNING_MESSAGELEN];
-      snprintf(wait_msg, sizeof(wait_msg), "[WAIT:%lums]", total_wait);
+      snprintf(wait_msg, sizeof(wait_msg), WAIT_MESSAGE_PREFIX "%lu" WAIT_MESSAGE_SUFFIX, total_wait);
       rb_write(&queue->tx_rb, (const uint8_t *)wait_msg, strlen(wait_msg));
 
       // 如果仍然没有足够空间，丢弃数据并记录丢弃信息
       if (free_space < (len + WARNING_MESSAGELEN))
       {
         // 彻底溢出
-        char ovf_msg[WARNING_MESSAGELEN];
-        snprintf(ovf_msg, sizeof(ovf_msg), "\r\n[DROP]\r\n");
-        rb_write(&queue->tx_rb, (const uint8_t *)ovf_msg, strlen(ovf_msg));
+        rb_write(&queue->tx_rb, (const uint8_t *)DROP_MESSAGE, strlen(DROP_MESSAGE));
         uart_queue_try_start_tx(queue);
         return false;
       }
@@ -324,45 +329,3 @@ static void uart_queue_handle_rx_complete(uart_queue_t *queue)
  * @param queue 队列实例
  * @param data 接收到的数据
  */
-static void uart_queue_handle_rx_event(uart_queue_t *queue, void *args)
-{
-  if (NULL == args)
-  {
-    // 错误处理...
-    return;
-  }
-  // 更新接收区写指针 - args是当前DMA传输的缓冲区位置偏移(Circular
-  // Mode)或传输量(Normal Mode) 假设使用 ReceiveToIdle + Circular Mode
-  size_t current_pos = (size_t)args;
-  size_t len_to_advance = 0;
-
-  if (current_pos >= queue->last_rx_pos)
-  {
-    len_to_advance = current_pos - queue->last_rx_pos;
-  }
-  else
-  {
-    // 发生了回绕
-    len_to_advance = (queue->rx_rb.size - queue->last_rx_pos) + current_pos;
-  }
-
-  if (len_to_advance > 0)
-  {
-    rb_advance_head(&queue->rx_rb, len_to_advance);
-    queue->last_rx_pos = current_pos;
-  }
-
-#if Rx_Manual_restart
-  // 重新启动接收
-  if (queue->rx_enabled)
-  {
-    uint8_t *rx_ptr;
-    size_t available_len = rb_peek_write(&queue->rx_rb, &rx_ptr);
-    if (available_len > 0)
-    {
-      usart_hal_receive_asyn((usart_hal_t *)queue->uart_hal, rx_ptr,
-                             available_len);
-    }
-  }
-#endif
-}
