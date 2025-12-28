@@ -60,6 +60,7 @@ typedef void (*at_handler_func_t)(void *ctx, const char *line);
 typedef struct at_urc_node_t {
   const char *prefix;
   at_handler_func_t handler;
+  void *ctx; // Handler context
   struct at_urc_node_t *next;
 } at_urc_node_t;
 
@@ -131,7 +132,7 @@ void at_controller_report_fault(at_controller_t *self);
  * @return 0 on success
  */
 int at_controller_register_handler(at_controller_t *self, const char *prefix,
-                                   at_handler_func_t handler);
+                                   at_handler_func_t handler, void *ctx);
 
 /**
  * @brief Dispatch a received line to registered handlers

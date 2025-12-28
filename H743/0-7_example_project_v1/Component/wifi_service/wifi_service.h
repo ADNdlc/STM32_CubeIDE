@@ -12,13 +12,14 @@
 typedef struct wifi_service_t wifi_service_t;
 
 // Event callback for status changes
-typedef void (*wifi_service_event_cb_t)(wifi_service_t *svc,
+typedef void (*wifi_service_event_cb_t)(wifi_service_t *self,
                                         wifi_status_t status, void *user_data);
 
 struct wifi_service_t {
   wifi_driver_t *driver;
   wifi_service_event_cb_t event_cb;
   void *user_data;
+  wifi_status_t last_status; // Track status changes internally
 };
 
 /**
@@ -32,6 +33,9 @@ void wifi_service_init(wifi_service_t *self, wifi_driver_t *driver);
 void wifi_service_register_callback(wifi_service_t *self,
                                     wifi_service_event_cb_t cb,
                                     void *user_data);
+
+// Process loop for state machine and event polling
+void wifi_svc_process(wifi_service_t *self);
 
 /**
  * @brief Connect to an AP

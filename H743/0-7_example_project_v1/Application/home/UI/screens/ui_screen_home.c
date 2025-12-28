@@ -89,7 +89,7 @@ void ui_screen_home_init(void) {
 
   // 设置背景
   lv_obj_t *bg = lv_img_create(ui_screen_home);
-  lv_img_set_src(bg, &wallpaper);
+  // lv_img_set_src(bg, &wallpaper);  // 设置图片源
 
   // 使用TileView作为主体
   ui_home_tileview = lv_tileview_create(ui_screen_home);

@@ -51,5 +51,7 @@ int hal_init(void) {
   log_i("LVGL port_indev initialization completed...");
 #endif
   /* --------------------- */
+
+  log_i("HAL initialization completed...");
   return 0;
 }

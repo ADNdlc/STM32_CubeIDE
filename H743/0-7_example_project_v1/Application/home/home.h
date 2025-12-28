@@ -16,7 +16,7 @@ void ui_Start(void);    // ui启动
 
 // 资源声明
 LV_IMG_DECLARE(icon_home);
-LV_IMG_DECLARE(wallpaper);
+//LV_IMG_DECLARE(wallpaper);
 
 #ifdef __cplusplus
 } /*extern "C"*/

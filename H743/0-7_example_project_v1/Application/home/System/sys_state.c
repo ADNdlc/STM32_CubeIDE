@@ -116,7 +116,7 @@ void sys_state_set_brightness(uint8_t bri) {
 void sys_state_set_wifi(bool connected) {
   if (g_state.wifi_connected != connected) {
     g_state.wifi_connected = connected;
-    notify_observers();
+    notify_observers();	// 通知观察者
   }
 }
 

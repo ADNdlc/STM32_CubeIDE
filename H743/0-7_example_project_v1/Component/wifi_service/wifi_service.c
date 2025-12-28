@@ -23,6 +23,22 @@ void wifi_service_register_callback(wifi_service_t *self,
   self->user_data = user_data;
 }
 
+void wifi_svc_process(wifi_service_t *self) {
+  if (!self || !self->driver)
+    return;
+
+  // Poll driver status
+  wifi_status_t current_status = WIFI_GET_STATUS(self->driver);
+
+  // If status changed, notify via callback
+  if (current_status != self->last_status) {
+    if (self->event_cb) {
+      self->event_cb(self, current_status, self->user_data);
+    }
+    self->last_status = current_status;
+  }
+}
+
 int wifi_svc_connect(wifi_service_t *self, const char *ssid, const char *pwd) {
   if (!self || !self->driver)
     return -1;

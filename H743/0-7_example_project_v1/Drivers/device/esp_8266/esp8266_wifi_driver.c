@@ -62,10 +62,11 @@ void esp8266_wifi_driver_init(esp8266_wifi_driver_t *self,
 
   // Register URC handlers
   at_controller_register_handler(at_ctrl, "WIFI CONNECTED",
-                                 handle_wifi_connected);
-  at_controller_register_handler(at_ctrl, "WIFI GOT IP", handle_wifi_got_ip);
+                                 handle_wifi_connected, self);
+  at_controller_register_handler(at_ctrl, "WIFI GOT IP", handle_wifi_got_ip,
+                                 self);
   at_controller_register_handler(at_ctrl, "WIFI DISCONNECT",
-                                 handle_wifi_disconnected);
+                                 handle_wifi_disconnected, self);
 
   // Initialization sequence
   AT_Cmd_t init_cmds[] = {

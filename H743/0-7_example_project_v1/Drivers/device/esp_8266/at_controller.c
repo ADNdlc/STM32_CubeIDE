@@ -121,13 +121,13 @@ void at_controller_init(at_controller_t *self, uart_queue_t *uart,
   log_i("AT Controller Initializing...");
 
   // 注册基本urc处理
-  at_controller_register_handler(self, "ready", handle_ready);
-  at_controller_register_handler(self, "busy p...", handle_busy);
-  at_controller_register_handler(self, ">", handle_CMDdata_send);
-  at_controller_register_handler(self, "OK", handle_final_ok);
-  at_controller_register_handler(self, "SEND OK", handle_final_ok);
-  at_controller_register_handler(self, "ERROR", handle_final_error);
-  at_controller_register_handler(self, "SEND FAIL", handle_final_error);
+  at_controller_register_handler(self, "ready", handle_ready, self);
+  at_controller_register_handler(self, "busy p...", handle_busy, self);
+  at_controller_register_handler(self, ">", handle_CMDdata_send, self);
+  at_controller_register_handler(self, "OK", handle_final_ok, self);
+  at_controller_register_handler(self, "SEND OK", handle_final_ok, self);
+  at_controller_register_handler(self, "ERROR", handle_final_error, self);
+  at_controller_register_handler(self, "SEND FAIL", handle_final_error, self);
 
   // at_controller_register_handler(self, "+CWMODE:", handle_Rxdata_process);
   // //wifi at_controller_register_handler(self, "+CIPSNTPTIME:",

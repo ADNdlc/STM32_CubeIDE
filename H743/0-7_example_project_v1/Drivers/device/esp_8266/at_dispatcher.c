@@ -28,7 +28,7 @@ bool at_controller_dispatch(at_controller_t *self, const char *line) {
       // 匹配成功，调用相应处理程序
       log_v("Match URC [%s] -> %s", current->prefix, line);
       if (current->handler) {
-        current->handler(self, line);
+        current->handler(current->ctx, line); // 使用存储的上下文
       }
       return true;
     }
@@ -46,7 +46,7 @@ bool at_controller_dispatch(at_controller_t *self, const char *line) {
  *
  */
 int at_controller_register_handler(at_controller_t *self, const char *prefix,
-                                   at_handler_func_t handler) {
+                                   at_handler_func_t handler, void *ctx) {
   if (!self || !prefix || !handler)
     return -1;
 
@@ -60,6 +60,7 @@ int at_controller_register_handler(at_controller_t *self, const char *prefix,
 
   node->prefix = prefix;
   node->handler = handler;
+  node->ctx = ctx;
   node->next = NULL;
 
   // Prepend to list

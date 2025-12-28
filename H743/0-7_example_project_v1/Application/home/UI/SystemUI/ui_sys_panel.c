@@ -1,4 +1,5 @@
 #include "ui_sys_panel.h"
+#include "../../System/net_mgr.h"
 #include "input_manager.h"
 #include "sys_state.h"
 #include "ui_helpers.h"
@@ -37,8 +38,7 @@ static void event_wifi_cb(lv_event_t *e);          // WiFi开关回调
  *********************/
 
 // 设置容器样式和属性(纯粹背景)
-static void container_style_set(lv_obj_t *obj)
-{
+static void container_style_set(lv_obj_t *obj) {
   lv_obj_set_style_shadow_width(obj, 0, LV_PART_MAIN); // 阴影
   lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN); // 边框
   lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);      // 不可滚动
@@ -59,8 +59,7 @@ static void container_style_set(lv_obj_t *obj)
  */
 static lv_obj_t *menu_child_container_create(lv_obj_t *parent, uint8_t col,
                                              uint8_t col_span, uint8_t row,
-                                             uint8_t row_span)
-{
+                                             uint8_t row_span) {
   // 块容器(不可见,用于对齐组件)
   lv_obj_t *block = lv_obj_create(parent);
   // lv_obj_set_style_opa(block, 0, LV_PART_MAIN); //不要让整体透明，
@@ -89,8 +88,7 @@ static lv_obj_t *menu_child_container_create(lv_obj_t *parent, uint8_t col,
 /* -- 子组件创建 -- */
 static lv_obj_t *multimedia_module_create(lv_obj_t *parent, uint8_t col,
                                           uint8_t col_span, uint8_t row,
-                                          uint8_t row_span)
-{
+                                          uint8_t row_span) {
   lv_obj_t *multimedia =
       menu_child_container_create(parent, col, col_span, row, row_span);
   // 暂定
@@ -100,15 +98,15 @@ static lv_obj_t *multimedia_module_create(lv_obj_t *parent, uint8_t col,
 
 static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
                                           uint8_t col, uint8_t col_span,
-                                          uint8_t row, uint8_t row_span)
-{
+                                          uint8_t row, uint8_t row_span) {
   lv_obj_t *brightness =
       menu_child_container_create(parent, col, col_span, row, row_span);
 
   // slider作为主体
   lv_obj_t *slider_bri = lv_slider_create(brightness);
   // 样式
-  lv_obj_set_size(slider_bri, lv_obj_get_width(brightness), lv_obj_get_height(brightness));
+  lv_obj_set_size(slider_bri, lv_obj_get_width(brightness),
+                  lv_obj_get_height(brightness));
   lv_obj_center(slider_bri);
   lv_obj_remove_style(slider_bri, NULL, LV_PART_KNOB);
   lv_obj_set_style_radius(slider_bri, 30, LV_PART_MAIN);
@@ -117,11 +115,14 @@ static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
   lv_obj_set_style_bg_color(slider_bri, lv_color_hex(0xF0F0F0),
                             LV_PART_INDICATOR);
   // 值
-  lv_slider_set_range(slider_bri, 0, 100);                                     // 设置范围
-  lv_slider_set_value(slider_bri, value, LV_ANIM_OFF);                         // 初始值
-  lv_obj_add_event_cb(slider_bri, event_bri_cb, LV_EVENT_VALUE_CHANGED, NULL); // 回调(值改变)
-  lv_obj_add_event_cb(slider_bri, event_bri_cb, LV_EVENT_PRESSED, NULL);       // 回调(按下)
-  lv_obj_add_event_cb(slider_bri, event_bri_cb, LV_EVENT_RELEASED, NULL);      // 回调(松开)
+  lv_slider_set_range(slider_bri, 0, 100);             // 设置范围
+  lv_slider_set_value(slider_bri, value, LV_ANIM_OFF); // 初始值
+  lv_obj_add_event_cb(slider_bri, event_bri_cb, LV_EVENT_VALUE_CHANGED,
+                      NULL); // 回调(值改变)
+  lv_obj_add_event_cb(slider_bri, event_bri_cb, LV_EVENT_PRESSED,
+                      NULL); // 回调(按下)
+  lv_obj_add_event_cb(slider_bri, event_bri_cb, LV_EVENT_RELEASED,
+                      NULL); // 回调(松开)
 
   // 图标
   lv_obj_t *brightness_icon =
@@ -137,14 +138,14 @@ static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
 
 static lv_obj_t *volume_module_create(lv_obj_t *parent, uint8_t value,
                                       uint8_t col, uint8_t col_span,
-                                      uint8_t row, uint8_t row_span)
-{
+                                      uint8_t row, uint8_t row_span) {
   lv_obj_t *volume =
       menu_child_container_create(parent, col, col_span, row, row_span);
   // slider作为主体
   lv_obj_t *slider_vol = lv_slider_create(volume);
   // 样式
-  lv_obj_set_size(slider_vol, lv_obj_get_width(volume), lv_obj_get_height(volume));
+  lv_obj_set_size(slider_vol, lv_obj_get_width(volume),
+                  lv_obj_get_height(volume));
   lv_obj_center(slider_vol);
   lv_obj_remove_style(slider_vol, NULL, LV_PART_KNOB);
   lv_obj_set_style_radius(slider_vol, 30, LV_PART_MAIN);
@@ -161,16 +162,11 @@ static lv_obj_t *volume_module_create(lv_obj_t *parent, uint8_t value,
   lv_obj_t *lbl_vol = lv_label_create(slider_vol);
   // 创建值对应图标
   char icon[4];
-  if (value == 0)
-  {
+  if (value == 0) {
     sprintf(icon, LV_SYMBOL_MUTE);
-  }
-  else if (value < 50)
-  {
+  } else if (value < 50) {
     sprintf(icon, LV_SYMBOL_VOLUME_MID);
-  }
-  else
-  {
+  } else {
     sprintf(icon, LV_SYMBOL_VOLUME_MAX);
   }
   lv_label_set_text(lbl_vol, icon);
@@ -182,8 +178,7 @@ static lv_obj_t *volume_module_create(lv_obj_t *parent, uint8_t value,
 
 static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
                                     uint8_t col, uint8_t col_span, uint8_t row,
-                                    uint8_t row_span)
-{
+                                    uint8_t row_span) {
   lv_obj_t *wifi =
       menu_child_container_create(parent, col, col_span, row, row_span);
   // btn作为主体
@@ -217,8 +212,7 @@ static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
  * @param parent 传入panel_bg作为父对象
  * @return 返回菜单主体
  */
-static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent)
-{
+static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent) {
   // 创建一个内容容器
   lv_obj_t *content_container = lv_obj_create(parent);
   // 初始时让它和父容器一样大，但要把它放在屏幕外
@@ -232,13 +226,13 @@ static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent)
   container_style_set(content_container);
   // 设置网格布局
   static lv_coord_t col_dsc[] = {
-      LV_GRID_FR(1), 98, 98, 98, 98, 98, 98, 98, LV_GRID_FR(1),
+      LV_GRID_FR(1),        98, 98, 98, 98, 98, 98, 98, LV_GRID_FR(1),
       LV_GRID_TEMPLATE_LAST};
   static lv_coord_t row_dsc[] = {
       LV_GRID_FR(1), 98, 98, 98, 98, LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST};
   lv_obj_set_grid_dsc_array(content_container, col_dsc, row_dsc);
   lv_obj_set_style_pad_all(content_container, 0,
-                           0);                         // 边距(是整体边距,不是子项间的距离)
+                           0); // 边距(是整体边距,不是子项间的距离)
   lv_obj_set_style_pad_gap(content_container, 20, 20); // 子项边距
 
   // 底部拖拽区
@@ -271,7 +265,7 @@ static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent)
   /* 音量滑块 */
   volume_module_create(content_container, state->volume, 4, 1, 1, 2);
   /* WiFi 按钮 */
-  wifi_module_create(content_container, state->wifi_connected, 5, 1, 1, 1);
+  wifi_module_create(content_container, net_mgr_wifi_is_enabled(), 5, 1, 1, 1);
 
   // #ifndef NODEBUG
   //// 布局测试
@@ -288,8 +282,7 @@ static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent)
 
 // 动画设置辅助
 static lv_anim_t *slide_anim_set(lv_obj_t *obj, lv_coord_t start,
-                                 lv_coord_t end)
-{
+                                 lv_coord_t end) {
   static lv_anim_t a; // 必须静态
   lv_anim_init(&a);
   lv_anim_set_var(&a, obj);
@@ -309,19 +302,16 @@ static lv_anim_t *slide_anim_set(lv_obj_t *obj, lv_coord_t start,
  * @param enable     此函数操作可还原
  */
 static void pd_menu_set_focus_mode(lv_obj_t *focused_bg,
-                                   uint8_t Top_parent_level, bool enable)
-{
+                                   uint8_t Top_parent_level, bool enable) {
   if (focused_bg == NULL)
     return;
   lv_obj_t *Top_parent = NULL;
   lv_obj_t *except = focused_bg;
   // 获取指定级级父容器
-  while (Top_parent_level)
-  {
+  while (Top_parent_level) {
     Top_parent = lv_obj_get_parent(except);
     Top_parent_level--;
-    if (Top_parent_level == 0 || Top_parent == NULL)
-    {
+    if (Top_parent_level == 0 || Top_parent == NULL) {
       break;
     }
     // 继续向上
@@ -331,13 +321,10 @@ static void pd_menu_set_focus_mode(lv_obj_t *focused_bg,
     return; // 级别错误
 
   // 隐藏顶级父项,和下拉菜单遮罩
-  if (enable)
-  {
+  if (enable) {
     lv_obj_set_style_bg_opa(Top_parent, 0, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(panel_bg, 0, LV_PART_MAIN);
-  }
-  else
-  {
+  } else {
     lv_obj_set_style_bg_opa(Top_parent, 80,
                             LV_PART_MAIN); // 这里获取到的是菜单背景
     lv_obj_set_style_bg_opa(
@@ -348,19 +335,14 @@ static void pd_menu_set_focus_mode(lv_obj_t *focused_bg,
   // 遍历 Top_parent 下的所有子对象
   uint32_t child_count = lv_obj_get_child_cnt(Top_parent); // 子项数量
   log_d("focus_mode:child_count=%d", child_count);
-  for (uint32_t i = 0; i < child_count; i++)
-  {
+  for (uint32_t i = 0; i < child_count; i++) {
     lv_obj_t *child = lv_obj_get_child(Top_parent, i);
     // 如果这个子对象不是我们想要聚焦的那个
-    if (child != except)
-    {
-      if (enable)
-      {
+    if (child != except) {
+      if (enable) {
         // 【开启聚焦】：隐藏其他所有功能块
         lv_obj_add_flag(child, LV_OBJ_FLAG_HIDDEN);
-      }
-      else
-      {
+      } else {
         // 【关闭聚焦】：恢复显示其他所有功能块
         lv_obj_clear_flag(child, LV_OBJ_FLAG_HIDDEN);
       }
@@ -376,10 +358,8 @@ static void pd_menu_set_focus_mode(lv_obj_t *focused_bg,
  *
  * 绑定于全局下拉手势
  */
-void ui_sys_panel_show(void)
-{
-  if (is_panel_active || panel_bg != NULL)
-  {
+void ui_sys_panel_show(void) {
+  if (is_panel_active || panel_bg != NULL) {
     return;
   }
   is_panel_active = true;
@@ -393,10 +373,10 @@ void ui_sys_panel_show(void)
   lv_obj_clear_flag(panel_bg, LV_OBJ_FLAG_SCROLLABLE);
 
   // 创建内容
-  panel_content = ui_sys_panel_content_create(panel_bg); // 使用完整实现而非测试代码
+  panel_content =
+      ui_sys_panel_content_create(panel_bg); // 使用完整实现而非测试代码
 
-  if (!panel_content)
-  {
+  if (!panel_content) {
     lv_obj_del(panel_bg);
     log_e("ui_sys_panel_show: panel_content create failed");
     return;
@@ -413,8 +393,7 @@ void ui_sys_panel_show(void)
  * 绑定于全局上拉手势,此函数不负责关闭菜单,只负责进入 event_panel_drag_cb
  * 判断是否关闭
  */
-static void ui_sys_panel_begin_close(void)
-{
+static void ui_sys_panel_begin_close(void) {
   if (!is_panel_active || !panel_bg || !panel_content)
     return;
   log_d("pulldown_menu_begin_close");
@@ -439,16 +418,14 @@ bool ui_sys_panel_is_visible(void) { return is_panel_active; }
  *********************/
 
 // 动画结束回调(下拉菜单删除)
-static void delete_anim_ready_cb(lv_anim_t *anim)
-{
+static void delete_anim_ready_cb(lv_anim_t *anim) {
   lv_obj_del(panel_bg);
   panel_bg = NULL;
   panel_content = NULL;
   is_panel_active = false;
 }
 
-static void event_panel_drag_cb(lv_event_t *e)
-{
+static void event_panel_drag_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t *bg = lv_event_get_target(e);
   lv_obj_t *content = lv_obj_get_user_data(bg);
@@ -478,28 +455,23 @@ static void event_panel_drag_cb(lv_event_t *e)
 
   lv_anim_t *a;
   // 事件1：当手指在背景上拖动时
-  if (code == LV_EVENT_PRESSING)
-  {
+  if (code == LV_EVENT_PRESSING) {
     // 将菜单下部对齐当前点y坐标
     lv_obj_set_y(content, p.y - content_h); /* 根据按下点计算控件左上角的位置 */
   }
   // 事件2：当手指松开时
-  else if (code == LV_EVENT_RELEASED || code == LV_EVENT_PRESS_LOST)
-  {
+  else if (code == LV_EVENT_RELEASED || code == LV_EVENT_PRESS_LOST) {
     lv_coord_t now_y = lv_obj_get_y(content); // 获取控件当前y
     // lv_coord_t final_y = p.y - ; //计算菜单y坐标(控件的坐标在左上角)
     //  滑入还是滑出
-    if (p.y > scr_act_height() / 2)
-    { // 松手点在屏幕下部1/3
+    if (p.y > scr_act_height() / 2) { // 松手点在屏幕下部1/3
       // --- 自动滑入 ---
       a = slide_anim_set(content, now_y, 0);
       lv_anim_set_path_cb(a, lv_anim_path_ease_out);
       // 动画结束后，解除拖动事件回调
       lv_obj_remove_event_cb(bg, event_panel_drag_cb);
       lv_anim_start(a);
-    }
-    else
-    {
+    } else {
       // --- 自动滑出并销毁 ---
       a = slide_anim_set(content, now_y, -(content_h + 10));
       lv_anim_set_path_cb(a, lv_anim_path_ease_in);
@@ -512,8 +484,7 @@ static void event_panel_drag_cb(lv_event_t *e)
 
 /* -- 子组件相关 -- */
 // 音量滑块事件
-static void event_vol_cb(lv_event_t *e)
-{
+static void event_vol_cb(lv_event_t *e) {
   lv_obj_t *slider = lv_event_get_target(e);
   uint8_t val = (uint8_t)lv_slider_get_value(slider);
 
@@ -522,8 +493,7 @@ static void event_vol_cb(lv_event_t *e)
 
   // Update Icon
   lv_obj_t *lbl = lv_obj_get_child(slider, 0);
-  if (lbl)
-  {
+  if (lbl) {
     if (val = 0)
       lv_label_set_text(lbl, LV_SYMBOL_MUTE);
     else if (val < 50)
@@ -534,22 +504,19 @@ static void event_vol_cb(lv_event_t *e)
 }
 
 // 亮度滑块事件
-static void event_bri_cb(lv_event_t *e)
-{
+static void event_bri_cb(lv_event_t *e) {
   lv_obj_t *slider = lv_event_get_target(e);
   lv_event_code_t event_code = lv_event_get_code(e); // 事件代码
 
   // 事件1：当滑块值改变时，更新图标的染色效果
-  if (event_code == LV_EVENT_VALUE_CHANGED)
-  {
+  if (event_code == LV_EVENT_VALUE_CHANGED) {
     int32_t value = lv_slider_get_value(slider);         // 滑块值
     lv_obj_t *bright_icon = lv_obj_get_child(slider, 0); // 图标
     log_d("bright_slider_value:%d", value);
     // 设置系统状态
     sys_state_set_brightness(value);
 
-    if (bright_icon == NULL)
-    {
+    if (bright_icon == NULL) {
       return;
     }
     // Update Icon
@@ -557,33 +524,29 @@ static void event_bri_cb(lv_event_t *e)
     lv_obj_set_style_img_recolor_opa(bright_icon, mapped_opa, LV_PART_MAIN);
   }
   // 事件2：当手指按下时，开启聚焦模式
-  else if (event_code == LV_EVENT_PRESSED)
-  {
+  else if (event_code == LV_EVENT_PRESSED) {
     log_d("bright: Focus Mode");
     pd_menu_set_focus_mode(slider, 3, true); // 聚焦
   }
   // 事件3：当手指松开或移出时，关闭聚焦模式
   else if (event_code == LV_EVENT_RELEASED ||
-           event_code == LV_EVENT_PRESS_LOST)
-  {
+           event_code == LV_EVENT_PRESS_LOST) {
     log_d("bright: Exit Focus Mode");
     pd_menu_set_focus_mode(slider, 3, false); // 恢复
   }
 }
 
 // WiFi 按钮事件
-static void event_wifi_cb(lv_event_t *e)
-{
+static void event_wifi_cb(lv_event_t *e) {
   lv_obj_t *btn = lv_event_get_target(e);
   bool checked = lv_obj_has_state(btn, LV_STATE_CHECKED);
 
-  // 设置WiFi状态
-  sys_state_set_wifi(checked);
+  // 发起连接请求(由 net_mgr 处理实际状态同步)
+  net_mgr_wifi_enable(checked);
 
-  // Update Icon
-  lv_obj_t *img = lv_obj_get_user_data(btn);
-  if (img)
-  {
+  // 图标颜色渲染
+  lv_obj_t *img = lv_obj_get_child(btn, 0);
+  if (img) {
     if (checked)
       lv_obj_set_style_img_recolor(img, lv_color_hex(0xEEEEEE), 0);
     else
@@ -593,30 +556,25 @@ static void event_wifi_cb(lv_event_t *e)
 
 // --- Gesture Callbacks ---
 
-static void on_pulldown_gesture(void)
-{
+static void on_pulldown_gesture(void) {
   log_d("UiSysPanel: Pulldown gesture received. Panel visible: %d",
-         ui_sys_panel_is_visible());
+        ui_sys_panel_is_visible());
   // 只有在面板不可见时才显示
-  if (!ui_sys_panel_is_visible())
-  {
+  if (!ui_sys_panel_is_visible()) {
     ui_sys_panel_show();
   }
 }
 
-static void on_close_gesture(void)
-{
+static void on_close_gesture(void) {
   log_d("UiSysPanel: Close gesture received. Panel visible: %d",
-         ui_sys_panel_is_visible());
+        ui_sys_panel_is_visible());
   // 只有在面板可见时才处理关闭
-  if (ui_sys_panel_is_visible())
-  {
+  if (ui_sys_panel_is_visible()) {
     ui_sys_panel_begin_close();
   }
 }
 
-void ui_sys_panel_init(void)
-{
+void ui_sys_panel_init(void) {
   // 注册下拉手势 (顶部下滑)
   input_manager_register_callback(GESTURE_TOP_SWIPE_DOWN, on_pulldown_gesture);
 
