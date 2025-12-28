@@ -18,7 +18,7 @@ static int g_observer_count = 0;                          // 观察者数量
 #include "ui_helpers.h"
 /**
  * 亮度遮罩(test)
- * 应该使用屏幕的pwm调光等硬件方式实现
+ * 实际应该使用屏幕的pwm调光等硬件方式实现
  */
 static lv_obj_t *shade = NULL; // 亮度遮罩值为0~255(0为全透明,255为不透明)
 lv_obj_t * create_shade(void) {

@@ -8,12 +8,9 @@
 #define USE_OLD_UI 0
 
 #include "app.h"
-#include "elog.h"
-#include "hal_init.h"
-
-
 #define LOG_TAG "APP"
 #include "elog.h"
+#include "hal_init.h"
 
 #if LVGL_INIT
 #include "home/System/net_mgr.h"
@@ -29,13 +26,29 @@
 #endif
 #endif
 
+#include "home/res_burner.h"
+#include "sys_init.h"
+#define CONFIG_RES_BURN_ENABLE 0 // 设置为1时开启烧录模式，烧录完成后应设回0
+
 int app_init(void) {
-#if LVGL_INIT
+  // 系统服务和组件初始化
+  sys_services_init();
+
+#if CONFIG_RES_BURN_ENABLE
+  res_burner_run();
+  log_i("Resource burning completed. Please disable CONFIG_RES_BURN_ENABLE and "
+        "re-flash.");
+  while (1) {
+    sys_delay_ms(1000); // 烧录模式下不进入主循环
+  }
+#endif
+
+#if LVGL_INIT && !CONFIG_RES_BURN_ENABLE
 #if USE_OLD_UI
   act_manager_init(); // 旧ui入口
   log_i("Old UI initialized");
 #else
-  home_init(); // 初始化核心功能
+  home_init(); // 初始化ui核心功能
 
   /* 注册各ui模块功能 */
   colorwheel_app_register(0);     // 注册 ColorWheel
@@ -51,7 +64,7 @@ int app_init(void) {
 }
 
 void app_run(void) {
-#if LVGL_INIT
+#if LVGL_INIT && !CONFIG_RES_BURN_ENABLE
   lv_timer_handler();
   net_mgr_process();
 #endif

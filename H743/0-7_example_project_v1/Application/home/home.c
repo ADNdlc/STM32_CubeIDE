@@ -7,7 +7,6 @@
 #include "sys_state.h"
 #include <home.h>
 
-
 #define LOG_TAG "UI"
 #include "elog.h"
 
@@ -38,9 +37,7 @@ static app_def_t home_app_def = {
 };
 
 void home_init(void) {
-  // 初始化核心服务
-  sys_state_init();     // 系统状态初始化
-  net_mgr_init();       // 网络管理器初始化
+  // 初始化 UI 核心服务
   app_manager_init();   // 应用管理器初始化
   input_manager_init(); // 输入管理器初始化
 

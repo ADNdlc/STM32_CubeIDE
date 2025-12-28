@@ -20,6 +20,7 @@
 #include "wifi_test.h"
 #include "flash_test.h"
 #include "norflash_test.h"
+#include "lfs_test.h"
 
 void run_all_tests(void) {
 #if _led_test_
@@ -70,11 +71,15 @@ void run_all_tests(void) {
   wifi_test_run();
 #endif
 
+#if _norflash_test_
+  norflash_test();
+#endif
+
 #if _flash_test_
   flash_integration_test();
 #endif
 
-#if _norflash_test_
-  norflash_test();
+#if _lfs_test_
+  lfs_integration_test();
 #endif
 }

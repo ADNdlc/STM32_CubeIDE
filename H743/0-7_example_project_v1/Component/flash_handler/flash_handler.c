@@ -3,7 +3,6 @@
 #include "sys.h"
 #include <string.h>
 
-
 #define LOG_TAG "FlashHdlr"
 
 #define MAX_MOUNT_POINTS 4 // 最大挂载点
@@ -73,4 +72,14 @@ int flash_handler_write(const char *path, uint32_t offset, const uint8_t *buf,
   if (!mp || !mp->strategy)
     return -1;
   return mp->strategy->ops->write(mp->strategy, path, offset, buf, size);
+}
+
+// Helper for LVGL FS porting to get the LFS handle
+#include "LittleFS/lfs.h"
+lfs_t *flash_handler_get_lfs(const char *prefix) {
+  mount_point_t *mp = _find_mount_point(prefix);
+  if (!mp || !mp->strategy)
+    return NULL;
+  // We assume the caller knows this prefix belongs to an LFS strategy
+  return lfs_strategy_get_lfs(mp->strategy);
 }

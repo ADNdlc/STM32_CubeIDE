@@ -128,7 +128,7 @@ int main(void) {
   app_init(); // 应用初始化
 
   // module testing
-  // run_all_tests(); // 运行所有开启的单元测试
+  //run_all_tests(); // 运行所有开启的单元测试
 
   /* USER CODE END 2 */
 

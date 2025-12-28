@@ -8,7 +8,7 @@
 #ifndef TEST_UNIT_ALL_TESTS_H_
 #define TEST_UNIT_ALL_TESTS_H_
 
-#include "../../Drivers/SYSTEM/sys.h"
+#include "sys.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -25,8 +25,8 @@
 #define _rtc_test_ 0
 #define _wifi_test_ 0
 #define _flash_test_ 0
+#define _lfs_test_ 1
 #define _norflash_test_ 0
-
 
 // 运行所有测试用例
 void run_all_tests(void);

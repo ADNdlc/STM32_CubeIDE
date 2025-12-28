@@ -1,5 +1,6 @@
 #include "ui_sys_panel.h"
 #include "../../System/net_mgr.h"
+#include "home/res_manager.h"
 #include "input_manager.h"
 #include "sys_state.h"
 #include "ui_helpers.h"
@@ -14,8 +15,6 @@
 /*********************
  *      EXTERNS
  *********************/
-LV_IMG_DECLARE(icon_bright);
-LV_IMG_DECLARE(icon_wifi);
 
 /*********************
  *  STATIC VARIABLES
@@ -127,7 +126,9 @@ static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
   // 图标
   lv_obj_t *brightness_icon =
       lv_img_create(slider_bri); // slider_bri作为父类，因为icon需要在回调中获取
-  lv_img_set_src(brightness_icon, &icon_bright);
+
+  lv_img_set_src(brightness_icon, res_get_src(RES_IMG_ICON_BRIGHT));
+
   lv_obj_align(brightness_icon, LV_ALIGN_BOTTOM_MID, 0, -20);
   lv_obj_set_style_img_recolor(brightness_icon, lv_color_hex(0x505050), 0);
   lv_opa_t bri_opa = lv_map(value, 0, 100, LV_OPA_COVER, LV_OPA_TRANSP);
@@ -198,7 +199,9 @@ static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
 
   // icon
   lv_obj_t *img_wifi = lv_img_create(btn_wifi);
-  lv_img_set_src(img_wifi, &icon_wifi);
+
+  lv_img_set_src(img_wifi, res_get_src(RES_IMG_ICON_WIFI));
+
   lv_obj_center(img_wifi);
   lv_img_set_zoom(img_wifi, 300);
   lv_obj_set_style_img_recolor(img_wifi, lv_color_hex(0x333333), 0);
@@ -494,7 +497,7 @@ static void event_vol_cb(lv_event_t *e) {
   // Update Icon
   lv_obj_t *lbl = lv_obj_get_child(slider, 0);
   if (lbl) {
-    if (val = 0)
+    if (val == 0)
       lv_label_set_text(lbl, LV_SYMBOL_MUTE);
     else if (val < 50)
       lv_label_set_text(lbl, LV_SYMBOL_VOLUME_MID);

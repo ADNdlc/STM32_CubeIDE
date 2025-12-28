@@ -1,11 +1,11 @@
 #include "w25qxx.h"
 #include "../../interface/block_device.h" // Help lint/compiler find it
+#define LOG_TAG "W25Q"
+#define LOG_LVL ELOG_LVL_DEBUG
 #include "elog.h"
 #include "sys.h"
 #include <stdlib.h>
 #include <string.h>
-
-#define LOG_TAG "W25Q"
 
 #define W25Q_MEMSOURCE SYS_MEM_INTERNAL
 
@@ -130,16 +130,16 @@ static int w25q_deinit(block_device_t *const self) {
 static int w25q_read(block_device_t *const self, uint32_t addr, uint8_t *buf,
                      size_t size) {
   w25qxx_t *dev = (w25qxx_t *)self;
-  log_d("W25Q read called: addr=0x%08X, size=%d", addr, (int)size);
+  log_v("W25Q read called: addr=0x%08X, size=%d", addr, (int)size);
   int result = dev->adapter->ops->read(dev->adapter, addr, buf, size);
-  log_d("W25Q read completed with result: %d", result);
+  log_v("W25Q read completed with result: %d", result);
   return result;
 }
 
 static int w25q_program(block_device_t *const self, uint32_t addr,
                         const uint8_t *buf, size_t size) {
   w25qxx_t *dev = (w25qxx_t *)self;
-  log_d("W25Q program called: addr=0x%08X, size=%d", addr, (int)size);
+  log_v("W25Q program called: addr=0x%08X, size=%d", addr, (int)size);
   uint32_t cur_addr = addr;
   uint32_t end_addr = addr + size;
   const uint8_t *ptr = buf;

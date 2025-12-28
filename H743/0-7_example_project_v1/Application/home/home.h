@@ -11,12 +11,10 @@ extern "C" {
 #include "screens/ui_screen_home.h"
 #include "ui_events.h"
 
-void home_init(void);   // ui功能初始化(初始化后注册)
-void ui_Start(void);    // ui启动
+void home_init(void); // ui功能初始化(初始化后注册)
+void ui_Start(void);  // ui启动
 
-// 资源声明
-LV_IMG_DECLARE(icon_home);
-//LV_IMG_DECLARE(wallpaper);
+// 资源声明 (已迁移至资源管理器)
 
 #ifdef __cplusplus
 } /*extern "C"*/
