@@ -29,7 +29,7 @@
 #include "home/res_burner.h"
 #include "sys_init.h"
 #define CONFIG_RES_BURN_ENABLE 0 // 设置为1时开启烧录模式，烧录完成后应设回0
-
+ 
 int app_init(void) {
   // 系统服务和组件初始化
   sys_services_init();
