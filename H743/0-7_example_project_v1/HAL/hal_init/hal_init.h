@@ -8,13 +8,13 @@
 #ifndef APPLICATION_HAL_INIT_HAL_INIT_H_
 #define APPLICATION_HAL_INIT_HAL_INIT_H_
 
-#define LVGL_INIT 1
+#include "project_cfg.h"
 
 #include "SYSTEM/sys.h"
 #include "all_tests_config.h"
 #include "factory.h"
 #include "logger/elog_init.h"
-#if LVGL_INIT
+#if LVGL_ENABLE
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
 #include "lvgl.h"

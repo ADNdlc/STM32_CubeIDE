@@ -4,7 +4,9 @@
  *  Created on: Dec 3, 2025
  *      Author: 12114
  */
+#include "project_cfg.h"
 
+#if TEST_ENABLE
 #include "all_tests_config.h"
 #include "elog_test.h"
 #include "key_test.h"
@@ -23,6 +25,7 @@
 #include "lfs_test.h"
 
 void run_all_tests(void) {
+
 #if _led_test_
   led_test_run();
 #endif
@@ -82,4 +85,10 @@ void run_all_tests(void) {
 #if _lfs_test_
   lfs_integration_test();
 #endif
+
+
+
 }
+#else
+void run_all_tests(void) {}
+#endif

@@ -7,6 +7,7 @@
 
 #include "hal_init.h"
 
+
 int hal_init(void) {
   /* ---- SYS初始化 ---- */
   sys_bind_ops(SysFactory_GetOps()); // 绑定平台sys操作
@@ -41,14 +42,18 @@ int hal_init(void) {
   sys_mem_init_external();
   log_i("SDRAM&MEM initialization completed...");
 
-#if LVGL_INIT
+#if LVGL_ENABLE
   /* ---- LVGL硬件初始化 ---- */
   lv_init(); // LVGL 初始化
   log_i("LVGL initialization completed...");
+#if LVGL_DISP_INIT&&!CONFIG_RES_BURN_ENABLE
   lv_port_disp_init(); // 注册LVGL的显示任务
   log_i("LVGL port_disp initialization completed...");
+#endif
+#if LVGL_INDEV_INIT&&!CONFIG_RES_BURN_ENABLE
   lv_port_indev_init(); // 注册LVGL的触屏检测任务
   log_i("LVGL port_indev initialization completed...");
+#endif
 #endif
   /* --------------------- */
 

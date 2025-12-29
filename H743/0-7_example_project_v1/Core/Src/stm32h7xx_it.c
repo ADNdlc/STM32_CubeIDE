@@ -66,6 +66,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern DMA2D_HandleTypeDef hdma2d;
+extern NAND_HandleTypeDef hnand1;
 extern SDRAM_HandleTypeDef hsdram1;
 extern LTDC_HandleTypeDef hltdc;
 extern QSPI_HandleTypeDef hqspi;
@@ -326,6 +327,7 @@ void FMC_IRQHandler(void)
   /* USER CODE BEGIN FMC_IRQn 0 */
 
   /* USER CODE END FMC_IRQn 0 */
+  HAL_NAND_IRQHandler(&hnand1);
   HAL_SDRAM_IRQHandler(&hsdram1);
   /* USER CODE BEGIN FMC_IRQn 1 */
 

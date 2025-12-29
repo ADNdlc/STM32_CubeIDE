@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#include "project_cfg.h"
+
 int app_init(void);
 void app_run(void);
 

@@ -1,6 +1,7 @@
 #ifndef APPLICATION_SYS_INIT_H_
 #define APPLICATION_SYS_INIT_H_
 
+#include "project_cfg.h"
 /**
  * @brief Initialize all foundational system services
  *
