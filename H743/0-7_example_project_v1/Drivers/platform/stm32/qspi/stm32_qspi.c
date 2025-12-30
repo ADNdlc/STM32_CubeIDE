@@ -170,12 +170,21 @@ static int _stm32_qspi_memory_mapped(qspi_driver_t *self, qspi_command_t *cmd) {
   return -1;
 }
 
+static int _stm32_qspi_abort(qspi_driver_t *self) {
+  stm32_qspi_t *qspi = (stm32_qspi_t *)self;
+  if (HAL_QSPI_Abort(qspi->hqspi) == HAL_OK) {
+    return 0;
+  }
+  return -1;
+}
+
 static const qspi_driver_ops_t stm32_qspi_ops = {
     .command = _stm32_qspi_command,
     .transmit = _stm32_qspi_transmit,
     .receive = _stm32_qspi_receive,
     .auto_polling = _stm32_qspi_auto_polling,
     .memory_mapped = _stm32_qspi_memory_mapped,
+    .abort = _stm32_qspi_abort,
 };
 
 qspi_driver_t *stm32_qspi_create(QSPI_HandleTypeDef *hqspi) {

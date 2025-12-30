@@ -74,6 +74,11 @@ typedef struct {
    * @brief 配置内存映射模式（可选）
    */
   int (*memory_mapped)(qspi_driver_t *self, qspi_command_t *cmd);
+
+  /**
+   * @brief Abort current operation (including memory mapped)
+   */
+  int (*abort)(qspi_driver_t *self);
 } qspi_driver_ops_t;
 
 /**

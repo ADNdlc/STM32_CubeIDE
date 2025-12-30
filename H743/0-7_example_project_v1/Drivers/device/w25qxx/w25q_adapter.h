@@ -27,6 +27,8 @@ typedef struct {
   int (*wait_busy)(w25q_adapter_t *self, uint32_t timeout); // 等待忙(写入/擦除)
   int (*enter_4byte_addr_mode)(w25q_adapter_t *self);       // 进入4字节地址模式
   int (*exit_4byte_addr_mode)(w25q_adapter_t *self);        // 退出4字节地址模式
+  int (*enter_memory_mapped)(w25q_adapter_t *self);         // 进入内存映射模式
+  int (*exit_memory_mapped)(w25q_adapter_t *self);          // 退出内存映射模式
 } w25q_adapter_ops_t;
 
 struct w25q_adapter_t {

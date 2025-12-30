@@ -7,6 +7,8 @@
 #include "lv_port_fs.h"
 #include "project_cfg.h"
 #include "strategy/lfs_strategy.h"
+#include "w25qxx/w25q_adapter.h"
+#include "w25qxx/w25qxx.h"
 #include <stddef.h>
 
 #define LOG_TAG "SYS_INIT"
@@ -17,47 +19,24 @@ int sys_services_init(void) {
   /* 存储和文件系统 */
   flash_handler_init(); // 初始化 Flash 管理器
 
-  block_device_t *dev =
-      flash_factory_get(FLASH_EXT_QSPI); // 获取外部 QSPI Flash 设备
-  if (dev == NULL) {
-    log_e("Failed to get QSPI Flash device from factory");
-    return -1;
-  }
-
-  flash_strategy_t *lfs_strat = lfs_strategy_create(); // 创建 LittleFS 策略
-  if (lfs_strat == NULL) {
-    log_e("Failed to create LittleFS strategy");
-    return -1;
-  }
-
-  if (flash_handler_register("/lfs", dev, lfs_strat) !=
-      0) { // 使用 LittleFS策略 和 QSPI Flash设备 注册 /lfs 挂载点
-    log_e("Failed to register /lfs mount point");
-    return -1;
-  }
-
-  /* lvgl文件系统初始化 */
-#if LVGL_FS_INIT && !CONFIG_RES_BURN_ENABLE
-  lv_port_fs_init(); // 目前lvgl关联/lfs挂载点
-#endif
-
-  /* 系统组件初始化 */
 #if !CONFIG_RES_BURN_ENABLE
-  sys_state_init(); // 初始化系统状态
-  net_mgr_init();   // 初始化网络管理器
-#endif
+  // --- 运行模式 (Runtime XIP Mode) ---
+  log_i("Mode: RUNTIME (XIP Read-Only)");
 
-#if !CONFIG_RES_BURN_ENABLE
-  // 切换到内存映射模式以实现零拷贝资源访问
-  w25q_adapter_t *qspi_adapter = (w25q_adapter_t *)dev->adapter;
-  if (dev && dev->adapter &&
-      qspi_adapter->ops->memory_mapped) { // 需要先确定adapter有这个接口
-    if (qspi_adapter->ops->memory_mapped(qspi_adapter) != 0) {
+  // 1. 切换到内存映射模式
+  block_device_t *dev = flash_factory_get(FLASH_EXT_QSPI);
+  w25q_adapter_t *qspi_adapter = ((w25qxx_t *)dev)->adapter;
+  if (dev && qspi_adapter && qspi_adapter->ops->enter_memory_mapped) {
+    if (qspi_adapter->ops->enter_memory_mapped(qspi_adapter) != 0) {
       log_e("Failed to enter QSPI memory mapped mode");
       return -1;
     }
-    log_i("System switched to QSPI XIP mode.");
+    log_i("QSPI switched to Memory Mapped Mode (0x90000000)");
   }
+
+  // 2. 初始化核心服务 (无文件系统，将使用默认配置)
+  sys_state_init();
+  net_mgr_init();
 #endif
 
   log_i("System services initialization completed.");

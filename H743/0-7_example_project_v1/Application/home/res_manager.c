@@ -11,22 +11,17 @@ typedef struct {
   const char *desc;
 } res_map_t;
 
-// QSPI Base Address for XIP (Typically 0x90000000)
-#define QSPI_MAP_ADDR 0x90000000
-
-// Resource Partition Offset (e.g. 1MB reserved for boot/config)
-#define RES_PARTITION_OFFSET 0x100000
+// QSPI Base Address & Offset now in header
+// static const res_map_t res_table[] ....
 
 static const res_map_t res_table[] = {
-    // Offset calculation: previous_offset + previous_size (aligned to 4 bytes
-    // ideally)
-    // Note: These need to match exactly with res_burner.c's write logic
-    {RES_IMG_WALLPAPER, 0x000000, 307200 + 4,
-     "Wallpaper"}, // 480*320*2 + 4 header
-    {RES_IMG_ICON_WIFI, 0x050000, 5000 + 4, "WiFi Icon"}, // Placeholder size
-    {RES_IMG_ICON_BRIGHT, 0x052000, 5000 + 4, "Brightness Icon"},
-    {RES_IMG_ICON_COLORWHEEL, 0x054000, 5000 + 4, "Colorwheel Icon"},
-    {RES_IMG_ICON_CONTROL, 0x056000, 5000 + 4, "Control Icon"},
+    // Offset calculation: must match res_burner.c logic
+    {RES_IMG_WALLPAPER, RES_OFFSET_WALLPAPER, 307200 + 4, "Wallpaper"},
+    {RES_IMG_ICON_WIFI, RES_OFFSET_ICON_WIFI, 5000 + 4, "WiFi Icon"},
+    {RES_IMG_ICON_BRIGHT, RES_OFFSET_ICON_BRIGHT, 5000 + 4, "Brightness Icon"},
+    {RES_IMG_ICON_COLORWHEEL, RES_OFFSET_ICON_COLORWHEEL, 5000 + 4,
+     "Colorwheel Icon"},
+    {RES_IMG_ICON_CONTROL, RES_OFFSET_ICON_CONTROL, 5000 + 4, "Control Icon"},
 };
 
 const void *res_get_src(res_id_t id) {

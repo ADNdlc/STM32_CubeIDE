@@ -158,7 +158,7 @@ static int _qspi_read(w25q_adapter_t *self, uint32_t addr, uint8_t *buf,
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
   _fill_cmd(impl, &cmd, CMD_READ_DATA, addr, QSPI_MODE_1_LINE,
-            QSPI_MODE_4_LINES, QSPI_MODE_4_LINES, 6, size);
+          QSPI_MODE_4_LINES, QSPI_MODE_4_LINES, 8, size);
   if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0 ||
       QSPI_RECEIVE(impl->driver, buf, 1000) != 0)
     return -1;
@@ -264,6 +264,21 @@ static int _qspi_memory_mapped(w25q_adapter_t *self) {
   log_d("Entered Memory Mapped Mode (XIP)");
   return 0;
 }
+static int _qspi_enter_memory_mapped(w25q_adapter_t *self) {
+  w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
+  qspi_command_t cmd;
+  log_d("Entering QSPI Memory Mapped Mode (XIP)");
+  // 使用与读取相同的配置: 0xEB, 1-4-4 模式, 8 Dummy cycles
+  _fill_cmd(impl, &cmd, CMD_READ_DATA, 0, QSPI_MODE_1_LINE, QSPI_MODE_4_LINES,
+            QSPI_MODE_4_LINES, 8, 0); // data_size=0 for XIP
+  return QSPI_MEMORY_MAPPED(impl->driver, &cmd);
+}
+
+static int _qspi_exit_memory_mapped(w25q_adapter_t *self) {
+  w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
+  log_d("Exiting QSPI Memory Mapped Mode");
+  return impl->driver->ops->abort(impl->driver);
+}
 
 static const w25q_adapter_ops_t w25q_qspi_ops = {
     .init = _qspi_init,
@@ -277,6 +292,8 @@ static const w25q_adapter_ops_t w25q_qspi_ops = {
     .wait_busy = _qspi_wait_busy,
     .enter_4byte_addr_mode = _qspi_enter_4byte_addr_mode,
     .exit_4byte_addr_mode = _qspi_exit_4byte_addr_mode,
+    .enter_memory_mapped = _qspi_enter_memory_mapped,
+    .exit_memory_mapped = _qspi_exit_memory_mapped,
 };
 
 w25q_adapter_t *w25q_qspi_adapter_create(qspi_driver_t *qspi_driver) {

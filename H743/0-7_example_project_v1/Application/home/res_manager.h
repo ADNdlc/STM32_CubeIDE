@@ -15,6 +15,17 @@ typedef enum {
   RES_IMG_COUNT
 } res_id_t;
 
+// XIP Mapping Configuration
+#define QSPI_MAP_ADDR 0x90000000
+#define RES_PARTITION_OFFSET 0x100000 // 1MB reserved
+
+// Resource Offsets (Physical relative to Partition Start)
+#define RES_OFFSET_WALLPAPER 0x000000
+#define RES_OFFSET_ICON_WIFI 0x050000
+#define RES_OFFSET_ICON_BRIGHT 0x052000
+#define RES_OFFSET_ICON_COLORWHEEL 0x054000
+#define RES_OFFSET_ICON_CONTROL 0x056000
+
 /**
  * @brief Get the source path for an image resource
  *

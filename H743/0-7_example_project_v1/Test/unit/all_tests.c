@@ -23,6 +23,7 @@
 #include "flash_test.h"
 #include "norflash_test.h"
 #include "lfs_test.h"
+#include "res_test.h"
 
 void run_all_tests(void) {
 
@@ -86,7 +87,9 @@ void run_all_tests(void) {
   lfs_integration_test();
 #endif
 
-
+#if _res_test_
+  res_test();
+#endif
 
 }
 #else
