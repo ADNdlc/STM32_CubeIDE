@@ -47,6 +47,19 @@ int sys_services_init(void) {
   net_mgr_init();   // 初始化网络管理器
 #endif
 
+#if !CONFIG_RES_BURN_ENABLE
+  // 切换到内存映射模式以实现零拷贝资源访问
+  w25q_adapter_t *qspi_adapter = (w25q_adapter_t *)dev->adapter;
+  if (dev && dev->adapter &&
+      qspi_adapter->ops->memory_mapped) { // 需要先确定adapter有这个接口
+    if (qspi_adapter->ops->memory_mapped(qspi_adapter) != 0) {
+      log_e("Failed to enter QSPI memory mapped mode");
+      return -1;
+    }
+    log_i("System switched to QSPI XIP mode.");
+  }
+#endif
+
   log_i("System services initialization completed.");
   return 0;
 }

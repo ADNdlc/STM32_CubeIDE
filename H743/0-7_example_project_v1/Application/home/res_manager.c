@@ -6,19 +6,30 @@
 
 typedef struct {
   res_id_t id;
-  const char *path;
+  uint32_t offset;
+  uint32_t size;
   const char *desc;
 } res_map_t;
 
+// QSPI Base Address for XIP (Typically 0x90000000)
+#define QSPI_MAP_ADDR 0x90000000
+
+// Resource Partition Offset (e.g. 1MB reserved for boot/config)
+#define RES_PARTITION_OFFSET 0x100000
+
 static const res_map_t res_table[] = {
-    {RES_IMG_WALLPAPER, "L:home/wallpaper.bin", "Wallpaper"},
-    {RES_IMG_ICON_WIFI, "L:sys/wifi.bin", "WiFi Icon"},
-    {RES_IMG_ICON_BRIGHT, "L:sys/bright.bin", "Brightness Icon"},
-    {RES_IMG_ICON_COLORWHEEL, "L:apps/colorwheel.bin", "Colorwheel Icon"},
-    {RES_IMG_ICON_CONTROL, "L:apps/control.bin", "Control Icon"},
+    // Offset calculation: previous_offset + previous_size (aligned to 4 bytes
+    // ideally)
+    // Note: These need to match exactly with res_burner.c's write logic
+    {RES_IMG_WALLPAPER, 0x000000, 307200 + 4,
+     "Wallpaper"}, // 480*320*2 + 4 header
+    {RES_IMG_ICON_WIFI, 0x050000, 5000 + 4, "WiFi Icon"}, // Placeholder size
+    {RES_IMG_ICON_BRIGHT, 0x052000, 5000 + 4, "Brightness Icon"},
+    {RES_IMG_ICON_COLORWHEEL, 0x054000, 5000 + 4, "Colorwheel Icon"},
+    {RES_IMG_ICON_CONTROL, 0x056000, 5000 + 4, "Control Icon"},
 };
 
-const char *res_get_src(res_id_t id) {
+const void *res_get_src(res_id_t id) {
   if (id >= RES_IMG_COUNT) {
     log_e("Invalid Resource ID: %d", id);
     return NULL;
@@ -26,8 +37,10 @@ const char *res_get_src(res_id_t id) {
 
   for (size_t i = 0; i < sizeof(res_table) / sizeof(res_table[0]); i++) {
     if (res_table[i].id == id) {
-      log_d("Loading resource: %s (%s)", res_table[i].desc, res_table[i].path);
-      return res_table[i].path;
+      uint32_t addr =
+          QSPI_MAP_ADDR + RES_PARTITION_OFFSET + res_table[i].offset;
+      log_d("Loading resource: %s (Addr: 0x%08X)", res_table[i].desc, addr);
+      return (const void *)addr;
     }
   }
 

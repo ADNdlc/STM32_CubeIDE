@@ -44,7 +44,7 @@ int app_init(void) {
   }
 #endif
 
-#if LVGL_ENABLE && !CONFIG_RES_BURN_ENABLE
+#if LVGL_ENABLE && LVGL_UI_START && !CONFIG_RES_BURN_ENABLE
 #if USE_OLD_UI
   act_manager_init(); // 旧ui入口
   log_i("Old UI initialized");

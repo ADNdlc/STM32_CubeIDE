@@ -21,6 +21,6 @@ typedef enum {
  * @param id Resource ID
  * @return const char* LVGL source path (e.g. "L:home/wallpaper.bin")
  */
-const char *res_get_src(res_id_t id);
+const void *res_get_src(res_id_t id);
 
 #endif /* APPLICATION_HOME_RES_MANAGER_H_ */

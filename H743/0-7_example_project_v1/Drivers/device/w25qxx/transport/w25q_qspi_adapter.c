@@ -1,10 +1,11 @@
 #include "w25q_qspi_adapter.h"
-#include "../../../interface/qspi_driver.h" // Ensure visibility of generic enums
-#include "elog.h"
+#include "qspi_driver.h"
+#include "stm32h7xx_hal.h"
 #include "sys.h"
-#include <stdlib.h>
 
 #define LOG_TAG "W25Q_QSPI"
+#include "elog.h"
+#include <stdlib.h>
 
 #define W25Q_QSPI_MEMSOURCE SYS_MEM_INTERNAL
 
@@ -234,6 +235,33 @@ static int _qspi_exit_4byte_addr_mode(w25q_adapter_t *self) {
   if (QSPI_COMMAND(impl->driver, &cmd, 100) != 0)
     return -1;
   impl->addr_size = QSPI_ADDR_24_BITS;
+  return 0;
+}
+
+static int _qspi_memory_mapped(w25q_adapter_t *self) {
+  w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
+  qspi_command_t cmd = {0};
+
+  // 配置四线IO读命令 (Fast Read Quad I/O - EB h)
+  cmd.instruction = 0xEB; // Fast Read Quad I/O
+  cmd.instruction_mode = QSPI_MODE_1_LINE;
+  cmd.address_mode = QSPI_MODE_4_LINES;
+  cmd.address_size =
+      QSPI_ADDR_24_BITS; // 假定3字节地址，如果是大容量Flash需要兼容这里
+  cmd.alternate_byte_mode = QSPI_MODE_4_LINES;
+  cmd.alternate_byte = 0; // M7-M0 = 0 (Continuous Read Mode Off)
+  cmd.dummy_cycles = 6;   // 4 dummy cycles + 2 alternate bytes = 6 cycles total
+                          // latency context dependent
+  cmd.data_mode = QSPI_MODE_4_LINES;
+  cmd.data_size = 0; // 内存映射模式不需要指定数据长度
+
+  // 调用驱动层接口进入内存映射模式
+  if (QSPI_MEMORY_MAPPED(impl->driver, &cmd) != 0) {
+    log_e("Failed to enter memory mapped mode");
+    return -1;
+  }
+
+  log_d("Entered Memory Mapped Mode (XIP)");
   return 0;
 }
 
