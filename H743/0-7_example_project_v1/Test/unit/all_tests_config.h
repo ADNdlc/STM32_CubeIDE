@@ -25,7 +25,7 @@
 #define _rtc_test_ 0
 #define _wifi_test_ 0
 #define _flash_test_ 0
-#define _lfs_test_ 0
+#define _lfs_test_ 1
 #define _norflash_test_ 0
 
 // 运行所有测试用例

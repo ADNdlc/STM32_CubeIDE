@@ -17,24 +17,6 @@ int sys_services_init(void) {
   /* 存储和文件系统 */
   flash_handler_init(); // 初始化 Flash 管理器
 
-  block_device_t *dev =
-      flash_factory_get(FLASH_EXT_QSPI); // 获取外部 QSPI Flash 设备
-  if (dev == NULL) {
-    log_e("Failed to get QSPI Flash device from factory");
-    return -1;
-  }
-
-  flash_strategy_t *lfs_strat = lfs_strategy_create(); // 创建 LittleFS 策略
-  if (lfs_strat == NULL) {
-    log_e("Failed to create LittleFS strategy");
-    return -1;
-  }
-
-  if (flash_handler_register("/lfs", dev, lfs_strat) !=
-      0) { // 使用 LittleFS策略 和 QSPI Flash设备 注册 /lfs 挂载点
-    log_e("Failed to register /lfs mount point");
-    return -1;
-  }
 
   /* lvgl文件系统初始化 */
 #if LVGL_FS_INIT && !CONFIG_RES_BURN_ENABLE

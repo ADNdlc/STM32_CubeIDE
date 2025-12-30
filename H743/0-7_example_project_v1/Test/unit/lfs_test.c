@@ -7,11 +7,10 @@
 #include "sys.h"
 #include <string.h>
 
-
 #define LOG_TAG "LFS_TEST"
 
 void lfs_integration_test(void) {
-  log_i("Starting LittleFS Integration Test...");
+  log_a("Starting LittleFS Integration Test...");
 
   // 1. Initialize Handler
   flash_handler_init();
@@ -24,7 +23,14 @@ void lfs_integration_test(void) {
   }
 
   // 3. Create LittleFS Strategy
-  flash_strategy_t *lfs_strat = lfs_strategy_create();
+  lfs_strategy_config_t lfs_cfg = {
+      .read_size = 16,
+      .prog_size = 16,
+      .cache_size = 256,
+      .lookahead_size = 32,
+      .block_cycles = 200,
+  };
+  flash_strategy_t *lfs_strat = lfs_strategy_create(&lfs_cfg);
   if (!lfs_strat) {
     log_e("LFS Strategy Create Failed");
     return;
@@ -39,9 +45,9 @@ void lfs_integration_test(void) {
   // 5. Initialize LVGL FS Bridge
   lv_port_fs_init();
 
-  // 6. Test Resource Manager
-  const char *img_path = res_get_src(RES_IMG_WALLPAPER);
-  log_i("Resource Manager verify: ID=RES_IMG_WALLPAPER, Path=%s", img_path);
+  // 6. Test Resource Manager 没有烧录资源暂不测试
+  // const char *img_path = res_get_src(RES_IMG_WALLPAPER);
+  // log_i("Resource Manager verify: ID=RES_IMG_WALLPAPER, Path=%s", img_path);
 
   // 7. Data Persistence Test
   const char *test_path = "/lfs/test.txt";

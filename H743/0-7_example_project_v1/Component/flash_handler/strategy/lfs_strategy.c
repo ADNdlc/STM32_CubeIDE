@@ -14,6 +14,7 @@ typedef struct {
   flash_strategy_t parent;
   lfs_t lfs;
   struct lfs_config cfg;
+  lfs_strategy_config_t user_config;
   bool mounted;
 } lfs_strategy_impl_t;
 
@@ -64,7 +65,7 @@ static int _lfs_mount(flash_strategy_t *self, block_device_t *dev) {
 
   // 2. Setup LittleFS config
   block_dev_info_t info;
-  BLOCK_DEV_GET_INFO(dev, &info);
+  BLOCK_DEV_GET_INFO(dev, &info); // 获取设备信息
 
   memset(&impl->cfg, 0, sizeof(impl->cfg));
   impl->cfg.context = impl;
@@ -73,13 +74,52 @@ static int _lfs_mount(flash_strategy_t *self, block_device_t *dev) {
   impl->cfg.erase = _lfs_bd_erase;
   impl->cfg.sync = _lfs_bd_sync;
 
-  impl->cfg.read_size = 16;
-  impl->cfg.prog_size = 16;
+  // 应该根据设备信息动态设置
+  // Read size
+  if (impl->user_config.read_size > 0) {
+    impl->cfg.read_size = impl->user_config.read_size;
+  } else if (info.read_unit > 0) {
+    impl->cfg.read_size = info.read_unit;
+  } else {
+    impl->cfg.read_size = 1;
+  }
+
+  // Prog size
+  if (impl->user_config.prog_size > 0) {
+    impl->cfg.prog_size = impl->user_config.prog_size;
+  } else if (info.prog_unit > 0) {
+    impl->cfg.prog_size = info.prog_unit;
+  } else {
+    impl->cfg.prog_size = 1;
+  }
+
   impl->cfg.block_size = info.sector_size;
   impl->cfg.block_count = info.capacity / info.sector_size;
-  impl->cfg.cache_size = 256;
-  impl->cfg.lookahead_size = 32;
-  impl->cfg.block_cycles = 500;
+
+  // Cache size
+  if (impl->user_config.cache_size > 0) {
+    impl->cfg.cache_size = impl->user_config.cache_size;
+  } else {
+    // Default cache size logic:
+    // Ensure at least enough to cache one prog_size or read_size, usually 256
+    // or multiple of prog_size
+    impl->cfg.cache_size =
+        (impl->cfg.prog_size > 256) ? impl->cfg.prog_size : 256;
+  }
+
+  // Lookahead size
+  if (impl->user_config.lookahead_size > 0) {
+    impl->cfg.lookahead_size = impl->user_config.lookahead_size;
+  } else {
+    impl->cfg.lookahead_size = 32;
+  }
+
+  // Block cycles
+  if (impl->user_config.block_cycles > 0) {
+    impl->cfg.block_cycles = impl->user_config.block_cycles;
+  } else {
+    impl->cfg.block_cycles = 500;
+  }
 
   // 3. Mount
   int err = lfs_mount(&impl->lfs, &impl->cfg);
@@ -177,12 +217,15 @@ static const flash_strategy_ops_t lfs_ops = {
     .write = _lfs_write,
 };
 
-flash_strategy_t *lfs_strategy_create(void) {
+flash_strategy_t *lfs_strategy_create(const lfs_strategy_config_t *config) {
   lfs_strategy_impl_t *impl = (lfs_strategy_impl_t *)sys_malloc(
       LFS_STRATEGY_MEMSOURCE, sizeof(lfs_strategy_impl_t));
   if (impl) {
     memset(impl, 0, sizeof(lfs_strategy_impl_t));
     impl->parent.ops = &lfs_ops;
+    if (config) {
+      memcpy(&impl->user_config, config, sizeof(lfs_strategy_config_t));
+    }
     return &impl->parent;
   }
   return NULL;

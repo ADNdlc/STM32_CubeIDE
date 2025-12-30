@@ -102,6 +102,10 @@ static int w25q_init(block_device_t *const self) {
   dev->info.block_size = 64 * 1024;
   dev->info.sector_size = 4 * 1024;
   dev->info.page_size = 256;
+  dev->info.prog_unit =
+      1; // NOR Flash can technically program byte by byte (though page is more
+         // efficient, LFS handles this via prog_size)
+  dev->info.read_unit = 1; // NOR Flash can read byte by byte
   dev->info.erase_value = 0xFF;
 
   // 4. Handle 4-byte address mode for capacity > 16MB (W25Q256 and above)

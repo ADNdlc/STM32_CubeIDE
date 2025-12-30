@@ -12,12 +12,13 @@
 /**
  * @brief Block Device 定义
  */
-typedef struct
-{
+typedef struct {
   uint32_t capacity;    // 容量(bytes)
   uint32_t block_size;  // 擦除块大小(bytes)
-  uint32_t page_size;   // 页大小(bytes)
-  uint32_t sector_size; // 扇区大小(block)
+  uint32_t page_size;   // 物理页大小 (bytes)
+  uint32_t prog_unit;   // 最小编程单元 (bytes) e.g. NAND=2048, NOR=1/16/256
+  uint32_t read_unit;   // 最小读取单元 (bytes) e.g. NAND=2048, NOR=1
+  uint32_t sector_size; // 物理扇区大小，通常等于 block_size
   uint8_t erase_value;  // 擦除块填充值(通常 0xFF)
 } block_dev_info_t;
 
@@ -26,8 +27,7 @@ typedef struct block_device_t block_device_t;
 /**
  * @brief Block Device 操作
  */
-typedef struct
-{
+typedef struct {
   /**
    * @brief 初始化
    * @return 0 on success, negative on error
@@ -86,8 +86,7 @@ typedef struct
 /**
  * @brief Block Device 基本结构
  */
-struct block_device_t
-{
+struct block_device_t {
   const block_device_ops_t *ops;
   void *user_data;
 };
