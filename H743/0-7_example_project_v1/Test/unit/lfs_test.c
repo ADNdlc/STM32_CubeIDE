@@ -9,26 +9,75 @@
 
 #define LOG_TAG "LFS_TEST"
 
+#define TEST_DEV_QSPI 0
+#define TEST_DEV_NAND 1
+#define TEST_DEV_SELECT TEST_DEV_NAND // Switch here
+
+#if TEST_DEV_SELECT == TEST_DEV_NAND
+#include "../../Drivers/device/mt29f4g08/mt29f4g08.h"
+#include "../../Drivers/device/mt29f4g08/transport/mt29f_fmc_adapter.h"
+// External handle declaration or assume initialized via some mechanism
+extern NAND_HandleTypeDef hnand1;
+#endif
+
 void lfs_integration_test(void) {
   log_a("Starting LittleFS Integration Test...");
 
   // 1. Initialize Handler
   flash_handler_init();
 
+  block_device_t *dev = NULL;
+
+#if TEST_DEV_SELECT == TEST_DEV_QSPI
   // 2. Get Device (QSPI)
-  block_device_t *dev = flash_factory_get(FLASH_EXT_QSPI);
+  dev = flash_factory_get(FLASH_EXT_QSPI);
   if (!dev) {
     log_e("Flash Factory Failed for QSPI");
     return;
   }
+#elif TEST_DEV_SELECT == TEST_DEV_NAND
+  // 2. Get Device (NAND)
+  // Create Adapter with external handle (assuming hnand1 is available from
+  // main)
+  mt29f_adapter_t *nand_adapter = mt29f_fmc_adapter_create(&hnand1);
+  if (!nand_adapter) {
+    log_e("NAND Adapter Create Failed");
+    return;
+  }
+
+  if (nand_adapter->ops->init(nand_adapter) != 0) {
+    log_e("NAND Adapter Init Failed");
+    return;
+  }
+
+  dev = mt29f4g08_create(nand_adapter);
+  if (!dev) {
+    log_e("NAND Device Create Failed");
+    return;
+  }
+
+  if (BLOCK_DEV_INIT(dev) != 0) {
+    log_e("NAND Block Device Init Failed");
+    return;
+  }
+#endif
 
   // 3. Create LittleFS Strategy
+  // Adjust config based on selected device if needed, or use safe defaults
   lfs_strategy_config_t lfs_cfg = {
+#if TEST_DEV_SELECT == TEST_DEV_NAND
+      .read_size = 2048,
+      .prog_size = 2048,
+      .cache_size = 2048,
+      .lookahead_size = 128, // Increase lookahead for larger device
+      .block_cycles = 500,
+#else
       .read_size = 16,
       .prog_size = 16,
       .cache_size = 256,
       .lookahead_size = 32,
       .block_cycles = 200,
+#endif
   };
   flash_strategy_t *lfs_strat = lfs_strategy_create(&lfs_cfg);
   if (!lfs_strat) {
