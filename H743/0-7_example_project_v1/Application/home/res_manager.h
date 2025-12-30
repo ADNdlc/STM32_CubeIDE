@@ -15,12 +15,14 @@ typedef enum {
   RES_IMG_COUNT
 } res_id_t;
 
+// #define RES_USE_INTERNAL_FLASH
+
 /**
  * @brief Get the source path for an image resource
  *
  * @param id Resource ID
- * @return const char* LVGL source path (e.g. "L:home/wallpaper.bin")
+ * @return const void* LVGL source: string path (external) or pointer (internal)
  */
-const char *res_get_src(res_id_t id);
+const void *res_get_src(res_id_t id);
 
 #endif /* APPLICATION_HOME_RES_MANAGER_H_ */
