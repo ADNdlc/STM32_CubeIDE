@@ -7,6 +7,8 @@
 #include "w25qxx/w25qxx.h"
 #include "w25qxx/transport/w25q_qspi_adapter.h"
 #include "w25qxx/transport/w25q_spi_adapter.h"
+#include "mt29f4g08/mt29f4g08.h"
+#include "mt29f4g08/transport/mt29f_fmc_adapter.h"
 #include "elog.h"
 #include <stddef.h>
 
@@ -78,6 +80,33 @@ block_device_t *flash_factory_get(flash_device_id_t id) {
         return NULL;
       }
       log_i("Successfully created W25QXX device with QSPI adapter");
+      
+    } else if (mapping->type == FLASH_TYPE_NAND) {
+      log_d("Creating NAND flash device, NAND ID: %d", mapping->hnand);
+      
+      // 1. Get NAND Driver handle directly from mapping
+      NAND_HandleTypeDef *nand_drv = mapping->hnand;
+      if (!nand_drv) {
+        log_e("Failed to get NAND driver for ID: %d", mapping->hnand);
+        return NULL;
+      }
+
+      // 2. Create adapter directly with NAND driver (no HAL needed)
+      mt29f_adapter_t *adapter = mt29f_fmc_adapter_create(nand_drv);
+      if (!adapter) {
+        log_e("Failed to create NAND adapter");
+        return NULL;
+      }
+      log_i("Successfully created NAND adapter");
+
+      // 3. Create device with adapter
+      flash_devices[id] = mt29f4g08_create(adapter);
+      if (!flash_devices[id]) {
+        log_e("Failed to create MT29F4G08 device with NAND adapter");
+        // Note: Currently there's no destroy function for mt29f_fmc_adapter, assuming it's not needed
+        return NULL;
+      }
+      log_i("Successfully created MT29F4G08 device with NAND adapter");
     } else {
       log_e("Unknown flash type: %d", mapping->type);
       return NULL;

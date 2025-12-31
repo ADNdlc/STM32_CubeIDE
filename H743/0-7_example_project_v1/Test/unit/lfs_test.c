@@ -13,13 +13,6 @@
 #define TEST_DEV_NAND 1
 #define TEST_DEV_SELECT TEST_DEV_NAND // Switch here
 
-#if TEST_DEV_SELECT == TEST_DEV_NAND
-#include "../../Drivers/device/mt29f4g08/mt29f4g08.h"
-#include "../../Drivers/device/mt29f4g08/transport/mt29f_fmc_adapter.h"
-// External handle declaration or assume initialized via some mechanism
-extern NAND_HandleTypeDef hnand1;
-#endif
-
 void lfs_integration_test(void) {
   log_a("Starting LittleFS Integration Test...");
 
@@ -36,28 +29,10 @@ void lfs_integration_test(void) {
     return;
   }
 #elif TEST_DEV_SELECT == TEST_DEV_NAND
-  // 2. Get Device (NAND)
-  // Create Adapter with external handle (assuming hnand1 is available from
-  // main)
-  mt29f_adapter_t *nand_adapter = mt29f_fmc_adapter_create(&hnand1);
-  if (!nand_adapter) {
-    log_e("NAND Adapter Create Failed");
-    return;
-  }
 
-  if (nand_adapter->ops->init(nand_adapter) != 0) {
-    log_e("NAND Adapter Init Failed");
-    return;
-  }
-
-  dev = mt29f4g08_create(nand_adapter);
+  dev = flash_factory_get(FLASH_EXT_NAND);
   if (!dev) {
-    log_e("NAND Device Create Failed");
-    return;
-  }
-
-  if (BLOCK_DEV_INIT(dev) != 0) {
-    log_e("NAND Block Device Init Failed");
+    log_e("Flash Factory Failed for NAND");
     return;
   }
 #endif

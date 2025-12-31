@@ -82,4 +82,6 @@ const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES] = {
 // Flash 设备映射表定义
 const flash_mapping_t flash_mappings[FLASH_MAX_DEVICES] = {
     [FLASH_EXT_SPI] = {.type = FLASH_TYPE_SPI, .spi_id = SPI_1},
-    [FLASH_EXT_QSPI] = {.type = FLASH_TYPE_QSPI, .qspi_id = QSPI_1}};
+    [FLASH_EXT_QSPI] = {.type = FLASH_TYPE_QSPI, .qspi_id = QSPI_1},
+    [FLASH_EXT_NAND] = {.type = FLASH_TYPE_NAND, .hnand = &hnand1}  // 更新为NAND_FMC_1
+};
