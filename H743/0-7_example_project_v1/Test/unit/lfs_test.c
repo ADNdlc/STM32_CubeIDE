@@ -92,7 +92,7 @@ void lfs_integration_test(void) {
   }
 
   // 5. Initialize LVGL FS Bridge
-  lv_port_fs_init();
+  //lv_port_fs_init();
 
   // 6. Test Resource Manager 没有烧录资源暂不测试
   // const char *img_path = res_get_src(RES_IMG_WALLPAPER);

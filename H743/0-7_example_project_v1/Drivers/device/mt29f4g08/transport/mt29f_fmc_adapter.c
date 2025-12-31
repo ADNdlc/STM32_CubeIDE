@@ -19,18 +19,28 @@ static int _fmc_reset(mt29f_adapter_t *self) {
   if (HAL_NAND_Reset(impl->hnand) != HAL_OK) {
     return -1;
   }
+  // Add delay like old driver (100ms after reset)
+  HAL_Delay(100);
   return 0;
 }
 
 static int _fmc_read_id(mt29f_adapter_t *self, uint32_t *id) {
   mt29f_fmc_adapter_impl_t *impl = (mt29f_fmc_adapter_impl_t *)self;
   NAND_IDTypeDef nand_id;
+
+  // Read ID using HAL
   if (HAL_NAND_Read_ID(impl->hnand, &nand_id) != HAL_OK) {
     return -1;
   }
-  // Pack ID: Maker | Device | 3rd | 4th
-  *id = (nand_id.Maker_Id << 24) | (nand_id.Device_Id << 16) |
-        (nand_id.Third_Id << 8) | (nand_id.Fourth_Id);
+
+  // Pack ID like old driver: Skip Maker_Id (0x2C for Micron), use remaining 4
+  // bytes Old driver: id = deviceid[1]<<24 | deviceid[2]<<16 | deviceid[3]<<8 |
+  // deviceid[4]
+  *id = ((uint32_t)nand_id.Device_Id << 24) |
+        ((uint32_t)nand_id.Third_Id << 16) | ((uint32_t)nand_id.Fourth_Id << 8);
+  // Note: HAL_NAND_Read_ID only returns 4 bytes in NAND_IDTypeDef
+  // We might be missing the 5th byte, but this should match the pattern
+
   return 0;
 }
 
