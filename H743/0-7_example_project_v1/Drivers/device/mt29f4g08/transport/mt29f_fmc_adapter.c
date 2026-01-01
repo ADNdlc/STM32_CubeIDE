@@ -44,57 +44,28 @@ static int _fmc_read_id(mt29f_adapter_t *self, uint32_t *id) {
   return 0;
 }
 
+#include "elog.h"
+#define LOG_TAG "FMC_ADP"
+
 static int _fmc_read_page(mt29f_adapter_t *self, uint32_t page, uint32_t col,
                           uint8_t *buf, size_t size) {
   mt29f_fmc_adapter_impl_t *impl = (mt29f_fmc_adapter_impl_t *)self;
   NAND_AddressTypeDef addr;
-  addr.Page = page;
-  addr.Plane = 0; // Assuming 1 plane or handled by HAL
-  addr.Block = 0; // Page address usually includes block info in HAL_NAND logic?
-                  // Wait, HAL_NAND_Read_Page_8b takes Address struct which has
-                  // Block, Page, Plane. My interface passed 'page' as absolute
-                  // linear page index or Row Address? In mt29f4g08.c I passed
-                  // row_addr (Page + Block*PagesPerBlock). For
-                  // HAL_NAND_Read_Page_8b, we need to split it.
-
-  // Geometry Constants (should match mt29f4g08.c or be passed in config)
-  // MT29F4G08: 0x1000 blocks, 64 pages per block
   const uint32_t PAGES_PER_BLOCK = 64;
-
+  //log_i("Unsupported read: page=%d, col=%d, size=%d", page, col, size);
   addr.Block = page / PAGES_PER_BLOCK;
   addr.Page = page % PAGES_PER_BLOCK;
-  addr.Plane = 0;
+  addr.Plane = (addr.Block >= 2048) ? 1 : 0;
+  if (addr.Plane == 1)
+    addr.Block -= 2048;
 
-  // Column address is usually handled inside HAL if it supports partial read?
-  // HAL_NAND_Read_Page_8b reads the WHOLE page?
-  // Checking STM32 HAL: HAL_NAND_Read_Page_8b(NAND_HandleTypeDef *hnand,
-  // NAND_AddressTypeDef *pAddress, uint8_t *pBuffer, uint32_t NumPageToRead) It
-  // reads whole pages. It does NOT support column offset directly in the high
-  // level API. If we want column offset, we might need low level API or read
-  // whole page and copy. For simplicity, let's read the whole page into a temp
-  // buffer if necessary, or assume aligned full page read. However, LFS often
-  // reads small chunks? Yes, LFS tests (and my test) set read_unit = 2048 (Page
-  // Size). So LFS will likely read full pages. My mt29f_read implementation in
-  // mt29f4g08.c logic: It loops and calls read_page(..., col, ..., chunk). If
-  // col != 0 or chunk != 2048, we have a problem with standard
-  // HAL_NAND_Read_Page. WE MUST SUPPORT PARTIAL READ if we exposd
-  // read_unit=2048? No, if read_unit is 2048, LFS only requests aligned full
-  // blocks? LFS "read_size" config: "Minimum size of a block read". If we set
-  // it to 2048, LFS should respect it. BUT, checks in `mt29f_read` handled
-  // offset.
-
-  // Let's assume for now we only support full page reads aligned to 0.
   if (col != 0 || size != 2048) {
-    // Fallback: Read full page to temp buffer?
-    // Or specific HAL function?
-    // HAL_NAND_Read_SpareArea exists...
-    // Let's implement full page read requirement for now.
-    // If necessary we can add a temp buffer here but stack usage is high (2KB).
-    // Let's assume aligned for simplicity of prototype, else Error.
+    log_e("Unsupported read: page=%d, col=%d, size=%d", page, col, size);
     return -1;
   }
 
   if (HAL_NAND_Read_Page_8b(impl->hnand, &addr, buf, 1) != HAL_OK) {
+    log_e("HAL_NAND_Read_Page failed: page=%d", page);
     return -1;
   }
   return 0;
@@ -105,15 +76,20 @@ static int _fmc_program_page(mt29f_adapter_t *self, uint32_t page, uint32_t col,
   mt29f_fmc_adapter_impl_t *impl = (mt29f_fmc_adapter_impl_t *)self;
   NAND_AddressTypeDef addr;
   const uint32_t PAGES_PER_BLOCK = 64;
+
   addr.Block = page / PAGES_PER_BLOCK;
   addr.Page = page % PAGES_PER_BLOCK;
-  addr.Plane = 0;
+  addr.Plane = (addr.Block >= 2048) ? 1 : 0;
+  if (addr.Plane == 1)
+    addr.Block -= 2048;
 
   if (col != 0 || size != 2048) {
-    return -1; // Only full page program supported via simple HAL
+    log_e("Unsupported program: page=%d, col=%d, size=%d", page, col, size);
+    return -1;
   }
 
   if (HAL_NAND_Write_Page_8b(impl->hnand, &addr, (uint8_t *)buf, 1) != HAL_OK) {
+    log_e("HAL_NAND_Write_Page failed: page=%d", page);
     return -1;
   }
   return 0;
@@ -124,11 +100,15 @@ static int _fmc_erase_block(mt29f_adapter_t *self, uint32_t row_addr) {
   NAND_AddressTypeDef addr;
   const uint32_t PAGES_PER_BLOCK = 64;
 
-  addr.Block = row_addr / PAGES_PER_BLOCK;
-  addr.Page = 0; // Erase is block level
-  addr.Plane = 0;
+  uint32_t block_idx = row_addr / PAGES_PER_BLOCK;
+  addr.Block = block_idx;
+  addr.Page = 0;
+  addr.Plane = (addr.Block >= 2048) ? 1 : 0;
+  if (addr.Plane == 1)
+    addr.Block -= 2048;
 
   if (HAL_NAND_Erase_Block(impl->hnand, &addr) != HAL_OK) {
+    log_e("HAL_NAND_Erase_Block failed: block=%d", block_idx);
     return -1;
   }
   return 0;

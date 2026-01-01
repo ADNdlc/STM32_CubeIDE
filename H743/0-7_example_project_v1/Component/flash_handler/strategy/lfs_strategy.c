@@ -11,9 +11,9 @@
 #define LFS_STRATEGY_MEMSOURCE SYS_MEM_INTERNAL
 
 typedef struct {
-  flash_strategy_t parent;
-  lfs_t lfs;
-  struct lfs_config cfg;
+  flash_strategy_t parent;  // 策略接口
+  lfs_t lfs;                // LittleFS 实例
+  struct lfs_config cfg;    // LittleFS 配置
   lfs_strategy_config_t user_config;
   bool mounted;
 } lfs_strategy_impl_t;

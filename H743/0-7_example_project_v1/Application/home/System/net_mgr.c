@@ -3,6 +3,7 @@
 #include "device/esp_8266/esp8266_wifi_driver.h"
 #include "device_mapping.h"
 #include "gpio_factory.h"
+#include "sys_config.h"
 #include "sys_state.h"
 #include "uart_queue/uart_queue.h"
 #include "usart_factory.h"
@@ -21,10 +22,6 @@ static uart_queue_t g_at_queue;
 static at_controller_t g_at_ctrl;
 static esp8266_wifi_driver_t g_esp_drv;
 static wifi_service_t g_wifi_svc;
-
-// SSID/PWD (In a real app, these come from NVS or Config)
-#define DEFAULT_SSID "test1"
-#define DEFAULT_PWD "yu12345678"
 
 static bool g_wifi_target_state = false;
 
@@ -92,8 +89,9 @@ void net_mgr_wifi_enable(bool enable) {
 
   if (enable) {
     log_i("WiFi enabling requested...");
+    const sys_config_t *cfg = sys_config_get();
     wifi_svc_set_mode(&g_wifi_svc, WIFI_MODE_STATION);
-    wifi_svc_connect(&g_wifi_svc, DEFAULT_SSID, DEFAULT_PWD);
+    wifi_svc_connect(&g_wifi_svc, cfg->net.ssid, cfg->net.password);
   } else {
     log_i("WiFi disabling requested...");
     wifi_svc_disconnect(&g_wifi_svc);

@@ -13,10 +13,9 @@ typedef struct
   int (*mount)(flash_strategy_t *self, block_device_t *dev); // 挂载设备
   int (*unmount)(flash_strategy_t *self);                    // 卸载设备
   int (*read)(flash_strategy_t *self, const char *path, uint32_t offset,
-              uint8_t *buf, size_t size);         // 直接读取数据
+              uint8_t *buf, size_t size);
   int (*write)(flash_strategy_t *self, const char *path, uint32_t offset,
-               const uint8_t *buf, size_t size);  // 直接写入数据(字节串)
-  // Add open/close/etc if full FS is needed, but for now generic read/write
+               const uint8_t *buf, size_t size);
 } flash_strategy_ops_t;
 
 /**

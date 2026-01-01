@@ -4,7 +4,7 @@
 
 #define LOG_TAG "RES_MGR"
 
-#define RES_USE_INTERNAL_FLASH 1		// 将资源数据编译到片上
+#define RES_USE_INTERNAL_FLASH 1		// 将资源数据编译到片上flash
 
 #if RES_USE_INTERNAL_FLASH
 #include "lvgl.h"

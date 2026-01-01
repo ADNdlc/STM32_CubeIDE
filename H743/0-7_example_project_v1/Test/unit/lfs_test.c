@@ -54,6 +54,9 @@ void lfs_integration_test(void) {
       .block_cycles = 200,
 #endif
   };
+  log_i("LFS Config: Read=%d, Prog=%d, Cache=%d, Lookahead=%d, Cycles=%d",
+       lfs_cfg.read_size, lfs_cfg.prog_size, lfs_cfg.cache_size,
+       lfs_cfg.lookahead_size, lfs_cfg.block_cycles);
   flash_strategy_t *lfs_strat = lfs_strategy_create(&lfs_cfg);
   if (!lfs_strat) {
     log_e("LFS Strategy Create Failed");
