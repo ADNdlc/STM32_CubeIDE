@@ -95,8 +95,8 @@ void net_mgr_init(void) {
   wifi_service_register_callback(&g_wifi_svc, wifi_event_handler, NULL);
 
 //  // 6. 初始化MQTT驱动与服务
-//  esp8266_mqtt_driver_init(&g_mqtt_drv, &g_at_ctrl);
-//  mqtt_svc_init(&g_mqtt_svc, (mqtt_driver_t *)&g_mqtt_drv, &g_onenet_adapter);
+  esp8266_mqtt_driver_init(&g_mqtt_drv, &g_at_ctrl);
+  mqtt_svc_init(&g_mqtt_svc, (mqtt_driver_t *)&g_mqtt_drv, &g_onenet_adapter);
 
   log_i("Network Manager initialized successfully");
 }

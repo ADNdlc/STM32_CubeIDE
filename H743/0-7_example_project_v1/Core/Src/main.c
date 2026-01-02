@@ -23,7 +23,6 @@
 #include "ltdc.h"
 #include "quadspi.h"
 #include "rtc.h"
-#include "sdmmc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -99,7 +98,6 @@ int main(void)
   PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  HAL_Delay(200);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -110,7 +108,6 @@ int main(void)
   MX_LTDC_Init();
   MX_DMA2D_Init();
   MX_TIM6_Init();
-  MX_SDMMC1_SD_Init();
   MX_RTC_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
@@ -122,11 +119,13 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+  GPIOB->ODR ^= (1<<0);
+  GPIOB->ODR ^= (1<<1);
+  HAL_Delay(300);
 
+  /* ----- 业务代码 ----- */
   hal_init(); // HAL初始化(绑定平台实现)
-
   app_init(); // 应用初始化
-
   // module testing
   run_all_tests(); // 运行所有开启的单元测试
 
@@ -257,6 +256,10 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1) {
+	GPIOB->ODR ^= (1<<0);	// PB0
+	for(__IO int i=0; i<100000; i++){
+		for(__IO int j=0; j<1000; j++){}
+	}
   }
   /* USER CODE END Error_Handler_Debug */
 }
