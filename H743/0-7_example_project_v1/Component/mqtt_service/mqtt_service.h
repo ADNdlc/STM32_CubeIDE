@@ -1,11 +1,10 @@
 #ifndef COMPONENT_MQTT_SERVICE_MQTT_SERVICE_H_
 #define COMPONENT_MQTT_SERVICE_MQTT_SERVICE_H_
 
-#include "device/esp_8266/at_controller.h"
+#include "mqtt_driver.h"
 #include "mqtt_adapter.h"
 #include <stdbool.h>
 #include <stdint.h>
-
 
 /**
  * @brief MQTT Service States
@@ -21,7 +20,7 @@ typedef enum {
  * @brief MQTT Service Object
  */
 typedef struct {
-  at_controller_t *at_ctrl;
+  mqtt_driver_t *drv;
   const mqtt_adapter_t *adapter;
   mqtt_svc_state_t state;
 
@@ -33,7 +32,7 @@ typedef struct {
 /**
  * @brief Initialize MQTT Service
  */
-void mqtt_svc_init(mqtt_service_t *self, at_controller_t *at_ctrl,
+void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv,
                    const mqtt_adapter_t *adapter);
 
 /**

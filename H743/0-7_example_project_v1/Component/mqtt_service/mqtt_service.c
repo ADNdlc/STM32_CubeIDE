@@ -6,101 +6,94 @@
 #define LOG_TAG "MQTT_SVC"
 #include "elog.h"
 
-// --- URC Handlers ---
-static void handle_mqtt_connected(void *ctx, const char *line) {
-  mqtt_service_t *self = (mqtt_service_t *)ctx;
-  self->state = MQTT_SVC_STATE_CONNECTED;
-  log_i("MQTT Connected to broker.");
-}
+// --- Local Event Handler for Driver Events ---
+static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
+  mqtt_service_t *self = (mqtt_service_t *)arg;
 
-static void handle_mqtt_disconnected(void *ctx, const char *line) {
-  mqtt_service_t *self = (mqtt_service_t *)ctx;
-  self->state = MQTT_SVC_STATE_DISCONNECTED;
-  log_w("MQTT Disconnected.");
-}
+  switch (event->type) {
+  case MQTT_DRV_EVENT_CONNECTED:
+    self->state = MQTT_SVC_STATE_CONNECTED;
+    log_i("Service: MQTT Connected.");
+    // Here we could auto-subscribe to topics if needed
+    break;
 
-static void handle_mqtt_msg_recv(void *ctx, const char *line) {
-  mqtt_service_t *self = (mqtt_service_t *)ctx;
-  char prop_id[32];
-  thing_value_t val;
-  char msg_id[32];
+  case MQTT_DRV_EVENT_DISCONNECTED:
+    self->state = MQTT_SVC_STATE_DISCONNECTED;
+    log_w("Service: MQTT Disconnected.");
+    break;
 
-  // Parse using platform adapter
-  if (self->adapter &&
-      self->adapter->parse_command(line, prop_id, &val, msg_id) == 0) {
-    log_i("Received command: %s", prop_id);
+  case MQTT_DRV_EVENT_DATA: {
+    log_i("Service: Data received on topic %s", event->topic);
 
-    // Find device (assuming single device for now or getting from context)
-    // In this architecture, net_mgr will coordinate this.
-    // For now, we update the first device in thing_model or similar.
-    // Better: adapter should handle which device it is based on topic.
+    char prop_id[32];
+    thing_value_t val;
+    char msg_id[32];
 
-    // thing_model_set_prop(..., prop_id, val, 1 /* Source: Cloud */);
+    if (self->adapter && self->adapter->parse_command(event->payload, prop_id,
+                                                      &val, msg_id) == 0) {
+      // Find device and update property
+      // For simplified demo, we assume the first device or derive device from
+      // topic thing_model_set_prop("TBD", prop_id, val, 1 /* Source: Cloud */);
 
-    // Reply if needed
-    char reply_topic[128];
-    char reply_payload[256];
-    self->adapter->get_reply_topic("TBD", reply_topic, sizeof(reply_topic));
-    self->adapter->get_reply_payload(msg_id, 200, reply_payload,
-                                     sizeof(reply_payload));
+      // Cloud Reply (Safe & Generic)
+      char reply_topic[128];
+      char reply_payload[256];
+      self->adapter->get_reply_topic("TBD", reply_topic, sizeof(reply_topic));
+      self->adapter->get_reply_payload(msg_id, 200, reply_payload,
+                                       sizeof(reply_payload));
 
-    // Submit publish command for reply
-    // AT+MQTTPUB=0,"topic","payload",0,0
+      MQTT_DRV_PUBLISH(self->drv, reply_topic, reply_payload, 0);
+    }
+    break;
+  }
   }
 }
 
-void mqtt_svc_init(mqtt_service_t *self, at_controller_t *at_ctrl,
+void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv,
                    const mqtt_adapter_t *adapter) {
   memset(self, 0, sizeof(mqtt_service_t));
-  self->at_ctrl = at_ctrl;
+  self->drv = drv;
   self->adapter = adapter;
   self->state = MQTT_SVC_STATE_DISCONNECTED;
 
-  // Register URCs
-  at_controller_register_handler(at_ctrl, "+MQTTCONNECTED",
-                                 handle_mqtt_connected, self);
-  at_controller_register_handler(at_ctrl, "+MQTTDISCONNECTED",
-                                 handle_mqtt_disconnected, self);
-  at_controller_register_handler(at_ctrl, "+MQTTSUBRECV", handle_mqtt_msg_recv,
-                                 self);
+  // Wire up the driver events to the service
+  if (self->drv) {
+    MQTT_DRV_SET_CB(self->drv, mqtt_drv_event_handler, self);
+  }
 }
 
 int mqtt_svc_connect(mqtt_service_t *self) {
-  if (!self->adapter || !self->at_ctrl)
+  if (!self->drv || !self->adapter)
     return -1;
 
   mqtt_conn_params_t params;
   self->adapter->get_conn_params(&params);
 
-  char cmd[512];
-
-  // 1. Configure User
-  // AT+MQTTUSERCFG=0,1,"client_id","user","pwd",0,0,""
-  snprintf(cmd, sizeof(cmd),
-           "AT+MQTTUSERCFG=0,1,\"%s\",\"%s\",\"%s\",0,0,\"\"\r\n",
-           params.client_id, params.username, params.password);
-  AT_Cmd_t user_cmd = {.cmd_str = cmd, .timeout_ms = 5000};
-  at_controller_submit_cmd(self->at_ctrl, &user_cmd);
-
-  // 2. Connect
-  // AT+MQTTCONN=0,"host",port,0
-  snprintf(cmd, sizeof(cmd), "AT+MQTTCONN=0,\"%s\",%d,0\r\n", params.host,
-           params.port);
-  AT_Cmd_t conn_cmd = {.cmd_str = cmd, .timeout_ms = 10000};
-  at_controller_submit_cmd(self->at_ctrl, &conn_cmd);
+  mqtt_driver_conn_params_t drv_params = {.host = params.host,
+                                          .port = params.port,
+                                          .client_id = params.client_id,
+                                          .username = params.username,
+                                          .password = params.password,
+                                          .keepalive = 120};
 
   self->state = MQTT_SVC_STATE_CONNECTING;
-  return 0;
+  return MQTT_DRV_CONNECT(self->drv, &drv_params);
+}
+
+int mqtt_svc_disconnect(mqtt_service_t *self) {
+  if (!self->drv)
+    return -1;
+  return MQTT_DRV_DISCONNECT(self->drv);
 }
 
 void mqtt_svc_process(mqtt_service_t *self) {
-  // Simple reconnection logic could go here
+  // Reconnection logic could be added here
 }
 
 int mqtt_svc_publish_property(mqtt_service_t *self,
                               const thing_device_t *device,
                               const thing_property_t *prop) {
-  if (self->state != MQTT_SVC_STATE_CONNECTED || !self->adapter)
+  if (self->state != MQTT_SVC_STATE_CONNECTED || !self->drv || !self->adapter)
     return -1;
 
   char topic[128];
@@ -108,12 +101,7 @@ int mqtt_svc_publish_property(mqtt_service_t *self,
   self->adapter->get_post_topic(device->device_id, topic, sizeof(topic));
   self->adapter->serialize_post(device, prop, payload, sizeof(payload));
 
-  char cmd[512];
-  // AT+MQTTPUB=0,"topic","payload",0,0
-  snprintf(cmd, sizeof(cmd), "AT+MQTTPUB=0,\"%s\",\"%s\",0,0\r\n", topic,
-           payload);
-  AT_Cmd_t pub_cmd = {.cmd_str = cmd, .timeout_ms = 5000};
-  return at_controller_submit_cmd(self->at_ctrl, &pub_cmd);
+  return MQTT_DRV_PUBLISH(self->drv, topic, payload, 0);
 }
 
 mqtt_svc_state_t mqtt_svc_get_state(mqtt_service_t *self) {
