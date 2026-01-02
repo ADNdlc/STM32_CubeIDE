@@ -73,7 +73,7 @@ static int drv_connect(mqtt_driver_t *base,
 
   // 密码使用长格式发送(SERCFG长度限制)
   snprintf(cmd, sizeof(cmd),
-           "AT+MQTTLONGPASSWORD=0,\"%s\"\r\n", strlen(params->password));
+           "AT+MQTTLONGPASSWORD=0,\"%d\"\r\n", strlen(params->password));
   AT_Cmd_t pwd_cmd = {.cmd_str = cmd, .data_to_send = params->password, .timeout_ms = 5000};
   if(at_controller_submit_cmd(self->at_ctrl, &pwd_cmd)){
     log_e("Failed to set MQTT password");

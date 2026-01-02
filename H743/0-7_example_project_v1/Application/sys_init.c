@@ -61,21 +61,9 @@ int sys_services_init(void) {
     log_e("LFS Handler Register Failed");
     return -1;
   }
-  
+
   // 4.读取信息验证系统文件完整性
   log_i("System storage mounted at %s", SYS_STORE_MOUNT_POINT);
-  // 读取系统配置文件
-  uint8_t read_buf[64] = {0};
-  const char *sys_cfg_file = SYS_STORE_MOUNT_POINT "/sys_cfg.json";
-  const char *sys_config = "{ \"sys_config\": {} }";
-  if (flash_handler_read(sys_cfg_file, 0, read_buf, sizeof(read_buf) - 1) ==
-      0) {
-    log_i("System config file read successfully:\n%s", read_buf);
-  } else {
-    log_w("System config file not found or read error.");
-    flash_handler_write(sys_cfg_file, 0, sys_config, strlen(sys_config));
-    log_i("Created default system config file.");
-  }
 
   /* lvgl文件系统初始化 */
 #if LVGL_FS_INIT && !CONFIG_RES_BURN_ENABLE

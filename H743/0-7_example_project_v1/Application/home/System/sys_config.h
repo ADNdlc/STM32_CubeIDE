@@ -4,6 +4,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+// Internal storage constants (Bank 2, Sector 7 for STM32H743)
+#define SYS_CFG_INTERNAL_ADDR 0x081E0000
+#define SYS_CFG_MAGIC 0x53434647 // "SCFG" in ASCII
+
 /**
  * @brief Network Configuration
  */
