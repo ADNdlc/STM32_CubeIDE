@@ -129,10 +129,6 @@ void at_controller_init(at_controller_t *self, uart_queue_t *uart,
   at_controller_register_handler(self, "ERROR", handle_final_error, self);
   at_controller_register_handler(self, "SEND FAIL", handle_final_error, self);
 
-  // at_controller_register_handler(self, "+CWMODE:", handle_Rxdata_process);
-  // //wifi at_controller_register_handler(self, "+CIPSNTPTIME:",
-  // handle_Rxdata_process); //SNTP
-
   at_controller_reset_hw(self); // 模块硬重置
 }
 

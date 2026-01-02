@@ -83,8 +83,8 @@ void net_mgr_init(void) {
   usart_hal_t *uart_hal = usart_hal_create(usart_drv); // 创建一个串口
   uart_queue_init(&g_at_queue, uart_hal, at_tx_buf, sizeof(at_tx_buf),
                   at_rx_buf, sizeof(at_rx_buf)); // 初始化UART队列(全局对象)
-  uart_queue_start_receive(
-      &g_at_queue); // 启动接收(异步,不需等待其他模块初始化)
+
+  uart_queue_start_receive(&g_at_queue);
   // 3. 初始化AT控制器
   at_controller_init(&g_at_ctrl, &g_at_queue, rst_gpio);
 
@@ -94,9 +94,9 @@ void net_mgr_init(void) {
   wifi_service_init(&g_wifi_svc, (wifi_driver_t *)&g_esp_drv);
   wifi_service_register_callback(&g_wifi_svc, wifi_event_handler, NULL);
 
-  // 6. 初始化MQTT驱动与服务
-  esp8266_mqtt_driver_init(&g_mqtt_drv, &g_at_ctrl);
-  mqtt_svc_init(&g_mqtt_svc, (mqtt_driver_t *)&g_mqtt_drv, &g_onenet_adapter);
+//  // 6. 初始化MQTT驱动与服务
+//  esp8266_mqtt_driver_init(&g_mqtt_drv, &g_at_ctrl);
+//  mqtt_svc_init(&g_mqtt_svc, (mqtt_driver_t *)&g_mqtt_drv, &g_onenet_adapter);
 
   log_i("Network Manager initialized successfully");
 }
