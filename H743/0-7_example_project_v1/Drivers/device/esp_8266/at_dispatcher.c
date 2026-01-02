@@ -6,8 +6,8 @@
  */
 
 #define LOG_TAG "at_dispatcher"
-#include "../../../EasyLogger/easylogger/inc/elog.h"
-#include "../../SYSTEM/sys.h"
+#include "elog.h"
+#include "sys.h"
 #include "at_controller.h"
 #include <stdio.h>
 #include <string.h>

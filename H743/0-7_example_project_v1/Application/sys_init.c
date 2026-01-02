@@ -24,8 +24,8 @@ int sys_services_init(void) {
 #if !CONFIG_RES_BURN_ENABLE
   /* 存储和文件系统 */
   flash_handler_init(); // 初始化 Flash 管理器
-  // 挂载系统存储
-  // 1.获取设备
+
+  // 1.获取存储设备
   block_device_t *sys_dev = flash_factory_get(SYS_FLASH_DEV);
   if (!sys_dev) {
     log_e("Failed to get system storage device.");
@@ -56,11 +56,12 @@ int sys_services_init(void) {
     return -1;
   }
 
-  // 4. Register Device with /lfs prefix
+  // 3. 注册系统资源挂载点
   if (flash_handler_register(SYS_STORE_MOUNT_POINT, sys_dev, lfs_strat) != 0) {
     log_e("LFS Handler Register Failed");
     return -1;
   }
+  
   // 4.读取信息验证系统文件完整性
   log_i("System storage mounted at %s", SYS_STORE_MOUNT_POINT);
   // 读取系统配置文件

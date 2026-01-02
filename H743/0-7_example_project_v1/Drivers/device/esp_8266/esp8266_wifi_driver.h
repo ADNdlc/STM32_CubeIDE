@@ -7,7 +7,7 @@
 #ifndef DRIVERS_DEVICE_ESP_8266_ESP8266_WIFI_DRIVER_H_
 #define DRIVERS_DEVICE_ESP_8266_ESP8266_WIFI_DRIVER_H_
 
-#include "../../interface/wifi_driver.h"
+#include "wifi_driver.h"
 #include "at_controller.h"
 
 typedef struct {

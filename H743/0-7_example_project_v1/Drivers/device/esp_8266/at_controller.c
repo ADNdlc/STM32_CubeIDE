@@ -10,11 +10,11 @@
 #include <stdio.h>
 #include <string.h>
 
-// 依赖 (使用完整相对路径确保编译环境无关性)
-#include "../../../Component/uart_queue/uart_queue.h"
-#include "../../../EasyLogger/easylogger/inc/elog.h"
-#include "../../SYSTEM/sys.h"
-#include "../../interface/gpio_driver.h"
+// 依赖
+#include "uart_queue/uart_queue.h"
+#include "elog.h"
+#include "sys.h"
+#include "gpio_driver.h"
 
 // --- Internal Prototypes ---
 static void at_controller_reset_hw(at_controller_t *self);

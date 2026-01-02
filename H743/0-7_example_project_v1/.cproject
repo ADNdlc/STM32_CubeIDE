@@ -70,6 +70,8 @@
 									<listOptionValue builtIn="false" value="../Component/lvgl_adapter/port"/>
 									<listOptionValue builtIn="false" value="../Component/flash_handler"/>
 									<listOptionValue builtIn="false" value="../Component/flash_handler/strategy"/>
+									<listOptionValue builtIn="false" value="../Component/wifi_service"/>
+									<listOptionValue builtIn="false" value="../Component/mqtt_service"/>
 									<listOptionValue builtIn="false" value="../Test/unit"/>
 									<listOptionValue builtIn="false" value="../LVGL/lvgl-release-v8.3"/>
 									<listOptionValue builtIn="false" value="../LVGL/lvgl-release-v8.3/demos"/>

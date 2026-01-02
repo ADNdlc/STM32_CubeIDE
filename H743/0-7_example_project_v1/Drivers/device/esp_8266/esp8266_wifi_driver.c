@@ -10,7 +10,7 @@
 #include <string.h>
 
 #define LOG_TAG "esp8266_wifi"
-#include "../../../EasyLogger/easylogger/inc/elog.h"
+#include "elog.h"
 
 // --- Forward Declarations ---
 static int esp8266_set_mode(wifi_driver_t *base, wifi_mode_t mode);

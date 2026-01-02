@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 #define LOG_TAG "THING_MODEL"
 #include "elog.h"
 
@@ -17,7 +16,7 @@ void thing_model_init(void) {
   log_i("Thing Model Manager initialized.");
 }
 
-thing_device_t *thing_model_register(const thing_device_t *template) {
+thing_device_t *thing_model_register(const thing_device_t *tmpl) {
   if (g_device_count >= MAX_THING_DEVICES) {
     log_e("Maximum device count reached.");
     return NULL;
@@ -28,15 +27,15 @@ thing_device_t *thing_model_register(const thing_device_t *template) {
   if (!dev)
     return NULL;
 
-  memcpy(dev, template, sizeof(thing_device_t));
+  memcpy(dev, tmpl, sizeof(thing_device_t));
 
   // Deep copy properties
-  if (template->prop_count > 0) {
-    dev->properties = (thing_property_t *)malloc(sizeof(thing_property_t) *
-                                                 template->prop_count);
+  if (tmpl->prop_count > 0) {
+    dev->properties =
+        (thing_property_t *)malloc(sizeof(thing_property_t) * tmpl->prop_count);
     if (dev->properties) {
-      memcpy(dev->properties, template->properties,
-             sizeof(thing_property_t) * template->prop_count);
+      memcpy(dev->properties, tmpl->properties,
+             sizeof(thing_property_t) * tmpl->prop_count);
     } else {
       free(dev);
       return NULL;

@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
 /**
  * @brief Thing Model Property Types
  */
@@ -77,7 +76,7 @@ void thing_model_init(void);
 /**
  * @brief Register a device with the Thing Model
  */
-thing_device_t *thing_model_register(const thing_device_t *template);
+thing_device_t *thing_model_register(const thing_device_t *tmpl);
 
 /**
  * @brief Update a property value (Entry point for UI or Cloud control)

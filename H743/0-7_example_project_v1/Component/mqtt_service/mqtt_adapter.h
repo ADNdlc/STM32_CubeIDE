@@ -2,7 +2,7 @@
 #define COMPONENT_MQTT_SERVICE_MQTT_ADAPTER_H_
 
 #include "home/System/thing_model.h"
-#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 
