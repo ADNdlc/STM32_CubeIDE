@@ -15,6 +15,11 @@
 #define LVGL_INDEV_INIT 1
 #define LVGL_FS_INIT 1
 
+#define SYS_FLASH_HANDLER_ENABLE 1
+#define SYS_CONFIG_ENABLE 0
+#define NET_MGR_ENABLE 0
+#define SYS_STATE_ENABLE 0
+
 #define TEST_ENABLE 1
 
 #endif /* PROJECT_CFG_H_ */

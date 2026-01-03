@@ -32,8 +32,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "app.h"
+
 #include "hal_init.h"
+#include "sys_init.h"
+#include "app.h"
 
 /* USER CODE END Includes */
 
@@ -125,6 +127,7 @@ int main(void)
 
   /* ----- 业务代码 ----- */
   hal_init(); // HAL初始化(绑定平台实现)
+  sys_services_init();// 系统服务和组件初始化
 #if !TEST_ENABLE
   app_init(); // 应用初始化
 #endif

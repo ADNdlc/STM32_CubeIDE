@@ -11,7 +11,7 @@
 
 #define TEST_DEV_QSPI 0
 #define TEST_DEV_NAND 1
-#define TEST_DEV_SELECT TEST_DEV_NAND // Switch here
+#define TEST_DEV_SELECT TEST_DEV_QSPI // Switch here
 
 void lfs_integration_test(void) {
   log_a("Starting LittleFS Integration Test...");

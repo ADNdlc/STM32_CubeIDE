@@ -32,8 +32,7 @@
 #endif
 
 int app_init(void) {
-  // 系统服务和组件初始化
-  sys_services_init();
+
 
 #if CONFIG_RES_BURN_ENABLE
   sys_delay_ms(1000);

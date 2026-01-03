@@ -21,7 +21,7 @@
 int sys_services_init(void) {
   log_i("Initializing system services...");
 
-#if !CONFIG_RES_BURN_ENABLE
+#if SYS_FLASH_HANDLER_ENABLE && !CONFIG_RES_BURN_ENABLE
   /* 存储和文件系统 */
   flash_handler_init(); // 初始化 Flash 管理器
 
@@ -63,16 +63,23 @@ int sys_services_init(void) {
   }
 
   /* lvgl文件系统初始化 */
-#if LVGL_FS_INIT && !CONFIG_RES_BURN_ENABLE
+#if LVGL_ENABLE && LVGL_FS_INIT && !CONFIG_RES_BURN_ENABLE
   // lv_port_fs_init(); // 目前lvgl关联/lfs挂载点
+#endif
 #endif
 
   /* 系统组件初始化 */
+#if SYS_CONFIG_ENABLE
   sys_config_init(); // 初始化系统配置 (从 Flash 加载)
+#endif
+#if SYS_STATE_ENABLE
   sys_state_init();  // 初始化系统状态
-  net_mgr_init();    // 初始化网络管理器
 
 #endif
+#if NET_MGR_ENABLE
+  net_mgr_init();    // 初始化网络管理器
+#endif
+
   log_i("System services initialization completed.");
   return 0;
 }
