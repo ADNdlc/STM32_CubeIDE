@@ -62,9 +62,6 @@ int sys_services_init(void) {
     return -1;
   }
 
-  // 4.读取信息验证系统文件完整性
-  log_i("System storage mounted at %s", SYS_STORE_MOUNT_POINT);
-
   /* lvgl文件系统初始化 */
 #if LVGL_FS_INIT && !CONFIG_RES_BURN_ENABLE
   // lv_port_fs_init(); // 目前lvgl关联/lfs挂载点

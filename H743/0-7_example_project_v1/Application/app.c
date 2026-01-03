@@ -36,6 +36,7 @@ int app_init(void) {
   sys_services_init();
 
 #if CONFIG_RES_BURN_ENABLE
+  sys_delay_ms(1000);
   res_burner_run();
   log_i("Resource burning completed. Please disable CONFIG_RES_BURN_ENABLE and "
         "re-flash.");

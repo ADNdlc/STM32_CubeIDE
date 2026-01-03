@@ -26,12 +26,16 @@ typedef struct {
   uint8_t data[0];
 } internal_cfg_header_t;
 
-static sys_config_t g_sys_config;
+static sys_config_t g_sys_config; /// 当前系统配置(初始化时从外部flash加载或使用默认值)
 
 // Forward declarations
 static int sys_config_internal_save(void);
 static int sys_config_internal_load(void);
 
+/**
+ * @brief 将g_sys_config配置为默认值
+ * 
+ */
 static void sys_config_set_defaults(void) {
   memset(&g_sys_config, 0, sizeof(sys_config_t));
 
@@ -47,102 +51,14 @@ static void sys_config_set_defaults(void) {
   strcpy(g_sys_config.cloud.device_secret, DEFAULT_CLOUD_DEVICE_SECRET);
 }
 
-#include "stm32h7xx_hal.h"
-
-static uint32_t calculate_checksum(const void *data, size_t size) {
-  uint32_t checksum = 0;
-  const uint8_t *p = (const uint8_t *)data;
-  for (size_t i = 0; i < size; i++) {
-    checksum += p[i];
-  }
-  return checksum;
-}
-
-static int sys_config_internal_save(void) {
-  HAL_StatusTypeDef status;
-  FLASH_EraseInitTypeDef erase_init;
-  uint32_t sector_error;
-
-  HAL_FLASH_Unlock();
-
-  // Erase Sector 7 of Bank 2 (0x081E0000)
-  erase_init.TypeErase = FLASH_TYPEERASE_SECTORS;
-  erase_init.Banks = FLASH_BANK_2;
-  erase_init.Sector = FLASH_SECTOR_7;
-  erase_init.NbSectors = 1;
-  erase_init.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-
-  status = HAL_FLASHEx_Erase(&erase_init, &sector_error);
-  if (status != HAL_OK) {
-    log_e("Internal Flash Erase Failed: %d", status);
-    HAL_FLASH_Lock();
-    return -1;
-  }
-
-  // Prepare header and data
-  internal_cfg_header_t header;
-  header.magic = SYS_CFG_MAGIC;
-  header.length = sizeof(sys_config_t);
-  header.checksum = calculate_checksum(&g_sys_config, sizeof(sys_config_t));
-
-  // Program header (must be 32-byte aligned for H7)
-  uint8_t buffer[256 + 32] = {0}; // Enough for header + config + padding
-  memcpy(buffer, &header, sizeof(header));
-  memcpy(buffer + sizeof(header), &g_sys_config, sizeof(sys_config_t));
-
-  // Program in 32-byte chunks (Flash Word)
-  uint32_t addr = SYS_CFG_INTERNAL_ADDR;
-  for (uint32_t i = 0; i < sizeof(buffer); i += 32) {
-    status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, addr + i,
-                               (uint32_t)((uintptr_t)buffer + i));
-    if (status != HAL_OK) {
-      log_e("Internal Flash Program Failed at 0x%08X: %d", addr + i, status);
-      HAL_FLASH_Lock();
-      return -1;
-    }
-  }
-
-  HAL_FLASH_Lock();
-  log_i("Internal config saved to on-chip flash.");
-  return 0;
-}
-
-static int sys_config_internal_load(void) {
-  const internal_cfg_header_t *header =
-      (const internal_cfg_header_t *)SYS_CFG_INTERNAL_ADDR;
-
-  if (header->magic != SYS_CFG_MAGIC) {
-    return -1;
-  }
-
-  if (header->length != sizeof(sys_config_t)) {
-    return -2;
-  }
-
-  uint32_t sum = calculate_checksum(
-      (const void *)(SYS_CFG_INTERNAL_ADDR + sizeof(internal_cfg_header_t)),
-      sizeof(sys_config_t));
-  if (sum != header->checksum) {
-    log_w("Internal config checksum mismatch!");
-    return -3;
-  }
-
-  memcpy(&g_sys_config,
-         (const void *)(SYS_CFG_INTERNAL_ADDR + sizeof(internal_cfg_header_t)),
-         sizeof(sys_config_t));
-  log_i("Internal config loaded from on-chip flash.");
-  return 0;
-}
 
 int sys_config_init(void) {
   log_i("Loading system configuration...");
-
-  sys_config_set_defaults(); // Load hardcoded defaults first
-
   static char buffer[MAX_CFG_BUFFER_SIZE];
   memset(buffer, 0, sizeof(buffer));
 
   bool loaded = false;
+  // 1.尝试从外部文件系统加载配置文件
   int res = flash_handler_read(SYS_CFG_FILE_PATH, 0, (uint8_t *)buffer,
                                sizeof(buffer) - 1);
   if (res == 0) {
@@ -194,12 +110,8 @@ int sys_config_init(void) {
   }
 
   if (!loaded) {
-    log_w("Config file error, trying internal flash...");
-    if (sys_config_internal_load() != 0) {
-      log_w("Internal flash config not found, using hardcoded defaults.");
-      // defaults already set at the beginning
-      sys_config_internal_save(); // Factory reset internal flash
-    }
+    log_w("Config file error, use defaults...");
+    sys_config_set_defaults();  // Set default values
     sys_config_save(); // Repair/Create the JSON file
   }
 
