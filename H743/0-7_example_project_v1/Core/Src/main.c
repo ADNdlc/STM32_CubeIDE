@@ -125,7 +125,9 @@ int main(void)
 
   /* ----- 业务代码 ----- */
   hal_init(); // HAL初始化(绑定平台实现)
+#if !TEST_ENABLE
   app_init(); // 应用初始化
+#endif
   // module testing
   run_all_tests(); // 运行所有开启的单元测试
 
@@ -134,7 +136,10 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
+#if !TEST_ENABLE
     app_run(); // 应用运行
+#endif
+
 #if 0
 	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
 	  HAL_Delay(500);

@@ -23,6 +23,7 @@
 #include "flash_test.h"
 #include "norflash_test.h"
 #include "lfs_test.h"
+#include "sys_config_test.h"  // 添加sys_config测试头文件
 
 void run_all_tests(void) {
 
@@ -86,7 +87,13 @@ void run_all_tests(void) {
   lfs_integration_test();
 #endif
 
+#if _sys_config_test_
+  sys_config_test_run();
+#endif
 
+#if _sys_config_save_load_test_
+  sys_config_save_load_test();
+#endif
 
 }
 #else

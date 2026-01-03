@@ -15,8 +15,8 @@
 // 默认云平台配置
 #define DEFAULT_CLOUD_PLATFORM CLOUD_PLATFORM_ONENET
 #define DEFAULT_CLOUD_PRODUCT_ID "SQKg9n0Ii0"
-#define DEFAULT_CLOUD_DEVICE_ID ""
-#define DEFAULT_CLOUD_DEVICE_SECRET ""
+#define DEFAULT_CLOUD_DEVICE_ID "test123"
+#define DEFAULT_CLOUD_DEVICE_SECRET "test234"
 
 // Internal storage header
 typedef struct {
