@@ -26,7 +26,8 @@ typedef struct {
   uint8_t data[0];
 } internal_cfg_header_t;
 
-static sys_config_t g_sys_config; /// 当前系统配置(初始化时从外部flash加载或使用默认值)
+static sys_config_t
+    g_sys_config; /// 当前系统配置(初始化时从外部flash加载或使用默认值)
 
 // Forward declarations
 static int sys_config_internal_save(void);
@@ -34,7 +35,7 @@ static int sys_config_internal_load(void);
 
 /**
  * @brief 将g_sys_config配置为默认值
- * 
+ *
  */
 static void sys_config_set_defaults(void) {
   memset(&g_sys_config, 0, sizeof(sys_config_t));
@@ -51,9 +52,12 @@ static void sys_config_set_defaults(void) {
   strcpy(g_sys_config.cloud.device_secret, DEFAULT_CLOUD_DEVICE_SECRET);
 }
 
-
 int sys_config_init(void) {
   log_i("Loading system configuration...");
+
+  // 0. Always reset to defaults first to prevent partial/mixed state
+  sys_config_set_defaults();
+
   static char buffer[MAX_CFG_BUFFER_SIZE];
   memset(buffer, 0, sizeof(buffer));
 
@@ -111,8 +115,8 @@ int sys_config_init(void) {
 
   if (!loaded) {
     log_w("Config file error, use defaults...");
-    sys_config_set_defaults();  // Set default values
-    sys_config_save(); // Repair/Create the JSON file
+    sys_config_set_defaults(); // Set default values
+    sys_config_save();         // Repair/Create the JSON file
   }
 
   return 0;

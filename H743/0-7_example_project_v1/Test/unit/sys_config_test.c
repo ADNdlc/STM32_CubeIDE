@@ -72,13 +72,13 @@ void sys_config_test_run(void) {
 
   // 3. 容错与恢复测试 (Case 3: Robustness & Recovery)
   log_i("Case 3: Robustness Test (Corrupt file -> Reload)");
-  // 故意写入损坏的 JSON
-  const char *corrupt_json = "{ \"network\": { \"ssid\": \"broken... ";
-  // 注意: 这里直接使用 flash_handler_write 写入同名文件来覆盖它
-  // 路径定义在 sys_config.c 中为 "/sys/sys_cfg.json"
+  // 故意写入完全不可解析的垃圾数据
+  const char *corrupt_json =
+      "!!INVALID_JSON_DATA!!_CORRUPTED_BY_TEST_1234567890";
+  // 注意: 这里由于加了 LFS_O_TRUNC，写入 offset 0 会清空文件
   if (flash_handler_write("/sys/sys_cfg.json", 0, (const uint8_t *)corrupt_json,
                           strlen(corrupt_json)) == 0) {
-    log_i("Simulated config corruption by writing invalid JSON.");
+    log_i("Simulated config corruption by writing garbage data.");
   }
 
   // 重新加载，此时应该解析失败并回滚到默认值

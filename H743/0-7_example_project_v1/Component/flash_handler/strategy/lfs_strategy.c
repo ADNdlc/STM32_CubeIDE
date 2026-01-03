@@ -11,9 +11,9 @@
 #define LFS_STRATEGY_MEMSOURCE SYS_MEM_INTERNAL
 
 typedef struct {
-  flash_strategy_t parent;  // 策略接口
-  lfs_t lfs;                // LittleFS 实例
-  struct lfs_config cfg;    // LittleFS 配置
+  flash_strategy_t parent; // 策略接口
+  lfs_t lfs;               // LittleFS 实例
+  struct lfs_config cfg;   // LittleFS 配置
   lfs_strategy_config_t user_config;
   bool mounted;
 } lfs_strategy_impl_t;
@@ -197,8 +197,12 @@ static int _lfs_write(flash_strategy_t *self, const char *path, uint32_t offset,
       filename = second_slash + 1;
   }
 
-  int err =
-      lfs_file_open(&impl->lfs, &file, filename, LFS_O_WRONLY | LFS_O_CREAT);
+  int flags = LFS_O_WRONLY | LFS_O_CREAT;
+  if (offset == 0) {
+    flags |= LFS_O_TRUNC;
+  }
+
+  int err = lfs_file_open(&impl->lfs, &file, filename, flags);
   if (err)
     return -1;
 
