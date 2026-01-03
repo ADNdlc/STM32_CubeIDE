@@ -6,7 +6,14 @@
  */
 
 #include "hal_init.h"
+#include "cJSON.h"
+#include "sys.h"
 
+static void *cjson_malloc(size_t sz) {
+  return sys_malloc(SYS_MEM_INTERNAL, (uint32_t)sz);
+}
+
+static void cjson_free(void *ptr) { sys_free(SYS_MEM_INTERNAL, ptr); }
 
 int hal_init(void) {
   /* ---- SYS初始化 ---- */
@@ -40,17 +47,22 @@ int hal_init(void) {
   }
   // 内存池
   sys_mem_init_external();
+
+  // 配置 cJSON 全局内存钩子，确保所有模块使用相同的堆
+  cJSON_Hooks hooks = {.malloc_fn = cjson_malloc, .free_fn = cjson_free};
+  cJSON_InitHooks(&hooks);
+
   log_i("SDRAM&MEM initialization completed...");
 
 #if LVGL_ENABLE
   /* ---- LVGL硬件初始化 ---- */
   lv_init(); // LVGL 初始化
   log_i("LVGL initialization completed...");
-#if LVGL_DISP_INIT&&!CONFIG_RES_BURN_ENABLE
+#if LVGL_DISP_INIT && !CONFIG_RES_BURN_ENABLE
   lv_port_disp_init(); // 注册LVGL的显示任务
   log_i("LVGL port_disp initialization completed...");
 #endif
-#if LVGL_INDEV_INIT&&!CONFIG_RES_BURN_ENABLE
+#if LVGL_INDEV_INIT && !CONFIG_RES_BURN_ENABLE
   lv_port_indev_init(); // 注册LVGL的触屏检测任务
   log_i("LVGL port_indev initialization completed...");
 #endif

@@ -123,7 +123,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   GPIOB->ODR ^= (1<<0);
   GPIOB->ODR ^= (1<<1);
-  HAL_Delay(300);
+  HAL_Delay(500);
 
   /* ----- 业务代码 ----- */
   hal_init(); // HAL初始化(绑定平台实现)

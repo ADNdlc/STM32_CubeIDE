@@ -1,22 +1,27 @@
 #include "sys_config.h"
+#include "cJSON.h"
 #include "flash_handler.h"
-#include "util/cJSON.h"
+#include "sys.h"
 #include <stdio.h>
 #include <string.h>
+
 
 #define LOG_TAG "SYS_CFG"
 #include "elog.h"
 
 #define SYS_CFG_FILE_PATH "/sys/sys_cfg.json"
-#define MAX_CFG_BUFFER_SIZE 1024
+#define MAX_CFG_BUFFER_SIZE 2048
+
 // 默认wifi配置
 #define DEFAULT_WIFI_SSID "test1"
 #define DEFAULT_WIFI_PASSWORD "yu12345678"
 // 默认云平台配置
 #define DEFAULT_CLOUD_PLATFORM CLOUD_PLATFORM_ONENET
 #define DEFAULT_CLOUD_PRODUCT_ID "SQKg9n0Ii0"
-#define DEFAULT_CLOUD_DEVICE_ID "test123"
-#define DEFAULT_CLOUD_DEVICE_SECRET "test234"
+#define DEFAULT_CLOUD_DEVICE_ID "test2"
+#define DEFAULT_CLOUD_DEVICE_SECRET                                            \
+  "version=2018-10-31&res=products%2FSQKg9n0Ii0%2Fdevices%2Ftest2&et="         \
+  "1855499668539&method=md5&sign=%2FHVmg4Xz2RfTRWEu44mApQ%3D%3D"
 
 // Internal storage header
 typedef struct {
@@ -28,10 +33,6 @@ typedef struct {
 
 static sys_config_t
     g_sys_config; /// 当前系统配置(初始化时从外部flash加载或使用默认值)
-
-// Forward declarations
-static int sys_config_internal_save(void);
-static int sys_config_internal_load(void);
 
 /**
  * @brief 将g_sys_config配置为默认值
@@ -57,7 +58,7 @@ int sys_config_init(void) {
 
   // 0. Always reset to defaults first to prevent partial/mixed state
   sys_config_set_defaults();
-
+  sys_config_save(); // test
   static char buffer[MAX_CFG_BUFFER_SIZE];
   memset(buffer, 0, sizeof(buffer));
 

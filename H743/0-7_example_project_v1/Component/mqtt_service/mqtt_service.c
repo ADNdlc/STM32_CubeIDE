@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 #define LOG_TAG "MQTT_SVC"
 #include "elog.h"
 
@@ -14,12 +13,18 @@ static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
   case MQTT_DRV_EVENT_CONNECTED:
     self->state = MQTT_SVC_STATE_CONNECTED;
     log_i("Service: MQTT Connected.");
+    if (self->event_cb) {
+      self->event_cb(self, self->state, self->user_data);
+    }
     // Here we could auto-subscribe to topics if needed
     break;
 
   case MQTT_DRV_EVENT_DISCONNECTED:
     self->state = MQTT_SVC_STATE_DISCONNECTED;
     log_w("Service: MQTT Disconnected.");
+    if (self->event_cb) {
+      self->event_cb(self, self->state, self->user_data);
+    }
     break;
 
   case MQTT_DRV_EVENT_DATA: {
@@ -60,6 +65,12 @@ void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv,
   if (self->drv) {
     MQTT_DRV_SET_CB(self->drv, mqtt_drv_event_handler, self);
   }
+}
+
+void mqtt_svc_register_callback(mqtt_service_t *self, mqtt_svc_event_cb_t cb,
+                                void *user_data) {
+  self->event_cb = cb;
+  self->user_data = user_data;
 }
 
 int mqtt_svc_connect(mqtt_service_t *self) {

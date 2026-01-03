@@ -1,10 +1,11 @@
 #ifndef COMPONENT_MQTT_SERVICE_MQTT_SERVICE_H_
 #define COMPONENT_MQTT_SERVICE_MQTT_SERVICE_H_
 
-#include "mqtt_driver.h"
 #include "mqtt_adapter.h"
+#include "mqtt_driver.h"
 #include <stdbool.h>
 #include <stdint.h>
+
 
 /**
  * @brief MQTT Service States
@@ -16,13 +17,22 @@ typedef enum {
   MQTT_SVC_STATE_FAULT
 } mqtt_svc_state_t;
 
+typedef struct mqtt_service_t mqtt_service_t;
+
+// Event callback for status changes
+typedef void (*mqtt_svc_event_cb_t)(mqtt_service_t *self,
+                                    mqtt_svc_state_t state, void *user_data);
+
 /**
  * @brief MQTT Service Object
  */
-typedef struct {
+typedef struct mqtt_service_t {
   mqtt_driver_t *drv;
   const mqtt_adapter_t *adapter;
   mqtt_svc_state_t state;
+
+  mqtt_svc_event_cb_t event_cb;
+  void *user_data;
 
   // Internal counters/timers for reconnection
   uint32_t last_reconnect_attempt;
@@ -34,6 +44,12 @@ typedef struct {
  */
 void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv,
                    const mqtt_adapter_t *adapter);
+
+/**
+ * @brief Register a status changed callback
+ */
+void mqtt_svc_register_callback(mqtt_service_t *self, mqtt_svc_event_cb_t cb,
+                                void *user_data);
 
 /**
  * @brief Start the MQTT service (connect to broker)

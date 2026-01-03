@@ -65,8 +65,10 @@ int app_init(void) {
 }
 
 void app_run(void) {
-#if LVGL_ENABLE && !CONFIG_RES_BURN_ENABLE
+#if !CONFIG_RES_BURN_ENABLE
+#if LVGL_ENABLE
   lv_timer_handler();
+#endif
   net_mgr_process();
 #endif
 }

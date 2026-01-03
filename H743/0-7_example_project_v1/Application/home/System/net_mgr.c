@@ -1,12 +1,12 @@
 #include "net_mgr.h"
-#include "mqtt_adapter.h"
-#include "mqtt_service.h"
-#include "esp_8266/esp8266_mqtt_driver.h"
-#include "mqtt_driver.h"
-#include "esp_8266/at_controller.h"
-#include "esp_8266/esp8266_wifi_driver.h"
 #include "device_mapping.h"
+#include "esp_8266/at_controller.h"
+#include "esp_8266/esp8266_mqtt_driver.h"
+#include "esp_8266/esp8266_wifi_driver.h"
 #include "gpio_factory.h"
+#include "mqtt_adapter.h"
+#include "mqtt_driver.h"
+#include "mqtt_service.h"
 #include "sys_config.h"
 #include "sys_state.h"
 #include "uart_queue/uart_queue.h"
@@ -14,6 +14,7 @@
 #include "usart_hal/usart_hal.h"
 #include "wifi_service/wifi_service.h"
 #include <string.h>
+
 
 #define LOG_TAG "NET_MGR"
 #include "elog.h"
@@ -60,6 +61,19 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
   }
 }
 
+/**
+ * @brief MQTT状态变化回调
+ */
+static void mqtt_event_handler(mqtt_service_t *svc, mqtt_svc_state_t state,
+                               void *user_data) {
+  log_i("MQTT status changed: %d", state);
+  if (state == MQTT_SVC_STATE_CONNECTED) {
+    sys_state_set_mqtt(true);
+  } else {
+    sys_state_set_mqtt(false);
+  }
+}
+
 /*****************
  * 外部服务调用
  *****************/
@@ -94,9 +108,10 @@ void net_mgr_init(void) {
   wifi_service_init(&g_wifi_svc, (wifi_driver_t *)&g_esp_drv);
   wifi_service_register_callback(&g_wifi_svc, wifi_event_handler, NULL);
 
-//  // 6. 初始化MQTT驱动与服务
+  //  // 6. 初始化MQTT驱动与服务
   esp8266_mqtt_driver_init(&g_mqtt_drv, &g_at_ctrl);
   mqtt_svc_init(&g_mqtt_svc, (mqtt_driver_t *)&g_mqtt_drv, &g_onenet_adapter);
+  mqtt_svc_register_callback(&g_mqtt_svc, mqtt_event_handler, NULL);
 
   log_i("Network Manager initialized successfully");
 }

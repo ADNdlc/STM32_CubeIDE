@@ -1,6 +1,6 @@
 #include "home/System/sys_config.h"
 #include "mqtt_adapter.h"
-#include "util/cJSON.h"
+#include "cJSON.h"
 #include <stdio.h>
 #include <string.h>
 
