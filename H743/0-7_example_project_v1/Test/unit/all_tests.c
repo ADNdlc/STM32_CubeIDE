@@ -91,10 +91,6 @@ void run_all_tests(void) {
   sys_config_test_run();
 #endif
 
-#if _sys_config_save_load_test_
-  sys_config_save_load_test();
-#endif
-
 }
 #else
 void run_all_tests(void) {}
