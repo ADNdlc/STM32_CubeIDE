@@ -126,8 +126,8 @@ int main(void)
   HAL_Delay(500);
 
   /* ----- 业务代码 ----- */
-  hal_init(); // HAL初始化(绑定平台实现)
-  sys_services_init();// 系统服务和组件初始化
+  hal_init(); // HAL层初始化(绑定平台实现)
+  sys_services_init();// 服务和组件初始化
 #if !TEST_ENABLE
   app_init(); // 应用初始化
 #endif

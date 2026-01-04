@@ -2,7 +2,6 @@
 #include "elog.h"
 #include <stddef.h>
 
-
 #define LOG_TAG "SYS_STATE"
 #include "elog.h"
 
@@ -47,27 +46,26 @@ void shade_update_cb(const sys_state_t *state) {
 static void notify_observers(void) {
   for (int i = 0; i < g_observer_count; i++) {
     if (g_observers[i]) {
-      g_observers[i](&g_state);
+      g_observers[i](&g_state); // 调用回调并传递当前状态
     }
   }
   log_d("Notified %d observers", g_observer_count);
 }
 
 /**
- * @brief 系统状态初始化
+ * @brief 系统状态管理初始化
  *
  */
 void sys_state_init(void) {
 #ifndef NDEBUG
 #if LVGL_ENABLE
   shade = create_shade();
-  // 绑定回调
   sys_state_subscribe(shade_update_cb);
 #else
 #define shade NULL
-#endif  
 #endif
-  // 初始化默认状态
+#endif
+  // 初始化为默认状态
 
   g_state.volume = 50;
   g_state.brightness = 100;
@@ -83,7 +81,6 @@ void sys_state_init(void) {
  * @return const sys_state_t*
  */
 const sys_state_t *sys_state_get(void) {
-  //log_v("State accessed");
   return &g_state;
 }
 

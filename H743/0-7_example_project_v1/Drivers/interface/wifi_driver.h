@@ -35,6 +35,13 @@ typedef struct {
   uint8_t wps;             // <wps>
 } wifi_ap_info_t;
 
+/**
+ * @brief WiFi扫描结果回调
+ *
+ * @param arg       用户数据指针
+ * @param ap_list   扫描到的AP列表
+ * @param count     AP数量
+ */
 typedef void (*wifi_scan_cb_t)(void *arg, wifi_ap_info_t *ap_list,
                                uint16_t count);
 

@@ -1,12 +1,13 @@
 #include "device_init.h"
-#include "../../../Drivers/old_driver/led/led.h"
+#include "gpio_led/gpio_led.h"
 #include "thing_model.h"
 #include <string.h>
 
 
 #define LOG_TAG "DEV_INIT"
-#include "../../../lib/EasyLogger/easylogger/inc/elog.h"
+#include "elog.h"
 
+#if 0
 // --- Hardware Callback for LEDs ---
 static bool led_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
                             thing_value_t value) {
@@ -33,7 +34,8 @@ void sys_devices_init(void) {
   static thing_property_t light1_props[] = {{.id = "led0",
                                              .name = "Switch",
                                              .type = THING_PROP_TYPE_SWITCH,
-                                             .access_mode = THING_ACCESS_RW}};
+                                             //.access_mode = THING_ACCESS_RW
+  }};
 
   thing_device_t light1_tmpl = {.device_id = "Light1",
                                 .name = "Kitchen Light",
@@ -45,7 +47,8 @@ void sys_devices_init(void) {
   static thing_property_t light2_props[] = {{.id = "led1",
                                              .name = "Switch",
                                              .type = THING_PROP_TYPE_SWITCH,
-                                             .access_mode = THING_ACCESS_RW}};
+                                             //.access_mode = THING_ACCESS_RW
+  }};
 
   thing_device_t light2_tmpl = {.device_id = "Light2",
                                 .name = "Bedroom Light",
@@ -59,3 +62,4 @@ void sys_devices_init(void) {
 
   log_i("Device registration completed.");
 }
+#endif

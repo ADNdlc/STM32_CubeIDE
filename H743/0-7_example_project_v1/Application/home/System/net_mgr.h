@@ -5,6 +5,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/**
+ * @brief 网络管理器,此模块
+ * 
+ */
+
 
 /**
  * @brief 初始化网络管理器(wifi,mqtt,sntp,etc)

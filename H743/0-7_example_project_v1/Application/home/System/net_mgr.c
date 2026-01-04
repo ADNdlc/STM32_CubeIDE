@@ -15,11 +15,9 @@
 #include "wifi_service/wifi_service.h"
 #include <string.h>
 
-
 #define LOG_TAG "NET_MGR"
 #include "elog.h"
 
-// --- Global Instances ---
 static uint8_t at_tx_buf[512];  // AT控制器发送缓冲
 static uint8_t at_rx_buf[1024]; // AT控制器接收缓冲
 
@@ -34,7 +32,7 @@ extern const mqtt_adapter_t g_onenet_adapter; // OneNet MQTT适配器
 /*****************
  * 内部状态与回调
  *****************/
-static bool g_wifi_target_state = false;
+static bool g_wifi_target_state = false;  // 管理器WiFi目标状态(非实际系统状态)
 
 /**
  * @brief WiFi状态变化回调
@@ -48,13 +46,14 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
   log_i("WiFi status changed: %d", status);
 
   // 同步给系统状态
-  if (status == WIFI_STATUS_GOT_IP) { // 获得IP地址，网络准备就绪
+  if (status == WIFI_STATUS_GOT_IP) { // 获得IP地址,网络准备就绪
     log_i("Network Ready: Obtained IP address");
     sys_state_set_wifi(true);
 
-    // 启动MQTT服务连接
+    // 连接上wifi, 自动启动MQTT服务连接
     log_i("Starting MQTT Service...");
     mqtt_svc_connect(&g_mqtt_svc);
+    
   } else if (status == WIFI_STATUS_DISCONNECTED) { // 断开连接
     log_w("Network Offline");
     sys_state_set_wifi(false);
@@ -116,6 +115,10 @@ void net_mgr_init(void) {
   log_i("Network Manager initialized successfully");
 }
 
+/**
+ * @brief 网络管理器循环处理函数
+ * 
+ */
 void net_mgr_process(void) {
   // 1. 处理AT控制器层
   at_controller_process(&g_at_ctrl);
@@ -125,9 +128,9 @@ void net_mgr_process(void) {
   mqtt_svc_process(&g_mqtt_svc);
 }
 
-/*****************
- * WiFi服务 控制
- *****************/
+/****************
+ * WiFi服务控制
+ ****************/
 void net_mgr_wifi_enable(bool enable) {
   if (enable == g_wifi_target_state)
     return;
@@ -139,11 +142,16 @@ void net_mgr_wifi_enable(bool enable) {
     log_d("sys_config_get: ssid=%s, pwd=%s", cfg->net.ssid, cfg->net.password);
     wifi_svc_set_mode(&g_wifi_svc, WIFI_MODE_STATION);
     wifi_svc_connect(&g_wifi_svc, cfg->net.ssid,
-                     cfg->net.password); // 从配置获取连接信息
+                     cfg->net.password); // 使用配置里的信息进行连接
   } else {
     log_i("WiFi disabling requested...");
-    wifi_svc_disconnect(&g_wifi_svc);
+    wifi_svc_disconnect(&g_wifi_svc);    // 断开连接
   }
 }
 
+/**
+ * @brief wifi使能状态查询
+ * 
+ * @return g_wifi_target_state true:启用,false:禁用
+ */
 bool net_mgr_wifi_is_enabled(void) { return g_wifi_target_state; }

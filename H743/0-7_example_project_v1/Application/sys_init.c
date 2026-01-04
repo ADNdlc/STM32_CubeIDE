@@ -3,7 +3,7 @@
 #include "elog.h"
 #include "factory/flash_factory.h"
 #include "flash_handler.h"
-#include "home/System/device_init.h"
+#include "device_init.h"
 #include "home/System/net_mgr.h"
 #include "home/System/sys_config.h"
 #include "home/System/sys_state.h"
@@ -19,14 +19,22 @@
 #define FLASH_EXT_SPI 0
 #define FLASH_EXT_QSPI 1
 #define FLASH_EXT_NAND 2
+// 定义系统使用的flash设备(主要存储配置信息)
 #define SYS_FLASH_DEV FLASH_EXT_QSPI
+// 系统配置路径
 #define SYS_STORE_MOUNT_POINT "/sys"
+
+
 
 int sys_services_init(void) {
   log_i("Initializing system services...");
 
 #if SYS_FLASH_HANDLER_ENABLE && !CONFIG_RES_BURN_ENABLE
-  /* 存储和文件系统 */
+
+/*****************
+ * 存储和文件系统
+ *****************/
+
   flash_handler_init(); // 初始化 Flash 管理器
 
   // 1.获取存储设备
@@ -72,7 +80,10 @@ int sys_services_init(void) {
 #endif
 #endif
 
-  /* 系统组件初始化 */
+/*****************
+ * 系统服务和组件
+ *****************/
+
 #if SYS_CONFIG_ENABLE
   sys_config_init(); // 初始化系统配置 (从 Flash 加载)
 #endif
@@ -80,7 +91,7 @@ int sys_services_init(void) {
   sys_state_init(); // 初始化系统状态
 #endif
   thing_model_init(); // 初始化物模型管理器
-  sys_devices_init(); // 初始化并注册硬件设备
+  //sys_devices_init(); // 初始化并注册硬件设备
 #if NET_MGR_ENABLE
   net_mgr_init(); // 初始化网络管理器
 #endif

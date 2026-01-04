@@ -8,7 +8,7 @@
 
 
 /**
- * @brief MQTT Service States
+ * @brief 服务状态枚举
  */
 typedef enum {
   MQTT_SVC_STATE_DISCONNECTED = 0,
@@ -19,22 +19,22 @@ typedef enum {
 
 typedef struct mqtt_service_t mqtt_service_t;
 
-// Event callback for status changes
+// 状态变化回调原型
 typedef void (*mqtt_svc_event_cb_t)(mqtt_service_t *self,
                                     mqtt_svc_state_t state, void *user_data);
 
 /**
- * @brief MQTT Service Object
+ * @brief mqtt服务结构体
  */
 typedef struct mqtt_service_t {
-  mqtt_driver_t *drv;
-  const mqtt_adapter_t *adapter;
-  mqtt_svc_state_t state;
+  mqtt_driver_t *drv; // 驱动
+  const mqtt_adapter_t *adapter; // 适配器(云平台)
+  mqtt_svc_state_t state;        // 当前状态
 
-  mqtt_svc_event_cb_t event_cb;
-  void *user_data;
+  mqtt_svc_event_cb_t event_cb; // 状态变化回调
+  void *user_data;              // 用户数据指针
 
-  // Internal counters/timers for reconnection
+  // 内部状态和计数器
   uint32_t last_reconnect_attempt;
   uint8_t retry_count;
 } mqtt_service_t;
