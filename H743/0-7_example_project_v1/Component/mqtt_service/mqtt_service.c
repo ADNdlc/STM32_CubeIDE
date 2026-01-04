@@ -30,20 +30,22 @@ static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
   case MQTT_DRV_EVENT_DATA: {
     log_i("Service: Data received on topic %s", event->topic);
 
-    char prop_id[32];
+    char dev_id[64];
+    char prop_id[64];
     thing_value_t val;
-    char msg_id[32];
+    char msg_id[64];
 
-    if (self->adapter && self->adapter->parse_command(event->payload, prop_id,
-                                                      &val, msg_id) == 0) {
-      // Find device and update property
-      // For simplified demo, we assume the first device or derive device from
-      // topic thing_model_set_prop("TBD", prop_id, val, 1 /* Source: Cloud */);
+    if (self->adapter &&
+        self->adapter->parse_command(event->topic, event->payload, dev_id,
+                                     prop_id, &val, msg_id) == 0) {
+      // Find device and update property in Thing Model
+      // Source 1 = Cloud
+      thing_model_set_prop(dev_id, prop_id, val, 1);
 
       // Cloud Reply (Safe & Generic)
       char reply_topic[128];
       char reply_payload[256];
-      self->adapter->get_reply_topic("TBD", reply_topic, sizeof(reply_topic));
+      self->adapter->get_reply_topic(dev_id, reply_topic, sizeof(reply_topic));
       self->adapter->get_reply_payload(msg_id, 200, reply_payload,
                                        sizeof(reply_payload));
 

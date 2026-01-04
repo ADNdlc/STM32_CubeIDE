@@ -5,7 +5,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-
 /**
  * @brief MQTT Credentials for login
  */
@@ -47,7 +46,8 @@ typedef struct {
   /**
    * @brief Parse an incoming command from the platform
    */
-  int (*parse_command)(const char *payload, char *out_prop_id,
+  int (*parse_command)(const char *topic, const char *payload,
+                       char *out_device_id, char *out_prop_id,
                        thing_value_t *out_value, char *out_msg_id);
 
   /**

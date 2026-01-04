@@ -1,9 +1,8 @@
+#include "cJSON.h"
 #include "home/System/sys_config.h"
 #include "mqtt_adapter.h"
-#include "cJSON.h"
 #include <stdio.h>
 #include <string.h>
-
 
 /**
  * @brief OneNet specific implementation of the MQTT Platform Adapter
@@ -12,7 +11,7 @@
 static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
   const sys_config_t *cfg = sys_config_get();
 
-  strcpy(out_params->host, "mqttst.heclouds.com"); // OneNet MQTT host
+  strcpy(out_params->host, "mqtts.heclouds.com"); // OneNet MQTT host
   out_params->port = 1883;
 
   // For OneNet, client_id is often the device_id
@@ -76,8 +75,24 @@ static int onenet_serialize_post(const thing_device_t *device,
   return 0;
 }
 
-static int onenet_parse_command(const char *payload, char *out_prop_id,
+static int onenet_parse_command(const char *topic, const char *payload,
+                                char *out_device_id, char *out_prop_id,
                                 thing_value_t *out_value, char *out_msg_id) {
+  // 1. Extract device ID from topic: $sys/{pid}/{did}/thing/property/set
+  // We look for the 3rd segment
+  char topic_copy[128];
+  strncpy(topic_copy, topic, sizeof(topic_copy) - 1);
+  char *save_ptr;
+  char *segment = strtok_r(topic_copy, "/", &save_ptr); // $sys
+  segment = strtok_r(NULL, "/", &save_ptr);             // {pid}
+  segment = strtok_r(NULL, "/", &save_ptr);             // {did}
+  if (segment) {
+    strcpy(out_device_id, segment);
+  } else {
+    return -1;
+  }
+
+  // 2. Parse JSON payload
   cJSON *root = cJSON_Parse(payload);
   if (!root)
     return -1;

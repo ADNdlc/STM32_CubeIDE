@@ -69,9 +69,33 @@ struct thing_device_t {
 };
 
 /**
+ * @brief Thing Model Events
+ */
+typedef enum {
+  THING_EVENT_PROPERTY_CHANGED, // Property updated (source info in event)
+  THING_EVENT_DEVICE_REGISTERED,
+} thing_event_type_t;
+
+typedef struct {
+  thing_event_type_t type;
+  const char *device_id;
+  const char *prop_id;
+  thing_value_t value;
+  int source; // 0 for Local(UI), 1 for Cloud, 2 for Driver
+} thing_model_event_t;
+
+typedef void (*thing_model_event_cb)(const thing_model_event_t *event,
+                                     void *user_data);
+
+/**
  * @brief Initialize the Thing Model Manager
  */
 void thing_model_init(void);
+
+/**
+ * @brief Register a global event observer
+ */
+void thing_model_add_observer(thing_model_event_cb cb, void *user_data);
 
 /**
  * @brief Register a device with the Thing Model

@@ -1,19 +1,38 @@
 #include "thing_model.h"
-#include <stdlib.h>
+#include <stdlib.h> // Added as per instruction
 #include <string.h>
 
 #define LOG_TAG "THING_MODEL"
-#include "elog.h"
+#include "../../../lib/EasyLogger/easylogger/inc/elog.h" // Path for elog.h is already correct
 
 #define MAX_THING_DEVICES 16
+#define MAX_THING_OBSERVERS 4
 
 static thing_device_t *g_devices[MAX_THING_DEVICES];
 static uint8_t g_device_count = 0;
 
+typedef struct {
+  thing_model_event_cb cb;
+  void *user_data;
+} thing_observer_t;
+
+static thing_observer_t g_observers[MAX_THING_OBSERVERS];
+static uint8_t g_observer_count = 0;
+
 void thing_model_init(void) {
   memset(g_devices, 0, sizeof(g_devices));
+  memset(g_observers, 0, sizeof(g_observers));
   g_device_count = 0;
+  g_observer_count = 0;
   log_i("Thing Model Manager initialized.");
+}
+
+void thing_model_add_observer(thing_model_event_cb cb, void *user_data) {
+  if (g_observer_count < MAX_THING_OBSERVERS) {
+    g_observers[g_observer_count].cb = cb;
+    g_observers[g_observer_count].user_data = user_data;
+    g_observer_count++;
+  }
 }
 
 thing_device_t *thing_model_register(const thing_device_t *tmpl) {
@@ -87,10 +106,20 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
   // constant
   target_prop->value = value;
 
-  // 5. Notify Observers (Logic to be implemented: UI Refresh and Cloud Post)
-  // For now, we just log it.
-  log_i("[Event] Prop %s.%s updated to value by source %d", device_id, prop_id,
-        source);
+  // 5. Notify Observers (UI Refresh and Cloud Post)
+  thing_model_event_t evt = {.type = THING_EVENT_PROPERTY_CHANGED,
+                             .device_id = device_id,
+                             .prop_id = prop_id,
+                             .value = value,
+                             .source = source};
+
+  for (int k = 0; k < g_observer_count; k++) {
+    if (g_observers[k].cb) {
+      g_observers[k].cb(&evt, g_observers[k].user_data);
+    }
+  }
+
+  log_i("[Event] Prop %s.%s updated by source %d", device_id, prop_id, source);
 
   return true;
 }

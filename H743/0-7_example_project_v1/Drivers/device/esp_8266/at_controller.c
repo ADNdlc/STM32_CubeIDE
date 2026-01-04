@@ -25,8 +25,7 @@ static void at_cmd_cleanup(at_controller_t *self, AT_Cmd_t *cmd);
 // "OK"
 static void handle_final_ok(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
-  if (self->state == AT_CTRL_STATE_WAIT_RSP ||
-      self->state == AT_CTRL_STATE_WAIT_DATAIN) {
+  if (self->state == AT_CTRL_STATE_WAIT_RSP) {
     if (self->current_cmd && self->current_cmd->response_cb) {
       self->current_cmd->response_cb(AT_CMD_OK, line);
     }
@@ -37,6 +36,8 @@ static void handle_final_ok(void *ctx, const char *line) {
     self->state = AT_CTRL_STATE_IDLE;
     self->busy_count = 0;
     self->consecutive_timeouts = 0;
+  } else if (self->state == AT_CTRL_STATE_WAIT_DATAIN) {
+    log_d("Intermediate OK (ignored in WAIT_DATAIN): %s", line);
   }
 }
 // "ERROR"
