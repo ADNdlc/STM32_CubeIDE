@@ -8,6 +8,7 @@
 
 #if TEST_ENABLE
 #include "all_tests_config.h"
+#include "elog.h"
 #include "elog_test.h"
 #include "key_test.h"
 #include "lcd_test.h"
@@ -24,73 +25,83 @@
 #include "norflash_test.h"
 #include "lfs_test.h"
 #include "sys_config_test.h"  // 添加sys_config测试头文件
+#include "connectivity_test.h"
+
+#define TEST_MODULE(func)  do{		\
+	log_w(#func" is running...");	\
+	func;	\
+}while(0)
 
 void run_all_tests(void) {
+	log_w(">>>>> Run Test !!! <<<<<");
 
 #if _led_test_
-  led_test_run();
+  TEST_MODULE(led_test_run());
 #endif
 
 #if _key_test_
-  key_test_run();
+  TEST_MODULE(key_test_run());
 #endif
 
 #if _uart_hal_test_
-  uart_hal_test_run();
+  TEST_MODULE(uart_hal_test_run());
 #endif
 
 #if _uart_queue_test_
-  uart_queue_test_run();
+  TEST_MODULE(uart_queue_test_run());
 #endif
 
 #if _elog_test_
-  elog_test_run();
+  TEST_MODULE(elog_test_run());
 #endif
 
 #if _sdram_test_
-  sdram_test();
+  TEST_MODULE(sdram_test());
 #endif
 
 #if _sys_test_
-  sys_test();
+  TEST_MODULE(sys_test());
 #endif
 
 #if _lcd_test_
-  lcd_test_run();
+  TEST_MODULE(lcd_test_run());
 #endif
 
 #if _lvgl_test_
-  lvgl_test_run();
+  TEST_MODULE(lvgl_test_run());
 #endif
 
 #if _touch_test_
-  touch_test_run();
+  TEST_MODULE(touch_test_run());
 #endif
 
 #if _rtc_test_
-  rtc_test_run();
+  TEST_MODULE(rtc_test_run());
 #endif
 
 #if _wifi_test_
-  wifi_test_run();
+  TEST_MODULE(wifi_test_run());
 #endif
 
 #if _norflash_test_
-  norflash_test();
+  TEST_MODULE(norflash_test());
 #endif
 
 #if _flash_test_
-  flash_integration_test();
+  TEST_MODULE(flash_integration_test());
 #endif
 
 #if _lfs_test_
-  lfs_integration_test();
+  TEST_MODULE(lfs_integration_test());
 #endif
 
 #if _sys_config_test_
-  sys_config_test_run();
+  TEST_MODULE(sys_config_test_run());
 #endif
 
+#if _net_mgr_test_
+  TEST_MODULE(connectivity_test_run());
+#endif
 }
 #else
 void run_all_tests(void) {}

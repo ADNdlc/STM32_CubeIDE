@@ -11,10 +11,10 @@
 #include <string.h>
 
 // 依赖
-#include "uart_queue/uart_queue.h"
 #include "elog.h"
-#include "sys.h"
 #include "gpio_driver.h"
+#include "sys.h"
+#include "uart_queue/uart_queue.h"
 
 // --- Internal Prototypes ---
 static void at_controller_reset_hw(at_controller_t *self);
@@ -81,7 +81,7 @@ static void handle_CMDdata_send(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
   if (self->state == AT_CTRL_STATE_WAIT_DATAIN && self->current_cmd &&
       self->current_cmd->data_to_send) {
-    log_i("Sending CMD data: %s", self->current_cmd->data_to_send);
+    log_d("Send CMD data: %s", self->current_cmd->data_to_send);
     uart_queue_send(self->uart,
                     (const uint8_t *)self->current_cmd->data_to_send,
                     strlen(self->current_cmd->data_to_send));

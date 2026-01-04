@@ -59,9 +59,13 @@ static void notify_observers(void) {
  */
 void sys_state_init(void) {
 #ifndef NDEBUG
+#if LVGL_ENABLE
   shade = create_shade();
   // 绑定回调
   sys_state_subscribe(shade_update_cb);
+#else
+#define shade NULL
+#endif  
 #endif
   // 初始化默认状态
 
@@ -79,7 +83,7 @@ void sys_state_init(void) {
  * @return const sys_state_t*
  */
 const sys_state_t *sys_state_get(void) {
-  log_d("State accessed");
+  //log_v("State accessed");
   return &g_state;
 }
 

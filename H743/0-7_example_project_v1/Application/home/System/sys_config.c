@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 #define LOG_TAG "SYS_CFG"
 #include "elog.h"
 

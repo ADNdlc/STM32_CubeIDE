@@ -107,7 +107,7 @@ int flash_handler_write(const char *path, uint32_t offset, const uint8_t *buf,
 }
 
 // LVGL FS 端口获取文件系统实例
-#include "LittleFS/lfs.h"
+#include "lfs.h"
 lfs_t *flash_handler_get_lfs(const char *prefix) {
   mount_point_t *mp = _find_mount_point(prefix);
   if (!mp || !mp->strategy)

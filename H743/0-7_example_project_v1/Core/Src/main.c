@@ -32,7 +32,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-
+#include "project_cfg.h"
 #include "hal_init.h"
 #include "sys_init.h"
 #include "app.h"
@@ -143,7 +143,7 @@ int main(void)
     app_run(); // 应用运行
 #endif
 
-#if 0
+#if 1
 	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
 	  HAL_Delay(500);
 #endif

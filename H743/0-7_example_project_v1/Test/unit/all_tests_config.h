@@ -28,6 +28,7 @@
 #define _lfs_test_ 0
 #define _norflash_test_ 0
 #define _sys_config_test_ 0
+#define _net_mgr_test_ 1
 
 // 运行所有测试用例
 void run_all_tests(void);
