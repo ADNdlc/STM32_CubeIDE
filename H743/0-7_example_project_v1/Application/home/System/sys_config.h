@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 /**
- * @brief Network Configuration
+ * @brief wifi连接配置
  */
 typedef struct {
   char ssid[33];
@@ -14,7 +14,7 @@ typedef struct {
 } net_config_t;
 
 /**
- * @brief Cloud Platform Types
+ * @brief 云平台类型
  */
 typedef enum {
   CLOUD_PLATFORM_ONENET = 0,
@@ -23,7 +23,7 @@ typedef enum {
 } cloud_platform_t;
 
 /**
- * @brief Cloud Configuration
+ * @brief 云服务配置
  */
 typedef struct {
   cloud_platform_t platform;
@@ -33,7 +33,7 @@ typedef struct {
 } cloud_config_t;
 
 /**
- * @brief Global System Configuration
+ * @brief 全局系统配置
  */
 typedef struct {
   net_config_t net;
@@ -41,13 +41,13 @@ typedef struct {
 } sys_config_t;
 
 /**
- * @brief Initialize system configuration, load from flash
+ * @brief 初始化系统配置
  * @return 0 on success
  */
 int sys_config_init(void);
 
 /**
- * @brief Get global config handle (read-only)
+ * @brief 获取系统配置
  */
 const sys_config_t *sys_config_get(void);
 
@@ -62,7 +62,7 @@ void sys_config_set_net(const net_config_t *net);
 void sys_config_set_cloud(const cloud_config_t *cloud);
 
 /**
- * @brief Save current configuration to flash
+ * @brief 保存当前配置到flash
  * @return 0 on success
  */
 int sys_config_save(void);

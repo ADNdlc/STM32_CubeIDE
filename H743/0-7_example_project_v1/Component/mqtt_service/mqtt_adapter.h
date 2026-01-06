@@ -1,63 +1,85 @@
 #ifndef COMPONENT_MQTT_SERVICE_MQTT_ADAPTER_H_
 #define COMPONENT_MQTT_SERVICE_MQTT_ADAPTER_H_
 
-#include "home/System/thing_model.h"
+#include "../../Application/home/System/thing_model.h"
 #include <stddef.h>
 #include <stdint.h>
 
 /**
- * @brief MQTT Credentials for login
+ * @brief MQTT 登录信息
  */
 typedef struct {
-  char host[64];
-  uint16_t port;
-  char client_id[128];
-  char username[128];
-  char password[128];
+  char host[64];       // 服务器地址
+  uint16_t port;       // 服务器端口
+  char client_id[128]; // 客户端ID
+  char username[128];  // 用户名
+  char password[256];  // 密码
 } mqtt_conn_params_t;
 
 /**
- * @brief MQTT Platform Adapter Interface
+ * @brief 平台适配接口
  */
 typedef struct {
   /**
-   * @brief Generate connection parameters (host, port, user, pwd)
-   *        based on device configuration.
+   * @brief生成连接参数
    */
   void (*get_conn_params)(mqtt_conn_params_t *out_params);
 
   /**
-   * @brief Generate the topic for property publishing
+   * @brief 生成发布主题
+   * @param device_id 设备ID
+   * @param out_topic 输出主题
+   * @param size 输出主题缓冲区大小
    */
   void (*get_post_topic)(const char *device_id, char *out_topic, size_t size);
 
   /**
-   * @brief Generate the topic for command receiving (subscription)
+   * @brief 生成订阅主题
+   * @param device_id 设备ID
+   * @param out_topic 输出主题
+   * @param size 输出主题缓冲区大小
    */
   void (*get_cmd_topic)(const char *device_id, char *out_topic, size_t size);
 
   /**
-   * @brief Pack a property update into the platform's JSON format
+   * @brief 序列化物模型属性
+   * @param device 设备信息
+   * @param prop 属性信息
+   * @param out_buf 输出缓冲区
+   * @param size 输出缓冲区大小
    */
   int (*serialize_post)(const thing_device_t *device,
                         const thing_property_t *prop, char *out_buf,
                         size_t size);
 
   /**
-   * @brief Parse an incoming command from the platform
+   * @brief 解析云平台命令
+   * @param topic 主题
+   * @param payload 数据
+   * @param out_device_id 输出设备ID
+   * @param out_prop_id 输出属性ID
+   * @param out_value 输出属性值
+   * @param out_msg_id 输出消息ID
    */
   int (*parse_command)(const char *topic, const char *payload,
                        char *out_device_id, char *out_prop_id,
                        thing_value_t *out_value, char *out_msg_id);
 
   /**
-   * @brief Generate a reply message for a received command
+   * @brief 生成命令回复数据
+   * @param msg_id 消息ID
+   * @param code 状态码
+   * @param out_buf 输出缓冲区
+   * @param size 输出缓冲区大小
    */
   void (*get_reply_payload)(const char *msg_id, int code, char *out_buf,
                             size_t size);
 
   /**
-   * @brief Generate the topic for the reply
+   * @brief 生成回复主题
+   * @param device_id 设备ID
+   * @param out_topic 输出主题
+   * @param size 输出主题缓冲区大小
    */
   void (*get_reply_topic)(const char *device_id, char *out_topic, size_t size);
 

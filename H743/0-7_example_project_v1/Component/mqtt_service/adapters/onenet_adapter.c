@@ -5,7 +5,7 @@
 #include <string.h>
 
 /**
- * @brief OneNet specific implementation of the MQTT Platform Adapter
+ * @brief 获取OneNet连接参数
  */
 
 static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
@@ -14,17 +14,17 @@ static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
   strcpy(out_params->host, "mqtts.heclouds.com"); // OneNet MQTT host
   out_params->port = 1883;
 
-  // For OneNet, client_id is often the device_id
+  // 对于 OneNet, client_id是设备id
   strcpy(out_params->client_id, cfg->cloud.device_id);
-  // username is the product_id
+  // username是产品id
   strcpy(out_params->username, cfg->cloud.product_id);
-
-  // password for OneNet often requires a token.
-  // For now we use the device_secret as a fixed password if configured for
-  // password login or return the secret directly as a placeholder.
+  // password
   strcpy(out_params->password, cfg->cloud.device_secret);
 }
 
+/**
+ * @brief 获取OneNet物模型属性发布主题
+ */
 static void onenet_get_post_topic(const char *device_id, char *out_topic,
                                   size_t size) {
   const sys_config_t *cfg = sys_config_get();
@@ -32,6 +32,9 @@ static void onenet_get_post_topic(const char *device_id, char *out_topic,
            cfg->cloud.product_id, device_id);
 }
 
+/**
+ * @brief 获取OneNet物模型属性订阅主题
+ */
 static void onenet_get_cmd_topic(const char *device_id, char *out_topic,
                                  size_t size) {
   const sys_config_t *cfg = sys_config_get();
@@ -39,6 +42,9 @@ static void onenet_get_cmd_topic(const char *device_id, char *out_topic,
            cfg->cloud.product_id, device_id);
 }
 
+/**
+ * @brief 序列化OneNet物模型属性
+ */
 static int onenet_serialize_post(const thing_device_t *device,
                                  const thing_property_t *prop, char *out_buf,
                                  size_t size) {
@@ -75,6 +81,9 @@ static int onenet_serialize_post(const thing_device_t *device,
   return 0;
 }
 
+/**
+ * @brief 解析OneNet物模型属性
+ */
 static int onenet_parse_command(const char *topic, const char *payload,
                                 char *out_device_id, char *out_prop_id,
                                 thing_value_t *out_value, char *out_msg_id) {

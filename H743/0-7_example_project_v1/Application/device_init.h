@@ -2,7 +2,7 @@
 #define APPLICATION_HOME_SYSTEM_DEVICE_INIT_H_
 
 /**
- * @brief Initialize all hardware devices and register them with Thing Model
+ * @brief 初始化并注册所有设备
  */
 void sys_devices_init(void);
 

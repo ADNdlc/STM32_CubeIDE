@@ -1,4 +1,5 @@
 #include "net_mgr.h"
+#include "cloud_bridge.h"
 #include "device_mapping.h"
 #include "esp_8266/at_controller.h"
 #include "esp_8266/esp8266_mqtt_driver.h"
@@ -32,7 +33,7 @@ extern const mqtt_adapter_t g_onenet_adapter; // OneNet MQTT适配器
 /*****************
  * 内部状态与回调
  *****************/
-static bool g_wifi_target_state = false;  // 管理器WiFi目标状态(非实际系统状态)
+static bool g_wifi_target_state = false; // 管理器WiFi目标状态(非实际系统状态)
 
 /**
  * @brief WiFi状态变化回调
@@ -53,7 +54,7 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
     // 连接上wifi, 自动启动MQTT服务连接
     log_i("Starting MQTT Service...");
     mqtt_svc_connect(&g_mqtt_svc);
-    
+
   } else if (status == WIFI_STATUS_DISCONNECTED) { // 断开连接
     log_w("Network Offline");
     sys_state_set_wifi(false);
@@ -107,7 +108,7 @@ void net_mgr_init(void) {
   wifi_service_init(&g_wifi_svc, (wifi_driver_t *)&g_esp_drv);
   wifi_service_register_callback(&g_wifi_svc, wifi_event_handler, NULL);
 
-  //  // 6. 初始化MQTT驱动与服务
+  // 6. 初始化MQTT驱动与服务
   esp8266_mqtt_driver_init(&g_mqtt_drv, &g_at_ctrl);
   mqtt_svc_init(&g_mqtt_svc, (mqtt_driver_t *)&g_mqtt_drv, &g_onenet_adapter);
   mqtt_svc_register_callback(&g_mqtt_svc, mqtt_event_handler, NULL);
@@ -117,7 +118,7 @@ void net_mgr_init(void) {
 
 /**
  * @brief 网络管理器循环处理函数
- * 
+ *
  */
 void net_mgr_process(void) {
   // 1. 处理AT控制器层
@@ -126,6 +127,7 @@ void net_mgr_process(void) {
   // 2. 处理服务层
   wifi_svc_process(&g_wifi_svc);
   mqtt_svc_process(&g_mqtt_svc);
+  cloud_bridge_process();
 }
 
 /****************
@@ -145,13 +147,13 @@ void net_mgr_wifi_enable(bool enable) {
                      cfg->net.password); // 使用配置里的信息进行连接
   } else {
     log_i("WiFi disabling requested...");
-    wifi_svc_disconnect(&g_wifi_svc);    // 断开连接
+    wifi_svc_disconnect(&g_wifi_svc); // 断开连接
   }
 }
 
 /**
  * @brief wifi使能状态查询
- * 
+ *
  * @return g_wifi_target_state true:启用,false:禁用
  */
 bool net_mgr_wifi_is_enabled(void) { return g_wifi_target_state; }

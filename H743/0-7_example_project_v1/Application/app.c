@@ -32,8 +32,6 @@
 #endif
 
 int app_init(void) {
-
-
 #if CONFIG_RES_BURN_ENABLE
   sys_delay_ms(1000);
   res_burner_run();

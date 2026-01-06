@@ -15,13 +15,11 @@ typedef enum {
   RES_IMG_COUNT
 } res_id_t;
 
-// #define RES_USE_INTERNAL_FLASH
-
 /**
- * @brief Get the source path for an image resource
+ * @brief 获取资源
  *
  * @param id Resource ID
- * @return const void* LVGL source: string path (external) or pointer (internal)
+ * @return const void* LVGL资源: FS路径 (外部flash) or 地址 (片上)
  */
 const void *res_get_src(res_id_t id);
 

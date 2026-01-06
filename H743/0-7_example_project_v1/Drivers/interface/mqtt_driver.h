@@ -4,44 +4,49 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
 /**
- * @brief MQTT Connection Parameters
+ * @brief 连接参数
  */
 typedef struct {
-  const char *host;
-  uint16_t port;
-  const char *client_id;
-  const char *username;
-  const char *password;
-  uint16_t keepalive;
+  const char *host;      // 服务器地址
+  uint16_t port;         // 服务器端口
+  const char *client_id; // 客户端ID
+  const char *username;  // 用户名
+  const char *password;  // 密码
+  uint16_t keepalive;    // 保持连接时间间隔(秒)
 } mqtt_driver_conn_params_t;
 
 /**
- * @brief MQTT Events
+ * @brief MQTT事件类型
  */
 typedef enum {
-  MQTT_DRV_EVENT_CONNECTED,
-  MQTT_DRV_EVENT_DISCONNECTED,
-  MQTT_DRV_EVENT_DATA,
+  MQTT_DRV_EVENT_CONNECTED,     // 已连接
+  MQTT_DRV_EVENT_DISCONNECTED,  // 已断开
+  MQTT_DRV_EVENT_DATA,          // 收到订阅数据
 } mqtt_drv_event_type_t;
 
+/**
+ * @brief MQTT事件体
+ */
 typedef struct {
-  mqtt_drv_event_type_t type;
-  const char *topic;
-  const char *payload;
-  uint16_t payload_len;
+  mqtt_drv_event_type_t type; // 事件类型
+  const char *topic;          // 主题(仅DATA事件有效)
+  const char *payload;        // 数据
+  uint16_t payload_len;       // 数据长度
 } mqtt_drv_event_t;
 
 /**
- * @brief Event Callback
+ * @brief 事件处理回调原型
+ *
+ * @param arg 事件回调参数
+ * @param event 事件类型
  */
 typedef void (*mqtt_drv_event_cb_t)(void *arg, mqtt_drv_event_t *event);
 
 typedef struct mqtt_driver_t mqtt_driver_t;
 
 /**
- * @brief MQTT Driver Interface (VTable)
+ * @brief MQTT驱动接口
  */
 typedef struct {
   int (*connect)(mqtt_driver_t *self, const mqtt_driver_conn_params_t *params);

@@ -1,8 +1,10 @@
 #include "cloud_bridge.h"
+#include "main.h"
 #include <string.h>
 
+
 #define LOG_TAG "CLOUD_BR"
-#include "elog.h"
+#include "../../../lib/EasyLogger/easylogger/inc/elog.h"
 
 static mqtt_service_t *g_mqtt_svc = NULL;
 
@@ -13,31 +15,9 @@ static mqtt_service_t *g_mqtt_svc = NULL;
 static void on_thing_model_event(const thing_model_event_t *event,
                                  void *user_data) {
   if (event->type == THING_EVENT_PROPERTY_CHANGED) {
-    // Only publish if the change didn't come from the cloud itself
-    if (event->source != 1) {
-      log_i("CloudBridge: Property %s.%s changed locally, publishing...",
-            event->device_id, event->prop_id);
-
-      // Find the device and property for publishing
-      thing_device_t *dev = NULL;
-      for (int i = 0; i < thing_model_get_count(); i++) {
-        thing_device_t *d = thing_model_get_device(i);
-        if (d && strcmp(d->device_id, event->device_id) == 0) {
-          dev = d;
-          break;
-        }
-      }
-
-      if (dev) {
-        // Find prop
-        for (int j = 0; j < dev->prop_count; j++) {
-          if (strcmp(dev->properties[j].id, event->prop_id) == 0) {
-            mqtt_svc_publish_property(g_mqtt_svc, dev, &dev->properties[j]);
-            break;
-          }
-        }
-      }
-    }
+    // Note: Immediate publish removed in favor of periodic polling via is_dirty
+    // flag.
+    // This allows batching and prevents flooding during rapid changes.
   }
 }
 
@@ -56,11 +36,47 @@ static void on_mqtt_svc_event(mqtt_service_t *svc, mqtt_svc_state_t state,
 void cloud_bridge_init(mqtt_service_t *mqtt_svc) {
   g_mqtt_svc = mqtt_svc;
 
-  // 1. Listen to Thing Model changes
+  // 1. Listen to Thing Model changes (mostly for metadata or immediate events
+  // if needed later)
   thing_model_add_observer(on_thing_model_event, NULL);
 
   // 2. Listen to MQTT service status
   mqtt_svc_register_callback(g_mqtt_svc, on_mqtt_svc_event, NULL);
 
   log_i("Cloud Bridge initialized.");
+}
+
+#define CLOUD_SYNC_INTERVAL_MS 500
+static uint32_t g_last_sync_time = 0;
+
+void cloud_bridge_process(void) {
+  if (!g_mqtt_svc ||
+      mqtt_svc_get_state(g_mqtt_svc) != MQTT_SVC_STATE_CONNECTED) {
+    return;
+  }
+
+  uint32_t now = HAL_GetTick();
+  if (now - g_last_sync_time < CLOUD_SYNC_INTERVAL_MS) {
+    return;
+  }
+  g_last_sync_time = now;
+
+  // Scan for dirty properties and sync
+  uint8_t dev_count = thing_model_get_count();
+  for (uint8_t i = 0; i < dev_count; i++) {
+    thing_device_t *dev = thing_model_get_device(i);
+    if (!dev)
+      continue;
+
+    for (uint8_t j = 0; j < dev->prop_count; j++) {
+      thing_property_t *prop = &dev->properties[j];
+      if (prop->is_dirty && prop->cloud_sync) {
+        log_d("CloudBridge: Syncing dirty property %s.%s", dev->device_id,
+              prop->id);
+        if (mqtt_svc_publish_property(g_mqtt_svc, dev, prop) == 0) {
+          prop->is_dirty = false; // Successfully sent
+        }
+      }
+    }
+  }
 }

@@ -28,7 +28,7 @@ static const wifi_driver_ops_t esp8266_ops = {
     .get_status = esp8266_get_status,
 };
 
-// --- URC Handlers ---
+// --- URC 处理回调 ---
 static void handle_wifi_connected(void *ctx, const char *line) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)ctx;
   self->status = WIFI_STATUS_CONNECTED;
@@ -47,7 +47,7 @@ static void handle_wifi_disconnected(void *ctx, const char *line) {
   log_i("WiFi Disconnected");
 }
 
-// --- Driver Implementation ---
+// --- 驱动接口实现 ---
 
 void esp8266_wifi_driver_init(esp8266_wifi_driver_t *self,
                               at_controller_t *at_ctrl) {
@@ -60,26 +60,22 @@ void esp8266_wifi_driver_init(esp8266_wifi_driver_t *self,
   self->mode = WIFI_MODE_STATION;
   self->scan_count = 0;
 
-  // Register URC handlers
+  // 注册URC处理
   at_controller_register_handler(at_ctrl, "WIFI CONNECTED",
                                  handle_wifi_connected, self);
   at_controller_register_handler(at_ctrl, "WIFI GOT IP", handle_wifi_got_ip,
                                  self);
   at_controller_register_handler(at_ctrl, "WIFI DISCONNECT",
                                  handle_wifi_disconnected, self);
-
-  // Initialization sequence
-  AT_Cmd_t init_cmds[] = {
-      {.cmd_str = "AT+SYSSTORE=1\r\n", .timeout_ms = 1000},
-      {.cmd_str = "ATE0\r\n", .timeout_ms = 1000},
-      {.cmd_str = "AT+CWAUTOCONN=0\r\n", .timeout_ms = 1000},
-  };
-
-  for (int i = 0; i < sizeof(init_cmds) / sizeof(init_cmds[0]); i++) {
-    at_controller_submit_cmd(at_ctrl, &init_cmds[i]);
-  }
 }
 
+/**
+ * @brief 设置WiFi工作模式
+ *
+ * @param base 驱动实例
+ * @param mode 工作模式
+ * @return int 0:提交成功, -1:提交失败
+ */
 static int esp8266_set_mode(wifi_driver_t *base, wifi_mode_t mode) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)base;
   char cmd[32];
@@ -99,6 +95,14 @@ static int esp8266_set_mode(wifi_driver_t *base, wifi_mode_t mode) {
   return -1;
 }
 
+/**
+ * @brief 连接WiFi网络
+ *
+ * @param base 驱动实例
+ * @param ssid 连接ap的SSID
+ * @param pwd  连接ap的密码
+ * @return int 0:提交成功, -1:提交失败
+ */
 static int esp8266_connect(wifi_driver_t *base, const char *ssid,
                            const char *pwd) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)base;
@@ -110,10 +114,13 @@ static int esp8266_connect(wifi_driver_t *base, const char *ssid,
       .timeout_ms = 20000, // Connecting can take a long time
   };
 
-  self->status = WIFI_STATUS_CONNECTING;
+  self->status = WIFI_STATUS_CONNECTING; // 状态变为连接中
   return at_controller_submit_cmd(self->at_ctrl, &at_cmd);
 }
 
+/**
+ * @brief 断开WiFi连接
+ */
 static int esp8266_disconnect(wifi_driver_t *base) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)base;
   AT_Cmd_t at_cmd = {
@@ -124,59 +131,43 @@ static int esp8266_disconnect(wifi_driver_t *base) {
 }
 
 /**
- * @brief Robust parser for +CWLAP lines
- * Spec:
+ * @brief AP扫描结果解析(解析一条)
+ * 扫描结果格式:
  * +CWLAP:(<ecn>,<"ssid">,<rssi>,<"mac">,<channel>,<freq_offset>,<freqcal_val>,<pairwise_cipher>,<group_cipher>,<wifi_protocol>,<wps>)
  */
-static void parse_scan_result(const char *line) {
-  if (strncmp(line, "+CWLAP:", 7) != 0)
-    return;
-
-  // We need to find the driver instance. Unfortunately the AT command parser_cb
-  // doesn't take context currently. In a real system we'd use a global or a
-  // better parser registration. For this project, let's assume we use a
-  // singleton or find a way to pass context. Actually, I should have modified
-  // the parser_cb to take a ctx.
-}
-
-// Fixed parser with context
-static void parse_scan_result_v2(void *ctx, const char *line) {
+static void parse_scan_result(void *ctx, const char *line) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)ctx;
-  if (strncmp(line, "+CWLAP:", 7) != 0)
+  if (strncmp(line, "+CWLAP:", 7) != 0) // 检查前缀
     return;
-  if (self->scan_count >= 20)
+  if (self->scan_count >= 10)
     return;
 
-  wifi_ap_info_t *ap = &self->scan_results[self->scan_count];
+  wifi_ap_info_t *ap = &self->scan_results[self->scan_count]; // 存储结果
 
-  // Use sscanf to extract fields. Note: SSID and MAC contain quotes.
-  // +CWLAP:(3,"test1",-20,"e2:b8:a6:e2:e3:10",6,-1,-1,4,4,7,0)
+  // +CWLAP:(3,"test1",-20,"f1:f2:f3:f4:f5:67",6,-1,-1,4,4,7,0)
   int ecn, rssi, channel, pw_cipher, gr_cipher, proto, wps;
-  char ssid[33];
-  char mac[18];
 
-  // Using a more manual approach because of quotes in string fields
   const char *p = line + 8; // skip "+CWLAP:("
 
   // <ecn>
-  ecn = atoi(p);
-  p = strchr(p, ',');
+  ecn = atoi(p);      // 转换为整数
+  p = strchr(p, ','); // 找到下一项(","为分隔符)
   if (!p)
     return;
-  p++;
+  p++; // 现在应该指向"SSID"开头的双引号
 
   // <"ssid">
-  if (*p == '\"')
+  if (*p == '\"') // 如果符合预期,p将指向SSID具体内容
     p++;
-  const char *ssid_end = strchr(p, '\"');
+  const char *ssid_end = strchr(p, '\"'); // 找到"SSID"结束的双引号
   if (!ssid_end)
     return;
-  size_t ssid_len = ssid_end - p;
+  size_t ssid_len = ssid_end - p; // 计算SSID长度
   if (ssid_len > 32)
     ssid_len = 32;
-  memcpy(ap->ssid, p, ssid_len);
+  memcpy(ap->ssid, p, ssid_len); // 复制SSID内容到结果表项对应成员中
   ap->ssid[ssid_len] = '\0';
-  p = ssid_end + 2; // skip quote and comma
+  p = ssid_end + 2;
 
   // <rssi>
   rssi = atoi(p);
@@ -213,7 +204,7 @@ static void parse_scan_result_v2(void *ctx, const char *line) {
   p = strchr(p, ',');
   if (!p)
     return;
-  p++;
+  p++; // 应该指向pairwise_cipher值
 
   // <pairwise_cipher>
   pw_cipher = atoi(p);
@@ -255,19 +246,11 @@ static int esp8266_scan(wifi_driver_t *base, wifi_scan_cb_t cb, void *arg) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)base;
   self->scan_count = 0; // Reset count
 
-  // Note: I need to update the AT_Cmd_t to allow a context for the parser.
-  // Since I can't easily change the AT controller's callback signature right
-  // now without breaking things, I will use at_controller_register_handler for
-  // +CWLAP temporarily or just hope it matches. Actually, the implementation
-  // plan said "Pass unhandled lines to command parser". But wait, it's better
-  // if the parser_cb takes a context. Let's modify AT_Cmd_t and at_controller.c
-  // to support it.
-
   AT_Cmd_t at_cmd = {
       .cmd_str = "AT+CWLAP\r\n",
       .timeout_ms = 10000,
-      .parser_cb = (at_parser_cb_t)
-          parse_scan_result_v2, // Cheat and pass context if I update it
+      .parser_cb =
+          (at_parser_cb_t)parse_scan_result, // 解析函数设置为查询处理回调
   };
 
   return at_controller_submit_cmd(self->at_ctrl, &at_cmd);

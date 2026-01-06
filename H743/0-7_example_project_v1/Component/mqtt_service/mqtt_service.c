@@ -5,21 +5,23 @@
 #define LOG_TAG "MQTT_SVC"
 #include "elog.h"
 
-// --- Local Event Handler for Driver Events ---
+/*******************
+ * mqtt事件处理回调
+ *******************/
 static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
   mqtt_service_t *self = (mqtt_service_t *)arg;
 
   switch (event->type) {
-  case MQTT_DRV_EVENT_CONNECTED:
-    self->state = MQTT_SVC_STATE_CONNECTED;
+  case MQTT_DRV_EVENT_CONNECTED:            // 连接成功
+    self->state = MQTT_SVC_STATE_CONNECTED; // 更新服务状态
     log_i("Service: MQTT Connected.");
     if (self->event_cb) {
-      self->event_cb(self, self->state, self->user_data);
+      self->event_cb(self, self->state, self->user_data); // 通知外部回调
     }
-    // Here we could auto-subscribe to topics if needed
+ 
     break;
 
-  case MQTT_DRV_EVENT_DISCONNECTED:
+  case MQTT_DRV_EVENT_DISCONNECTED:        // 断开连接
     self->state = MQTT_SVC_STATE_DISCONNECTED;
     log_w("Service: MQTT Disconnected.");
     if (self->event_cb) {
@@ -27,22 +29,23 @@ static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
     }
     break;
 
-  case MQTT_DRV_EVENT_DATA: {
+  case MQTT_DRV_EVENT_DATA: {           // 收到订阅数据
     log_i("Service: Data received on topic %s", event->topic);
 
-    char dev_id[64];
-    char prop_id[64];
-    thing_value_t val;
-    char msg_id[64];
+    char dev_id[64];  // 设备ID
+    char prop_id[64]; // 属性ID
+    thing_value_t val;// 属性值
+    char msg_id[64];  // 消息ID
 
+    // 调用(平台)适配器解析命令
     if (self->adapter &&
         self->adapter->parse_command(event->topic, event->payload, dev_id,
                                      prop_id, &val, msg_id) == 0) {
-      // Find device and update property in Thing Model
+      // 更新数据模型属性
       // Source 1 = Cloud
       thing_model_set_prop(dev_id, prop_id, val, 1);
 
-      // Cloud Reply (Safe & Generic)
+      // 回复云平台
       char reply_topic[128];
       char reply_payload[256];
       self->adapter->get_reply_topic(dev_id, reply_topic, sizeof(reply_topic));
@@ -63,7 +66,7 @@ void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv,
   self->adapter = adapter;
   self->state = MQTT_SVC_STATE_DISCONNECTED;
 
-  // Wire up the driver events to the service
+  // 连接服务和驱动的事件传递
   if (self->drv) {
     MQTT_DRV_SET_CB(self->drv, mqtt_drv_event_handler, self);
   }

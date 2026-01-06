@@ -1,23 +1,71 @@
 #include "thing_model.h"
-#include <stdlib.h> // Added as per instruction
+#include "elog.h"
+#include <stdlib.h>
 #include <string.h>
 
+
 #define LOG_TAG "THING_MODEL"
-#include "../../../lib/EasyLogger/easylogger/inc/elog.h" // Path for elog.h is already correct
 
 #define MAX_THING_DEVICES 16
 #define MAX_THING_OBSERVERS 4
 
-static thing_device_t *g_devices[MAX_THING_DEVICES];
-static uint8_t g_device_count = 0;
+/****************
+ * 内部变量
+ ****************/
 
+static thing_device_t *g_devices[MAX_THING_DEVICES]; // 设备列表
+static uint8_t g_device_count = 0;                   // 已注册的设备数
+
+/**
+ * @brief 物模型观察者
+ *
+ */
 typedef struct {
-  thing_model_event_cb cb;
+  thing_model_event_cb cb; // 事件通知回调
   void *user_data;
 } thing_observer_t;
 
-static thing_observer_t g_observers[MAX_THING_OBSERVERS];
-static uint8_t g_observer_count = 0;
+static thing_observer_t g_observers[MAX_THING_OBSERVERS]; // 观察者列表
+static uint8_t g_observer_count = 0; // 已注册的观察者数
+
+/****************
+ * 工具方法
+ ****************/
+/**
+ * @brief 查找设备
+ *
+ * @param device_id 设备ID
+ * @return thing_device_t* 设备
+ */
+thing_device_t *find_device_by_id(const char *device_id) {
+  for (int i = 0; i < g_device_count; i++) {
+    if (strcmp(g_devices[i]->device_id, device_id) == 0) {
+      return g_devices[i];
+    }
+  }
+  return NULL;
+}
+
+/**
+ * @brief 查找属性
+ *
+ * @param dev 设备
+ * @param prop_id 属性ID
+ * @return thing_property_t* 属性
+ */
+thing_property_t *find_property_by_id(thing_device_t *dev,
+                                      const char *prop_id) {
+  for (int i = 0; i < dev->prop_count; i++) {
+    if (strcmp(dev->properties[i].id, prop_id) == 0) {
+      return &dev->properties[i];
+    }
+  }
+  return NULL;
+}
+
+/****************
+ * 外部api
+ ****************/
 
 void thing_model_init(void) {
   memset(g_devices, 0, sizeof(g_devices));
@@ -27,6 +75,12 @@ void thing_model_init(void) {
   log_i("Thing Model Manager initialized.");
 }
 
+/**
+ * @brief 添加观察者
+ *
+ * @param cb 回调函数
+ * @param user_data 用户数据
+ */
 void thing_model_add_observer(thing_model_event_cb cb, void *user_data) {
   if (g_observer_count < MAX_THING_OBSERVERS) {
     g_observers[g_observer_count].cb = cb;
@@ -35,20 +89,26 @@ void thing_model_add_observer(thing_model_event_cb cb, void *user_data) {
   }
 }
 
+/**
+ * @brief 注册设备到物模型
+ * @param tmpl 设备物模型模板
+ * @return thing_device_t* 注册的设备
+ */
 thing_device_t *thing_model_register(const thing_device_t *tmpl) {
   if (g_device_count >= MAX_THING_DEVICES) {
     log_e("Maximum device count reached.");
     return NULL;
   }
 
-  // Allocate memory for device structure
+  // 分配设备结构体内存
   thing_device_t *dev = (thing_device_t *)malloc(sizeof(thing_device_t));
   if (!dev)
     return NULL;
 
+  // 深拷贝设备模板
   memcpy(dev, tmpl, sizeof(thing_device_t));
 
-  // Deep copy properties
+  // 深拷贝属性
   if (tmpl->prop_count > 0) {
     dev->properties =
         (thing_property_t *)malloc(sizeof(thing_property_t) * tmpl->prop_count);
@@ -67,46 +127,54 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
   return dev;
 }
 
+/**
+ * @brief 设置设备属性
+ *
+ * @param device_id 设备ID
+ * @param prop_id 属性ID
+ * @param value 属性值
+ * @param source 源
+ * @return true
+ * @return false
+ */
 bool thing_model_set_prop(const char *device_id, const char *prop_id,
                           thing_value_t value, int source) {
-  // 1. Find the device
+  // 1. 寻找目标设备
   thing_device_t *target_dev = NULL;
-  for (int i = 0; i < g_device_count; i++) {
-    if (strcmp(g_devices[i]->device_id, device_id) == 0) {
-      target_dev = g_devices[i];
-      break;
-    }
+  target_dev = find_device_by_id(device_id);
+  if (!target_dev) {
+    log_e("Device not found: %s", device_id);
+    return false;
   }
 
-  if (!target_dev)
-    return false;
-
-  // 2. Find the property
+  // 2. 寻找目标属性
   thing_property_t *target_prop = NULL;
-  for (int j = 0; j < target_dev->prop_count; j++) {
-    if (strcmp(target_dev->properties[j].id, prop_id) == 0) {
-      target_prop = &target_dev->properties[j];
-      break;
-    }
+  target_prop = find_property_by_id(target_dev, prop_id);
+  if (!target_prop) {
+    log_e("Property not found: %s.%s", device_id, prop_id);
+    return false;
   }
 
-  if (!target_prop)
-    return false;
-
-  // 3. Trigger Hardware Callback (if applicable and not from driver itself)
+  // 3. 调用目标设备的属性设置回调并传递变更属性值
   if (source != 2 && target_dev->on_prop_set) {
     if (!target_dev->on_prop_set(target_dev, prop_id, value)) {
       log_w("Driver rejected property update: %s.%s", device_id, prop_id);
       return false;
     }
+  } else {
+    log_d("%s's prop %s updated to %s by source %d", device_id, prop_id, value,
+          source);
   }
 
-  // 4. Update internal value
-  // Note: for STRING types, we might need a more complex copy if it's not a
-  // constant
+  // 4. 更新内部属性值
   target_prop->value = value;
 
-  // 5. Notify Observers (UI Refresh and Cloud Post)
+  // 如果来源不是云端（即本地 UI 或硬件上报），则标记为“脏”，待后续同步
+  if (source != 1 && target_prop->cloud_sync) {
+    target_prop->is_dirty = true;
+  }
+
+  // 5. 通知观察者
   thing_model_event_t evt = {.type = THING_EVENT_PROPERTY_CHANGED,
                              .device_id = device_id,
                              .prop_id = prop_id,
@@ -124,10 +192,31 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
   return true;
 }
 
+/**
+ * @brief 获取设备
+ *
+ * @param index 设备索引
+ * @return thing_device_t* 设备指针
+ */
 thing_device_t *thing_model_get_device(uint8_t index) {
   if (index < g_device_count)
     return g_devices[index];
   return NULL;
 }
 
+/**
+ * @brief 获取已注册的设备数量
+ *
+ * @return uint8_t 设备数量
+ */
 uint8_t thing_model_get_count(void) { return g_device_count; }
+
+void thing_model_clear_dirty(const char *device_id, const char *prop_id) {
+  thing_device_t *dev = find_device_by_id(device_id);
+  if (dev) {
+    thing_property_t *prop = find_property_by_id(dev, prop_id);
+    if (prop) {
+      prop->is_dirty = false;
+    }
+  }
+}

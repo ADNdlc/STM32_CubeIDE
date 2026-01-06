@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 /**
- * @brief Thing Model Property Types
+ * @brief 物模型属性类型定义
  */
 typedef enum {
   THING_PROP_TYPE_SWITCH = 0, // Boolean
@@ -16,7 +16,7 @@ typedef enum {
 } thing_prop_type_t;
 
 /**
- * @brief Thing Model Property Value
+ * @brief 属性值定义
  */
 typedef union {
   bool b;
@@ -26,97 +26,114 @@ typedef union {
 } thing_value_t;
 
 /**
- * @brief Thing Model Property Definition
+ * @brief 物模型属性定义
  */
 typedef struct {
-  const char *id;         // Property ID (e.g., "led0", "temp")
-  const char *name;       // Display Name (e.g., "Main Light", "Temperature")
-  thing_prop_type_t type; // Data Type
-  thing_value_t value;    // Current Value
+  const char *id;         // 属性识别ID (e.g., "pwr", "temp")
+  const char *name;       // 属性显示名称 (e.g., "Main Light", "Temperature")
+  thing_prop_type_t type; // 数据类型
+  thing_value_t value;    // 当前值
 
-  // Constraints (optional)
+  // 约束条件 (可选)
   int32_t min;
   int32_t max;
   const char *unit; // e.g., "C", "%"
 
-  // Flags
+  // 读写类型和云同步
   bool readable;
   bool writable;
   bool cloud_sync; // Whether to report to cloud
+  bool is_dirty;   // Added to track changes for periodic reporting
 } thing_property_t;
 
-/**
- * @brief Thing Model Device Definition
- */
 typedef struct thing_device_t thing_device_t;
 
 /**
- * @brief Callback for property changes (hardware driver implementation)
+ * @brief 属性设置回调 (硬件驱动实现)
  */
 typedef bool (*thing_on_prop_set_cb)(thing_device_t *device,
                                      const char *prop_id, thing_value_t value);
 
+/**
+ * @brief 物模型设备定义
+ */
 struct thing_device_t {
-  const char *device_id; // Cloud Device ID
-  const char *name;      // Display Name
-  const void *icon;      // Pointer to LVGL image source
+  const char *device_id; // 云端设备识别ID
+  const char *name;      // 显示名称
+  const void *icon;      // LVGL图标
 
-  thing_property_t *properties;
-  uint8_t prop_count;
+  thing_property_t *properties; // 属性列表
+  uint8_t prop_count;           // 属性数量
 
-  thing_on_prop_set_cb on_prop_set;
-  void *user_data; // Private driver data
+  thing_on_prop_set_cb on_prop_set; // 属性设置回调
+  void *user_data;                  // 私有数据
 };
 
 /**
- * @brief Thing Model Events
+ * @brief 物模型事件类型
  */
 typedef enum {
-  THING_EVENT_PROPERTY_CHANGED, // Property updated (source info in event)
-  THING_EVENT_DEVICE_REGISTERED,
+  THING_EVENT_PROPERTY_CHANGED,  // 属性更新 (事件中包含源信息)
+  THING_EVENT_DEVICE_REGISTERED, // 设备注册
 } thing_event_type_t;
 
+/**
+ * @brief 物模型事件
+ */
 typedef struct {
-  thing_event_type_t type;
-  const char *device_id;
-  const char *prop_id;
-  thing_value_t value;
-  int source; // 0 for Local(UI), 1 for Cloud, 2 for Driver
+  thing_event_type_t type; // 事件类型
+  const char *device_id;   // 设备ID
+  const char *prop_id;     // 属性ID
+  thing_value_t value;     // 属性值
+  int source;              // 事件来源
 } thing_model_event_t;
 
+/**
+ * @brief 物模型事件回调原型
+ */
 typedef void (*thing_model_event_cb)(const thing_model_event_t *event,
                                      void *user_data);
 
 /**
- * @brief Initialize the Thing Model Manager
+ * @brief 初始化物模型管理器
  */
 void thing_model_init(void);
 
 /**
- * @brief Register a global event observer
+ * @brief 注册一个全局事件观察者
  */
 void thing_model_add_observer(thing_model_event_cb cb, void *user_data);
 
 /**
- * @brief Register a device with the Thing Model
+ * @brief 注册一个设备到物模型
  */
 thing_device_t *thing_model_register(const thing_device_t *tmpl);
 
 /**
- * @brief Update a property value (Entry point for UI or Cloud control)
+ * @brief 更新一个属性值 (入口点为UI或云控制)
  * @param source 0 for Local(UI), 1 for Cloud, 2 for Driver
  */
 bool thing_model_set_prop(const char *device_id, const char *prop_id,
                           thing_value_t value, int source);
 
 /**
- * @brief Get a device by index
+ * @brief 通过索引获取一个设备
  */
 thing_device_t *thing_model_get_device(uint8_t index);
 
 /**
- * @brief Get total device count
+ * @brief 获取设备总数
  */
 uint8_t thing_model_get_count(void);
 
 #endif /* APPLICATION_HOME_SYSTEM_THING_MODEL_H_ */
+
+/**
+ * @brief 查找属性
+ */
+thing_property_t *find_property_by_id(thing_device_t *dev, const char *prop_id);
+
+/**
+ * @brief 查找设备
+ */
+thing_device_t *find_device_by_id(const char *device_id);
