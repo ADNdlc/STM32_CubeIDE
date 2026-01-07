@@ -3,6 +3,8 @@
 
 #include "lvgl.h"
 
+#if 0
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -18,6 +20,8 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif

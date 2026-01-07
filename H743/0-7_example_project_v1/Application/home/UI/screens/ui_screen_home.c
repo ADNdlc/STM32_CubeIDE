@@ -4,7 +4,6 @@
 #include "app_manager.h"
 #include "lv_util.h"
 #include "core_app.h"
-#include "lv_util.h"
 #include <assert.h>
 #include <stdio.h>
 

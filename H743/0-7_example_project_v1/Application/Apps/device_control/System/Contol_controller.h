@@ -4,6 +4,9 @@
 #include "thing_model.h"
 #include "lvgl.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef MAX_ID_LENGTH
 #define MAX_ID_LENGTH 32
@@ -22,5 +25,9 @@ void ui_state_update_cb(const thing_model_event_t *event, void *user_data);
 void controller_init_main_tab(lv_obj_t *tab_main);
 void controller_init_user_tab(lv_obj_t *tab_user);
 void controller_init_add_tab(lv_obj_t *tab_add);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

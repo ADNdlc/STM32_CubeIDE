@@ -1,15 +1,8 @@
 #ifndef APPLICATION_HOME_SYSTEM_NET_MGR_H_
 #define APPLICATION_HOME_SYSTEM_NET_MGR_H_
 
-#include "wifi_driver.h"
 #include <stdbool.h>
 #include <stdint.h>
-
-/**
- * @brief 网络管理器,此模块
- * 
- */
-
 
 /**
  * @brief 初始化网络管理器(wifi,mqtt,sntp,etc)

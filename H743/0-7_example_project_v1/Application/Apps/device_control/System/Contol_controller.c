@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#if 0
 
 // 定义一个映射结构体和数组来存储控件
 #define MAX_UI_CONTROLS 32
@@ -131,3 +132,5 @@ void controller_init_main_tab(lv_obj_t *tab) {
 void controller_init_user_tab(lv_obj_t *tab_user) {}
 
 void controller_init_add_tab(lv_obj_t *tab_add) {}
+
+#endif

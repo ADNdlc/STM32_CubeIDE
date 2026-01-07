@@ -1,5 +1,7 @@
 #include "ui_sys_panel.h"
+#if !USE_Simulator
 #include "../../System/net_mgr.h"
+#endif
 #include "res_manager.h"
 #include "input_manager.h"
 #include "sys_state.h"
@@ -268,13 +270,11 @@ static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent) {
   /* 音量滑块 */
   volume_module_create(content_container, state->volume, 4, 1, 1, 2);
   /* WiFi 按钮 */
-  wifi_module_create(content_container, net_mgr_wifi_is_enabled(), 5, 1, 1, 1);
+  wifi_module_create(content_container, state->wifi_connected, 5, 1, 1, 1);
 
-  // #ifndef NODEBUG
-  //// 布局测试
-  // #include "components/util.h"
-  //   test_layout_grid(content_container, , );
-  // #endif
+  // 布局测试
+  // #includ "lv_util.h"
+  // test_layout_grid(content_container, , );
 
   return content_container; // 添加返回语句
 }
@@ -545,8 +545,11 @@ static void event_wifi_cb(lv_event_t *e) {
   bool checked = lv_obj_has_state(btn, LV_STATE_CHECKED);
 
   // 发起连接请求(由 net_mgr 处理实际状态同步)
+#if !USE_Simulator
   net_mgr_wifi_enable(checked);
-
+#else
+log_d("wifi is connected.");
+#endif
   // 图标颜色渲染
   lv_obj_t *img = lv_obj_get_child(btn, 0);
   if (img) {

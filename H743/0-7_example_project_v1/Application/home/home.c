@@ -2,11 +2,9 @@
 #include "SystemUI/ui_sys_panel.h"
 #include "app_manager.h"
 #include "input_manager.h"
-#include "net_mgr.h"
 #include "screens/ui_screen_home.h"
 #include "sys_state.h"
-#include <home.h>
-
+#include "home.h"
 #define LOG_TAG "UI"
 #include "elog.h"
 

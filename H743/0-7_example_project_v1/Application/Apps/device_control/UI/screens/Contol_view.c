@@ -4,6 +4,7 @@
 #include "../components/style_util.h"
 #include <stdio.h>
 
+#if 0
 
 LV_IMG_DECLARE(default_user);
 //
@@ -252,3 +253,5 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
 
   return card;
 }
+
+#endif

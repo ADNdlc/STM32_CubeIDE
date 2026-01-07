@@ -44,10 +44,9 @@ static lv_obj_t *create_device_control_screen(void)
 	lv_obj_t *screen = lv_obj_create(NULL);
 	// 创建 Tabview 作为app根容器
 	lv_obj_t *tabview = lv_tabview_create(screen, LV_DIR_BOTTOM, scr_act_height() / 12);
-	style_tabview_simple(tabview, style_get_base_default(),
-						 style_get_base_checked());
+	style_tabview_simple(tabview, style_get_base_default(), style_get_base_checked());
 
-	create_main(tabview);
+	//create_main(tabview);
 	//create_add(tabview);
 	//create_user(tabview);
 

@@ -4,9 +4,6 @@
  *  Created on: Dec 15, 2025
  *      Author: 12114
  */
-
-#define USE_Simulator 1
-
 #include "app.h"
 #define LOG_TAG "APP"
 #include "elog.h"
@@ -27,7 +24,7 @@
 #if LVGL_ENABLE
 #include "lvgl.h"
 #include "Colorwheel/colorwheel.h"
-//#include "device_control/device_control.h"
+#include "device_control/device_control.h"
 #endif
 
 int app_init(void) {
