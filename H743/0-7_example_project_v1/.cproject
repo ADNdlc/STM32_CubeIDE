@@ -76,8 +76,10 @@
 									<listOptionValue builtIn="false" value="../Test/unit"/>
 									<listOptionValue builtIn="false" value="../LVGL/lvgl-release-v8.3"/>
 									<listOptionValue builtIn="false" value="../LVGL/lvgl-release-v8.3/demos"/>
+									<listOptionValue builtIn="false" value="../LVGL/lv_util"/>
 									<listOptionValue builtIn="false" value="../HAL/hal_init"/>
 									<listOptionValue builtIn="false" value="../Application"/>
+									<listOptionValue builtIn="false" value="../Application/assets_handler"/>
 									<listOptionValue builtIn="false" value="../Application/home"/>
 									<listOptionValue builtIn="false" value="../Application/home/System"/>
 									<listOptionValue builtIn="false" value="../Application/home/UI"/>
@@ -109,13 +111,9 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1962495330" name="dev_token.h" rcbsApplicability="disable" resourcePath="Component/mqtt_service/adapters/dev_token.h" toolsToInvoke=""/>
-					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.2080054747" name="device_init.c" rcbsApplicability="disable" resourcePath="Application/device_init.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1328602458.1799562164">
-						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1328602458.1799562164" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1328602458">
-							<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1048630376" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
-						</tool>
-					</fileInfo>
+					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1756314397" name="Contol_controller.h" rcbsApplicability="disable" resourcePath="Application/Apps/device_control/System/Contol_controller.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="old_ui/img/sys_bg|old_ui/img/sys_icon|lvgl_app/old_ui/app|home/UI/assets/img/sys/icon_home.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
+						<entry excluding="Apps/device_control/System/Contol_controller.h|Apps/device_control/System/Contol_controller.c|old_ui/img/sys_bg|old_ui/img/sys_icon|lvgl_app/old_ui/app|old_ui/app/Contol|home/UI/assets/img/sys/icon_home.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry excluding="mqtt_service/adapters/dev_token.c|old_esp_app|mqtt_service/adapters/dev_token.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>

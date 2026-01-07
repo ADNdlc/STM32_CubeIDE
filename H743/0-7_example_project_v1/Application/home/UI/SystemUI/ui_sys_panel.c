@@ -1,9 +1,9 @@
 #include "ui_sys_panel.h"
 #include "../../System/net_mgr.h"
-#include "home/res_manager.h"
+#include "res_manager.h"
 #include "input_manager.h"
 #include "sys_state.h"
-#include "ui_helpers.h"
+#include "lv_util.h"
 
 #define LOG_TAG "UI_SYS_PANEL"
 #include "elog.h"

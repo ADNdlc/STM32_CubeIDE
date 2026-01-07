@@ -1,7 +1,7 @@
 ﻿#ifndef __Contol_controller_H__
 #define __Contol_controller_H__
 
-#include "../../../../home/System/thing_model.h"
+#include "thing_model.h"
 #include "lvgl.h"
 
 

@@ -11,11 +11,9 @@ static sys_state_t g_state;                              // 系统状态实例
 static sys_state_observer_cb g_observers[MAX_OBSERVERS]; // 观察者列表
 static int g_observer_count = 0;                         // 观察者数量
 
-// #define NDEBUG
-
 #ifndef NDEBUG
 #include "lvgl.h"
-#include "ui_helpers.h"
+#include "lv_util.h"
 /**
  * 亮度遮罩(test)
  * 实际应该使用屏幕的pwm调光等硬件方式实现

@@ -1,8 +1,7 @@
 #include "Contol_view.h"
-#include "../../../../home/System/thing_model.h"
-#include "Contol_controller.h" // 引入控制器以绑定事件
-#include "style.h"             // 引入视图头文件以获取样式
-#include "util_contol.h"
+#include "thing_model.h"
+#include "../../System/Contol_controller.h"
+#include "../components/style_util.h"
 #include <stdio.h>
 
 
@@ -34,13 +33,12 @@ static void free_context_event_cb(lv_event_t *e) {
 
 void create_main(lv_obj_t *tabview) {
 
-  lv_obj_t *tab_main = lv_tabview_add_tab(tabview, LV_SYMBOL_HOME " HOME");
-  lv_obj_set_grid_dsc_array(tab_main, main_col_dsc,
-                            main_row_dsc); // 主页使用网格布局
+  lv_obj_t *tab_main = lv_tabview_add_tab(tabview, LV_SYMBOL_HOME " HOME"); // 添加一个页面
+  lv_obj_set_grid_dsc_array(tab_main, main_col_dsc, main_row_dsc);      // 主页使用网格布局
 
-  //_test_layout_grid_(tab_main, 5, 3);//布局测试
+  // _test_layout_grid_(tab_main, 5, 3);//布局测试
 
-  controller_init_main_tab(tab_main); // 根据用户设置填充内容
+  //controller_init_main_tab(tab_main); // 根据用户设置填充内容
 }
 
 void create_add(lv_obj_t *tabview) {

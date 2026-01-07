@@ -1,5 +1,5 @@
 #include "ui_screen_colorwheel.h"
-#include "ui_helpers.h"
+#include "lv_util.h"
 #include "app_manager.h"
 
 #define LOG_TAG "ColorWheel"

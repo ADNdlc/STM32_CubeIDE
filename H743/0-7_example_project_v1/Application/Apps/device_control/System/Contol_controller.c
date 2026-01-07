@@ -1,5 +1,5 @@
 ﻿#include "Contol_controller.h"
-#include "Contol_view.h"
+#include "../UI/components/style_util.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -45,9 +45,7 @@ lv_obj_t *controller_find_ui_control(const char *deviceID, const char *propID) {
 }
 
 // 设备ui状态更新回调函数
-void ui_state_update_cb(const device_data_t *device, const char *prop_id) {
-  printf("[Info]Contol_controller: %s/%s ui update \r\n", device->deviceID,
-         prop_id);
+printf("[Info]Contol_controller: %s/%s ui update \r\n", device->deviceID,prop_id);
 
   // 查找对应的控件
   lv_obj_t *target_obj = controller_find_ui_control(device->deviceID, prop_id);

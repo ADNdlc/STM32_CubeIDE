@@ -5,31 +5,29 @@
  *      Author: 12114
  */
 
-#define USE_OLD_UI 0
+#define USE_Simulator 1
 
 #include "app.h"
 #define LOG_TAG "APP"
 #include "elog.h"
-#include "project_cfg.h"
 
+#if !USE_Simulator
+#include "project_cfg.h"
 
 #include "hal_init.h"
 #include "sys_init.h"
-#include <device_handle.h>
+#include "device_handle.h"
 
 #include "home.h"
 #include "home/System/net_mgr.h"
 #include "home/res_burner.h"
 #include "home/res_manager.h"
+#endif
 
 #if LVGL_ENABLE
 #include "lvgl.h"
-#if USE_OLD_UI
-#include "ui/Act_Manager.h"
-#else
 #include "Colorwheel/colorwheel.h"
-#include "device_control/device_control.h"
-#endif
+//#include "device_control/device_control.h"
 #endif
 
 int app_init(void) {
@@ -44,10 +42,6 @@ int app_init(void) {
 #endif
 
 #if LVGL_ENABLE && !CONFIG_RES_BURN_ENABLE
-#if USE_OLD_UI
-  act_manager_init(); // 旧ui入口
-  log_i("Old UI initialized");
-#else
   home_init();        // 初始化ui核心功能
 
   /* 注册各ui模块功能 */
@@ -57,7 +51,6 @@ int app_init(void) {
   ui_Start(); // 启动 UI 系统
   log_i("New UI initialized");
 #endif
-#endif
 
   log_i("Application initialization completed...");
   return 0;
@@ -65,10 +58,12 @@ int app_init(void) {
 
 void app_run(void) {
 #if !CONFIG_RES_BURN_ENABLE
+#if !USE_Simulator
   sys_devices_process();  // 本地设备处理
+  net_mgr_process();  // 网络服务处理
+#endif
 #if LVGL_ENABLE
   lv_timer_handler(); // ui处理
 #endif
-  net_mgr_process();  // 网络服务处理
 #endif
 }

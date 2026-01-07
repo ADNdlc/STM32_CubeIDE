@@ -1,7 +1,7 @@
 #include "Colorwheel/UI/screens/ui_screen_colorwheel.h"
 #include "app_manager.h"
 #include "core_app.h"
-#include "home/res_manager.h"
+#include "res_manager.h"
 #include <stddef.h>
 
 #define LOG_TAG "ColorWheelApp"

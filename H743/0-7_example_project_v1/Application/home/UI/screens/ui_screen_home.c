@@ -1,10 +1,10 @@
 ﻿#include "ui_screen_home.h"
-#include "home/res_manager.h"
-// #include "elog.h"
-#include "app_manager.h" // Added missing include
-#include "components/util.h"
+#include "res_manager.h"
+#include "elog.h"
+#include "app_manager.h"
+#include "lv_util.h"
 #include "core_app.h"
-#include "ui_helpers.h"
+#include "lv_util.h"
 #include <assert.h>
 #include <stdio.h>
 
