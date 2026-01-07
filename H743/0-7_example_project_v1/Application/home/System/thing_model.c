@@ -1,10 +1,9 @@
 #include "thing_model.h"
-#include "elog.h"
 #include <stdlib.h>
 #include <string.h>
 
-
 #define LOG_TAG "THING_MODEL"
+#include "../../../lib/EasyLogger/easylogger/inc/elog.h"
 
 #define MAX_THING_DEVICES 16
 #define MAX_THING_OBSERVERS 4
@@ -26,7 +25,7 @@ typedef struct {
 } thing_observer_t;
 
 static thing_observer_t g_observers[MAX_THING_OBSERVERS]; // 观察者列表
-static uint8_t g_observer_count = 0; // 已注册的观察者数
+static uint8_t g_observer_count = 0;                      // 已注册的观察者数
 
 /****************
  * 工具方法
@@ -138,7 +137,7 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
  * @return false
  */
 bool thing_model_set_prop(const char *device_id, const char *prop_id,
-                          thing_value_t value, int source) {
+                          thing_value_t value, thing_source_t source) {
   // 1. 寻找目标设备
   thing_device_t *target_dev = NULL;
   target_dev = find_device_by_id(device_id);
@@ -156,7 +155,7 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
   }
 
   // 3. 调用目标设备的属性设置回调并传递变更属性值
-  if (source != 2 && target_dev->on_prop_set) {
+  if (source != THING_SOURCE_DRV && target_dev->on_prop_set) {
     if (!target_dev->on_prop_set(target_dev, prop_id, value)) {
       log_w("Driver rejected property update: %s.%s", device_id, prop_id);
       return false;
@@ -170,7 +169,7 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
   target_prop->value = value;
 
   // 如果来源不是云端（即本地 UI 或硬件上报），则标记为“脏”，待后续同步
-  if (source != 1 && target_prop->cloud_sync) {
+  if (source != THING_SOURCE_CLOUD && target_prop->cloud_sync) {
     target_prop->is_dirty = true;
   }
 

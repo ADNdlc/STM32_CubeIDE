@@ -6,58 +6,56 @@
 #include "elog.h"
 
 /*******************
- * mqtt事件处理回调
+ * Internal Helpers
  *******************/
-static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
-  mqtt_service_t *self = (mqtt_service_t *)arg;
 
-  switch (event->type) {
-  case MQTT_DRV_EVENT_CONNECTED:            // 连接成功
-    self->state = MQTT_SVC_STATE_CONNECTED; // 更新服务状态
-    log_i("Service: MQTT Connected.");
-    if (self->event_cb) {
-      self->event_cb(self, self->state, self->user_data); // 通知外部回调
+static void notify_event(mqtt_service_t *self, const mqtt_svc_event_t *event) {
+  for (uint8_t i = 0; i < self->observer_count; i++) {
+    if (self->observers[i].cb) {
+      self->observers[i].cb(self, event, self->observers[i].user_data);
     }
- 
-    break;
-
-  case MQTT_DRV_EVENT_DISCONNECTED:        // 断开连接
-    self->state = MQTT_SVC_STATE_DISCONNECTED;
-    log_w("Service: MQTT Disconnected.");
-    if (self->event_cb) {
-      self->event_cb(self, self->state, self->user_data);
-    }
-    break;
-
-  case MQTT_DRV_EVENT_DATA: {           // 事件：收到订阅数据
-    log_i("Service: Data received on topic %s", event->topic);
-
-    char dev_id[64];  // 设备ID
-    char prop_id[64]; // 属性ID
-    thing_value_t val;// 属性值
-    char msg_id[64];  // 消息ID
-
-    // 调用(平台)适配器解析命令
-    if (self->adapter &&
-        self->adapter->parse_command(event->topic, event->payload, dev_id,
-                                     prop_id, &val, msg_id) == 0) {
-      // 使用解析出的参数更新数据模型属性
-      // Source 1 = Cloud
-      thing_model_set_prop(dev_id, prop_id, val, 1);
-
-      // 回复云平台
-      char reply_topic[128];
-      char reply_payload[256];
-      self->adapter->get_reply_topic(dev_id, reply_topic, sizeof(reply_topic));
-      self->adapter->get_reply_payload(msg_id, 200, reply_payload,
-                                       sizeof(reply_payload));
-
-      MQTT_DRV_PUBLISH(self->drv, reply_topic, reply_payload, 0);
-    }
-    break;
-  }
   }
 }
+
+static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
+  mqtt_service_t *self = (mqtt_service_t *)arg;
+  if (!self)
+    return;
+
+  mqtt_svc_event_t svc_event;
+  memset(&svc_event, 0, sizeof(svc_event));
+
+  switch (event->type) {
+  case MQTT_DRV_EVENT_CONNECTED:
+    self->state = MQTT_SVC_STATE_CONNECTED;
+    self->retry_count = 0;
+    log_i("Service: MQTT Connected.");
+    svc_event.type = MQTT_SVC_EVENT_STATE_CHANGED;
+    svc_event.state = self->state;
+    notify_event(self, &svc_event);
+    break;
+
+  case MQTT_DRV_EVENT_DISCONNECTED:
+    self->state = MQTT_SVC_STATE_DISCONNECTED;
+    log_w("Service: MQTT Disconnected.");
+    svc_event.type = MQTT_SVC_EVENT_STATE_CHANGED;
+    svc_event.state = self->state;
+    notify_event(self, &svc_event);
+    break;
+
+  case MQTT_DRV_EVENT_DATA:
+    log_d("Service: Data received on topic %s", event->topic);
+    svc_event.type = MQTT_SVC_EVENT_DATA_RECEIVED;
+    svc_event.topic = event->topic;
+    svc_event.payload = event->payload;
+    notify_event(self, &svc_event);
+    break;
+  }
+}
+
+/*******************
+ * Public APIs
+ *******************/
 
 void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv,
                    const mqtt_adapter_t *adapter) {
@@ -65,17 +63,23 @@ void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv,
   self->drv = drv;
   self->adapter = adapter;
   self->state = MQTT_SVC_STATE_DISCONNECTED;
+  self->observer_count = 0;
 
-  // 连接服务和驱动的事件传递
   if (self->drv) {
     MQTT_DRV_SET_CB(self->drv, mqtt_drv_event_handler, self);
   }
 }
 
-void mqtt_svc_register_callback(mqtt_service_t *self, mqtt_svc_event_cb_t cb,
-                                void *user_data) {
-  self->event_cb = cb;
-  self->user_data = user_data;
+int mqtt_svc_register_callback(mqtt_service_t *self, mqtt_svc_event_cb_t cb,
+                               void *user_data) {
+  if (self->observer_count >= MAX_MQTT_SVC_OBSERVERS) {
+    log_e("MQTT SVC: Observer list full!");
+    return -1;
+  }
+  self->observers[self->observer_count].cb = cb;
+  self->observers[self->observer_count].user_data = user_data;
+  self->observer_count++;
+  return 0;
 }
 
 int mqtt_svc_connect(mqtt_service_t *self) {
@@ -102,8 +106,14 @@ int mqtt_svc_disconnect(mqtt_service_t *self) {
   return MQTT_DRV_DISCONNECT(self->drv);
 }
 
+int mqtt_svc_subscribe(mqtt_service_t *self, const char *topic, uint8_t qos) {
+  if (!self->drv)
+    return -1;
+  return MQTT_DRV_SUBSCRIBE(self->drv, topic, qos);
+}
+
 void mqtt_svc_process(mqtt_service_t *self) {
-  // Reconnection logic could be added here
+  // Transport layer processing if needed
 }
 
 int mqtt_svc_publish_property(mqtt_service_t *self,
@@ -113,11 +123,26 @@ int mqtt_svc_publish_property(mqtt_service_t *self,
     return -1;
 
   char topic[128];
-  char payload[256];
-  self->adapter->get_post_topic(device->device_id, topic, sizeof(topic));
-  self->adapter->serialize_post(device, prop, payload, sizeof(payload));
+  char buf[256];
+  if (self->adapter &&
+      self->adapter->serialize_post(device, prop, buf, sizeof(buf)) == 0) {
+    self->adapter->get_post_topic(device->device_id, topic, sizeof(topic));
+    return MQTT_DRV_PUBLISH(self->drv, topic, buf, 0);
+  }
+  return -1;
+}
 
-  return MQTT_DRV_PUBLISH(self->drv, topic, payload, 0);
+void mqtt_svc_reply_command(mqtt_service_t *self, const char *device_id,
+                            const char *msg_id, int code) {
+  if (!self || !self->adapter || !self->drv)
+    return;
+
+  char reply_topic[128];
+  char reply_payload[128];
+  self->adapter->get_reply_topic(device_id, reply_topic, sizeof(reply_topic));
+  self->adapter->get_reply_payload(msg_id, code, reply_payload,
+                                   sizeof(reply_payload));
+  MQTT_DRV_PUBLISH(self->drv, reply_topic, reply_payload, 0);
 }
 
 mqtt_svc_state_t mqtt_svc_get_state(mqtt_service_t *self) {

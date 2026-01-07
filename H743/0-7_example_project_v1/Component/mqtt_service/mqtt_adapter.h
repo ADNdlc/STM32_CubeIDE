@@ -17,6 +17,12 @@ typedef struct {
 } mqtt_conn_params_t;
 
 /**
+ * @brief Property parsing callback for multi-property commands
+ */
+typedef void (*thing_on_prop_parsed_cb)(const char *prop_id,
+                                        thing_value_t value, void *ctx);
+
+/**
  * @brief 平台适配接口
  */
 typedef struct {
@@ -57,13 +63,13 @@ typedef struct {
    * @param topic 主题
    * @param payload 数据
    * @param out_device_id 输出设备ID
-   * @param out_prop_id 输出属性ID
-   * @param out_value 输出属性值
    * @param out_msg_id 输出消息ID
+   * @param prop_cb 属性解析回调 (每解析到一个属性调用一次)
+   * @param ctx 回调上下文
    */
   int (*parse_command)(const char *topic, const char *payload,
-                       char *out_device_id, char *out_prop_id,
-                       thing_value_t *out_value, char *out_msg_id);
+                       char *out_device_id, char *out_msg_id,
+                       thing_on_prop_parsed_cb prop_cb, void *ctx);
 
   /**
    * @brief 生成命令回复数据

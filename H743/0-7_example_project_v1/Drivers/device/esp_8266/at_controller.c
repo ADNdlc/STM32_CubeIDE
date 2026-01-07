@@ -139,6 +139,8 @@ void at_controller_init(at_controller_t *self, uart_queue_t *uart,
   at_controller_register_handler(self, ">", handle_CMDdata_send, self);
   at_controller_register_handler(self, "OK", handle_final_ok, self);
   at_controller_register_handler(self, "SEND OK", handle_final_ok, self);
+  at_controller_register_handler(self, "+MQTTPUB:OK", handle_final_ok, self);
+  at_controller_register_handler(self, "+MQTTSUB:OK", handle_final_ok, self);
   at_controller_register_handler(self, "ERROR", handle_final_error, self);
   at_controller_register_handler(self, "SEND FAIL", handle_final_error, self);
 

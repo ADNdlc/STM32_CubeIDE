@@ -116,7 +116,7 @@ static int drv_publish(mqtt_driver_t *base, const char *topic,
   esp8266_mqtt_driver_t *self = (esp8266_mqtt_driver_t *)base;
   char cmd[256];
   uint32_t payload_len = (uint32_t)strlen(payload);
-  snprintf(cmd, sizeof(cmd), "AT+MQTTPUBRAW=0,\"%s\",\"%d\",%d,0\r\n", topic,
+  snprintf(cmd, sizeof(cmd), "AT+MQTTPUBRAW=0,\"%s\",%d,%d,0\r\n", topic,
            payload_len, qos);
   AT_Cmd_t pub_cmd = {
       .cmd_str = cmd, .data_to_send = payload, .timeout_ms = 5000};

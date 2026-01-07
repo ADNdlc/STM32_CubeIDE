@@ -64,13 +64,15 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
 /**
  * @brief MQTT状态变化回调
  */
-static void mqtt_event_handler(mqtt_service_t *svc, mqtt_svc_state_t state,
-                               void *user_data) {
-  log_i("MQTT status changed: %d", state);
-  if (state == MQTT_SVC_STATE_CONNECTED) {
-    sys_state_set_mqtt(true);
-  } else {
-    sys_state_set_mqtt(false);
+static void mqtt_event_handler(mqtt_service_t *svc,
+                               const mqtt_svc_event_t *event, void *user_data) {
+  if (event->type == MQTT_SVC_EVENT_STATE_CHANGED) {
+    log_i("MQTT status changed: %d", event->state);
+    if (event->state == MQTT_SVC_STATE_CONNECTED) {
+      sys_state_set_mqtt(true);
+    } else {
+      sys_state_set_mqtt(false);
+    }
   }
 }
 
@@ -112,6 +114,7 @@ void net_mgr_init(void) {
   esp8266_mqtt_driver_init(&g_mqtt_drv, &g_at_ctrl);
   mqtt_svc_init(&g_mqtt_svc, (mqtt_driver_t *)&g_mqtt_drv, &g_onenet_adapter);
   mqtt_svc_register_callback(&g_mqtt_svc, mqtt_event_handler, NULL);
+  cloud_bridge_init(&g_mqtt_svc);
 
   log_i("Network Manager initialized successfully");
 }

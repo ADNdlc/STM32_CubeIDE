@@ -88,10 +88,9 @@ static int onenet_serialize_post(const thing_device_t *device,
  * @brief 解析OneNet物模型属性
  */
 static int onenet_parse_command(const char *topic, const char *payload,
-                                char *out_device_id, char *out_prop_id,
-                                thing_value_t *out_value, char *out_msg_id) {
+                                char *out_device_id, char *out_msg_id,
+                                thing_on_prop_parsed_cb prop_cb, void *ctx) {
   // 1. Extract device ID from topic: $sys/{pid}/{did}/thing/property/set
-  // We look for the 3rd segment
   char topic_copy[128];
   strncpy(topic_copy, topic, sizeof(topic_copy) - 1);
   char *save_ptr;
@@ -114,13 +113,28 @@ static int onenet_parse_command(const char *topic, const char *payload,
     strcpy(out_msg_id, id->valuestring);
 
   cJSON *params = cJSON_GetObjectItem(root, "params");
-  if (params && params->child) {
-    strcpy(out_prop_id, params->child->string);
-    // Simplified value parsing
-    if (cJSON_IsBool(params->child)) {
-      out_value->b = cJSON_IsTrue(params->child);
-    } else if (cJSON_IsNumber(params->child)) {
-      out_value->i = params->child->valueint; // or valuef
+  if (params && prop_cb) {
+    // Iterate through all children of params
+    cJSON *prop = params->child;
+    while (prop) {
+      thing_value_t out_value;
+      bool valid = false;
+
+      if (cJSON_IsBool(prop)) {
+        out_value.b = cJSON_IsTrue(prop);
+        valid = true;
+      } else if (cJSON_IsNumber(prop)) {
+        out_value.i = prop->valueint; // or valuef
+        valid = true;
+      } else if (cJSON_IsString(prop)) {
+        out_value.s = prop->valuestring;
+        valid = true;
+      }
+
+      if (valid) {
+        prop_cb(prop->string, out_value, ctx);
+      }
+      prop = prop->next;
     }
   }
 

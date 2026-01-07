@@ -144,7 +144,7 @@ int main(void)
     app_run(); // 应用运行
 #endif
 
-#if 1
+#if 0
 	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
 	  HAL_Delay(500);
 #endif

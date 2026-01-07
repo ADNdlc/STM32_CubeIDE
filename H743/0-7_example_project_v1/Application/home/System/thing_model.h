@@ -78,6 +78,15 @@ typedef enum {
 } thing_event_type_t;
 
 /**
+ * @brief 物模型属性更新来源
+ */
+typedef enum {
+  THING_SOURCE_LOCAL = 0, // UI or Local Logic
+  THING_SOURCE_CLOUD = 1, // Cloud Command
+  THING_SOURCE_DRV = 2    // Hardware Driver Sync
+} thing_source_t;
+
+/**
  * @brief 物模型事件
  */
 typedef struct {
@@ -85,7 +94,7 @@ typedef struct {
   const char *device_id;   // 设备ID
   const char *prop_id;     // 属性ID
   thing_value_t value;     // 属性值
-  int source;              // 事件来源
+  thing_source_t source;   // 事件来源
 } thing_model_event_t;
 
 /**
@@ -111,10 +120,10 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl);
 
 /**
  * @brief 更新一个属性值 (入口点为UI或云控制)
- * @param source 0 for Local(UI), 1 for Cloud, 2 for Driver
+ * @param source 更新来源
  */
 bool thing_model_set_prop(const char *device_id, const char *prop_id,
-                          thing_value_t value, int source);
+                          thing_value_t value, thing_source_t source);
 
 /**
  * @brief 通过索引获取一个设备

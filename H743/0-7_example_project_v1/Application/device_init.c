@@ -16,12 +16,12 @@ static bool device_prop_set_cb(struct thing_device_t *dev, const char *prop_id, 
   {
     if (strcmp(prop_id, "led0") == 0)
     {
-      log_i("Hardware: Light1.led0 set to %d", value.b);
+      log_i("Hardware: led0 set to %d", value.b);
       return true;
     }
     else if (strcmp(prop_id, "led1") == 0)
     {
-      log_i("Hardware: Light1.led0 set to %d", value.b);
+      log_i("Hardware: led1 set to %d", value.b);
       return true;
     }
   }
