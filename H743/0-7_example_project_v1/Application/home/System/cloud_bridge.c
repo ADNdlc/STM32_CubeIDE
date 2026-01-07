@@ -96,7 +96,7 @@ void cloud_bridge_process(void) {
   }
   g_last_sync_time = now;
 
-  log_d("prop sync...");
+  //log_v("prop sync...");
   // 扫描脏属性并同步
   uint8_t dev_count = thing_model_get_count();
   for (uint8_t i = 0; i < dev_count; i++) { // 遍历所有设备

@@ -19,6 +19,7 @@
 #define SYS_CONFIG_ENABLE 1
 #define NET_MGR_ENABLE 1
 #define SYS_STATE_ENABLE 1
+#define THING_MODEL_ENABLE 1
 
 #define TEST_ENABLE 0
 

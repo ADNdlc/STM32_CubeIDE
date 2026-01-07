@@ -15,6 +15,7 @@
 
 #include "hal_init.h"
 #include "sys_init.h"
+#include <device_handle.h>
 
 #include "home.h"
 #include "home/System/net_mgr.h"
@@ -64,9 +65,10 @@ int app_init(void) {
 
 void app_run(void) {
 #if !CONFIG_RES_BURN_ENABLE
+  sys_devices_process();  // 本地设备处理
 #if LVGL_ENABLE
-  lv_timer_handler();
+  lv_timer_handler(); // ui处理
 #endif
-  net_mgr_process();
+  net_mgr_process();  // 网络服务处理
 #endif
 }

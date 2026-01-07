@@ -1,9 +1,9 @@
+#include <device_handle.h>
 #include "sys_init.h"
 #include "cloud_bridge.h"
 #include "elog.h"
 #include "factory/flash_factory.h"
 #include "flash_handler.h"
-#include "device_init.h"
 #include "home/System/net_mgr.h"
 #include "home/System/sys_config.h"
 #include "home/System/sys_state.h"
@@ -85,13 +85,15 @@ int sys_services_init(void) {
  *****************/
 
 #if SYS_CONFIG_ENABLE
-  sys_config_init(); // 初始化系统配置 (从 Flash 加载)
+  sys_config_init(); // 初始化系统配置 (从Flash加载)
 #endif
 #if SYS_STATE_ENABLE
   sys_state_init(); // 初始化系统状态
 #endif
+#if THING_MODEL_ENABLE
   thing_model_init(); // 初始化物模型管理器
   sys_devices_init(); // 初始化并注册硬件设备
+ #endif 
 #if NET_MGR_ENABLE
   net_mgr_init(); // 初始化网络管理器
 #endif
