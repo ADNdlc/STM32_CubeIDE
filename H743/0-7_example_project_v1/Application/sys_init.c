@@ -91,7 +91,7 @@ int sys_services_init(void) {
   sys_state_init(); // 初始化系统状态
 #endif
   thing_model_init(); // 初始化物模型管理器
-  //sys_devices_init(); // 初始化并注册硬件设备
+  sys_devices_init(); // 初始化并注册硬件设备
 #if NET_MGR_ENABLE
   net_mgr_init(); // 初始化网络管理器
 #endif

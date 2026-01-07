@@ -42,8 +42,8 @@ typedef struct {
   // 读写类型和云同步
   bool readable;
   bool writable;
-  bool cloud_sync; // Whether to report to cloud
-  bool is_dirty;   // Added to track changes for periodic reporting
+  bool cloud_sync; // 是否同步到云端
+  bool is_dirty;   // 是否需要同步
 } thing_property_t;
 
 typedef struct thing_device_t thing_device_t;

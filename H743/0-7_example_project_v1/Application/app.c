@@ -16,6 +16,11 @@
 #include "hal_init.h"
 #include "sys_init.h"
 
+#include "home.h"
+#include "home/System/net_mgr.h"
+#include "home/res_burner.h"
+#include "home/res_manager.h"
+
 #if LVGL_ENABLE
 #include "lvgl.h"
 #if USE_OLD_UI
@@ -23,11 +28,6 @@
 #else
 #include "Colorwheel/colorwheel.h"
 #include "device_control/device_control.h"
-#include "home.h"
-#include "home/System/net_mgr.h"
-#include "home/res_burner.h"
-#include "home/res_manager.h"
-
 #endif
 #endif
 

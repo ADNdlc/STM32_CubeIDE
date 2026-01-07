@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define ONENET_SERVER_HOST "mqtts.heclouds.com"
+#define ONENET_SERVER_PORT 1883
+
 /**
  * @brief 获取OneNet连接参数
  */
@@ -11,8 +14,8 @@
 static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
   const sys_config_t *cfg = sys_config_get();
 
-  strcpy(out_params->host, "mqtts.heclouds.com"); // OneNet MQTT host
-  out_params->port = 1883;
+  strcpy(out_params->host, ONENET_SERVER_HOST);
+  out_params->port = ONENET_SERVER_PORT;
 
   // 对于 OneNet, client_id是设备id
   strcpy(out_params->client_id, cfg->cloud.device_id);

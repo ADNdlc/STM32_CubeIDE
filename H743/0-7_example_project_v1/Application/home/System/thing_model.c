@@ -166,7 +166,7 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
           source);
   }
 
-  // 4. 更新内部属性值
+  // 4. 更新内部属性值和状态
   target_prop->value = value;
 
   // 如果来源不是云端（即本地 UI 或硬件上报），则标记为“脏”，待后续同步

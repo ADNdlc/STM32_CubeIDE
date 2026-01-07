@@ -29,7 +29,7 @@ static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
     }
     break;
 
-  case MQTT_DRV_EVENT_DATA: {           // 收到订阅数据
+  case MQTT_DRV_EVENT_DATA: {           // 事件：收到订阅数据
     log_i("Service: Data received on topic %s", event->topic);
 
     char dev_id[64];  // 设备ID
@@ -41,7 +41,7 @@ static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
     if (self->adapter &&
         self->adapter->parse_command(event->topic, event->payload, dev_id,
                                      prop_id, &val, msg_id) == 0) {
-      // 更新数据模型属性
+      // 使用解析出的参数更新数据模型属性
       // Source 1 = Cloud
       thing_model_set_prop(dev_id, prop_id, val, 1);
 
