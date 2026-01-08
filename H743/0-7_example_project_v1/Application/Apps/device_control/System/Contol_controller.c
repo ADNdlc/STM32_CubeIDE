@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#if 0
+#if 1
 
 // 定义一个映射结构体和数组来存储控件
 #define MAX_UI_CONTROLS 32

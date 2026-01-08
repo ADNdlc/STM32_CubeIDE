@@ -1,10 +1,11 @@
 #include "Contol_view.h"
+#include "lv_util.h"
 #include "thing_model.h"
 #include "../../System/Contol_controller.h"
 #include "../components/style_util.h"
 #include <stdio.h>
 
-#if 0
+#if 1
 
 LV_IMG_DECLARE(default_user);
 //
@@ -13,7 +14,7 @@ extern void controller_register_ui_control(const char *deviceID,
 extern void generic_control_event_cb(lv_event_t *e);
 
 // 主页网格布局定义(静态)
-static lv_coord_t main_row_dsc[] = {30,  160, 160,
+static lv_coord_t main_row_dsc[] = {1, 160, 160,
                                     160, 160, LV_GRID_TEMPLATE_LAST}; // 高
 static lv_coord_t main_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1),
                                     LV_GRID_TEMPLATE_LAST}; // 宽
@@ -23,12 +24,12 @@ static void free_context_event_cb(lv_event_t *e) {
   control_event_ctx_t *ctx = (control_event_ctx_t *)lv_event_get_user_data(e);
   if (ctx) {
     // 释放之前为这个控件分配的上下文内存
-    printf("[Info]free_context_event_cb: free context for [Dev='%s'] "
+    log_d("free_context_event_cb: free context for [Dev='%s'] "
            "[Prop='%s']\r\n",
            ctx->deviceID, ctx->propID);
     lv_mem_free(ctx);
   } else {
-    printf("[Warning]free_context_event_cb: ctx is NULL\r\n");
+    log_e("free_context_event_cb: ctx is NULL\r\n");
   }
 }
 
@@ -37,10 +38,11 @@ void create_main(lv_obj_t *tabview) {
   lv_obj_t *tab_main = lv_tabview_add_tab(tabview, LV_SYMBOL_HOME " HOME"); // 添加一个页面
   lv_obj_set_grid_dsc_array(tab_main, main_col_dsc, main_row_dsc);      // 主页使用网格布局
 
-  // _test_layout_grid_(tab_main, 5, 3);//布局测试
+  //test_layout_grid(tab_main, 5, 3);//布局测试
 
-  //controller_init_main_tab(tab_main); // 根据用户设置填充内容
+  //controller_init_main_tab(tab_main); // 填充内容
 }
+
 
 void create_add(lv_obj_t *tabview) {
   lv_obj_t *tab_add = lv_tabview_add_tab(tabview, LV_SYMBOL_PLUS " ADD");
@@ -64,7 +66,7 @@ void create_add(lv_obj_t *tabview) {
 
   lv_obj_t *btns = lv_tabview_get_tab_btns(add_directory);
 
-  controller_init_add_tab(add_directory); // 根据"可添加设备"填充内容
+  //controller_init_add_tab(add_directory); // 根据"可添加设备"填充内容
 }
 
 void create_user(lv_obj_t *tabview) {
@@ -138,9 +140,10 @@ void create_user(lv_obj_t *tabview) {
   lv_obj_set_style_text_color(logout_label, lv_color_hex(0xFF6045),
                               LV_PART_MAIN); // 红色字体
 
-  controller_init_user_tab(tab_user);
+  // controller_init_user_tab(tab_user);
 }
 
+#if 1
 /**
  * @brief 创建一个设备卡片
  *
@@ -253,5 +256,6 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
 
   return card;
 }
+#endif
 
 #endif

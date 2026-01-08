@@ -3,7 +3,7 @@
 #include <string.h>
 
 #define LOG_TAG "THING_MODEL"
-#include "../../../lib/EasyLogger/easylogger/inc/elog.h"
+#include "elog.h"
 
 #define MAX_THING_DEVICES 16
 #define MAX_THING_OBSERVERS 4
