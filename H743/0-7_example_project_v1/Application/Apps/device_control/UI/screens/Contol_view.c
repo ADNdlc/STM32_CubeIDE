@@ -1,5 +1,6 @@
 #define LOG_TAG "CTRL_VIEW"
 #include "Contol_view.h"
+#include "res_manager.h"
 #include "../../System/Contol_controller.h"
 #include "../components/style_util.h"
 #include "elog.h"
@@ -8,8 +9,7 @@
 
 #if 1
 
-LV_IMG_DECLARE(default_user);
-//
+// 主页布局描述
 extern void controller_register_ui_control(const char *deviceID,
                                            const char *propID, lv_obj_t *obj);
 extern void generic_control_event_cb(lv_event_t *e);
@@ -41,7 +41,7 @@ void create_main(lv_obj_t *tabview) {
 
   // test_layout_grid(tab_main, 5, 3);//布局测试
 
-  controller_init_main_tab(tab_main); // 填充内容
+  controller_init_main_tab(tab_main); // 填充内容(根据已注册设备创建控制卡片)
 }
 
 void create_add(lv_obj_t *tabview) {
@@ -83,7 +83,7 @@ void create_user(lv_obj_t *tabview) {
   lv_obj_set_size(user, scr_act_width() / 2, scr_act_height() / 6);
 
   lv_obj_t *img = lv_img_create(user);
-  lv_img_set_src(img, &default_user);
+  lv_img_set_src(img, res_get_src(RES_IMG_DEFAULT_USER));
   lv_img_set_zoom(img, 450);
   lv_obj_align(img, LV_ALIGN_TOP_LEFT, 10, 3);
 
@@ -178,20 +178,23 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
   // 根据设备数据显示内容
   lv_obj_t *name_label = lv_label_create(card);
   lv_label_set_text(name_label, device->name); // 显示设备名字
-  lv_obj_align(name_label, LV_ALIGN_TOP_RIGHT, 0, 0);
+  lv_obj_set_style_text_font(name_label, &lv_font_montserrat_20,
+                             LV_PART_MAIN);
+  lv_obj_align(name_label, LV_ALIGN_TOP_RIGHT, -10, 0);
 
   // 显示设备图标
   lv_obj_t *card_img = lv_img_create(card);
   if (device->icon) {
     lv_img_set_src(card_img, device->icon); // 使用设备的图标
   } else {
-    lv_img_set_src(card_img, &default_user);
+    lv_img_set_src(card_img, res_get_src(RES_IMG_ICON_CONTROL));// 缺省图标
   }
-  lv_img_set_zoom(card_img, 400);
+  lv_img_set_zoom(card_img, 300);
   lv_obj_align(card_img, LV_ALIGN_LEFT_MID, 10, 0);
 
   // 根据设备属性动态添加控件
   log_d("Generating %d controls for %s", device->prop_count, device->device_id);
+  // 为了协调暂时最多添加三个，可能需要更合适的页面布局
   for (int i = 0; i < device->prop_count && i < 3; i++) {
     const thing_property_t *prop = &device->properties[i];
 
@@ -206,6 +209,7 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
     snprintf(ctx->deviceID, sizeof(ctx->deviceID), "%s", device->device_id);
     snprintf(ctx->propID, sizeof(ctx->propID), "%s", prop->id);
 
+    // 根据属性类型创建控件
     switch (prop->type) {
     case THING_PROP_TYPE_SWITCH: {
       log_d("  Adding Switch: %s", prop->id);
@@ -218,20 +222,17 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
 
       obj_align_card(sw, device->prop_count, width, height);
 
-      lv_obj_set_size(sw, width / 4, height / 6);
+      lv_obj_set_size(sw, width / 4, height / 8);
       if (prop->value.b) {
         lv_obj_add_state(sw, LV_STATE_CHECKED);
       }
       lv_obj_align_to(label_sw, sw, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
 
       // 绑定事件回调
-      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED,
-                          ctx); // 绑定事件回调
-      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE,
-                          ctx); // 删除回调,释放上下文空间
+      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx); // 绑定事件回调
+      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE, ctx); // 删除回调,释放上下文空间
 
-      controller_register_ui_control(device->device_id, prop->id,
-                                     sw); // 注册控件到映射表
+      controller_register_ui_control(device->device_id, prop->id, sw); // 注册控件到映射表
       break;
     }
     case THING_PROP_TYPE_INT: {

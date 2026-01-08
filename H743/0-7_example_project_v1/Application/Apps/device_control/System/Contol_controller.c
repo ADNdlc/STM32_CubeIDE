@@ -59,7 +59,7 @@ void ui_state_update_cb(const thing_model_event_t *event, void *user_data) {
 
   // 如果是由本地UI触发的更新（SOURCE_LOCAL），通常不需要再次更新UI显示
   // 但为了保证状态一致性（例如驱动层可能修正值），这里也可以选择统一更新
-  if (event->source == THING_SOURCE_LOCAL) {
+  if (event->source == THING_SOURCE_LOCAL) {    // 来源
     log_v("Ignore local change for [%s/%s]", event->device_id, event->prop_id);
     return;
   }
@@ -146,15 +146,15 @@ void controller_init_main_tab(lv_obj_t *tab) {
   log_i("Found %d devices in thing model. Generating UI cards...",
         device_count);
 
-  for (uint8_t i = 0; i < device_count; i++) {
+  for (uint8_t i = 0; i < device_count; i++) {  // 遍历所有设备
     thing_device_t *device = thing_model_get_device(i);
     if (device) {
       log_d("Creating card %d: %s (%s)", i, device->name, device->device_id);
-      // 布局计算：每行放 3 个卡片
+      // 布局计算：每行放 3 个卡片，跳过第一行
       uint8_t row = 1 + (i / 3);
       uint8_t col = i % 3;
 
-      // 调用视图函数创建卡片
+      // 创建设备控制卡片
       view_create_device_card(tab, device, row, col);
     }
   }

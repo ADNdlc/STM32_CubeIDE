@@ -7,12 +7,15 @@
  * @brief Resource ID for all external resources
  */
 typedef enum {
-  RES_IMG_WALLPAPER = 0,
-  RES_IMG_ICON_WIFI,
-  RES_IMG_ICON_BRIGHT,
-  RES_IMG_ICON_COLORWHEEL,
-  RES_IMG_ICON_CONTROL,
-  RES_IMG_COUNT
+    RES_IMG_WALLPAPER = 0,
+    RES_IMG_ICON_WIFI,
+    RES_IMG_ICON_BRIGHT,
+    RES_IMG_ICON_COLORWHEEL,
+    RES_IMG_ICON_CONTROL,
+    RES_IMG_DEFAULT_USER,
+    RES_IMG_IMG_LIGHT,
+    //...
+    RES_IMG_COUNT
 } res_id_t;
 
 /**

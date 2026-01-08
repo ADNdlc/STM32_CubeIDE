@@ -1,4 +1,3 @@
-#define LOG_TAG "DevControl"
 #include "System/Contol_controller.h"
 #include "UI/components/style_util.h"
 #include "UI/screens/Contol_view.h"
@@ -9,6 +8,7 @@
 #include "res_manager.h"
 #include <stddef.h>
 
+#define LOG_TAG "DevControl"
 
 // 接口函数
 static lv_obj_t *create_device_control_screen(void);
@@ -80,3 +80,4 @@ static void pause_device_control_screen(struct app_t *app) {
 static void resume_device_control_screen(struct app_t *app) {
   log_d("Device Control screen resumed.");
 }
+

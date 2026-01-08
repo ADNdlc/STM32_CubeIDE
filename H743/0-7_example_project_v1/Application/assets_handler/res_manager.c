@@ -15,6 +15,8 @@ LV_IMG_DECLARE(icon_wifi);
 LV_IMG_DECLARE(icon_bright);
 LV_IMG_DECLARE(icon_colorwheel);
 LV_IMG_DECLARE(icon_Contol);
+LV_IMG_DECLARE(default_user);
+LV_IMG_DECLARE(img_light);
 #endif
 
 typedef struct {
@@ -30,6 +32,8 @@ static const res_map_t res_table[] = {
     {RES_IMG_ICON_BRIGHT, &icon_bright, "Brightness Icon"},
     {RES_IMG_ICON_COLORWHEEL, &icon_colorwheel, "Colorwheel Icon"},
     {RES_IMG_ICON_CONTROL, &icon_Contol, "Control Icon"},
+    {RES_IMG_DEFAULT_USER, &default_user, "Default User"},
+    {RES_IMG_IMG_LIGHT, &img_light, "Light Image"},
 #else
     {RES_IMG_WALLPAPER, "L:home/wallpaper.bin", "Wallpaper"},
     {RES_IMG_ICON_WIFI, "L:sys/icon_wifi.bin", "WiFi Icon"},

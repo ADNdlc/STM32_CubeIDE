@@ -7,18 +7,17 @@
 #include "app.h"
 #define LOG_TAG "APP"
 #include "elog.h"
-
-#if !USE_Simulator
 #include "project_cfg.h"
 
+#if !USE_Simulator
 #include "hal_init.h"
 #include "sys_init.h"
 #include "device_handle.h"
 
 #include "home.h"
 #include "home/System/net_mgr.h"
-#include "home/res_burner.h"
-#include "home/res_manager.h"
+#include "res_burner.h"
+#include "res_manager.h"
 #endif
 
 #if LVGL_ENABLE
@@ -33,8 +32,8 @@
 
 
 int app_init(void) {
-#if USE_Simulator
-  devices_init(); // 注册模拟设备
+#if USE_Simulator   // 模拟器环境
+  devices_init();   // 注册模拟设备
 #endif
 #if CONFIG_RES_BURN_ENABLE
   sys_delay_ms(1000);
