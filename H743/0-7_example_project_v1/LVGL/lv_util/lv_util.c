@@ -8,6 +8,21 @@
 #include "lv_util.h"
 #include "lvgl.h"
 
+
+lv_obj_t* simple_slider_create(lv_color_t color, lv_obj_t* parent) {
+    lv_obj_t* slider = lv_slider_create(parent);                      //创建滑块部件
+    lv_obj_set_size(slider, scr_act_width() / 3, scr_act_height() / 20);    //设置滑块大小
+    lv_slider_set_range(slider, 0, 100);
+
+    lv_obj_set_style_bg_color(slider, color, LV_PART_INDICATOR);            //设置滑块"指示器"颜色
+    lv_obj_set_style_bg_color(slider, color, LV_PART_MAIN);                 //设置滑块"主体"颜色
+    lv_obj_set_style_bg_opa(slider, 100, LV_PART_MAIN);                     //设置滑块"主体"透明度(0~255,0为全透明,255为不透明)
+
+    lv_obj_remove_style(slider, NULL, LV_PART_KNOB);                        //移除手柄部分
+
+    return slider;
+}
+
 void _ui_screen_change(lv_obj_t **target, lv_scr_load_anim_t fademode, int spd,
                        int delay, void (*target_init)(void)) {
   if (*target == NULL && target_init != NULL) {

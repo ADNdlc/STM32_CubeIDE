@@ -113,7 +113,7 @@
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1962495330" name="dev_token.h" rcbsApplicability="disable" resourcePath="Component/mqtt_service/adapters/dev_token.h" toolsToInvoke=""/>
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1756314397" name="Contol_controller.h" rcbsApplicability="disable" resourcePath="Application/Apps/device_control/System/Contol_controller.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="Apps/device_control/System/Contol_controller.h|Apps/device_control/System/Contol_controller.c|old_ui/img/sys_bg|old_ui/img/sys_icon|lvgl_app/old_ui/app|old_ui/app/Contol|home/UI/assets/img/sys/icon_home.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
+						<entry excluding="old_ui/img/sys_bg|old_ui/img/sys_icon|lvgl_app/old_ui/app|old_ui/app/Contol|home/UI/assets/img/sys/icon_home.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry excluding="mqtt_service/adapters/dev_token.c|old_esp_app|mqtt_service/adapters/dev_token.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>

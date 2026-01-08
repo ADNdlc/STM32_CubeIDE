@@ -1,9 +1,10 @@
+#define LOG_TAG "CTRL_VIEW"
 #include "Contol_view.h"
-#include "lv_util.h"
-#include "thing_model.h"
 #include "../../System/Contol_controller.h"
 #include "../components/style_util.h"
-#include <stdio.h>
+#include "elog.h"
+#include "lv_util.h"
+#include "thing_model.h"
 
 #if 1
 
@@ -14,7 +15,7 @@ extern void controller_register_ui_control(const char *deviceID,
 extern void generic_control_event_cb(lv_event_t *e);
 
 // 主页网格布局定义(静态)
-static lv_coord_t main_row_dsc[] = {1, 160, 160,
+static lv_coord_t main_row_dsc[] = {1,   160, 160,
                                     160, 160, LV_GRID_TEMPLATE_LAST}; // 高
 static lv_coord_t main_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1),
                                     LV_GRID_TEMPLATE_LAST}; // 宽
@@ -24,27 +25,27 @@ static void free_context_event_cb(lv_event_t *e) {
   control_event_ctx_t *ctx = (control_event_ctx_t *)lv_event_get_user_data(e);
   if (ctx) {
     // 释放之前为这个控件分配的上下文内存
-    log_d("free_context_event_cb: free context for [Dev='%s'] "
-           "[Prop='%s']\r\n",
-           ctx->deviceID, ctx->propID);
+    log_d("Freeing context for [%s/%s]", ctx->deviceID, ctx->propID);
     lv_mem_free(ctx);
   } else {
-    log_e("free_context_event_cb: ctx is NULL\r\n");
+    log_e("free_context_event_cb: ctx is NULL");
   }
 }
 
 void create_main(lv_obj_t *tabview) {
+  log_i("Creating Main Tab...");
+  lv_obj_t *tab_main =
+      lv_tabview_add_tab(tabview, LV_SYMBOL_HOME " HOME"); // 添加一个页面
+  lv_obj_set_grid_dsc_array(tab_main, main_col_dsc,
+                            main_row_dsc); // 主页使用网格布局
 
-  lv_obj_t *tab_main = lv_tabview_add_tab(tabview, LV_SYMBOL_HOME " HOME"); // 添加一个页面
-  lv_obj_set_grid_dsc_array(tab_main, main_col_dsc, main_row_dsc);      // 主页使用网格布局
+  // test_layout_grid(tab_main, 5, 3);//布局测试
 
-  //test_layout_grid(tab_main, 5, 3);//布局测试
-
-  //controller_init_main_tab(tab_main); // 填充内容
+  controller_init_main_tab(tab_main); // 填充内容
 }
 
-
 void create_add(lv_obj_t *tabview) {
+  log_i("Creating Add Tab...");
   lv_obj_t *tab_add = lv_tabview_add_tab(tabview, LV_SYMBOL_PLUS " ADD");
 
   lv_obj_t *add_directory = lv_tabview_create(
@@ -66,10 +67,11 @@ void create_add(lv_obj_t *tabview) {
 
   lv_obj_t *btns = lv_tabview_get_tab_btns(add_directory);
 
-  //controller_init_add_tab(add_directory); // 根据"可添加设备"填充内容
+  controller_init_add_tab(add_directory); // 根据"可添加设备"填充内容
 }
 
 void create_user(lv_obj_t *tabview) {
+  log_i("Creating User Tab...");
   char *user_name = "user_name"; // 假设获取到了登陆的用户id
   char *uid_str = "1234567890";
 
@@ -140,10 +142,9 @@ void create_user(lv_obj_t *tabview) {
   lv_obj_set_style_text_color(logout_label, lv_color_hex(0xFF6045),
                               LV_PART_MAIN); // 红色字体
 
-  // controller_init_user_tab(tab_user);
+  controller_init_user_tab(tab_user);
 }
 
-#if 1
 /**
  * @brief 创建一个设备卡片
  *
@@ -157,6 +158,8 @@ void create_user(lv_obj_t *tabview) {
 lv_obj_t *view_create_device_card(lv_obj_t *parent,
                                   const thing_device_t *device, uint8_t row,
                                   uint8_t col) {
+  log_d("Creating card for device: %s at [%d, %d]", device->device_id, row,
+        col);
   lv_obj_t *card = lv_obj_create(parent);
   lv_obj_set_size(card, LV_PCT(100), LV_PCT(100));
   // 设置卡片的样式，如大小、圆角、阴影
@@ -188,17 +191,24 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
   lv_obj_align(card_img, LV_ALIGN_LEFT_MID, 10, 0);
 
   // 根据设备属性动态添加控件
+  log_d("Generating %d controls for %s", device->prop_count, device->device_id);
   for (int i = 0; i < device->prop_count && i < 3; i++) {
     const thing_property_t *prop = &device->properties[i];
 
     // 分配上下文空间
     control_event_ctx_t *ctx =
         (control_event_ctx_t *)lv_mem_alloc(sizeof(control_event_ctx_t));
+    if (!ctx) {
+      log_e("Memory alloc failed for control context [%s/%s]",
+            device->device_id, prop->id);
+      continue;
+    }
     snprintf(ctx->deviceID, sizeof(ctx->deviceID), "%s", device->device_id);
     snprintf(ctx->propID, sizeof(ctx->propID), "%s", prop->id);
 
     switch (prop->type) {
     case THING_PROP_TYPE_SWITCH: {
+      log_d("  Adding Switch: %s", prop->id);
       lv_obj_t *sw = lv_switch_create(card);
 
       ctx->target_obj = sw; // 绑定控件指针
@@ -225,7 +235,8 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
       break;
     }
     case THING_PROP_TYPE_INT: {
-      lv_obj_t *sld = slider_create(lv_color_hex(0xFFE4B5), card);
+      log_d("  Adding Slider: %s", prop->id);
+      lv_obj_t *sld = simple_slider_create(lv_color_hex(0xFFE4B5), card);
 
       ctx->target_obj = sld; // 绑定控件指针
 
@@ -249,6 +260,8 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
       break;
     }
     default:
+      log_w("  Skipping unsupported property type %d for %s", prop->type,
+            prop->id);
       lv_mem_free(ctx); // 未处理的类型释放内存
       break;
     }
@@ -256,6 +269,5 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
 
   return card;
 }
-#endif
 
 #endif

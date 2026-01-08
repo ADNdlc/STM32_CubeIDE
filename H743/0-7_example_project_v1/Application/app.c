@@ -25,9 +25,17 @@
 #include "lvgl.h"
 #include "Colorwheel/colorwheel.h"
 #include "device_control/device_control.h"
+#if USE_Simulator
+#include "virtual_device.h"
+#endif
 #endif
 
+
+
 int app_init(void) {
+#if USE_Simulator
+  devices_init(); // 注册模拟设备
+#endif
 #if CONFIG_RES_BURN_ENABLE
   sys_delay_ms(1000);
   res_burner_run();

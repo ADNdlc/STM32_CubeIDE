@@ -26,6 +26,14 @@ void _ui_screen_change(lv_obj_t **target, lv_scr_load_anim_t fademode, int spd,
                        int delay, void (*target_init)(void));
 
 /**
+ * @brief 创建自定义样式滑块
+ * @param color  颜色
+ * @param Screens
+ * @return
+ */
+lv_obj_t* simple_slider_create(lv_color_t color, lv_obj_t* parent);
+
+/**
  * @brief 这里是DEBUG用的测试函数
  *
  */
