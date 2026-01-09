@@ -1,9 +1,12 @@
+#include "project_cfg.h"
 #include "sys_config.h"
+#include <stdio.h>
+#include <string.h>
+#if !USE_Simulator
 #include "cJSON.h"
 #include "flash_handler.h"
 #include "sys.h"
-#include <stdio.h>
-#include <string.h>
+#endif
 
 #define LOG_TAG "SYS_CFG"
 #include "elog.h"
@@ -59,7 +62,11 @@ int sys_config_init(void)
   log_i("Loading system configuration...");
 
   sys_config_set_defaults();
-  // sys_config_save(); // test
+// sys_config_save(); // test
+#if USE_Simulator
+  log_i("Simulator mode, use default config.");
+  return 0; // 模拟器环境无flash设备
+#else
 
   static char buffer[MAX_CFG_BUFFER_SIZE]; // 配置文件操作缓冲
   memset(buffer, 0, sizeof(buffer));
@@ -129,6 +136,7 @@ int sys_config_init(void)
   }
 
   return 0;
+#endif
 }
 
 /**
@@ -164,6 +172,7 @@ void sys_config_set_cloud(const cloud_config_t *cloud)
   }
 }
 
+#if !USE_Simulator
 /**
  * @brief 将g_sys_config当前配置以文件保存到sys使用的文件系统中
  *
@@ -174,11 +183,11 @@ int sys_config_save(void)
   cJSON *root = cJSON_CreateObject(); // json根对象
 
   // Build Network JSON
-  cJSON *net = cJSON_CreateObject();  // 网络对象
-  cJSON_AddStringToObject(net, "ssid", g_sys_config.net.ssid);  // 为network添加字符串值
+  cJSON *net = cJSON_CreateObject();                           // 网络对象
+  cJSON_AddStringToObject(net, "ssid", g_sys_config.net.ssid); // 为network添加字符串值
   cJSON_AddStringToObject(net, "password", g_sys_config.net.password);
-  cJSON_AddBoolToObject(net, "auto_connect", g_sys_config.net.auto_connect);// 添加布尔值
-  cJSON_AddItemToObject(root, "network", net);  // network作为子对象添加到根对象中
+  cJSON_AddBoolToObject(net, "auto_connect", g_sys_config.net.auto_connect); // 添加布尔值
+  cJSON_AddItemToObject(root, "network", net);                               // network作为子对象添加到根对象中
 
   // Build Cloud JSON
   cJSON *cloud = cJSON_CreateObject();
@@ -214,3 +223,4 @@ int sys_config_save(void)
 
   return res;
 }
+#endif

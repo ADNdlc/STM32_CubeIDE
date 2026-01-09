@@ -11,9 +11,9 @@
 #define CONFIG_RES_BURN_ENABLE 0 // 设置为1时开启烧录模式，烧录完成后应设回0
 
 #if defined(_WIN32) || defined(__cplusplus)
-#define USE_Simulator 1
+#define USE_Simulator 1		//  模拟器环境
 #endif
- // Compile-time check
+
 #if USE_Simulator
 #pragma message("Environment: LVGL Simulator (VS/Windows)")
 #else

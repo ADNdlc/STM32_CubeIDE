@@ -35,9 +35,8 @@ static void free_context_event_cb(lv_event_t *e) {
 void create_main(lv_obj_t *tabview) {
   log_i("Creating Main Tab...");
   lv_obj_t *tab_main =
-      lv_tabview_add_tab(tabview, LV_SYMBOL_HOME " HOME"); // 添加一个页面
-  lv_obj_set_grid_dsc_array(tab_main, main_col_dsc,
-                            main_row_dsc); // 主页使用网格布局
+  lv_tabview_add_tab(tabview, LV_SYMBOL_HOME " HOME"); // 添加一个页面
+  lv_obj_set_grid_dsc_array(tab_main, main_col_dsc, main_row_dsc); // 主页使用网格布局
 
   // test_layout_grid(tab_main, 5, 3);//布局测试
 
@@ -165,25 +164,27 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
   // 设置卡片的样式，如大小、圆角、阴影
   lv_obj_set_style_radius(card, 10, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(card, 5, LV_PART_MAIN);
+  lv_obj_set_style_pad_all(card, 0, 0);
+  lv_obj_set_style_pad_gap(card, 20, 20); // 子项边距
   lv_obj_clear_flag(card,
                     LV_OBJ_FLAG_SCROLLABLE); // 卡片本身不可滚动，内部容器滚动
-
   // 添加到网格布局
   lv_obj_set_grid_cell(card, LV_GRID_ALIGN_STRETCH, col, 1,
                        LV_GRID_ALIGN_STRETCH, row, 1);
 
-  lv_obj_update_layout(card); // 更新布局信息
+  lv_obj_update_layout(card); // 更新布局信息,获取容器大小
   lv_coord_t width = lv_obj_get_width(card);
   lv_coord_t height = lv_obj_get_height(card);
 
   // 1. 创建头部区域 (Icon + Name)
   lv_obj_t *header = lv_obj_create(card);
-  lv_obj_set_size(header, LV_PCT(100), 50);          // 固定高度
+  lv_obj_set_size(header, LV_PCT(105), 60);          // 固定高度
   lv_obj_set_style_bg_opa(header, LV_OPA_TRANSP, 0); // 透明背景
-  lv_obj_set_style_border_width(header, 0, 0);       // 无边框
-  lv_obj_set_style_pad_all(header, 0, 0);            // 无内边距
+  lv_obj_set_style_border_width(header, 50, 50);       // 无边框
+  lv_obj_set_style_pad_all(header, 5, 5);
+  lv_obj_set_style_pad_gap(header, 5, 5); // 子项边距
   lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_align(header, LV_ALIGN_TOP_MID, 0, 0);
+  lv_obj_align(header, LV_ALIGN_TOP_MID, 0, -5);
 
   // 显示设备图标
   lv_obj_t *card_img = lv_img_create(header);

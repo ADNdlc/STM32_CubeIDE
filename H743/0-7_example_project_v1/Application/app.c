@@ -8,6 +8,7 @@
 #define LOG_TAG "APP"
 #include "elog.h"
 #include "project_cfg.h"
+#include "sys_config.h"
 
 #if !USE_Simulator
 #include "hal_init.h"
@@ -33,6 +34,8 @@
 
 int app_init(void) {
 #if USE_Simulator   // 模拟器环境
+  sys_config_init();
+  sys_state_init();
   devices_init();   // 注册模拟设备
 #endif
 #if CONFIG_RES_BURN_ENABLE

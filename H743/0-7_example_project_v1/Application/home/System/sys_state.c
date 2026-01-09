@@ -1,3 +1,4 @@
+#include "project_cfg.h"
 #include "sys_state.h"
 #include "elog.h"
 #include <stddef.h>
@@ -36,6 +37,7 @@ void shade_update_cb(const sys_state_t *state) {
   if (shade) {
     lv_opa_t opa = lv_map(state->brightness, 0, 100, 255, 0); // 亮度转opa
     lv_obj_set_style_bg_opa(shade, opa, LV_PART_MAIN);
+    log_v("Brightness %d", state->brightness);
   }
 }
 #endif
