@@ -15,47 +15,46 @@ extern void controller_register_ui_control(const char *deviceID,
 extern void generic_control_event_cb(lv_event_t *e);
 
 // 主页网格布局定义(静态)
-static lv_coord_t main_row_dsc[] = {1,   160, 160,
-                                    160, 160, LV_GRID_TEMPLATE_LAST}; // 高
+static lv_coord_t main_row_dsc[] = {1, 180, 180,
+                                    180, 180, LV_GRID_TEMPLATE_LAST}; // 高
 static lv_coord_t main_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1),
                                     LV_GRID_TEMPLATE_LAST}; // 宽
 
 // 释放控件上下文空间的事件回调
-static void free_context_event_cb(lv_event_t *e) {
+static void free_context_event_cb(lv_event_t *e)
+{
   control_event_ctx_t *ctx = (control_event_ctx_t *)lv_event_get_user_data(e);
-  if (ctx) {
+  if (ctx)
+  {
     // 释放之前为这个控件分配的上下文内存
     log_d("Freeing context for [%s/%s]", ctx->deviceID, ctx->propID);
     lv_mem_free(ctx);
-  } else {
+  }
+  else
+  {
     log_e("free_context_event_cb: ctx is NULL");
   }
 }
 
-void create_main(lv_obj_t *tabview) {
+void create_main(lv_obj_t *tabview)
+{
   log_i("Creating Main Tab...");
-  lv_obj_t *tab_main =
-  lv_tabview_add_tab(tabview, LV_SYMBOL_HOME " HOME"); // 添加一个页面
-  lv_obj_set_grid_dsc_array(tab_main, main_col_dsc, main_row_dsc); // 主页使用网格布局
+  lv_obj_t *tab_main = lv_tabview_add_tab(tabview, LV_SYMBOL_HOME " HOME"); // 添加一个页面
+  lv_obj_set_grid_dsc_array(tab_main, main_col_dsc, main_row_dsc);          // 主页使用网格布局
 
   // test_layout_grid(tab_main, 5, 3);//布局测试
-
   controller_init_main_tab(tab_main); // 填充内容(根据已注册设备创建控制卡片)
 }
 
-void create_add(lv_obj_t *tabview) {
+void create_add(lv_obj_t *tabview)
+{
   log_i("Creating Add Tab...");
   lv_obj_t *tab_add = lv_tabview_add_tab(tabview, LV_SYMBOL_PLUS " ADD");
 
-  lv_obj_t *add_directory = lv_tabview_create(
-      tab_add, LV_DIR_LEFT, scr_act_width() / 6); // 内部使用tableview
-  lv_obj_align(add_directory, LV_ALIGN_LEFT_MID, -scr_act_width() / 40,
-               0); // 对齐屏幕边缘
-  lv_obj_set_size(add_directory, LV_PCT(100),
-                  LV_PCT(100)); // 设置 add_directory 占满整个父容器
-
-  style_tabview_simple(add_directory, style_get_addtab_default(),
-                       style_get_addtab_checked());
+  lv_obj_t *add_directory = lv_tabview_create(tab_add, LV_DIR_LEFT, scr_act_width() / 6); // 内部使用tableview
+  lv_obj_align(add_directory, LV_ALIGN_LEFT_MID, -scr_act_width() / 40, 0);               // 对齐屏幕边缘
+  lv_obj_set_size(add_directory, LV_PCT(100), LV_PCT(100));                               // 设置 add_directory 占满整个父容器
+  style_tabview_simple(add_directory, style_get_addtab_default(), style_get_addtab_checked());
 
   // 添加设备分类目录
   lv_obj_t *directory_light = lv_tabview_add_tab(add_directory, "Light");
@@ -69,7 +68,8 @@ void create_add(lv_obj_t *tabview) {
   controller_init_add_tab(add_directory); // 根据"可添加设备"填充内容
 }
 
-void create_user(lv_obj_t *tabview) {
+void create_user(lv_obj_t *tabview)
+{
   log_i("Creating User Tab...");
   char *user_name = "user_name"; // 假设获取到了登陆的用户id
   char *uid_str = "1234567890";
@@ -104,24 +104,13 @@ void create_user(lv_obj_t *tabview) {
   // 列表,添加圆角,单列
   lv_obj_t *list = lv_list_create(tab_user); // 创建表格
   lv_obj_set_size(list, scr_act_width() / 2, scr_act_height() / 3 + 10);
-  lv_obj_align_to(list, user, LV_ALIGN_OUT_BOTTOM_MID, 0,
-                  15); // 与用户信息块有一定间距
+  lv_obj_align_to(list, user, LV_ALIGN_OUT_BOTTOM_MID, 0, 15); // 与用户信息块有一定间距
   // 函数第一个参数为添加到的列表,
   // 第二个参数为"按钮图标"(可使用lvgl提供的图标枚举)，第三个参数为"按钮文本"。返回值为添加的按钮
-  lv_obj_t *Setting =
-      lv_list_add_btn(list, LV_SYMBOL_SETTINGS,
-                      "Setting                                                 "
-                      "         " LV_SYMBOL_RIGHT);
-  lv_obj_t *about = lv_list_add_btn(list, LV_SYMBOL_SETTINGS,
-                                    "about                                     "
-                                    "                       " LV_SYMBOL_RIGHT);
-  lv_obj_t *help = lv_list_add_btn(list, LV_SYMBOL_SETTINGS,
-                                   "help                                       "
-                                   "                        " LV_SYMBOL_RIGHT);
-  lv_obj_t *version =
-      lv_list_add_btn(list, LV_SYMBOL_SETTINGS,
-                      "version                                                 "
-                      "         " LV_SYMBOL_RIGHT);
+  lv_obj_t *Setting = lv_list_add_btn(list, LV_SYMBOL_SETTINGS, "Setting");
+  lv_obj_t *about = lv_list_add_btn(list, LV_SYMBOL_WARNING, "about");
+  lv_obj_t *help = lv_list_add_btn(list, LV_SYMBOL_PLUS, "help");
+  lv_obj_t *version = lv_list_add_btn(list, LV_SYMBOL_FILE, "version");
 
   // 添加登出按钮,白色按钮，红色字体,去除阴影
   lv_obj_t *logout_btn = lv_btn_create(tab_user);
@@ -145,7 +134,7 @@ void create_user(lv_obj_t *tabview) {
 }
 
 /**
- * @brief 创建一个设备卡片
+ * @brief 创建一个设备控件卡片
  *
  * @param parent 父容器
  * @param device 设备数据体
@@ -156,75 +145,111 @@ void create_user(lv_obj_t *tabview) {
  */
 lv_obj_t *view_create_device_card(lv_obj_t *parent,
                                   const thing_device_t *device, uint8_t row,
-                                  uint8_t col) {
+                                  uint8_t col)
+{
   log_d("Creating card for device: %s at [%d, %d]", device->device_id, row,
         col);
   lv_obj_t *card = lv_obj_create(parent);
   lv_obj_set_size(card, LV_PCT(100), LV_PCT(100));
   // 设置卡片的样式，如大小、圆角、阴影
   lv_obj_set_style_radius(card, 10, LV_PART_MAIN);
-  lv_obj_set_style_shadow_width(card, 5, LV_PART_MAIN);
-  lv_obj_set_style_pad_all(card, 0, 0);
-  lv_obj_set_style_pad_gap(card, 20, 20); // 子项边距
-  lv_obj_clear_flag(card,
-                    LV_OBJ_FLAG_SCROLLABLE); // 卡片本身不可滚动，内部容器滚动
+  lv_obj_set_style_shadow_width(card, 4, LV_PART_MAIN);
+  lv_obj_set_style_pad_all(card, 6, LV_PART_MAIN);
+  lv_obj_set_style_pad_gap(card, 5, LV_PART_MAIN); // 子项边距
+  lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE); // 卡片本身不可滚动，内部容器滚动
   // 添加到网格布局
   lv_obj_set_grid_cell(card, LV_GRID_ALIGN_STRETCH, col, 1,
                        LV_GRID_ALIGN_STRETCH, row, 1);
+  lv_obj_update_layout(card);                             // 更新布局信息,获取容器大小
+  lv_coord_t img_size = 8 * lv_obj_get_height(card) / 26; // 图片缩放目标大小
 
-  lv_obj_update_layout(card); // 更新布局信息,获取容器大小
-  lv_coord_t width = lv_obj_get_width(card);
-  lv_coord_t height = lv_obj_get_height(card);
+  // 1. 图标区域
+  lv_obj_t *img_icon = lv_obj_create(card);
+  lv_obj_set_size(img_icon, img_size, img_size);            // 目标大小
+  lv_obj_set_style_bg_opa(img_icon, LV_OPA_TRANSP, 0);      // 透明背景
+  lv_obj_set_style_pad_all(img_icon, 0, 0);                 // 无内边距
+  lv_obj_set_style_border_width(img_icon, 0, LV_PART_MAIN); // 无边框
+  lv_obj_clear_flag(img_icon, LV_OBJ_FLAG_SCROLLABLE);      // 禁止滚动
+  lv_obj_align(img_icon, LV_ALIGN_TOP_LEFT, 0, 0);
+  lv_obj_update_layout(img_icon); // 更新布局信息
 
-  // 1. 创建头部区域 (Icon + Name)
-  lv_obj_t *header = lv_obj_create(card);
-  lv_obj_set_size(header, LV_PCT(105), 60);          // 固定高度
-  lv_obj_set_style_bg_opa(header, LV_OPA_TRANSP, 0); // 透明背景
-  lv_obj_set_style_border_width(header, 50, 50);       // 无边框
-  lv_obj_set_style_pad_all(header, 5, 5);
-  lv_obj_set_style_pad_gap(header, 5, 5); // 子项边距
-  lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_align(header, LV_ALIGN_TOP_MID, 0, -5);
-
-  // 显示设备图标
-  lv_obj_t *card_img = lv_img_create(header);
-  if (device->icon) {
+  // 获取设备图标
+  lv_obj_t *card_img = lv_img_create(img_icon);
+  lv_obj_align(card_img, LV_ALIGN_CENTER, 0, 0);
+  if (device->icon)
+  {
     lv_img_set_src(card_img, device->icon);
-  } else {
-    lv_img_set_src(card_img, res_get_src(RES_IMG_ICON_CONTROL));
   }
-  lv_img_set_zoom(card_img, 300);
-  lv_obj_align(card_img, LV_ALIGN_LEFT_MID, 5, 0);
+  else
+  {
+    lv_img_set_src(card_img, res_get_src(RES_IMG_ICON_CONTROL)); // 使用缺省值
+  }
+  // 获取图标原始尺寸
+  lv_img_header_t header_img;
+  const void *img_src = lv_img_get_src(card_img);
+  lv_res_t res = lv_img_decoder_get_info(img_src, &header_img);
+  lv_coord_t zoom;
+  if (res == LV_RES_OK && header_img.w > 0 && header_img.h > 0)
+  { // 检查图片信息是否成功获取且尺寸有效
+    lv_coord_t available_size = lv_obj_get_content_height(img_icon);
+    log_d("header size: %d", available_size);
 
-  // 根据设备数据显示内容 (滚动标签)
-  lv_obj_t *name_label = lv_label_create(header);
+    // 计算基于宽度的缩放比例
+    // 将 available_size 转换为 int32_t 进行乘法，避免溢出，然后除以原始宽度
+    int32_t zoom_w = (int32_t)available_size * LV_IMG_ZOOM_NONE / header_img.w;
+
+    // 计算基于高度的缩放比例
+    int32_t zoom_h = (int32_t)available_size * LV_IMG_ZOOM_NONE / header_img.h;
+
+    // 为了确保图片完全可见且不被裁剪，我们需要选择较小的缩放比例
+    // 这样图片的两条边都能被限制在可用空间内
+    zoom = LV_MIN(zoom_w, zoom_h);
+
+    // 确保缩放比例不为0，以防极端情况导致显示异常
+    if (zoom <= 0)
+    {
+      zoom = LV_IMG_ZOOM_NONE; // 如果计算结果不合理，则不缩放
+    }
+
+    lv_img_set_zoom(card_img, zoom);
+    log_d("%s zoom: %d", device->name, zoom);
+  }
+  else
+  {
+    // 如果图片信息无法获取或尺寸无效，则不进行缩放（100%）
+    lv_img_set_zoom(card_img, LV_IMG_ZOOM_NONE); // LV_IMG_ZOOM_NONE 等同于 256
+  }
+
+  // 2. 设备名称 (滚动标签)
+  lv_obj_t *name_label = lv_label_create(card);
   lv_label_set_text(name_label, device->name);
-  lv_obj_set_style_text_font(name_label, &lv_font_montserrat_20, LV_PART_MAIN);
-  lv_obj_set_width(name_label, 90); // 限制宽度以触发滚动
-  lv_label_set_long_mode(name_label,
-                         LV_LABEL_LONG_SCROLL_CIRCULAR); // 循环滚动模式
-  lv_obj_align(name_label, LV_ALIGN_RIGHT_MID, -5, 0);
+  lv_obj_set_style_text_font(name_label, &lv_font_montserrat_22, LV_PART_MAIN);
+  lv_obj_set_width(name_label, 34 * lv_obj_get_width(card) / 50); // 限制宽度以触发滚动
+  lv_label_set_long_mode(name_label, LV_LABEL_LONG_SCROLL);       // 往复滚动模式
+  lv_obj_align_to(name_label, img_icon, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+  log_w("%s name label width: %d", device->name, 3 * lv_obj_get_width(card) / 5);
 
-  // 2. 创建属性容器 (滚动区域)
+  // 3. 创建属性容器 (滚动区域)
   lv_obj_t *prop_cont = lv_obj_create(card);
-  lv_obj_set_size(prop_cont, LV_PCT(100), LV_PCT(65)); // 占据剩余空间
-  lv_obj_align_to(prop_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+  lv_obj_set_size(prop_cont, LV_PCT(105), LV_PCT(70)); // 占据剩余空间
+  lv_obj_align(prop_cont, LV_ALIGN_BOTTOM_MID, 0, 6);
   lv_obj_set_flex_flow(prop_cont, LV_FLEX_FLOW_COLUMN); // 垂直Flex布局
-  lv_obj_set_style_bg_opa(prop_cont, LV_OPA_TRANSP, 0);
-  lv_obj_set_style_border_width(prop_cont, 0, 0);
-  lv_obj_set_style_pad_all(prop_cont, 5, 0);
-  lv_obj_set_style_pad_row(prop_cont, 10, 0); // 行间距
+  lv_obj_set_style_bg_opa(prop_cont, LV_OPA_TRANSP, LV_PART_MAIN);
+  lv_obj_set_style_border_width(prop_cont, 0, LV_PART_MAIN);
+  lv_obj_set_style_pad_all(prop_cont, 0, LV_PART_MAIN); // 内边距
+  lv_obj_set_style_pad_row(prop_cont, 5, LV_PART_MAIN); // 行间距
+  //
 
   // 根据设备属性动态添加控件
   log_d("Generating %d controls for %s", device->prop_count, device->device_id);
-
-  for (int i = 0; i < device->prop_count; i++) {
+  for (int i = 0; i < device->prop_count; i++)
+  { // 遍历设备的所有属性
     const thing_property_t *prop = &device->properties[i];
-
     // 分配上下文空间
     control_event_ctx_t *ctx =
         (control_event_ctx_t *)lv_mem_alloc(sizeof(control_event_ctx_t));
-    if (!ctx) {
+    if (!ctx)
+    {
       log_e("Memory alloc failed for control context [%s/%s]",
             device->device_id, prop->id);
       continue;
@@ -233,128 +258,132 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
     snprintf(ctx->propID, sizeof(ctx->propID), "%s", prop->id);
 
     // 根据属性类型创建控件
-    switch (prop->type) {
-    case THING_PROP_TYPE_SWITCH: {
+    switch (prop->type)
+    {
+    case THING_PROP_TYPE_SWITCH:
+    {
       log_d("  Adding Switch: %s", prop->id);
 
-      // 创建一个行容器来容纳标签和开关
+      // 创建一个"行容器"来容纳"开关属性"的switch控件
       lv_obj_t *row_cont = lv_obj_create(prop_cont);
-      lv_obj_set_size(row_cont, LV_PCT(100), 40);
-      lv_obj_set_style_bg_opa(row_cont, LV_OPA_TRANSP, 0);
-      lv_obj_set_style_border_width(row_cont, 0, 0);
+      lv_obj_set_size(row_cont, LV_PCT(100), 40); // 容器高40
+      lv_obj_set_style_bg_opa(row_cont, LV_OPA_TRANSP, LV_PART_MAIN);
+      lv_obj_set_style_border_width(row_cont, 0, LV_PART_MAIN);
       lv_obj_clear_flag(row_cont, LV_OBJ_FLAG_SCROLLABLE);
-
+      lv_obj_update_layout(row_cont); // 更新布局信息
+      // 属性名称
       lv_obj_t *label_sw = lv_label_create(row_cont);
       lv_label_set_text(label_sw, prop->name);
+      lv_obj_set_style_text_font(label_sw, &lv_font_montserrat_16, LV_PART_MAIN);
+      lv_obj_set_width(label_sw, lv_obj_get_width(row_cont) / 2); // 限制宽度以触发滚动
+      lv_label_set_long_mode(label_sw, LV_LABEL_LONG_SCROLL);     // 往复滚动模式
       lv_obj_align(label_sw, LV_ALIGN_LEFT_MID, 0, 0);
-
+      // 属性控件
       lv_obj_t *sw = lv_switch_create(row_cont);
-      lv_obj_set_size(sw, 45, 25);
+      lv_obj_set_size(sw, 65, 30); // 手动留出边距
       lv_obj_align(sw, LV_ALIGN_RIGHT_MID, 0, 0);
 
-      if (prop->value.b) {
+      if (prop->value.b)
+      {
         lv_obj_add_state(sw, LV_STATE_CHECKED);
       }
-
+      // 添加控件事件处理
       ctx->target_obj = sw;
-      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED,
-                          ctx);
-      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE, ctx);
+      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx); // 值改变事件
+      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE, ctx);           // 删除事件
 
-      controller_register_ui_control(device->device_id, prop->id, sw);
+      controller_register_ui_control(device->device_id, prop->id, sw); // 注册设备控件
       break;
     }
-    case THING_PROP_TYPE_INT: {
+    case THING_PROP_TYPE_INT:
+    {
       log_d("  Adding Slider: %s", prop->id);
 
-      // 创建一个垂直堆叠的容器
+      // 创建"垂直堆叠"的容器,int类型属性的slider控件
       lv_obj_t *col_cont = lv_obj_create(prop_cont);
-      lv_obj_set_size(col_cont, LV_PCT(100), 55);
-      lv_obj_set_style_bg_opa(col_cont, LV_OPA_TRANSP, 0);
-      lv_obj_set_style_border_width(col_cont, 0, 0);
+      lv_obj_set_size(col_cont, LV_PCT(100), 50);
+      lv_obj_set_style_bg_opa(col_cont, LV_OPA_TRANSP, LV_PART_MAIN);
+      lv_obj_set_style_border_width(col_cont, 0, LV_PART_MAIN);
       lv_obj_clear_flag(col_cont, LV_OBJ_FLAG_SCROLLABLE);
-      lv_obj_set_style_pad_all(col_cont, 0, 0);
+      lv_obj_update_layout(col_cont); // 更新布局信息
 
       lv_obj_t *label_sld = lv_label_create(col_cont);
       lv_label_set_text(label_sld, prop->name);
-      lv_obj_set_style_text_font(label_sld, &lv_font_montserrat_14, 0);
-      lv_obj_align(label_sld, LV_ALIGN_TOP_LEFT, 0, 0);
+      lv_obj_set_style_text_font(label_sld, &lv_font_montserrat_16, LV_PART_MAIN);
+      lv_obj_align(label_sld, LV_ALIGN_TOP_LEFT, 0, -20);
 
       lv_obj_t *sld = simple_slider_create(lv_color_hex(0xFFE4B5), col_cont);
-      lv_obj_set_size(sld, LV_PCT(95), 12);
-      lv_obj_align(sld, LV_ALIGN_BOTTOM_MID, 0, -5);
+      lv_obj_set_size(sld, LV_PCT(100), 18);
+      lv_obj_align(sld, LV_ALIGN_BOTTOM_MID, 0, 10);
 
       lv_slider_set_range(sld, prop->min, prop->max);
       lv_slider_set_value(sld, prop->value.i, LV_ANIM_OFF);
 
       ctx->target_obj = sld;
-      lv_obj_add_event_cb(sld, generic_control_event_cb, LV_EVENT_VALUE_CHANGED,
-                          ctx);
+      lv_obj_add_event_cb(sld, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx);
       lv_obj_add_event_cb(sld, free_context_event_cb, LV_EVENT_DELETE, ctx);
-
       controller_register_ui_control(device->device_id, prop->id, sld);
       break;
     }
-    case THING_PROP_TYPE_FLOAT: {
+    case THING_PROP_TYPE_FLOAT:
+    {
       log_d("  Adding Float Display: %s", prop->id);
 
       lv_obj_t *row_cont = lv_obj_create(prop_cont);
       lv_obj_set_size(row_cont, LV_PCT(100), 30);
-      lv_obj_set_style_bg_opa(row_cont, LV_OPA_TRANSP, 0);
-      lv_obj_set_style_border_width(row_cont, 0, 0);
-      lv_obj_set_style_pad_all(row_cont, 0, 0);
+      lv_obj_set_style_bg_opa(row_cont, LV_OPA_TRANSP, LV_PART_MAIN);
+      lv_obj_set_style_border_width(row_cont, 0, LV_PART_MAIN);
       lv_obj_clear_flag(row_cont, LV_OBJ_FLAG_SCROLLABLE);
 
       lv_obj_t *label_name = lv_label_create(row_cont);
       lv_label_set_text(label_name, prop->name);
-      lv_obj_set_style_text_font(label_name, &lv_font_montserrat_14, 0);
+      lv_obj_set_style_text_font(label_name, &lv_font_montserrat_16, 0);
       lv_obj_align(label_name, LV_ALIGN_LEFT_MID, 0, 0);
 
       lv_obj_t *label_val = lv_label_create(row_cont);
       char buf[32];
-      snprintf(buf, sizeof(buf), "%.1f %s", prop->value.f,
-               prop->unit ? prop->unit : "");
+      snprintf(buf, sizeof(buf), "%.1f %s", prop->value.f, prop->unit ? prop->unit : ""); // 单位
       lv_label_set_text(label_val, buf);
-      lv_obj_set_style_text_font(label_val, &lv_font_montserrat_14, 0);
+      lv_obj_set_style_text_font(label_val, &lv_font_montserrat_16, 0);
       lv_obj_align(label_val, LV_ALIGN_RIGHT_MID, 0, 0);
 
       ctx->target_obj = label_val; // 绑定到数值标签
-      lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE,
-                          ctx);
-
+      lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE, ctx);
       controller_register_ui_control(device->device_id, prop->id, label_val);
       break;
     }
     case THING_PROP_TYPE_STRING:
-    case THING_PROP_TYPE_ENUM: {
+    case THING_PROP_TYPE_ENUM:
+    {
       log_d("  Adding Label Display for type %d: %s", prop->type, prop->id);
 
       lv_obj_t *row_cont = lv_obj_create(prop_cont);
       lv_obj_set_size(row_cont, LV_PCT(100), 30);
       lv_obj_set_style_bg_opa(row_cont, LV_OPA_TRANSP, 0);
       lv_obj_set_style_border_width(row_cont, 0, 0);
-      lv_obj_set_style_pad_all(row_cont, 0, 0);
       lv_obj_clear_flag(row_cont, LV_OBJ_FLAG_SCROLLABLE);
 
       lv_obj_t *label_name = lv_label_create(row_cont);
       lv_label_set_text(label_name, prop->name);
-      lv_obj_set_style_text_font(label_name, &lv_font_montserrat_14, 0);
+      lv_obj_set_style_text_font(label_name, &lv_font_montserrat_16, 0);
       lv_obj_align(label_name, LV_ALIGN_LEFT_MID, 0, 0);
 
       lv_obj_t *label_val = lv_label_create(row_cont);
-      if (prop->type == THING_PROP_TYPE_STRING) {
+      if (prop->type == THING_PROP_TYPE_STRING)
+      {
         lv_label_set_text(label_val, prop->value.s ? prop->value.s : "N/A");
-      } else {
+      }
+      else
+      {
         char buf[16];
         snprintf(buf, sizeof(buf), "%d", prop->value.i);
         lv_label_set_text(label_val, buf);
       }
-      lv_obj_set_style_text_font(label_val, &lv_font_montserrat_14, 0);
+      lv_obj_set_style_text_font(label_val, &lv_font_montserrat_16, 0);
       lv_obj_align(label_val, LV_ALIGN_RIGHT_MID, 0, 0);
 
       ctx->target_obj = label_val;
-      lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE,
-                          ctx);
+      lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE, ctx);
 
       controller_register_ui_control(device->device_id, prop->id, label_val);
       break;

@@ -37,7 +37,7 @@ typedef struct {
   // 约束条件 (可选)
   int32_t min;
   int32_t max;
-  const char *unit; // e.g., "C", "%"
+  const char *unit; //单位 e.g., "C", "%"
 
   // 读写类型和云同步
   bool readable;

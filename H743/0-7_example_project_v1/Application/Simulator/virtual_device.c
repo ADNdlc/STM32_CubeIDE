@@ -70,6 +70,30 @@ static bool light_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
   return false;
 }
 
+// 全类型设备回调 - 支持所有thing_prop_type_t类型
+static bool full_type_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
+                                  thing_value_t value) {
+  if (strcmp(dev->device_id, "full_type_dev") == 0) {
+    if (strcmp(prop_id, "switch_prop") == 0) {
+      log_i("FullType: Switch property set to %s", value.b ? "true" : "false");
+      return true;
+    } else if (strcmp(prop_id, "int_prop") == 0) {
+      log_i("FullType: Integer property set to %d", value.i);
+      return true;
+    } else if (strcmp(prop_id, "float_prop") == 0) {
+      log_i("FullType: Float property set to %.2f", value.f);
+      return true;
+    } else if (strcmp(prop_id, "string_prop") == 0) {
+      log_i("FullType: String property set to %s", value.s);
+      return true;
+    } else if (strcmp(prop_id, "enum_prop") == 0) {
+      log_i("FullType: Enum property set to %d", value.i);
+      return true;
+    }
+  }
+  return false;
+}
+
 void devices_init(void) {
   log_i("Initializing hardware devices for Thing Model...");
 
@@ -193,6 +217,49 @@ void devices_init(void) {
                                .on_prop_set = light_prop_set_cb};
 
   thing_model_register(&light_tmpl);
+
+  // 全类型设备 - 包含所有thing_prop_type_t类型的属性
+  static thing_property_t full_type_props[] = {
+      {.id = "switch_prop",
+       .name = "Switch Property",
+       .type = THING_PROP_TYPE_SWITCH,
+       .cloud_sync = true},
+      {.id = "int_prop",
+       .name = "Integer Property",
+       .type = THING_PROP_TYPE_INT,
+       .unit = "",
+       .min = 0,
+       .max = 100,
+       .cloud_sync = true},
+      {.id = "float_prop",
+       .name = "Float Property",
+       .type = THING_PROP_TYPE_FLOAT,
+       .unit = "",
+       .min = 0.0,
+       .max = 100.0,
+       .cloud_sync = true},
+      {.id = "string_prop",
+       .name = "String Property",
+       .type = THING_PROP_TYPE_STRING,
+       .max = 64,
+       .cloud_sync = true},
+      {.id = "enum_prop",
+       .name = "Enum Property",
+       .type = THING_PROP_TYPE_ENUM,
+       .unit = "",
+       .min = 0,
+       .max = 4,  // 枚举值范围 0~4
+       .cloud_sync = true},
+  };
+
+  thing_device_t full_type_tmpl = {.device_id = "full_type_dev",
+                                   .name = "Full Type Virtual Device",
+                                   .prop_count = 5,  // 包含全部5种类型
+                                   .icon = res_get_src(RES_IMG_ICON_BRIGHT),
+                                   .properties = full_type_props,
+                                   .on_prop_set = full_type_prop_set_cb};
+
+  thing_model_register(&full_type_tmpl);
 
   log_i("Device registration completed.");
 }
