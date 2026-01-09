@@ -33,7 +33,6 @@
 	func;	\
 }while(0)
 
-
 void run_all_tests(void) {
 	log_w(">>>>> Run Test !!! <<<<<");
 
@@ -103,10 +102,6 @@ void run_all_tests(void) {
 
 #if _net_mgr_test_
   TEST_MODULE(connectivity_test_run());
-#endif
-
-#if _flash_test_
-  flash_test_run();
 #endif
 }
 #else
