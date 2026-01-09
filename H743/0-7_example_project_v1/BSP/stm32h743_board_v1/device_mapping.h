@@ -9,6 +9,7 @@
 // GPIO 设备逻辑标识枚举
 typedef enum {
   GPIO_LED_0 = 0,
+  GPIO_LED_1,
   GPIO_BUTTON_KEYUP,
   GPIO_BUTTON_KEY0,
   GPIO_BUTTON_KEY1,

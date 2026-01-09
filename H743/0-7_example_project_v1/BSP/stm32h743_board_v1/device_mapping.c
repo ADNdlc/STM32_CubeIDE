@@ -13,7 +13,8 @@
 
 // GPIO 设备映射表定义
 const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
-    [GPIO_LED_0] = {GPIOB, GPIO_PIN_1},        // 开发板led_1(PB0,act=0)
+    [GPIO_LED_0] = {GPIOB, GPIO_PIN_1},        // 开发板led_0(PB1,act=0)
+	[GPIO_LED_1] = {GPIOB, GPIO_PIN_0},        // 开发板led_1(PB0,act=0)
     [GPIO_BUTTON_KEYUP] = {GPIOA, GPIO_PIN_0}, // 开发板按键KEY_UP(act=1)
     [GPIO_BUTTON_KEY0] = {GPIOH, GPIO_PIN_3},  // 开发板按键KEY_0 (act=0)
     [GPIO_BUTTON_KEY1] = {GPIOH, GPIO_PIN_2},  // 开发板按键KEY_1 (act=0)

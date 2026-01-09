@@ -134,7 +134,7 @@ int main(void)
   // module testing
   run_all_tests(); // 运行所有开启的单元测试
 
-  net_mgr_wifi_enable(1);
+  //net_mgr_wifi_enable(1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
