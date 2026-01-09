@@ -1,9 +1,9 @@
 ﻿#include "ui_screen_home.h"
-// #include "elog.h"
-#include "app_manager.h" // Added missing include
-#include "components/util.h"
+#include "res_manager.h"
+#include "elog.h"
+#include "app_manager.h"
+#include "lv_util.h"
 #include "core_app.h"
-#include "ui_helpers.h"
 #include <assert.h>
 #include <stdio.h>
 
@@ -89,7 +89,7 @@ void ui_screen_home_init(void) {
 
   // 设置背景
   lv_obj_t *bg = lv_img_create(ui_screen_home);
-  lv_img_set_src(bg, &wallpaper);
+  lv_img_set_src(bg, res_get_src(RES_IMG_WALLPAPER)); // 从资源管理器获取路径
 
   // 使用TileView作为主体
   ui_home_tileview = lv_tileview_create(ui_screen_home);

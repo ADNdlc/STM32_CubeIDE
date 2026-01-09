@@ -57,7 +57,7 @@ void MX_RTC_Init(void)
   }
 
   /* USER CODE BEGIN Check_RTC_BKUP */
-  return;	// 由rtc_hal进行判断
+  return;	// 是否设置由rtc_hal进行判断
   /* USER CODE END Check_RTC_BKUP */
 
   /** Initialize RTC and set the Time and Date

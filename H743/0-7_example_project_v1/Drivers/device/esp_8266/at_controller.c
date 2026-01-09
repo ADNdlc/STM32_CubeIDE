@@ -10,33 +10,48 @@
 #include <stdio.h>
 #include <string.h>
 
-// 依赖 (使用完整相对路径确保编译环境无关性)
-#include "../../../Component/uart_queue/uart_queue.h"
-#include "../../../EasyLogger/easylogger/inc/elog.h"
-#include "../../SYSTEM/sys.h"
-#include "../../interface/gpio_driver.h"
+// 依赖
+#include "elog.h"
+#include "gpio_driver.h"
+#include "sys.h"
+#include "uart_queue/uart_queue.h"
 
-// --- Internal Prototypes ---
+/****************
+ * 常量定义
+ ****************/
+#define READY_TIMEOUT_MS 5000     // 等待模块就绪超时时间
+#define RETRY_TIMEOUT_MS 200      // 重试超时时间
+#define MAX_BUSY_TIMEOUT_MS 10000 // 模块忙碌超时时间
+
+/****************
+ * 内部处理函数
+ ****************/
 static void at_controller_reset_hw(at_controller_t *self);
 static void at_controller_process_cmd(at_controller_t *self);
 static void at_cmd_cleanup(at_controller_t *self, AT_Cmd_t *cmd);
 
-/* ===================== 内部处理回调 ===================== */
+/****************
+ * 内部URC处理
+ ****************/
 // "OK"
 static void handle_final_ok(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
-  if (self->state == AT_CTRL_STATE_WAIT_RSP ||
-      self->state == AT_CTRL_STATE_WAIT_DATAIN) {
+  if (self->state == AT_CTRL_STATE_WAIT_RSP) {
     if (self->current_cmd && self->current_cmd->response_cb) {
-      self->current_cmd->response_cb(AT_CMD_OK, line);
+      self->current_cmd->response_cb(AT_CMD_OK,
+                                     line); // 将结果和内容传递给命令的回调
     }
     log_d("Cmd OK: %s",
           self->current_cmd ? self->current_cmd->cmd_str : "NULL");
+    // 清理命令对象和系统状态
     at_cmd_cleanup(self, self->current_cmd);
     self->current_cmd = NULL;
     self->state = AT_CTRL_STATE_IDLE;
     self->busy_count = 0;
     self->consecutive_timeouts = 0;
+  } else if (self->state ==
+             AT_CTRL_STATE_WAIT_DATAIN) { // 如果是长输入命令则忽略中间的OK
+    log_d("Intermediate OK (ignored in WAIT_DATAIN): %s", line);
   }
 }
 // "ERROR"
@@ -47,9 +62,9 @@ static void handle_final_error(void *ctx, const char *line) {
     log_e("Cmd Error: %s",
           self->current_cmd ? self->current_cmd->cmd_str : "NULL");
     if (self->current_cmd && self->current_cmd->response_cb) {
-      self->current_cmd->response_cb(AT_CMD_ERROR, line);
+      self->current_cmd->response_cb(AT_CMD_ERROR,
+                                     line); // 将结果和内容传递给命令的回调
     }
-
     at_cmd_cleanup(self, self->current_cmd);
     self->current_cmd = NULL;
     self->state = AT_CTRL_STATE_IDLE;
@@ -60,6 +75,7 @@ static void handle_busy(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
   if (self->current_cmd != NULL) {
     log_w("Module busy, retry %d", self->busy_count + 1);
+    // 进入等待状态并记录状态
     self->busy_count++;
     self->state = AT_CTRL_STATE_BUSY;
     self->wait_sent_time = sys_get_systick_ms();
@@ -71,6 +87,7 @@ static void handle_ready(void *ctx, const char *line) {
   log_i("Module ready");
   if (self->state == AT_CTRL_STATE_WAIT_READY ||
       self->state == AT_CTRL_STATE_RESETTING) {
+    // 模块就绪，进入空闲状态
     self->state = AT_CTRL_STATE_IDLE;
     self->error_count = 0;
     self->consecutive_timeouts = 0;
@@ -81,6 +98,8 @@ static void handle_CMDdata_send(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
   if (self->state == AT_CTRL_STATE_WAIT_DATAIN && self->current_cmd &&
       self->current_cmd->data_to_send) {
+    log_d("Send CMD data: %s", self->current_cmd->data_to_send);
+    // 发送数据部分
     uart_queue_send(self->uart,
                     (const uint8_t *)self->current_cmd->data_to_send,
                     strlen(self->current_cmd->data_to_send));
@@ -88,13 +107,7 @@ static void handle_CMDdata_send(void *ctx, const char *line) {
   }
 }
 
-// static void handle_Rxdata_process(void *ctx, const char *line) {
-//   at_controller_t *self = (at_controller_t *)ctx;
-//   if (self->current_cmd && self->current_cmd->parser_cb) {
-//     self->current_cmd->parser_cb(line);
-//   }
-// }
-
+// 清理命令对象
 static void at_cmd_cleanup(at_controller_t *self, AT_Cmd_t *cmd) {
   if (!cmd)
     return;
@@ -115,25 +128,35 @@ void at_controller_init(at_controller_t *self, uart_queue_t *uart,
   memset(self, 0, sizeof(at_controller_t));
   self->uart = uart;
   self->rst_pin = rst_pin;
-  self->state = AT_CTRL_STATE_RESETTING;
+  self->state = AT_CTRL_STATE_RESETTING; // 等待模块复位就绪
   self->last_action_time = sys_get_systick_ms();
 
   log_i("AT Controller Initializing...");
 
   // 注册基本urc处理
-  at_controller_register_handler(self, "ready", handle_ready);
-  at_controller_register_handler(self, "busy p...", handle_busy);
-  at_controller_register_handler(self, ">", handle_CMDdata_send);
-  at_controller_register_handler(self, "OK", handle_final_ok);
-  at_controller_register_handler(self, "SEND OK", handle_final_ok);
-  at_controller_register_handler(self, "ERROR", handle_final_error);
-  at_controller_register_handler(self, "SEND FAIL", handle_final_error);
-
-  // at_controller_register_handler(self, "+CWMODE:", handle_Rxdata_process);
-  // //wifi at_controller_register_handler(self, "+CIPSNTPTIME:",
-  // handle_Rxdata_process); //SNTP
+  at_controller_register_handler(self, "ready", handle_ready, self);
+  at_controller_register_handler(self, "busy p...", handle_busy, self);
+  at_controller_register_handler(self, ">", handle_CMDdata_send, self);
+  at_controller_register_handler(self, "OK", handle_final_ok, self);
+  at_controller_register_handler(self, "SEND OK", handle_final_ok, self);
+  at_controller_register_handler(self, "+MQTTPUB:OK", handle_final_ok, self);
+  at_controller_register_handler(self, "+MQTTSUB:OK", handle_final_ok, self);
+  at_controller_register_handler(self, "ERROR", handle_final_error, self);
+  at_controller_register_handler(self, "SEND FAIL", handle_final_error, self);
 
   at_controller_reset_hw(self); // 模块硬重置
+
+  // 提交模块初始设置(就绪后发送)
+  AT_Cmd_t init_cmds[] = {
+      {.cmd_str = "AT+SYSSTORE=1\r\n",
+       .timeout_ms = 1000}, // 模块的配置更改将保存在 NVS 分区
+      {.cmd_str = "ATE0\r\n", .timeout_ms = 1000}, // 关闭回显
+      {.cmd_str = "AT+CWAUTOCONN=0\r\n",
+       .timeout_ms = 1000}, // 关闭上电自动连接 AP
+  };
+  for (int i = 0; i < sizeof(init_cmds) / sizeof(init_cmds[0]); i++) {
+    at_controller_submit_cmd(self, &init_cmds[i]);
+  }
 }
 
 /**
@@ -147,12 +170,19 @@ static void at_controller_reset_hw(at_controller_t *self) {
     GPIO_WRITE(self->rst_pin, 1);
   } else { // 若无硬件复位，则软件复位(可能失败或一直收不到read)
     log_w("No RST pin, using AT+RST");
-    uart_queue_send(self->uart, (uint8_t *)"AT+RST\r\n", 8);
+    uart_queue_send(self->uart, (uint8_t *)"AT+RST\r\n",
+                    8); // 调用底层直接发送软复位指令
   }
-  self->state = AT_CTRL_STATE_WAIT_READY;
+  self->state = AT_CTRL_STATE_WAIT_READY; // 等待模块就绪
   self->wait_sent_time = sys_get_systick_ms();
 }
 
+/**
+ * @brief 向AT控制器提交一个命令
+ * @param self AT控制器实例
+ * @param cmd 命令体
+ * @return 0 on success, non-zero on error
+ */
 int at_controller_submit_cmd(at_controller_t *self, AT_Cmd_t *cmd) {
   if (!self || !cmd)
     return -1;
@@ -194,6 +224,10 @@ int at_controller_submit_cmd(at_controller_t *self, AT_Cmd_t *cmd) {
   return 0;
 }
 
+/**
+ * @brief AT控制器主循环
+ * @param self AT控制器实例
+ */
 void at_controller_process(at_controller_t *self) {
   if (!self)
     return;
@@ -203,13 +237,14 @@ void at_controller_process(at_controller_t *self) {
 
   // 接收处理
   uint8_t ch;
-  while (uart_queue_getdata(self->uart, &ch, 1) > 0) {
+  while (uart_queue_getdata(self->uart, &ch, 1) > 0) { // 从队列中读取一个字节
     if (rx_idx >= sizeof(rx_line_buf) - 1) {
       rx_idx = 0;
     }
 
     rx_line_buf[rx_idx++] = ch;
 
+    // 收到换行符，处理一行数据
     if (ch == '\n') {
       rx_line_buf[rx_idx] = '\0';
       if (rx_idx > 1 && rx_line_buf[rx_idx - 2] == '\r') {
@@ -220,11 +255,11 @@ void at_controller_process(at_controller_t *self) {
           rx_line_buf[rx_idx - 2] = '\0';
         }
       }
-      // 收到一个完整的行(换行符分割)
+      // 处理一个完整的行(换行符分割)
       if (strlen(rx_line_buf) > 0) {
         log_d("Rx line: %s", rx_line_buf);
 
-        // 1. Check for command echo (ignore if it matches the current command)
+        // 1. 检查命令回显(如果匹配当前命令则忽略)
         bool is_echo = false;
         if (self->current_cmd && self->current_cmd->cmd_str) {
           // Echo might have extra whitespace or be exactly the command
@@ -279,13 +314,13 @@ void at_controller_process(at_controller_t *self) {
         self->current_cmd->response_cb(AT_CMD_TIMEOUT, "TIMEOUT"); // 超时
       }
 
-      at_cmd_cleanup(self, self->current_cmd); // 释放当前命令
+      // 释放当前命令并记录错误
+      at_cmd_cleanup(self, self->current_cmd);
       self->current_cmd = NULL;
       self->state = AT_CTRL_STATE_IDLE;
-
       self->error_count++;
       self->consecutive_timeouts++;
-
+      // 超过阈值则报告故障
       if (self->consecutive_timeouts > 5) {
         at_controller_report_fault(self);
       }
@@ -293,13 +328,13 @@ void at_controller_process(at_controller_t *self) {
     break;
 
   case AT_CTRL_STATE_BUSY:
-    if (now - self->wait_sent_time > 200) {
+    if (now - self->wait_sent_time > RETRY_TIMEOUT_MS) {
       if (self->current_cmd) {
         uart_queue_send(self->uart, (uint8_t *)self->current_cmd->cmd_str,
                         strlen(self->current_cmd->cmd_str));
         self->wait_sent_time = now;
 
-        if (self->busy_count * 200 > 10000) {
+        if (self->busy_count * RETRY_TIMEOUT_MS > MAX_BUSY_TIMEOUT_MS) {
           if (self->current_cmd->response_cb) {
             self->current_cmd->response_cb(AT_CMD_TIMEOUT, "BUSY TIMEOUT");
           }
@@ -314,7 +349,7 @@ void at_controller_process(at_controller_t *self) {
     break;
 
   case AT_CTRL_STATE_WAIT_READY:
-    if (now - self->wait_sent_time > 5000) {
+    if (now - self->wait_sent_time > READY_TIMEOUT_MS) {
       at_controller_reset_hw(self); // 模块硬重置
     }
     break;
@@ -326,10 +361,10 @@ void at_controller_process(at_controller_t *self) {
 
 // 处理命令队列
 static void at_controller_process_cmd(at_controller_t *self) {
-  if (self->cmd_queue_head) { // 有命令
-    self->current_cmd = self->cmd_queue_head;
-    self->cmd_queue_head = self->cmd_queue_head->next;
-    if (self->cmd_queue_head == NULL) { // 队列为空
+  if (self->cmd_queue_head) {                          // 检查命令队列头
+    self->current_cmd = self->cmd_queue_head;          // 取出命令
+    self->cmd_queue_head = self->cmd_queue_head->next; // 移动队列头
+    if (self->cmd_queue_head == NULL) {                // 队列已空
       self->cmd_queue_tail = NULL;
     }
     // 发送命令(推送到uart队列)
@@ -337,21 +372,32 @@ static void at_controller_process_cmd(at_controller_t *self) {
     uart_queue_send(self->uart, (uint8_t *)self->current_cmd->cmd_str,
                     strlen(self->current_cmd->cmd_str));
 
-    self->wait_sent_time = sys_get_systick_ms();
+    self->wait_sent_time = sys_get_systick_ms(); // 记录发送时间
+    // 根据命令类型设置状态
     if (self->current_cmd->data_to_send != NULL) {
-      self->state = AT_CTRL_STATE_WAIT_DATAIN;
+      self->state = AT_CTRL_STATE_WAIT_DATAIN; // 等待模块进入输入模式
     } else {
-      self->state = AT_CTRL_STATE_WAIT_RSP;
+      self->state = AT_CTRL_STATE_WAIT_RSP; // 等待结果响应
     }
   }
 }
 
+/**
+ * @brief 报告错误或故障并在必要时重置模块
+ *
+ * @param self AT控制器实例
+ */
 void at_controller_report_fault(at_controller_t *self) {
   self->error_count++;
   log_w("Fault reported: %d/10", self->error_count);
   if (self->error_count > 10) {
+    // 达到故障阈值,复位模块和AT控制器状态
     log_e("Fault threshold reached, force reset!");
-    at_controller_reset_hw(self);
+    self->state = AT_CTRL_STATE_RESETTING;
+    self->last_action_time = sys_get_systick_ms();
+    self->consecutive_timeouts = 0;
+    self->busy_count = 0;
     self->error_count = 0;
+    at_controller_reset_hw(self);
   }
 }

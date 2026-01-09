@@ -7,17 +7,17 @@
 #ifndef DRIVERS_DEVICE_ESP_8266_ESP8266_WIFI_DRIVER_H_
 #define DRIVERS_DEVICE_ESP_8266_ESP8266_WIFI_DRIVER_H_
 
-#include "../../interface/wifi_driver.h"
+#include "wifi_driver.h"
 #include "at_controller.h"
 
 typedef struct {
-  wifi_driver_t base;       // Inherit from wifi_driver_t
-  at_controller_t *at_ctrl; // Pointer to the AT controller
-  wifi_status_t status;
-  wifi_mode_t mode;
+  wifi_driver_t base;       // 驱动接口
+  at_controller_t *at_ctrl; // AT控制器
+  wifi_status_t status;     // 当前状态
+  wifi_mode_t mode;         // 当前模式
 
-  // Scan Results
-  wifi_ap_info_t scan_results[20];
+  // AP扫描结果
+  wifi_ap_info_t scan_results[10];
   uint16_t scan_count;
 } esp8266_wifi_driver_t;
 

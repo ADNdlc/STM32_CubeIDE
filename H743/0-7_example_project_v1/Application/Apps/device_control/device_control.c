@@ -1,13 +1,14 @@
+#include "System/Contol_controller.h"
+#include "UI/components/style_util.h"
+#include "UI/screens/Contol_view.h"
 #include "app_manager.h"
 #include "core_app.h"
-
-#define LOG_TAG "Dvice_Control"
 #include "elog.h"
+#include "lv_util.h"
+#include "res_manager.h"
+#include <stddef.h>
 
-// 图标声明
-LV_IMG_DECLARE(icon_Contol);
-LV_IMG_DECLARE(img_light);
-LV_IMG_DECLARE(default_user);
+#define LOG_TAG "DevControl"
 
 // 接口函数
 static lv_obj_t *create_device_control_screen(void);
@@ -18,7 +19,7 @@ static void resume_device_control_screen(struct app_t *app);
 // 定义 Device Control 应用
 static app_def_t dvice_control_app_def = {
     .name = "DevControl",
-    .icon = &icon_Contol,
+    .icon = NULL, // Set during registration
     .create = create_device_control_screen,
     .destroy = destroy_device_control_screen,
     .pause = pause_device_control_screen,
@@ -30,35 +31,53 @@ static app_def_t dvice_control_app_def = {
  * @param page_index 放置页码
  */
 void device_control_app_register(int page_index) {
-	app_manager_register(&dvice_control_app_def, page_index);
+  log_i("Registering Device Control App at page %d", page_index);
+  dvice_control_app_def.icon = res_get_src(RES_IMG_ICON_CONTROL);
+  app_manager_register(&dvice_control_app_def, page_index);
 }
 
 /**
  * @brief 创建 dvice_control 屏幕
  */
 static lv_obj_t *create_device_control_screen(void) {
+  log_i("Creating Device Control screen...");
+  style_init();
 
+  lv_obj_t *screen = lv_obj_create(NULL);
+  // 创建 Tabview 作为app根容器
+  lv_obj_t *tabview =
+      lv_tabview_create(screen, LV_DIR_BOTTOM, scr_act_height() / 12);
+  style_tabview_simple(tabview, style_get_base_default(),
+                       style_get_base_checked());
 
-	//return ui_screen_dvice_control;
+  // 创建三个页面
+  create_main(tabview); // 主页面(设备控制)
+  create_add(tabview);  // 添加设备
+  create_user(tabview); // 用户信息
+
+  return screen;
 }
 
 /**
  * @brief 销毁 dvice_control 屏幕
  */
 static void destroy_device_control_screen(struct app_t *app) {
-
+  log_i("Destroying Device Control screen...");
+  style_deinit();
+  controller_clear_ui_map(); // 清除设备控件映射表
 }
 
 /**
  * @brief 暂停 dvice_control 屏幕
  */
 static void pause_device_control_screen(struct app_t *app) {
-
+  log_d("Device Control screen paused.");
 }
 
 /**
  * @brief 恢复 dvice_control 屏幕
  */
 static void resume_device_control_screen(struct app_t *app) {
-
+  log_d("Device Control screen resumed.");
 }
+

@@ -1,18 +1,15 @@
-/*
- * device_mapping.h
- *
- *  Created on: Nov 28, 2025
- *      Author: 12114
- */
-
-#ifndef STM32H743_BOARD_V1_DEVICE_MAPPING_H_
-#define STM32H743_BOARD_V1_DEVICE_MAPPING_H_
+#ifndef BSP_STM32H743_BOARD_V1_DEVICE_MAPPING_H_
+#define BSP_STM32H743_BOARD_V1_DEVICE_MAPPING_H_
 
 #include "stm32h7xx_hal.h"
 
+/*********************
+ *      标识枚举
+ *********************/
 // GPIO 设备逻辑标识枚举
 typedef enum {
   GPIO_LED_0 = 0,
+  GPIO_LED_1,
   GPIO_BUTTON_KEYUP,
   GPIO_BUTTON_KEY0,
   GPIO_BUTTON_KEY1,
@@ -72,6 +69,48 @@ typedef enum {
   TOUCH_MAX_DEVICES
 } touch_device_id_t;
 
+// RTC 设备逻辑标识枚举
+typedef enum {
+  RTC_DEVICE_0 = 0,
+  // ...
+  RTC_MAX_DEVICES
+} rtc_device_id_t;
+
+// SPI 设备逻辑标识枚举
+typedef enum {
+  SPI_1 = 0,
+  //...
+  SPI_MAX_DEVICES
+} spi_device_id_t;
+
+// QSPI 设备逻辑标识枚举
+typedef enum {
+  QSPI_1 = 0,
+  //...
+  QSPI_MAX_DEVICES
+} qspi_device_id_t;
+
+// Flash 设备类型枚举
+typedef enum {
+  FLASH_TYPE_NONE = 0,
+  FLASH_TYPE_SPI,
+  FLASH_TYPE_QSPI,
+  FLASH_TYPE_NAND  // 新增NAND Flash类型
+} flash_type_t;
+
+// Flash 设备逻辑标识枚举
+typedef enum {
+  FLASH_EXT_SPI = 0, // 外部SPI Flash
+  FLASH_EXT_QSPI,    // 外部QSPI Flash
+  FLASH_EXT_NAND,    // 外部NAND Flash
+  //...
+  FLASH_MAX_DEVICES
+} flash_device_id_t;
+
+/*********************
+ * 驱动和设备映射结构
+ *********************/
+
 // GPIO 设备映射结构体
 typedef struct {
   GPIO_TypeDef *port;
@@ -116,17 +155,32 @@ typedef struct {
   uint8_t i2c_addr_mode;        // I2C 地址模式 (0x14 或 0x5D)
 } touch_mapping_t;
 
-// RTC 设备逻辑标识枚举
-typedef enum {
-  RTC_DEVICE_0 = 0,
-  // ...
-  RTC_MAX_DEVICES
-} rtc_device_id_t;
-
 // RTC 设备映射结构体
 typedef struct {
   RTC_HandleTypeDef *hrtc;
 } rtc_mapping_t;
+
+// SPI 设备映射结构体
+typedef struct {
+  SPI_HandleTypeDef *hspi;
+  GPIO_TypeDef *cs_port;
+  uint16_t cs_pin;
+} spi_mapping_t;
+
+// QSPI 设备映射结构体
+typedef struct {
+  QSPI_HandleTypeDef *hqspi;
+} qspi_mapping_t;
+
+// Flash 设备配置结构体 (使用ID引用)
+typedef struct {
+  flash_type_t type;
+  union {
+    spi_device_id_t spi_id;
+    qspi_device_id_t qspi_id;
+    NAND_HandleTypeDef *hnand;
+  };
+} flash_mapping_t;
 
 // 导出映射表
 extern const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES];
@@ -137,5 +191,8 @@ extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 extern const i2c_soft_mapping_t i2c_soft_mappings[I2C_SOFT_MAX_DEVICES];
 extern const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES];
 extern const rtc_mapping_t rtc_mappings[RTC_MAX_DEVICES];
+extern const spi_mapping_t spi_mappings[SPI_MAX_DEVICES];
+extern const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES];
+extern const flash_mapping_t flash_mappings[FLASH_MAX_DEVICES];
 
-#endif /* STM32H743_BOARD_V1_DEVICE_MAPPING_H_ */
+#endif /* BSP_STM32H743_BOARD_V1_DEVICE_MAPPING_H_ */

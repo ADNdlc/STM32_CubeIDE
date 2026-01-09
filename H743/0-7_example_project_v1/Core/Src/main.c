@@ -20,10 +20,9 @@
 #include "main.h"
 #include "dma.h"
 #include "dma2d.h"
-#include "i2c.h"
 #include "ltdc.h"
+#include "quadspi.h"
 #include "rtc.h"
-#include "sdmmc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -33,9 +32,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "app.h"
+#include "project_cfg.h"
 #include "hal_init.h"
-
+#include "sys_init.h"
+#include "app.h"
 
 /* USER CODE END Includes */
 
@@ -100,7 +100,6 @@ int main(void)
   PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -111,32 +110,44 @@ int main(void)
   MX_LTDC_Init();
   MX_DMA2D_Init();
   MX_TIM6_Init();
-  MX_SDMMC1_SD_Init();
   MX_RTC_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
   MX_TIM4_Init();
-  MX_I2C1_Init();
-  MX_SPI2_Init();
   MX_TIM3_Init();
+  MX_SPI1_Init();
+  MX_QUADSPI_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+  GPIOB->ODR ^= (1<<0);
+  GPIOB->ODR ^= (1<<1);
+  HAL_Delay(500);
 
-  hal_init(); // HAL初始化(绑定平台实现)
-  //app_init(); // 应用初始化
-
+  /* ----- 业务代码 ----- */
+  hal_init(); // HAL层初始化(绑定平台实现)
+  sys_services_init();// 服务和组件初始化
+#if !TEST_ENABLE
+  app_init(); // 应用初始化
+#endif
   // module testing
   run_all_tests(); // 运行所有开启的单元测试
 
+  //net_mgr_wifi_enable(1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    //app_run(); // 应用运行
+#if !TEST_ENABLE
+    app_run(); // 应用运行
+#endif
 
+#if 0
+	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+	  HAL_Delay(500);
+#endif
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -254,6 +265,10 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1) {
+	GPIOB->ODR ^= (1<<0);	// PB0
+	for(__IO int i=0; i<100000; i++){
+		for(__IO int j=0; j<1000; j++){}
+	}
   }
   /* USER CODE END Error_Handler_Debug */
 }

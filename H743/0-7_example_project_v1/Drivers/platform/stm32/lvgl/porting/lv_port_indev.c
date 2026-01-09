@@ -212,7 +212,9 @@ void lv_port_indev_init(void) {
 #if Touchpad
 /*Initialize your touchpad*/
 static void touchpad_init(void) {
+
   /*Your code comes here*/
+
   /* 获取触摸屏驱动实例 */
   touch_drv = touch_driver_get(TOUCH_MAIN);
   if (touch_drv == NULL) {
@@ -244,6 +246,7 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
 
 /*Return true is the touchpad is pressed*/
 static bool touchpad_is_pressed(void) {
+
   /*Your code comes here*/
   return TOUCH_SCAN(touch_drv, &touch_data); // 扫描并刷新触摸数据
 }

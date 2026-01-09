@@ -48,7 +48,7 @@ typedef struct AT_Cmd_t {
   uint32_t timeout_ms;          // 命令执行超时时间
   at_parser_cb_t parser_cb;     // 查询命令回调
   at_response_cb_t response_cb; // 执行结果回调
-  void *ctx;                    // Context for parser_cb
+  void *ctx;                    // parser_cb上下文
 
   struct AT_Cmd_t *next; // 链表
 } AT_Cmd_t;
@@ -60,8 +60,10 @@ typedef void (*at_handler_func_t)(void *ctx, const char *line);
 typedef struct at_urc_node_t {
   const char *prefix;
   at_handler_func_t handler;
+  void *ctx; // 上下文
   struct at_urc_node_t *next;
 } at_urc_node_t;
+
 
 // --- AT控制器对象 ---
 typedef struct at_controller_t {
@@ -75,12 +77,12 @@ typedef struct at_controller_t {
   uint32_t wait_sent_time;   // 模块发送数据等待时间
 
   // 命令队列
-  AT_Cmd_t *cmd_queue_head;
-  AT_Cmd_t *cmd_queue_tail;
-  AT_Cmd_t *current_cmd; // 正在执行的命令
+  AT_Cmd_t *cmd_queue_head; // 命令队列头
+  AT_Cmd_t *cmd_queue_tail; // 命令队列尾
+  AT_Cmd_t *current_cmd;    // 正在执行的命令
 
   // URC 处理表
-  at_urc_node_t *urc_list;
+  at_urc_node_t *urc_list;  // URC处理链表头
 
   // 错误处理
   uint32_t error_count;          // Error 计数
@@ -131,7 +133,7 @@ void at_controller_report_fault(at_controller_t *self);
  * @return 0 on success
  */
 int at_controller_register_handler(at_controller_t *self, const char *prefix,
-                                   at_handler_func_t handler);
+                                   at_handler_func_t handler, void *ctx);
 
 /**
  * @brief Dispatch a received line to registered handlers
