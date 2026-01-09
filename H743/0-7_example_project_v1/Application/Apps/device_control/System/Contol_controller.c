@@ -1,11 +1,9 @@
 ﻿#define LOG_TAG "CTRL_CTRL"
 #include "Contol_controller.h"
-#include "../UI/components/style_util.h"
 #include "../UI/screens/Contol_view.h"
 #include "elog.h"
 #include <assert.h>
 #include <string.h>
-
 
 // 定义一个映射结构体和数组来存储控件
 #define MAX_UI_CONTROLS 32
@@ -59,7 +57,7 @@ void ui_state_update_cb(const thing_model_event_t *event, void *user_data) {
 
   // 如果是由本地UI触发的更新（SOURCE_LOCAL），通常不需要再次更新UI显示
   // 但为了保证状态一致性（例如驱动层可能修正值），这里也可以选择统一更新
-  if (event->source == THING_SOURCE_LOCAL) {    // 来源
+  if (event->source == THING_SOURCE_LOCAL) { // 来源
     log_v("Ignore local change for [%s/%s]", event->device_id, event->prop_id);
     return;
   }
@@ -94,6 +92,20 @@ void ui_state_update_cb(const thing_model_event_t *event, void *user_data) {
       lv_slider_set_value(target_obj, event->value.i, LV_ANIM_ON);
       log_d("Updated Slider [%s/%s]: %d", event->device_id, event->prop_id,
             event->value.i);
+    }
+  } else if (lv_obj_check_type(target_obj, &lv_label_class)) {
+    // 处理只读数值显示 (FLOAT 等)
+    thing_device_t *dev = find_device_by_id(event->device_id);
+    thing_property_t *prop = find_property_by_id(dev, event->prop_id);
+    if (prop) {
+      char buf[32];
+      if (prop->type == THING_PROP_TYPE_FLOAT) {
+        snprintf(buf, sizeof(buf), "%.1f %s", event->value.f,
+                 prop->unit ? prop->unit : "");
+        lv_label_set_text(target_obj, buf);
+        log_d("Updated Label [%s/%s]: %s", event->device_id, event->prop_id,
+              buf);
+      }
     }
   }
 }
@@ -146,7 +158,7 @@ void controller_init_main_tab(lv_obj_t *tab) {
   log_i("Found %d devices in thing model. Generating UI cards...",
         device_count);
 
-  for (uint8_t i = 0; i < device_count; i++) {  // 遍历所有设备
+  for (uint8_t i = 0; i < device_count; i++) { // 遍历所有设备
     thing_device_t *device = thing_model_get_device(i);
     if (device) {
       log_d("Creating card %d: %s (%s)", i, device->name, device->device_id);

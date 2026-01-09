@@ -1,10 +1,10 @@
 #define LOG_TAG "CTRL_VIEW"
 #include "Contol_view.h"
-#include "res_manager.h"
 #include "../../System/Contol_controller.h"
 #include "../components/style_util.h"
 #include "elog.h"
 #include "lv_util.h"
+#include "res_manager.h"
 #include "thing_model.h"
 
 #if 1
@@ -165,37 +165,59 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
   // 设置卡片的样式，如大小、圆角、阴影
   lv_obj_set_style_radius(card, 10, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(card, 5, LV_PART_MAIN);
+  lv_obj_clear_flag(card,
+                    LV_OBJ_FLAG_SCROLLABLE); // 卡片本身不可滚动，内部容器滚动
 
   // 添加到网格布局
   lv_obj_set_grid_cell(card, LV_GRID_ALIGN_STRETCH, col, 1,
                        LV_GRID_ALIGN_STRETCH, row, 1);
 
   lv_obj_update_layout(card); // 更新布局信息
-  // 获取容器大小
   lv_coord_t width = lv_obj_get_width(card);
   lv_coord_t height = lv_obj_get_height(card);
 
-  // 根据设备数据显示内容
-  lv_obj_t *name_label = lv_label_create(card);
-  lv_label_set_text(name_label, device->name); // 显示设备名字
-  lv_obj_set_style_text_font(name_label, &lv_font_montserrat_20,
-                             LV_PART_MAIN);
-  lv_obj_align(name_label, LV_ALIGN_TOP_RIGHT, -10, 0);
+  // 1. 创建头部区域 (Icon + Name)
+  lv_obj_t *header = lv_obj_create(card);
+  lv_obj_set_size(header, LV_PCT(100), 50);          // 固定高度
+  lv_obj_set_style_bg_opa(header, LV_OPA_TRANSP, 0); // 透明背景
+  lv_obj_set_style_border_width(header, 0, 0);       // 无边框
+  lv_obj_set_style_pad_all(header, 0, 0);            // 无内边距
+  lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_align(header, LV_ALIGN_TOP_MID, 0, 0);
 
   // 显示设备图标
-  lv_obj_t *card_img = lv_img_create(card);
+  lv_obj_t *card_img = lv_img_create(header);
   if (device->icon) {
-    lv_img_set_src(card_img, device->icon); // 使用设备的图标
+    lv_img_set_src(card_img, device->icon);
   } else {
-    lv_img_set_src(card_img, res_get_src(RES_IMG_ICON_CONTROL));// 缺省图标
+    lv_img_set_src(card_img, res_get_src(RES_IMG_ICON_CONTROL));
   }
   lv_img_set_zoom(card_img, 300);
-  lv_obj_align(card_img, LV_ALIGN_LEFT_MID, 10, 0);
+  lv_obj_align(card_img, LV_ALIGN_LEFT_MID, 5, 0);
+
+  // 根据设备数据显示内容 (滚动标签)
+  lv_obj_t *name_label = lv_label_create(header);
+  lv_label_set_text(name_label, device->name);
+  lv_obj_set_style_text_font(name_label, &lv_font_montserrat_20, LV_PART_MAIN);
+  lv_obj_set_width(name_label, 90); // 限制宽度以触发滚动
+  lv_label_set_long_mode(name_label,
+                         LV_LABEL_LONG_SCROLL_CIRCULAR); // 循环滚动模式
+  lv_obj_align(name_label, LV_ALIGN_RIGHT_MID, -5, 0);
+
+  // 2. 创建属性容器 (滚动区域)
+  lv_obj_t *prop_cont = lv_obj_create(card);
+  lv_obj_set_size(prop_cont, LV_PCT(100), LV_PCT(65)); // 占据剩余空间
+  lv_obj_align_to(prop_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+  lv_obj_set_flex_flow(prop_cont, LV_FLEX_FLOW_COLUMN); // 垂直Flex布局
+  lv_obj_set_style_bg_opa(prop_cont, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(prop_cont, 0, 0);
+  lv_obj_set_style_pad_all(prop_cont, 5, 0);
+  lv_obj_set_style_pad_row(prop_cont, 10, 0); // 行间距
 
   // 根据设备属性动态添加控件
   log_d("Generating %d controls for %s", device->prop_count, device->device_id);
-  // 为了协调暂时最多添加三个，可能需要更合适的页面布局
-  for (int i = 0; i < device->prop_count && i < 3; i++) {
+
+  for (int i = 0; i < device->prop_count; i++) {
     const thing_property_t *prop = &device->properties[i];
 
     // 分配上下文空间
@@ -213,57 +235,133 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
     switch (prop->type) {
     case THING_PROP_TYPE_SWITCH: {
       log_d("  Adding Switch: %s", prop->id);
-      lv_obj_t *sw = lv_switch_create(card);
 
-      ctx->target_obj = sw; // 绑定控件指针
+      // 创建一个行容器来容纳标签和开关
+      lv_obj_t *row_cont = lv_obj_create(prop_cont);
+      lv_obj_set_size(row_cont, LV_PCT(100), 40);
+      lv_obj_set_style_bg_opa(row_cont, LV_OPA_TRANSP, 0);
+      lv_obj_set_style_border_width(row_cont, 0, 0);
+      lv_obj_clear_flag(row_cont, LV_OBJ_FLAG_SCROLLABLE);
 
-      lv_obj_t *label_sw = lv_label_create(card);
+      lv_obj_t *label_sw = lv_label_create(row_cont);
       lv_label_set_text(label_sw, prop->name);
+      lv_obj_align(label_sw, LV_ALIGN_LEFT_MID, 0, 0);
 
-      obj_align_card(sw, device->prop_count, width, height);
+      lv_obj_t *sw = lv_switch_create(row_cont);
+      lv_obj_set_size(sw, 45, 25);
+      lv_obj_align(sw, LV_ALIGN_RIGHT_MID, 0, 0);
 
-      lv_obj_set_size(sw, width / 4, height / 8);
       if (prop->value.b) {
         lv_obj_add_state(sw, LV_STATE_CHECKED);
       }
-      lv_obj_align_to(label_sw, sw, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
 
-      // 绑定事件回调
-      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx); // 绑定事件回调
-      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE, ctx); // 删除回调,释放上下文空间
+      ctx->target_obj = sw;
+      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED,
+                          ctx);
+      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE, ctx);
 
-      controller_register_ui_control(device->device_id, prop->id, sw); // 注册控件到映射表
+      controller_register_ui_control(device->device_id, prop->id, sw);
       break;
     }
     case THING_PROP_TYPE_INT: {
       log_d("  Adding Slider: %s", prop->id);
-      lv_obj_t *sld = simple_slider_create(lv_color_hex(0xFFE4B5), card);
 
-      ctx->target_obj = sld; // 绑定控件指针
+      // 创建一个垂直堆叠的容器
+      lv_obj_t *col_cont = lv_obj_create(prop_cont);
+      lv_obj_set_size(col_cont, LV_PCT(100), 55);
+      lv_obj_set_style_bg_opa(col_cont, LV_OPA_TRANSP, 0);
+      lv_obj_set_style_border_width(col_cont, 0, 0);
+      lv_obj_clear_flag(col_cont, LV_OBJ_FLAG_SCROLLABLE);
+      lv_obj_set_style_pad_all(col_cont, 0, 0);
 
-      lv_obj_t *label_sld = lv_label_create(card);
+      lv_obj_t *label_sld = lv_label_create(col_cont);
       lv_label_set_text(label_sld, prop->name);
+      lv_obj_set_style_text_font(label_sld, &lv_font_montserrat_14, 0);
+      lv_obj_align(label_sld, LV_ALIGN_TOP_LEFT, 0, 0);
 
-      obj_align_card(sld, device->prop_count, width, height);
+      lv_obj_t *sld = simple_slider_create(lv_color_hex(0xFFE4B5), col_cont);
+      lv_obj_set_size(sld, LV_PCT(95), 12);
+      lv_obj_align(sld, LV_ALIGN_BOTTOM_MID, 0, -5);
 
-      lv_obj_set_size(sld, width / 2, height / 10);
       lv_slider_set_range(sld, prop->min, prop->max);
       lv_slider_set_value(sld, prop->value.i, LV_ANIM_OFF);
-      lv_obj_align_to(label_sld, sld, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
 
-      // 绑定事件回调
+      ctx->target_obj = sld;
       lv_obj_add_event_cb(sld, generic_control_event_cb, LV_EVENT_VALUE_CHANGED,
                           ctx);
       lv_obj_add_event_cb(sld, free_context_event_cb, LV_EVENT_DELETE, ctx);
 
-      controller_register_ui_control(device->device_id, prop->id,
-                                     sld); // 注册控件到映射表
+      controller_register_ui_control(device->device_id, prop->id, sld);
+      break;
+    }
+    case THING_PROP_TYPE_FLOAT: {
+      log_d("  Adding Float Display: %s", prop->id);
+
+      lv_obj_t *row_cont = lv_obj_create(prop_cont);
+      lv_obj_set_size(row_cont, LV_PCT(100), 30);
+      lv_obj_set_style_bg_opa(row_cont, LV_OPA_TRANSP, 0);
+      lv_obj_set_style_border_width(row_cont, 0, 0);
+      lv_obj_set_style_pad_all(row_cont, 0, 0);
+      lv_obj_clear_flag(row_cont, LV_OBJ_FLAG_SCROLLABLE);
+
+      lv_obj_t *label_name = lv_label_create(row_cont);
+      lv_label_set_text(label_name, prop->name);
+      lv_obj_set_style_text_font(label_name, &lv_font_montserrat_14, 0);
+      lv_obj_align(label_name, LV_ALIGN_LEFT_MID, 0, 0);
+
+      lv_obj_t *label_val = lv_label_create(row_cont);
+      char buf[32];
+      snprintf(buf, sizeof(buf), "%.1f %s", prop->value.f,
+               prop->unit ? prop->unit : "");
+      lv_label_set_text(label_val, buf);
+      lv_obj_set_style_text_font(label_val, &lv_font_montserrat_14, 0);
+      lv_obj_align(label_val, LV_ALIGN_RIGHT_MID, 0, 0);
+
+      ctx->target_obj = label_val; // 绑定到数值标签
+      lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE,
+                          ctx);
+
+      controller_register_ui_control(device->device_id, prop->id, label_val);
+      break;
+    }
+    case THING_PROP_TYPE_STRING:
+    case THING_PROP_TYPE_ENUM: {
+      log_d("  Adding Label Display for type %d: %s", prop->type, prop->id);
+
+      lv_obj_t *row_cont = lv_obj_create(prop_cont);
+      lv_obj_set_size(row_cont, LV_PCT(100), 30);
+      lv_obj_set_style_bg_opa(row_cont, LV_OPA_TRANSP, 0);
+      lv_obj_set_style_border_width(row_cont, 0, 0);
+      lv_obj_set_style_pad_all(row_cont, 0, 0);
+      lv_obj_clear_flag(row_cont, LV_OBJ_FLAG_SCROLLABLE);
+
+      lv_obj_t *label_name = lv_label_create(row_cont);
+      lv_label_set_text(label_name, prop->name);
+      lv_obj_set_style_text_font(label_name, &lv_font_montserrat_14, 0);
+      lv_obj_align(label_name, LV_ALIGN_LEFT_MID, 0, 0);
+
+      lv_obj_t *label_val = lv_label_create(row_cont);
+      if (prop->type == THING_PROP_TYPE_STRING) {
+        lv_label_set_text(label_val, prop->value.s ? prop->value.s : "N/A");
+      } else {
+        char buf[16];
+        snprintf(buf, sizeof(buf), "%d", prop->value.i);
+        lv_label_set_text(label_val, buf);
+      }
+      lv_obj_set_style_text_font(label_val, &lv_font_montserrat_14, 0);
+      lv_obj_align(label_val, LV_ALIGN_RIGHT_MID, 0, 0);
+
+      ctx->target_obj = label_val;
+      lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE,
+                          ctx);
+
+      controller_register_ui_control(device->device_id, prop->id, label_val);
       break;
     }
     default:
       log_w("  Skipping unsupported property type %d for %s", prop->type,
             prop->id);
-      lv_mem_free(ctx); // 未处理的类型释放内存
+      lv_mem_free(ctx);
       break;
     }
   }
