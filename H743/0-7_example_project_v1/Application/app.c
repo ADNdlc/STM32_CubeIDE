@@ -33,7 +33,7 @@
 
 
 int app_init(void) {
-#if USE_Simulator   // 模拟器环境
+#if USE_Simulator   // 模拟器环境 
   sys_config_init();
   sys_state_init();
   devices_init();   // 注册模拟设备
