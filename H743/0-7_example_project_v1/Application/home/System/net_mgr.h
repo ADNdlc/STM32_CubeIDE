@@ -6,6 +6,8 @@
 
 /**
  * @brief 初始化网络管理器(wifi,mqtt,sntp,etc)
+ *      此模块负责初始化网络相关所有驱动和服务
+ *      以及服务间的协作
  * 
  */
 void net_mgr_init(void);

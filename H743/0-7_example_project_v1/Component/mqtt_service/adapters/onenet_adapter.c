@@ -114,12 +114,12 @@ static int onenet_parse_command(const char *topic, const char *payload,
 
   cJSON *params = cJSON_GetObjectItem(root, "params");
   if (params && prop_cb) {
-    // Iterate through all children of params
+    // 遍历属性
     cJSON *prop = params->child;
     while (prop) {
       thing_value_t out_value;
       bool valid = false;
-
+      // 检查属性类型
       if (cJSON_IsBool(prop)) {
         out_value.b = cJSON_IsTrue(prop);
         valid = true;

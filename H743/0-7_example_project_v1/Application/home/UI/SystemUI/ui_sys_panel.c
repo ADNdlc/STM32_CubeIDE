@@ -10,6 +10,8 @@
 #define LOG_TAG "UI_SYS_PANEL"
 #include "elog.h"
 
+#define NDEBUG
+
 /*********************
  *      DEFINES
  *********************/
@@ -50,7 +52,7 @@ static void container_style_set(lv_obj_t *obj) {
  *   CREATE HELPERS
  *********************/
 /**
- * @brief 下拉菜单子项容器创建(不可见,不可点击,不可滚动)
+ * @brief 下拉菜单子项容器创建
  * @param Parent  父类
  * @param x       x坐标
  * @param span_x  x跨度
@@ -63,8 +65,7 @@ static lv_obj_t *menu_child_container_create(lv_obj_t *parent, uint8_t col,
                                              uint8_t row_span) {
   // 块容器(不可见,用于对齐组件)
   lv_obj_t *block = lv_obj_create(parent);
-  // lv_obj_set_style_opa(block, 0, LV_PART_MAIN); //不要让整体透明，
-  // 这会影响子项
+  // lv_obj_set_style_opa(block, 0, LV_PART_MAIN); //让整体透明，会影响子项
   lv_obj_set_style_bg_opa(block, 0, LV_PART_MAIN);
   container_style_set(block);
   lv_obj_set_grid_cell(block, LV_GRID_ALIGN_STRETCH, col, col_span,
@@ -87,6 +88,16 @@ static lv_obj_t *menu_child_container_create(lv_obj_t *parent, uint8_t col,
 }
 
 /* -- 子组件创建 -- */
+/**
+ * @brief 媒体组件
+ * 
+ * @param parent  父容器
+ * @param col       列
+ * @param col_span  列跨度 
+ * @param row       行
+ * @param row_span  行跨度
+ * @return lv_obj_t* 
+ */
 static lv_obj_t *multimedia_module_create(lv_obj_t *parent, uint8_t col,
                                           uint8_t col_span, uint8_t row,
                                           uint8_t row_span) {
@@ -97,6 +108,14 @@ static lv_obj_t *multimedia_module_create(lv_obj_t *parent, uint8_t col,
   return multimedia;
 }
 
+/**
+ * @brief 亮度滑块组件
+ * 
+ * @param parent 父容器
+ * @param value  初始亮度值
+ * 
+ * @return lv_obj_t* 
+ */
 static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
                                           uint8_t col, uint8_t col_span,
                                           uint8_t row, uint8_t row_span) {
@@ -115,7 +134,7 @@ static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
   lv_obj_set_style_radius(slider_bri, 30, LV_PART_INDICATOR);
   lv_obj_set_style_bg_color(slider_bri, lv_color_hex(0xF0F0F0),
                             LV_PART_INDICATOR);
-  // 值
+  // 值和事件
   lv_slider_set_range(slider_bri, 0, 100);             // 设置范围
   lv_slider_set_value(slider_bri, value, LV_ANIM_OFF); // 初始值
   lv_obj_add_event_cb(slider_bri, event_bri_cb, LV_EVENT_VALUE_CHANGED,
@@ -128,9 +147,7 @@ static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
   // 图标
   lv_obj_t *brightness_icon =
       lv_img_create(slider_bri); // slider_bri作为父类，因为icon需要在回调中获取
-
   lv_img_set_src(brightness_icon, res_get_src(RES_IMG_ICON_BRIGHT));
-
   lv_obj_align(brightness_icon, LV_ALIGN_BOTTOM_MID, 0, -20);
   lv_obj_set_style_img_recolor(brightness_icon, lv_color_hex(0x505050), 0);
   lv_opa_t bri_opa = lv_map(value, 0, 100, LV_OPA_COVER, LV_OPA_TRANSP);
@@ -139,6 +156,14 @@ static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
   return brightness;
 }
 
+/**
+ * @brief 音量滑块组件
+ * 
+ * @param parent 父容器
+ * @param value  初始音量值
+ * 
+ * @return lv_obj_t* 
+ */
 static lv_obj_t *volume_module_create(lv_obj_t *parent, uint8_t value,
                                       uint8_t col, uint8_t col_span,
                                       uint8_t row, uint8_t row_span) {
@@ -157,13 +182,13 @@ static lv_obj_t *volume_module_create(lv_obj_t *parent, uint8_t value,
   lv_obj_set_style_bg_color(slider_vol, lv_color_hex(0xF0F0F0),
                             LV_PART_INDICATOR);
   lv_slider_set_range(slider_vol, 0, 100);
+
   // 值
   lv_slider_set_value(slider_vol, value, LV_ANIM_OFF);
   lv_obj_add_event_cb(slider_vol, event_vol_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
   // 图标(使用lvgl内部label图标)
   lv_obj_t *lbl_vol = lv_label_create(slider_vol);
-  // 创建值对应图标
   char icon[4];
   if (value == 0) {
     sprintf(icon, LV_SYMBOL_MUTE);
@@ -179,6 +204,17 @@ static lv_obj_t *volume_module_create(lv_obj_t *parent, uint8_t value,
   return volume;
 }
 
+/**
+ * @brief wifi组件
+ * 
+ * @param parent 父容器
+ * @param value  初始wifi状态
+ * @param col    列
+ * @param col_span 列跨度
+ * @param row    行
+ * @param row_span 行跨度
+ * @return lv_obj_t* 
+ */
 static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
                                     uint8_t col, uint8_t col_span, uint8_t row,
                                     uint8_t row_span) {
@@ -195,6 +231,8 @@ static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
                             LV_STATE_DEFAULT); // 默认状态
   lv_obj_set_style_bg_color(btn_wifi, lv_color_hex(0x1E90FF),
                             LV_STATE_CHECKED); // 选中状态
+
+  // 值和回调
   if (value)
     lv_obj_add_state(btn_wifi, LV_STATE_CHECKED);
   lv_obj_add_event_cb(btn_wifi, event_wifi_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -273,8 +311,10 @@ static lv_obj_t *ui_sys_panel_content_create(lv_obj_t *parent) {
   wifi_module_create(content_container, state->wifi_connected, 5, 1, 1, 1);
 
   // 布局测试
-  // #includ "lv_util.h"
-  // test_layout_grid(content_container, , );
+#ifndef NDEBUG
+#include "lv_util.h"
+  test_layout_grid(content_container, 7, 5);
+#endif
 
   return content_container; // 添加返回语句
 }

@@ -1,43 +1,39 @@
 #include "cloud_bridge.h"
 #include "sys.h"
 #include <string.h>
-
-
-#define LOG_TAG "CLOUD_BR"
 #include "mqtt_service.h"
 
 #include "elog.h"
+#define LOG_TAG "CLOUD_BR"
 
-
+#define CLOUD_SYNC_INTERVAL_MS 1000   // 同步检查周期
+// 内部状态和变量
+static uint32_t g_last_sync_time = 0;
 static mqtt_service_t *g_mqtt_svc = NULL;
 
-// --- Helper: Find device by ID (Thing Model doesn't expose list easily yet)
-// --- Actually we can use thing_model_get_device
 
-// --- Thing Model Callback: Local change -> Publish to Cloud ---
-static void on_thing_model_event(const thing_model_event_t *event,
-                                 void *user_data) {
-  if (event->type == THING_EVENT_PROPERTY_CHANGED) {
-    // Note: Immediate publish removed in favor of periodic polling via is_dirty
-    // flag.
-    // This allows batching and prevents flooding during rapid changes.
-  }
-}
-
-// --- MQTT Callback: Cloud -> Local ---
+// --- 解析属性回调 ---
 static void on_prop_parsed(const char *prop_id, thing_value_t value,
                            void *ctx) {
   const char *device_id = (const char *)ctx;
   log_i("CloudBridge: Applying property %s.%s from cloud", device_id, prop_id);
-  thing_model_set_prop(device_id, prop_id, value, THING_SOURCE_CLOUD);
+  // 云命令中解析出的属性值会通过此回调函数传递给物模型层
+  thing_model_set_prop(device_id, prop_id, value, THING_SOURCE_CLOUD); //来源：云端
 }
 
+/**
+ * @brief MQTT服务事件处理函数
+ * 
+ * @param svc       MQTT服务实例
+ * @param event     MQTT事件
+ * @param user_data 用户数据
+ */
 static void on_mqtt_svc_event(mqtt_service_t *svc,
                               const mqtt_svc_event_t *event, void *user_data) {
   if (event->type == MQTT_SVC_EVENT_STATE_CHANGED) {
     if (event->state == MQTT_SVC_STATE_CONNECTED) {
       log_i("CloudBridge: MQTT Connected, subscribing to command topics...");
-      // Auto-subscribe for all registered devices
+      // 订阅所有设备的命令控制主题
       uint8_t count = thing_model_get_count();
       for (uint8_t i = 0; i < count; i++) {
         thing_device_t *dev = thing_model_get_device(i);
@@ -55,9 +51,9 @@ static void on_mqtt_svc_event(mqtt_service_t *svc,
       char msg_id[64] = {0};
       if (svc->adapter->parse_command(event->topic, event->payload, dev_id,
                                       msg_id, on_prop_parsed, dev_id) == 0) {
-        // Ack command
+        // 回复云端的命令
         if (strlen(msg_id) > 0) {
-          mqtt_svc_reply_command(svc, dev_id, msg_id, 200);
+          mqtt_svc_reply_command(svc, dev_id, msg_id, 200); // 代码200表示成功
         }
       }
     }
@@ -67,20 +63,14 @@ static void on_mqtt_svc_event(mqtt_service_t *svc,
 void cloud_bridge_init(mqtt_service_t *mqtt_svc) {
   g_mqtt_svc = mqtt_svc;
 
-  // 1. 监听物模型的变化
-  thing_model_add_observer(on_thing_model_event, NULL);
-
-  // 2. 监听MQTT服务状态
+  // 监听MQTT服务事件
   mqtt_svc_register_callback(g_mqtt_svc, on_mqtt_svc_event, NULL);
 
   log_i("Cloud Bridge initialized.");
 }
 
-#define CLOUD_SYNC_INTERVAL_MS 1000
-static uint32_t g_last_sync_time = 0;
-
 /**
- * @brief 云桥处理函数
+ * @brief 云桥接处理函数
  *        周期同步设备属性到云端
  */
 void cloud_bridge_process(void) {
@@ -99,16 +89,16 @@ void cloud_bridge_process(void) {
   //log_v("prop sync...");
   // 扫描脏属性并同步
   uint8_t dev_count = thing_model_get_count();
-  for (uint8_t i = 0; i < dev_count; i++) { // 遍历所有设备
+  // 遍历所有设备
+  for (uint8_t i = 0; i < dev_count; i++) {
     thing_device_t *dev = thing_model_get_device(i);
     if (!dev)
       continue;
-
-    for (uint8_t j = 0; j < dev->prop_count; j++) { // 遍历此设备的所有属性
+    // 遍历此设备的所有属性
+    for (uint8_t j = 0; j < dev->prop_count; j++) {
       thing_property_t *prop = &dev->properties[j];
       if (prop->is_dirty && prop->cloud_sync) { // 是否脏且需要同步
-        log_d("CloudBridge: Syncing dirty property %s.%s", dev->device_id,
-              prop->id);
+        log_d("CloudBridge: Syncing dirty property %s.%s", dev->device_id, prop->id);
         if (mqtt_svc_publish_property(g_mqtt_svc, dev, prop) == 0) {
           prop->is_dirty = false; // 成功同步后，将属性标记为干净
         }

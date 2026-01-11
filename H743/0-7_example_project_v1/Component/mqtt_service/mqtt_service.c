@@ -124,6 +124,7 @@ int mqtt_svc_publish_property(mqtt_service_t *self,
 
   char topic[128];
   char buf[256];
+  // 通过适配器获取发布主题和数据
   if (self->adapter &&
       self->adapter->serialize_post(device, prop, buf, sizeof(buf)) == 0) {
     self->adapter->get_post_topic(device->device_id, topic, sizeof(topic));

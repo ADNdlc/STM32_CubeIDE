@@ -17,7 +17,7 @@ static void on_gesture_home(void) {
 // --- Home App Wrapper ---
 static lv_obj_t *create_home_wrapper(void) {
   if (!ui_screen_home) {
-    ui_screen_home_init(); // 初始化主屏幕
+    ui_screen_home_init(); // 初始化主页
   }
 
   return ui_screen_home;
