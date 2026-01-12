@@ -7,7 +7,7 @@
 #include "home/System/net_mgr.h"
 #include "home/System/sys_config.h"
 #include "home/System/sys_state.h"
-#include "home/System/thing_model.h"
+#include "thing_model/thing_model.h"
 #include "lv_port_fs.h"
 #include "mqtt_service.h"
 #include "project_cfg.h"

@@ -1,7 +1,7 @@
 #ifndef COMPONENT_MQTT_SERVICE_MQTT_ADAPTER_H_
 #define COMPONENT_MQTT_SERVICE_MQTT_ADAPTER_H_
 
-#include "../../Application/home/System/thing_model.h"
+#include "thing_model/thing_model.h"
 #include <stddef.h>
 #include <stdint.h>
 

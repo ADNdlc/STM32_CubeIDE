@@ -2,8 +2,7 @@
 #define __Contol_controller_H__
 
 #include "lvgl.h"
-#include "thing_model.h"
-
+#include "thing_model/thing_model.h"
 
 #ifdef __cplusplus
 extern "C" {

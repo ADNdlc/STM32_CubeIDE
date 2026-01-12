@@ -5,7 +5,7 @@
 #include "elog.h"
 #include "lv_util.h"
 #include "res_manager.h"
-#include "thing_model.h"
+#include "thing_model/thing_model.h"
 
 #if 1
 

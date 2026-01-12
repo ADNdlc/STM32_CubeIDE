@@ -2,7 +2,7 @@
 #include "gpio_key/gpio_key.h"
 #include "gpio_led/gpio_led.h"
 #include "sys_config.h"
-#include "thing_model.h"
+#include "thing_model/thing_model.h"
 #include <device_handle.h>
 #include <string.h>
 

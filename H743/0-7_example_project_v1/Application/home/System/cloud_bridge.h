@@ -2,7 +2,7 @@
 #define APPLICATION_HOME_SYSTEM_CLOUD_BRIDGE_H_
 
 #include "mqtt_service.h"
-#include "thing_model.h"
+#include "thing_model/thing_model.h"
 
 /**
  * @brief 初始化云桥负责物模型的云同步
