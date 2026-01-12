@@ -3,6 +3,9 @@
 #include "sys.h"
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
 
 // 定义rtc_hal类结构体
 struct rtc_hal_t {
@@ -92,4 +95,26 @@ int rtc_hal_get_date(rtc_date_t *date) {
   if (!self || !self->driver)
     return -1;
   return RTC_GET_DATE(self->driver, date);
+}
+
+uint64_t rtc_hal_get_unix_ms(void) {
+  rtc_time_t rt;
+  rtc_date_t rd;
+  if (rtc_hal_get_time(&rt) != 0 || rtc_hal_get_date(&rd) != 0)
+    return 0;
+
+  struct tm t;
+  memset(&t, 0, sizeof(struct tm));
+  t.tm_year = rd.year + 2000 - 1900;
+  t.tm_mon = rd.month - 1;
+  t.tm_mday = rd.day;
+  t.tm_hour = rt.hour;
+  t.tm_min = rt.minute;
+  t.tm_sec = rt.second;
+
+  time_t s = mktime(&t);
+  if (s == (time_t)-1)
+    return 0;
+
+  return (uint64_t)s * 1000 + (sys_get_systick_ms() % 1000);
 }

@@ -1,4 +1,3 @@
-#include <device_handle.h>
 #include "sys_init.h"
 #include "cloud_bridge.h"
 #include "elog.h"
@@ -7,12 +6,16 @@
 #include "home/System/net_mgr.h"
 #include "home/System/sys_config.h"
 #include "home/System/sys_state.h"
-#include "thing_model/thing_model.h"
 #include "lv_port_fs.h"
 #include "mqtt_service.h"
 #include "project_cfg.h"
+#include "rtc_factory.h"
+#include "rtc_hal/rtc_hal.h"
 #include "strategy/lfs_strategy.h"
+#include "thing_model/thing_model.h"
+#include <device_handle.h>
 #include <stddef.h>
+
 
 #define LOG_TAG "SYS_INIT"
 // 以下值根据device_mapping定义
@@ -24,16 +27,14 @@
 // 系统配置路径
 #define SYS_STORE_MOUNT_POINT "/sys"
 
-
-
 int sys_services_init(void) {
   log_i("Initializing system services...");
 
 #if SYS_FLASH_HANDLER_ENABLE && !CONFIG_RES_BURN_ENABLE
 
-/*****************
- * 存储和文件系统
- *****************/
+  /*****************
+   * 存储和文件系统
+   *****************/
 
   flash_handler_init(); // 初始化 Flash 管理器
 
@@ -80,9 +81,9 @@ int sys_services_init(void) {
 #endif
 #endif
 
-/*****************
- * 系统服务和组件
- *****************/
+  /*****************
+   * 系统服务和组件
+   *****************/
 
 #if SYS_CONFIG_ENABLE
   sys_config_init(); // 初始化系统配置 (从Flash加载)
@@ -93,10 +94,18 @@ int sys_services_init(void) {
 #if THING_MODEL_ENABLE
   thing_model_init(); // 初始化物模型管理器
   sys_devices_init(); // 初始化并注册硬件设备
- #endif 
+#endif
 #if NET_MGR_ENABLE
   net_mgr_init(); // 初始化网络管理器
 #endif
+
+  // RTC 初始化
+  rtc_driver_t *rtc_drv = rtc_driver_get(RTC_DEVICE_0);
+  if (rtc_drv) {
+    rtc_hal_init(rtc_drv, NULL, NULL);
+  } else {
+    log_w("RTC driver not found, skipping RTC HAL init.");
+  }
 
   log_i("System services initialization completed.");
   return 0;

@@ -1,8 +1,10 @@
+#include "rtc_hal/rtc_hal.h"
 #include "cJSON.h"
 #include "home/System/sys_config.h"
 #include "mqtt_adapter.h"
 #include <stdio.h>
 #include <string.h>
+
 
 #define ONENET_SERVER_HOST "mqtts.heclouds.com"
 #define ONENET_SERVER_PORT 1883
@@ -70,6 +72,12 @@ static int onenet_serialize_post(const thing_device_t *device,
     break;
   default:
     break;
+  }
+
+  // 为属性值添加毫秒级时间戳
+  uint64_t timestamp = rtc_hal_get_unix_ms();
+  if (timestamp > 0) {
+    cJSON_AddNumberToObject(p_val, "time", (double)timestamp);
   }
 
   cJSON_AddItemToObject(params, prop->id, p_val);

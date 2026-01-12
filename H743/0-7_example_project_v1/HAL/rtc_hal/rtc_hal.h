@@ -28,4 +28,7 @@ int rtc_hal_get_time(rtc_time_t *time);
 int rtc_hal_set_date(rtc_date_t *date);
 int rtc_hal_get_date(rtc_date_t *date);
 
+// 获取 Unix 毫秒时间戳
+uint64_t rtc_hal_get_unix_ms(void);
+
 #endif /* HAL_RTC_HAL_RTC_HAL_H_ */

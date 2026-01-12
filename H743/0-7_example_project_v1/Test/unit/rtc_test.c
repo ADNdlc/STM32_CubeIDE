@@ -39,8 +39,7 @@ void rtc_test_run(void) {
         "implemented)...");
 
   for (int i = 0; i < 10; i++) {
-    if (rtc_hal_get_time(&current_time) == 0 &&
-        rtc_hal_get_date(&current_date) == 0) {
+    if (rtc_hal_get_time(&current_time) == 0 && rtc_hal_get_date(&current_date) == 0) {
       log_i("[%d] RTC: 20%02d-%02d-%02d Week:%d %02d:%02d:%02d", i + 1,
             current_date.year, current_date.month, current_date.day,
             current_date.week, current_time.hour, current_time.minute,

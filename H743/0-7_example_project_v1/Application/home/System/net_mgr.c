@@ -3,11 +3,13 @@
 #include "device_mapping.h"
 #include "esp_8266/at_controller.h"
 #include "esp_8266/esp8266_mqtt_driver.h"
+#include "esp_8266/esp8266_sntp_driver.h"
 #include "esp_8266/esp8266_wifi_driver.h"
 #include "gpio_factory.h"
 #include "mqtt_adapter.h"
 #include "mqtt_driver.h"
 #include "mqtt_service.h"
+#include "sntp_service/sntp_service.h"
 #include "sys_config.h"
 #include "sys_state.h"
 #include "uart_queue/uart_queue.h"
@@ -15,6 +17,7 @@
 #include "usart_hal/usart_hal.h"
 #include "wifi_service/wifi_service.h"
 #include <string.h>
+#include <time.h>
 
 #define LOG_TAG "NET_MGR"
 #include "elog.h"
@@ -28,6 +31,8 @@ static esp8266_wifi_driver_t g_esp_drv;       // ESP8266 WiFi驱动实例
 static wifi_service_t g_wifi_svc;             // WiFi服务实例
 static esp8266_mqtt_driver_t g_mqtt_drv;      // ESP8266 MQTT驱动实例
 static mqtt_service_t g_mqtt_svc;             // MQTT服务实例
+static esp8266_sntp_driver_t g_sntp_drv;      // ESP8266 SNTP驱动
+static sntp_service_t g_sntp_svc;             // SNTP服务
 extern const mqtt_adapter_t g_onenet_adapter; // OneNet MQTT适配器
 
 /*****************
@@ -55,9 +60,15 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
     log_i("Starting MQTT Service...");
     mqtt_svc_connect(&g_mqtt_svc);
 
+    // 自动启动 SNTP 时间同步 (UTC+8)
+    log_i("Starting SNTP Sync...");
+    sntp_svc_set_network_ready(&g_sntp_svc, true);
+    sntp_svc_start_sync(&g_sntp_svc, 8, 24 * 3600 * 1000);
+
   } else if (status == WIFI_STATUS_DISCONNECTED) { // 断开连接
     log_w("Network Offline");
     sys_state_set_wifi(false);
+    sntp_svc_set_network_ready(&g_sntp_svc, false);
   }
 }
 
@@ -99,13 +110,14 @@ void net_mgr_init(void) {
   usart_hal_t *uart_hal = usart_hal_create(usart_drv); // 创建一个串口
   uart_queue_init(&g_at_queue, uart_hal, at_tx_buf, sizeof(at_tx_buf),
                   at_rx_buf, sizeof(at_rx_buf)); // 初始化UART队列(全局对象)
-
   uart_queue_start_receive(&g_at_queue);
+
   // 3. 初始化AT控制器
   at_controller_init(&g_at_ctrl, &g_at_queue, rst_gpio);
 
   // 4. 初始化ESP8266 WiFi驱动
   esp8266_wifi_driver_init(&g_esp_drv, &g_at_ctrl);
+
   // 5. 初始化WiFi服务
   wifi_service_init(&g_wifi_svc, (wifi_driver_t *)&g_esp_drv);
   wifi_service_register_callback(&g_wifi_svc, wifi_event_handler, NULL);
@@ -115,6 +127,10 @@ void net_mgr_init(void) {
   mqtt_svc_init(&g_mqtt_svc, (mqtt_driver_t *)&g_mqtt_drv, &g_onenet_adapter);
   mqtt_svc_register_callback(&g_mqtt_svc, mqtt_event_handler, NULL);
   cloud_bridge_init(&g_mqtt_svc);
+
+  // 7. 初始化 SNTP 驱动与服务
+  esp8266_sntp_driver_init(&g_sntp_drv, &g_at_ctrl);
+  sntp_svc_init(&g_sntp_svc, (sntp_driver_t *)&g_sntp_drv);
 
   log_i("Network Manager initialized successfully");
 }
@@ -130,6 +146,7 @@ void net_mgr_process(void) {
   // 2. 处理服务层
   wifi_svc_process(&g_wifi_svc);
   mqtt_svc_process(&g_mqtt_svc);
+  sntp_svc_process(&g_sntp_svc);
   cloud_bridge_process();
 }
 
