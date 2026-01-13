@@ -22,13 +22,15 @@
 #define _lcd_test_ 0
 #define _touch_test_ 0
 #define _lvgl_test_ 0
-#define _rtc_test_ 1
+#define _rtc_test_ 0
 #define _wifi_test_ 0
 #define _flash_test_ 0
 #define _lfs_test_ 0
 #define _norflash_test_ 0
 #define _sys_config_test_ 0
 #define _net_mgr_test_ 0
+#define _sdcard_test_ 1
+#define _fatfs_test_ 1
 
 // 运行所有测试用例
 void run_all_tests(void);

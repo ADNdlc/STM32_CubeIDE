@@ -8,32 +8,36 @@
 
 #if TEST_ENABLE
 #include "all_tests_config.h"
+#include "connectivity_test.h"
 #include "elog.h"
 #include "elog_test.h"
+#include "fatfs_test.h"
+#include "flash_test.h"
 #include "key_test.h"
 #include "lcd_test.h"
 #include "led_test.h"
+#include "lfs_test.h"
 #include "lvgl_test.h"
+#include "norflash_test.h"
 #include "rtc_test.h"
+#include "sdcard_test.h"
 #include "sdram_test.h"
+#include "sys_config_test.h" // 添加sys_config测试头文件
 #include "sys_test.h"
 #include "touch_test.h"
 #include "uart_hal_test.h"
 #include "uart_queue_test.h"
 #include "wifi_test.h"
-#include "flash_test.h"
-#include "norflash_test.h"
-#include "lfs_test.h"
-#include "sys_config_test.h"  // 添加sys_config测试头文件
-#include "connectivity_test.h"
 
-#define TEST_MODULE(func)  do{		\
-	log_w(#func" is running...");	\
-	func;	\
-}while(0)
+
+#define TEST_MODULE(func)                                                      \
+  do {                                                                         \
+    log_w(#func " is running...");                                             \
+    func;                                                                      \
+  } while (0)
 
 void run_all_tests(void) {
-	log_w(">>>>> Run Test !!! <<<<<");
+  log_w(">>>>> Run Test !!! <<<<<");
 
 #if _led_test_
   TEST_MODULE(led_test_run());
@@ -101,6 +105,14 @@ void run_all_tests(void) {
 
 #if _net_mgr_test_
   TEST_MODULE(connectivity_test_run());
+#endif
+
+#if _sdcard_test_
+  TEST_MODULE(sdcard_test_run());
+#endif
+
+#if _fatfs_test_
+  TEST_MODULE(fatfs_test_run());
 #endif
 }
 #else

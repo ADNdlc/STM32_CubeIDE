@@ -24,8 +24,8 @@ const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
     // 触摸屏控制引脚
     [GPIO_TOUCH_RST] = {GPIOI, GPIO_PIN_8}, // 触摸屏 RST 引脚 (PI8)
     [GPIO_TOUCH_INT] = {GPIOH, GPIO_PIN_7}, // 触摸屏 INT 引脚 (PH7)
-                                            // esp8266硬件复位引脚
-    [GPIO_ESP_RST] = {GPIOC, GPIO_PIN_5},
+                                            
+    [GPIO_ESP_RST] = {GPIOC, GPIO_PIN_5},   // esp8266硬件复位引脚
 };
 
 // PWM 设备映射表定义
@@ -87,6 +87,5 @@ const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES] = {
 const flash_mapping_t flash_mappings[FLASH_MAX_DEVICES] = {
     [FLASH_EXT_SPI] = {.type = FLASH_TYPE_SPI, .spi_id = SPI_1},
     [FLASH_EXT_QSPI] = {.type = FLASH_TYPE_QSPI, .qspi_id = QSPI_1},
-    [FLASH_EXT_NAND] = {.type = FLASH_TYPE_NAND,
-                        .hnand = &hnand1}, // 更新为NAND_FMC_1
+    [FLASH_EXT_NAND] = {.type = FLASH_TYPE_NAND, .hnand = &hnand1},
     [FLASH_EXT_SDCARD] = {.type = FLASH_TYPE_SD, .hsd = &hsd1}};

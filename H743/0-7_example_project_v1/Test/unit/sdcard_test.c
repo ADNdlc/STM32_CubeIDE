@@ -1,8 +1,9 @@
+#include "all_tests_config.h"
+#if _sdcard_test_
 #include "elog.h"
 #include "factory/flash_factory.h"
 #include "sys.h"
 #include <string.h>
-
 
 #define LOG_TAG "SDTest"
 
@@ -33,8 +34,17 @@ void sdcard_test_run(void) {
 
   // 4. 读写测试 (测试第 100 个块)
   uint32_t test_addr = 100 * info.block_size;
-  uint8_t write_buf[512];
-  uint8_t read_buf[512];
+  uint8_t *write_buf = sys_malloc(SYS_MEM_INTERNAL, 512);
+  uint8_t *read_buf = sys_malloc(SYS_MEM_INTERNAL, 512);
+
+  if (!write_buf || !read_buf) {
+    log_e("Failed to allocate test buffers");
+    if (write_buf)
+      sys_free(SYS_MEM_INTERNAL, write_buf);
+    if (read_buf)
+      sys_free(SYS_MEM_INTERNAL, read_buf);
+    return;
+  }
 
   for (int i = 0; i < 512; i++) {
     write_buf[i] = (uint8_t)(i & 0xFF);
@@ -59,6 +69,9 @@ void sdcard_test_run(void) {
     log_e("SD Card Data Mismatch! Test FAILED.");
     // Optional: Dump data for debugging
   }
+
+  sys_free(SYS_MEM_INTERNAL, write_buf);
+  sys_free(SYS_MEM_INTERNAL, read_buf);
 
   // 5. 多块读写测试 (测试 4 个块)
   uint32_t multi_size = 4 * info.block_size;
@@ -92,3 +105,5 @@ void sdcard_test_run(void) {
 
   log_i("SD Card Test Completed.");
 }
+
+#endif

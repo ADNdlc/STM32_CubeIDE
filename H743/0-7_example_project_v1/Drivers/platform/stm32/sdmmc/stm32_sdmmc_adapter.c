@@ -1,5 +1,6 @@
 #include "stm32_sdmmc_adapter.h"
 #include "elog.h"
+#include "stm32h7xx_hal.h"
 #include "sys.h"
 #include <stdlib.h>
 #include <string.h>
@@ -34,21 +35,37 @@ static int stm32_sdmmc_read_blocks(sdcard_adapter_t *self, uint32_t block_addr,
   stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
   HAL_StatusTypeDef status;
 
-  // Use Polling read as in the old driver
-  status = HAL_SD_ReadBlocks(impl->hsd, buf, block_addr, block_count, 10000);
+  log_i("SD Read: block %u, count %u", block_addr, block_count);
+
+  status = HAL_SD_ReadBlocks_DMA(impl->hsd, buf, block_addr, block_count);
+
   if (status != HAL_OK) {
-    log_e("HAL_SD_ReadBlocks failed: %d", status);
+    log_e("HAL_SD_ReadBlocks_DMA failed: %d, ErrorCode: 0x%08X", status,
+          impl->hsd->ErrorCode);
     return -1;
   }
 
-  // Wait for transfer to complete
-  uint32_t timeout = 1000000;
-  while (HAL_SD_GetCardState(impl->hsd) != HAL_SD_CARD_TRANSFER) {
+  // 1. Wait for HAL State to be READY (DMA transfer finished)
+  uint32_t timeout = 500000;
+  while (HAL_SD_GetState(impl->hsd) != HAL_SD_STATE_READY) {
     if (timeout-- == 0) {
-      log_e("Wait for read transfer timeout");
+      log_e("Wait for HAL READY timeout, ErrorCode: 0x%08X",
+            impl->hsd->ErrorCode);
       return -1;
     }
   }
+
+  // 2. Wait for Card to be in TRANSFER state
+  timeout = 500000;
+  while (HAL_SD_GetCardState(impl->hsd) != HAL_SD_CARD_TRANSFER) {
+    if (timeout-- == 0) {
+      log_e("Wait for card TRANSFER state timeout");
+      return -1;
+    }
+  }
+
+  // 3. Cache Maintenance: Invalidate D-Cache after DMA read
+  SCB_InvalidateDCache_by_Addr((uint32_t *)buf, block_count * 512);
 
   return 0;
 }
@@ -58,18 +75,35 @@ static int stm32_sdmmc_write_blocks(sdcard_adapter_t *self, uint32_t block_addr,
   stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
   HAL_StatusTypeDef status;
 
-  status = HAL_SD_WriteBlocks(impl->hsd, (uint8_t *)buf, block_addr,
-                              block_count, 10000);
+  log_i("SD Write: block %d, count %d", block_addr, block_count);
+
+  // 1. Cache Maintenance: Clean D-Cache before DMA write
+  SCB_CleanDCache_by_Addr((uint32_t *)buf, block_count * 512);
+
+  status = HAL_SD_WriteBlocks_DMA(impl->hsd, (uint8_t *)buf, block_addr,
+                                  block_count);
+
   if (status != HAL_OK) {
-    log_e("HAL_SD_WriteBlocks failed: %d", status);
+    log_e("HAL_SD_WriteBlocks_DMA failed: %d, ErrorCode: 0x%08X", status,
+          impl->hsd->ErrorCode);
     return -1;
   }
 
-  // Wait for transfer to complete
-  uint32_t timeout = 1000000;
+  // 2. Wait for HAL State to be READY (DMA transfer finished)
+  uint32_t timeout = 500000;
+  while (HAL_SD_GetState(impl->hsd) != HAL_SD_STATE_READY) {
+    if (timeout-- == 0) {
+      log_e("Wait for HAL READY timeout, ErrorCode: 0x%08X",
+            impl->hsd->ErrorCode);
+      return -1;
+    }
+  }
+
+  // 3. Wait for Card to be in TRANSFER state (Finish programming)
+  timeout = 1000000;
   while (HAL_SD_GetCardState(impl->hsd) != HAL_SD_CARD_TRANSFER) {
     if (timeout-- == 0) {
-      log_e("Wait for write transfer timeout");
+      log_e("Wait for card TRANSFER state timeout");
       return -1;
     }
   }
@@ -95,6 +129,9 @@ static int stm32_sdmmc_get_info(sdcard_adapter_t *self, sdcard_info_t *info) {
 
 static int stm32_sdmmc_is_ready(sdcard_adapter_t *self) {
   stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
+  if (HAL_SD_GetState(impl->hsd) != HAL_SD_STATE_READY) {
+    return 1;
+  }
   return (HAL_SD_GetCardState(impl->hsd) == HAL_SD_CARD_TRANSFER) ? 0 : 1;
 }
 
