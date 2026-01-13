@@ -17,11 +17,9 @@ static lv_obj_t *label_wifi;
 
 // 时间刷新定时器回调
 static void time_timer_cb(lv_timer_t *timer) {
-  log_v("time ui cb");
   rtc_time_t rt;
   // 使用RTC获取时间
   if (rtc_hal_get_time(&rt) == 0) {
-    log_d("lv time update: %02d:%02d:%02d",rt.hour, rt.minute, rt.second);
     lv_label_set_text_fmt(label_time, "%02d:%02d", rt.hour, rt.minute);
   }
 }

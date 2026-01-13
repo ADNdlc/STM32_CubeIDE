@@ -1,16 +1,19 @@
 #include "flash_factory.h"
 #include "device_mapping.h"
-#include "qspi_factory.h"
+#include "elog.h"
+#include "mt29f4g08/mt29f4g08.h"
+#include "fmc/mt29f_fmc_adapter.h"
+#include "sdmmc/stm32_sdmmc_adapter.h"
 #include "qspi_driver.h"
-#include "spi_factory.h"
+#include "qspi_factory.h"
+#include "sdcard/sdcard.h"
 #include "spi_driver.h"
-#include "w25qxx/w25qxx.h"
+#include "spi_factory.h"
 #include "w25qxx/transport/w25q_qspi_adapter.h"
 #include "w25qxx/transport/w25q_spi_adapter.h"
-#include "mt29f4g08/mt29f4g08.h"
-#include "mt29f4g08/transport/mt29f_fmc_adapter.h"
-#include "elog.h"
+#include "w25qxx/w25qxx.h"
 #include <stddef.h>
+
 
 #define LOG_TAG "Flash_Factory"
 
@@ -19,7 +22,7 @@ static block_device_t *flash_devices[FLASH_MAX_DEVICES] = {NULL};
 
 block_device_t *flash_factory_get(flash_device_id_t id) {
   log_d("Flash factory get called with ID: %d", id);
-  
+
   if (id >= FLASH_MAX_DEVICES) {
     log_e("Invalid flash device ID: %d", id);
     return NULL;
@@ -80,10 +83,10 @@ block_device_t *flash_factory_get(flash_device_id_t id) {
         return NULL;
       }
       log_i("Successfully created W25QXX device with QSPI adapter");
-      
+
     } else if (mapping->type == FLASH_TYPE_NAND) {
       log_d("Creating NAND flash device, NAND ID: %d", mapping->hnand);
-      
+
       // 1. Get NAND Driver handle directly from mapping
       NAND_HandleTypeDef *nand_drv = mapping->hnand;
       if (!nand_drv) {
@@ -103,10 +106,34 @@ block_device_t *flash_factory_get(flash_device_id_t id) {
       flash_devices[id] = mt29f4g08_create(adapter);
       if (!flash_devices[id]) {
         log_e("Failed to create MT29F4G08 device with NAND adapter");
-        // Note: Currently there's no destroy function for mt29f_fmc_adapter, assuming it's not needed
+        // Note: Currently there's no destroy function for mt29f_fmc_adapter,
+        // assuming it's not needed
         return NULL;
       }
       log_i("Successfully created MT29F4G08 device with NAND adapter");
+    } else if (mapping->type == FLASH_TYPE_SD) {
+      log_d("Creating SD card device");
+
+      SD_HandleTypeDef *hsd = mapping->hsd;
+      if (!hsd) {
+        log_e("Failed to get SD handle for ID: %d", id);
+        return NULL;
+      }
+
+      sdcard_adapter_t *adapter = stm32_sdmmc_adapter_create(hsd);
+      if (!adapter) {
+        log_e("Failed to create SD adapter");
+        return NULL;
+      }
+      log_i("Successfully created SD adapter");
+
+      flash_devices[id] = sdcard_create(adapter);
+      if (!flash_devices[id]) {
+        log_e("Failed to create SD card device");
+        stm32_sdmmc_adapter_destroy(adapter);
+        return NULL;
+      }
+      log_i("Successfully created SD card device");
     } else {
       log_e("Unknown flash type: %d", mapping->type);
       return NULL;

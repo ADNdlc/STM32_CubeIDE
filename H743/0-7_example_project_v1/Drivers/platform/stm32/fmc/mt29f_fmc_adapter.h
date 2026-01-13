@@ -1,7 +1,7 @@
 #ifndef DRIVERS_DEVICE_MT29F4G08_TRANSPORT_MT29F_FMC_ADAPTER_H_
 #define DRIVERS_DEVICE_MT29F4G08_TRANSPORT_MT29F_FMC_ADAPTER_H_
 
-#include "../mt29f4g08_adapter.h"
+#include "mt29f4g08/mt29f4g08_adapter.h"
 #include "stm32h7xx_hal.h"
 
 /**

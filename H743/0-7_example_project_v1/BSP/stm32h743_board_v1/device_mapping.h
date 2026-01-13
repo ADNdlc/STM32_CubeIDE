@@ -95,7 +95,8 @@ typedef enum {
   FLASH_TYPE_NONE = 0,
   FLASH_TYPE_SPI,
   FLASH_TYPE_QSPI,
-  FLASH_TYPE_NAND  // 新增NAND Flash类型
+  FLASH_TYPE_NAND, // NAND Flash类型
+  FLASH_TYPE_SD    // SD卡类型
 } flash_type_t;
 
 // Flash 设备逻辑标识枚举
@@ -103,6 +104,7 @@ typedef enum {
   FLASH_EXT_SPI = 0, // 外部SPI Flash
   FLASH_EXT_QSPI,    // 外部QSPI Flash
   FLASH_EXT_NAND,    // 外部NAND Flash
+  FLASH_EXT_SDCARD,  // 外部SD卡
   //...
   FLASH_MAX_DEVICES
 } flash_device_id_t;
@@ -179,6 +181,7 @@ typedef struct {
     spi_device_id_t spi_id;
     qspi_device_id_t qspi_id;
     NAND_HandleTypeDef *hnand;
+    SD_HandleTypeDef *hsd;
   };
 } flash_mapping_t;
 
