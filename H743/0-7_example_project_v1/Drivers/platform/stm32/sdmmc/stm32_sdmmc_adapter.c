@@ -1,5 +1,6 @@
 #include "stm32_sdmmc_adapter.h"
 #include "elog.h"
+#include "sdmmc.h"
 #include "stm32h7xx_hal.h"
 #include "sys.h"
 #include <stdlib.h>
@@ -16,16 +17,24 @@ typedef struct {
 static int stm32_sdmmc_init(sdcard_adapter_t *self) {
   stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
 
-  // HAL_SD_Init is usually called by CubeMX generated code,
-  // but we can check the state here if needed.
-  if (impl->hsd->State == HAL_SD_STATE_RESET) {
-    log_w("SDMMC state is RESET, attempting HAL_SD_Init...");
-    // In a real scenario, the initialization parameters should be correctly set
-    // in MX_SDMMC1_SD_Init() If we need to re-init here, we'd need the init
-    // struct values.
+  if (impl->hsd->State == HAL_SD_STATE_READY) {
+    return 0;
   }
 
-  return (impl->hsd->State != HAL_SD_STATE_ERROR) ? 0 : -1;
+  log_i("SDMMC state is %s, attempting HAL_SD_Init...",
+        (impl->hsd->State == HAL_SD_STATE_RESET) ? "RESET" : "ERROR");
+
+  hsd1.Instance = SDMMC1;
+  hsd1.Init.ClockEdge = SDMMC_CLOCK_EDGE_RISING;
+  hsd1.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
+  hsd1.Init.BusWide = SDMMC_BUS_WIDE_4B;
+  hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
+  hsd1.Init.ClockDiv = SDMMC_NSpeed_CLK_DIV;
+  if (HAL_SD_Init(&hsd1) != HAL_OK) {
+    return -1;
+  }
+
+  return 0;
 }
 
 static int stm32_sdmmc_deinit(sdcard_adapter_t *self) { return 0; }
@@ -133,9 +142,17 @@ static int stm32_sdmmc_get_info(sdcard_adapter_t *self, sdcard_info_t *info) {
 
 static int stm32_sdmmc_is_ready(sdcard_adapter_t *self) {
   stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
-  if (HAL_SD_GetState(impl->hsd) != HAL_SD_STATE_READY) {
-    return 1;
+
+  HAL_SD_StateTypeDef state = HAL_SD_GetState(impl->hsd);
+  if (state == HAL_SD_STATE_RESET || state == HAL_SD_STATE_ERROR) {
+    return 0; // Succeed to allow flash_handler to try mounting (init)
   }
+
+  if (state != HAL_SD_STATE_READY) {
+    return 1; // Busy or Transferring
+  }
+
+  // Check card state electronically
   return (HAL_SD_GetCardState(impl->hsd) == HAL_SD_CARD_TRANSFER) ? 0 : 1;
 }
 

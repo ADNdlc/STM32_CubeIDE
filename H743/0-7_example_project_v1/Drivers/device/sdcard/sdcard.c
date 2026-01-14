@@ -99,11 +99,8 @@ static int sdcard_get_info(block_device_t *const self, block_dev_info_t *info) {
 
 static int sdcard_sync(block_device_t *const self) {
   sdcard_t *dev = (sdcard_t *)self;
-  if (dev->adapter->ops->is_ready) {
-    while (dev->adapter->ops->is_ready(dev->adapter) != 0) {
-      // Busy waiting or OS delay
-      sys_delay_ms(1);
-    }
+  if (dev->adapter && dev->adapter->ops->is_ready) {
+    return dev->adapter->ops->is_ready(dev->adapter);
   }
   return 0;
 }
