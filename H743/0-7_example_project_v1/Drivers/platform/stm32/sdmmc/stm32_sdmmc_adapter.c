@@ -65,7 +65,9 @@ static int stm32_sdmmc_read_blocks(sdcard_adapter_t *self, uint32_t block_addr,
   }
 
   // 3. Cache Maintenance: Invalidate D-Cache after DMA read
-  SCB_InvalidateDCache_by_Addr((uint32_t *)buf, block_count * 512);
+  if (SCB->CCR & SCB_CCR_DC_Msk) {
+    SCB_InvalidateDCache_by_Addr((uint32_t *)buf, block_count * 512);
+  }
 
   return 0;
 }
@@ -78,7 +80,9 @@ static int stm32_sdmmc_write_blocks(sdcard_adapter_t *self, uint32_t block_addr,
   log_i("SD Write: block %d, count %d", block_addr, block_count);
 
   // 1. Cache Maintenance: Clean D-Cache before DMA write
-  SCB_CleanDCache_by_Addr((uint32_t *)buf, block_count * 512);
+  if (SCB->CCR & SCB_CCR_DC_Msk) {
+    SCB_CleanDCache_by_Addr((uint32_t *)buf, block_count * 512);
+  }
 
   status = HAL_SD_WriteBlocks_DMA(impl->hsd, (uint8_t *)buf, block_addr,
                                   block_count);

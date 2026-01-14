@@ -168,12 +168,28 @@ static int _fatfs_mount(flash_strategy_t *self, block_device_t *dev) {
   char path[4] = "0:";
   path[0] = impl->pdrv + '0';
 
-  FRESULT res = f_mount(&impl->fs, path, 1);
+  FRESULT res = FR_NOT_READY;
+  for (int retry = 0; retry < 3; retry++) {
+    res = f_mount(&impl->fs, path, 1);
+    if (res == FR_OK)
+      break;
+    log_w("FatFS mount attempt %d failed (%d), retrying in 200ms...", retry + 1,
+          res);
+    sys_delay_ms(200);
+  }
+
   if (res != FR_OK) {
-    log_w("FatFS mount failed (%d), attempting to format...", res);
-    BYTE work[FF_MAX_SS];
+    log_w("FatFS mount failed after retries (%d), attempting to format...",
+          res);
+    uint8_t *work = (uint8_t *)sys_malloc(FATFS_STRATEGY_MEMSOURCE, FF_MAX_SS);
+    if (!work) {
+      log_e("Failed to allocate format buffer");
+      return -1;
+    }
     MKFS_PARM opt = {FM_ANY, 0, 0, 0, 0};
-    res = f_mkfs(path, &opt, work, sizeof(work));
+    res = f_mkfs(path, &opt, work, FF_MAX_SS);
+    sys_free(FATFS_STRATEGY_MEMSOURCE, work);
+
     if (res != FR_OK) {
       log_e("FatFS format failed (%d)", res);
       return -1;
