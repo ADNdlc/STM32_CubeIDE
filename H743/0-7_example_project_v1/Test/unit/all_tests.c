@@ -28,6 +28,7 @@
 #include "uart_hal_test.h"
 #include "uart_queue_test.h"
 #include "wifi_test.h"
+#include "fatfs_test.h"
 
 
 #define TEST_MODULE(func)                                                      \

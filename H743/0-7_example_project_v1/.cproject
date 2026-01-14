@@ -110,11 +110,12 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.34049228" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.946295622" name="fatfs_strategy.h" rcbsApplicability="disable" resourcePath="Component/flash_handler/strategy/fatfs_strategy.h" toolsToInvoke=""/>
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1962495330" name="dev_token.h" rcbsApplicability="disable" resourcePath="Component/mqtt_service/adapters/dev_token.h" toolsToInvoke=""/>
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1756314397" name="Contol_controller.h" rcbsApplicability="disable" resourcePath="Application/Apps/device_control/System/Contol_controller.h" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry excluding="easylogger/plugins|easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib/EasyLogger"/>
-						<entry excluding="FatFS" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib/FileSys"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib/FileSys"/>
 						<entry excluding="hal_init" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL"/>
 						<entry excluding="unit/main_test_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
 						<entry excluding="mqtt_service/adapters/dev_token.c|old_esp_app|mqtt_service/adapters/dev_token.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>

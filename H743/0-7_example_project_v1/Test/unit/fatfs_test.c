@@ -35,29 +35,50 @@ void fatfs_test_run(void) {
   }
 
   // 4. 测试文件读写
-  const char *test_path = "0:/hello_stm32.txt";
-  const char *test_data = "Hello from STM32H7 FatFS Integration!";
-  size_t data_len = strlen(test_data);
+  const char *test_path = "0:/stm32_test.txt";
+  const char *test_str =
+      "Hello from STM32H7 FatFS Integration with Heap Buffers!";
+  size_t data_len = strlen(test_str);
+
+  // 为 DMA 使用堆内存 (AXI SRAM)，避免 DTCM/栈问题
+  uint8_t *test_buf = (uint8_t *)sys_malloc(SYS_MEM_INTERNAL, 512);
+  uint8_t *read_buf = (uint8_t *)sys_malloc(SYS_MEM_INTERNAL, 512);
+
+  if (!test_buf || !read_buf) {
+    log_e("Failed to allocate test buffers on heap");
+    if (test_buf)
+      sys_free(SYS_MEM_INTERNAL, test_buf);
+    if (read_buf)
+      sys_free(SYS_MEM_INTERNAL, read_buf);
+    FLASH_STRATEGY_UNMOUNT(strategy);
+    fatfs_strategy_destroy(strategy);
+    return;
+  }
+
+  memset(test_buf, 0, 512);
+  memcpy(test_buf, test_str, data_len);
+  memset(read_buf, 0, 512);
 
   log_i("Writing test data to file: %s", test_path);
-  if (FLASH_STRATEGY_WRITE(strategy, test_path, 0, (const uint8_t *)test_data,
-                           data_len) != 0) {
+  if (FLASH_STRATEGY_WRITE(strategy, test_path, 0, test_buf, data_len) != 0) {
     log_e("File write failed");
   } else {
-    log_i("Reading back test data...");
-    uint8_t read_buf[64] = {0};
+    log_i("File write successful! Reading back test data...");
     if (FLASH_STRATEGY_READ(strategy, test_path, 0, read_buf, data_len) != 0) {
       log_e("File read failed");
     } else {
       log_i("Read data: %s", (char *)read_buf);
-      if (memcmp(test_data, read_buf, data_len) == 0) {
+      if (memcmp(test_buf, read_buf, data_len) == 0) {
         log_i("FatFS Integration Test PASSED!");
       } else {
-        log_e("Data mismatch! Expected: %s, Got: %s", test_data,
-              (char *)read_buf);
+        log_e("Data mismatch!");
       }
     }
   }
+
+  // 释放资源
+  sys_free(SYS_MEM_INTERNAL, test_buf);
+  sys_free(SYS_MEM_INTERNAL, read_buf);
 
   // 5. 卸载和清理
   FLASH_STRATEGY_UNMOUNT(strategy);

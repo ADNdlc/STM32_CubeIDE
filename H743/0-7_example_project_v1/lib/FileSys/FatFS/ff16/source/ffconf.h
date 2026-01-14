@@ -104,7 +104,7 @@ functions.
 /     0 - Include all code pages above and configured by f_setcp()
 */
 
-#define FF_USE_LFN 0
+#define FF_USE_LFN 3
 #define FF_MAX_LFN 255
 /* The FF_USE_LFN switches the support for LFN (long file name).
 /
@@ -216,7 +216,7 @@ and /  f_fdisk(). 2^32 sectors maximum. This option has no effect when FF_LBA64
 / System Configurations
 /---------------------------------------------------------------------------*/
 
-#define FF_FS_TINY 0
+#define FF_FS_TINY 1
 /* This option switches tiny buffer configuration. (0:Normal or 1:Tiny)
 /  At the tiny configuration, size of file object (FIL) is reduced FF_MAX_SS
 bytes. /  Instead of private sector buffer eliminated from the file object,
