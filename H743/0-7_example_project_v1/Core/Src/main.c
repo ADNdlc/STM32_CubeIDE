@@ -23,7 +23,6 @@
 #include "ltdc.h"
 #include "quadspi.h"
 #include "rtc.h"
-#include "sdmmc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -33,10 +32,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "project_cfg.h"
-#include "hal_init.h"
-#include "sys_init.h"
 #include "app.h"
+#include "hal_init.h"
+#include "project_cfg.h"
+#include "sys_init.h"
+
 
 /* USER CODE END Includes */
 
@@ -118,25 +118,24 @@ int main(void)
   MX_TIM3_Init();
   MX_SPI1_Init();
   MX_QUADSPI_Init();
-  MX_SDMMC1_SD_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  GPIOB->ODR ^= (1<<0);
-  GPIOB->ODR ^= (1<<1);
+  GPIOB->ODR ^= (1 << 0);
+  GPIOB->ODR ^= (1 << 1);
   HAL_Delay(500);
 
   /* ----- 业务代码 ----- */
-  hal_init(); // HAL层初始化(绑定平台实现)
-  sys_services_init();// 服务和组件初始化
+  hal_init();          // HAL层初始化(绑定平台实现)
+  sys_services_init(); // 服务和组件初始化
 #if !TEST_ENABLE
   app_init(); // 应用初始化
 #endif
   // module testing
   run_all_tests(); // 运行所有开启的单元测试
 
-  //net_mgr_wifi_enable(1);
+  // net_mgr_wifi_enable(1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -147,8 +146,8 @@ int main(void)
 #endif
 
 #if TEST_ENABLE
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
-	  HAL_Delay(500);
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+    HAL_Delay(500);
 #endif
     /* USER CODE END WHILE */
 
@@ -277,12 +276,14 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  // 这里是HAL库错误处理
+  GPIOB->ODR ^= (1 << 0);
+  GPIOB->ODR ^= (1 << 1);
   while (1) {
-	GPIOB->ODR ^= (1<<0);	// PB0
-	for(__IO int i=0; i<100000; i++){
-		for(__IO int j=0; j<500; j++){}
-	}
+    GPIOB->ODR ^= (1 << 0); // PB0
+    for (__IO int i = 0; i < 10000; i++) {
+      for (__IO int j = 0; j < 1000; j++) {
+      }
+    }
   }
   /* USER CODE END Error_Handler_Debug */
 }
