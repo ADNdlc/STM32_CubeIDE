@@ -205,8 +205,7 @@ extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 extern const lcd_mapping_t lcd_mappings[LCD_MAX_DEVICES];
 extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 extern const i2c_soft_mapping_t i2c_soft_mappings[I2C_SOFT_MAX_DEVICES];
-extern const one_wire_soft_mapping_t
-    one_wire_soft_mappings[ONE_WIRE_SOFT_MAX_DEVICES];
+extern const one_wire_soft_mapping_t one_wire_soft_mappings[ONE_WIRE_SOFT_MAX_DEVICES];
 extern const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES];
 extern const rtc_mapping_t rtc_mappings[RTC_MAX_DEVICES];
 extern const spi_mapping_t spi_mappings[SPI_MAX_DEVICES];

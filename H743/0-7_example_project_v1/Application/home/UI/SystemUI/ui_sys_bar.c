@@ -1,7 +1,9 @@
+#include "project_cfg.h"
 #include "ui_sys_bar.h"
 #include "../../System/sys_state.h"
-
+#if !USE_Simulator
 #include "rtc_hal/rtc_hal.h"
+#endif
 #include "elog.h"
 
 #define LOG_TAG "UI_SYS_BAR"
@@ -17,11 +19,13 @@ static lv_obj_t *label_wifi;
 
 // 时间刷新定时器回调
 static void time_timer_cb(lv_timer_t *timer) {
+#if !USE_Simulator
   rtc_time_t rt;
   // 使用RTC获取时间
   if (rtc_hal_get_time(&rt) == 0) {
     lv_label_set_text_fmt(label_time, "%02d:%02d", rt.hour, rt.minute);
   }
+#endif
 }
 
 // 状态栏更新回调

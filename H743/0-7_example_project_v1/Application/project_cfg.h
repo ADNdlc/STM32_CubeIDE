@@ -20,7 +20,7 @@
 #pragma message("Environment: STM32 Hardware")
 #endif
 
-#define LVGL_ENABLE 0
+#define LVGL_ENABLE 1
 #define LVGL_DISP_INIT 1
 #define LVGL_INDEV_INIT 1
 #define LVGL_FS_INIT 1
