@@ -30,7 +30,9 @@
 #define _sys_config_test_ 0
 #define _net_mgr_test_ 0
 #define _sdcard_test_ 0
-#define _fatfs_test_ 1
+#define _dht11_test_ 1
+#define _fatfs_test_ 0
+
 
 // 运行所有测试用例
 void run_all_tests(void);

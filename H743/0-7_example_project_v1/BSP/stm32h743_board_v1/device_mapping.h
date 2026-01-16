@@ -62,6 +62,13 @@ typedef enum {
   I2C_SOFT_MAX_DEVICES
 } i2c_soft_device_id_t;
 
+// One-Wire 软件模拟设备逻辑标识枚举
+typedef enum {
+  ONE_WIRE_SOFT_DHT11 = 0,
+  //...
+  ONE_WIRE_SOFT_MAX_DEVICES
+} one_wire_soft_device_id_t;
+
 // 触摸屏设备逻辑标识枚举
 typedef enum {
   TOUCH_MAIN = 0, // 主触摸屏
@@ -149,6 +156,12 @@ typedef struct {
   uint32_t delay_us;      // 延时时间（微秒）
 } i2c_soft_mapping_t;
 
+// One-Wire 软件模拟设备映射结构体
+typedef struct {
+  GPIO_TypeDef *port; // GPIO 端口
+  uint16_t pin;       // GPIO 引脚
+} one_wire_soft_mapping_t;
+
 // 触摸屏设备映射结构体
 typedef struct {
   i2c_soft_device_id_t i2c_id;  // 使用的 I2C 设备 ID
@@ -192,6 +205,8 @@ extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 extern const lcd_mapping_t lcd_mappings[LCD_MAX_DEVICES];
 extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 extern const i2c_soft_mapping_t i2c_soft_mappings[I2C_SOFT_MAX_DEVICES];
+extern const one_wire_soft_mapping_t
+    one_wire_soft_mappings[ONE_WIRE_SOFT_MAX_DEVICES];
 extern const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES];
 extern const rtc_mapping_t rtc_mappings[RTC_MAX_DEVICES];
 extern const spi_mapping_t spi_mappings[SPI_MAX_DEVICES];

@@ -29,7 +29,7 @@
 #include "uart_queue_test.h"
 #include "wifi_test.h"
 #include "fatfs_test.h"
-
+#include "dht11_test.h"
 
 #define TEST_MODULE(func)                                                      \
   do {                                                                         \
@@ -110,6 +110,10 @@ void run_all_tests(void) {
 
 #if _sdcard_test_
   TEST_MODULE(sdcard_test_run());
+#endif
+
+#if _dht11_test_
+  TEST_MODULE(dht11_test_run());
 #endif
 
 #if _fatfs_test_
