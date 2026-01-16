@@ -13,7 +13,7 @@
 
 
 #if (TARGET_PLATFORM == PLATFORM_STM32)
-#include "stm32_i2c_soft_driver.h"
+#include "i2c/stm32_i2c_soft_driver.h"
 #endif
 
 // 存储已创建的 I2C 软件模拟驱动实例指针数组
