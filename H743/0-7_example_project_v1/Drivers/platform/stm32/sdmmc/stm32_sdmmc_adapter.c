@@ -14,30 +14,47 @@ typedef struct {
   SD_HandleTypeDef *hsd;
 } stm32_sdmmc_adapter_impl_t;
 
+// 前向声明
+static int stm32_sdmmc_reset(sdcard_adapter_t *self);
+
 static int stm32_sdmmc_init(sdcard_adapter_t *self) {
   stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
 
+  // 如果已经READY，快速返回
   if (impl->hsd->State == HAL_SD_STATE_READY) {
     return 0;
   }
 
-  log_i("SDMMC state is %s, attempting HAL_SD_Init...",
-        (impl->hsd->State == HAL_SD_STATE_RESET) ? "RESET" : "ERROR");
+  // 关键改进: 先完全重置硬件
+  log_i("SDMMC state is %d, resetting hardware...", impl->hsd->State);
+  stm32_sdmmc_reset(self);
 
+  // 重新初始化
   hsd1.Instance = SDMMC1;
   hsd1.Init.ClockEdge = SDMMC_CLOCK_EDGE_RISING;
   hsd1.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
   hsd1.Init.BusWide = SDMMC_BUS_WIDE_4B;
   hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
   hsd1.Init.ClockDiv = SDMMC_NSpeed_CLK_DIV;
+
   if (HAL_SD_Init(&hsd1) != HAL_OK) {
+    log_e("HAL_SD_Init failed after reset");
     return -1;
   }
 
+  log_i("SDMMC init success");
   return 0;
 }
 
-static int stm32_sdmmc_deinit(sdcard_adapter_t *self) { return 0; }
+static int stm32_sdmmc_deinit(sdcard_adapter_t *self) {
+  stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
+
+  // 强制反初始化
+  HAL_SD_DeInit(impl->hsd);
+  log_i("SDMMC deinit completed");
+
+  return 0;
+}
 
 static int stm32_sdmmc_read_blocks(sdcard_adapter_t *self, uint32_t block_addr,
                                    uint8_t *buf, uint32_t block_count) {
@@ -156,6 +173,49 @@ static int stm32_sdmmc_is_ready(sdcard_adapter_t *self) {
   return (HAL_SD_GetCardState(impl->hsd) == HAL_SD_CARD_TRANSFER) ? 0 : 1;
 }
 
+/**
+ * @brief 检测SD卡是否物理存在
+ * @return 1=存在, 0=不存在, -1=需要重新初始化才能确定
+ */
+static int stm32_sdmmc_detect(sdcard_adapter_t *self) {
+  stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
+
+  HAL_SD_StateTypeDef state = HAL_SD_GetState(impl->hsd);
+
+  // 已初始化成功，尝试获取卡状态
+  if (state == HAL_SD_STATE_READY) {
+    HAL_SD_CardStateTypeDef card_state = HAL_SD_GetCardState(impl->hsd);
+    if (card_state == HAL_SD_CARD_ERROR) {
+      return 0; // 卡不存在或通信错误
+    }
+    return 1; // 卡存在
+  }
+
+  // 未初始化状态，返回-1表示需要尝试初始化来确定
+  return -1;
+}
+
+/**
+ * @brief 完整硬件重置(GPIO/外设/时钟)
+ */
+static int stm32_sdmmc_reset(sdcard_adapter_t *self) {
+  stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
+
+  // 1. 强制反初始化HAL
+  HAL_SD_DeInit(impl->hsd);
+
+  // 2. 复位SDMMC外设时钟
+  __HAL_RCC_SDMMC1_FORCE_RESET();
+  HAL_Delay(2);
+  __HAL_RCC_SDMMC1_RELEASE_RESET();
+
+  // 3. 延时等待卡稳定
+  HAL_Delay(50);
+
+  log_i("SDMMC hardware reset completed");
+  return 0;
+}
+
 static const sdcard_adapter_ops_t stm32_sdmmc_ops = {
     .init = stm32_sdmmc_init,
     .deinit = stm32_sdmmc_deinit,
@@ -163,6 +223,8 @@ static const sdcard_adapter_ops_t stm32_sdmmc_ops = {
     .write_blocks = stm32_sdmmc_write_blocks,
     .get_info = stm32_sdmmc_get_info,
     .is_ready = stm32_sdmmc_is_ready,
+    .detect = stm32_sdmmc_detect,
+    .reset = stm32_sdmmc_reset,
 };
 
 sdcard_adapter_t *stm32_sdmmc_adapter_create(SD_HandleTypeDef *hsd) {

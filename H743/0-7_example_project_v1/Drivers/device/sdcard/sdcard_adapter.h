@@ -50,6 +50,18 @@ typedef struct {
    */
   int (*is_ready)(sdcard_adapter_t *self);
 
+  /**
+   * @brief 检测卡是否物理存在(用于热插拔)
+   * @return 1=存在, 0=不存在, -1=需要重新初始化才能确定
+   */
+  int (*detect)(sdcard_adapter_t *self);
+
+  /**
+   * @brief 硬件完全重置(GPIO/外设/时钟)
+   * @return 0 on success, negative on error
+   */
+  int (*reset)(sdcard_adapter_t *self);
+
 } sdcard_adapter_ops_t;
 
 struct sdcard_adapter_t {

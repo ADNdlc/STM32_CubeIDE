@@ -42,8 +42,14 @@ static int sdcard_init(block_device_t *const self) {
 
 static int sdcard_deinit(block_device_t *const self) {
   sdcard_t *dev = (sdcard_t *)self;
-  if (dev && dev->adapter && dev->adapter->ops->deinit) {
-    return dev->adapter->ops->deinit(dev->adapter);
+  if (dev && dev->adapter) {
+    // 调用重置以清理硬件状态(热插拔关键)
+    if (dev->adapter->ops->reset) {
+      dev->adapter->ops->reset(dev->adapter);
+    }
+    if (dev->adapter->ops->deinit) {
+      return dev->adapter->ops->deinit(dev->adapter);
+    }
   }
   return 0;
 }
@@ -105,6 +111,29 @@ static int sdcard_sync(block_device_t *const self) {
   return 0;
 }
 
+/**
+ * @brief 检测SD卡是否物理存在(用于热插拔)
+ * @return 1=存在, 0=不存在, -1=不支持/需重新初始化
+ */
+static int sdcard_is_present(block_device_t *const self) {
+  sdcard_t *dev = (sdcard_t *)self;
+  if (!dev || !dev->adapter) {
+    return -1;
+  }
+
+  // 优先使用adapter的detect检测物理存在
+  if (dev->adapter->ops->detect) {
+    return dev->adapter->ops->detect(dev->adapter);
+  }
+
+  // 回退: 使用is_ready判断
+  if (dev->adapter->ops->is_ready) {
+    return (dev->adapter->ops->is_ready(dev->adapter) == 0) ? 1 : 0;
+  }
+
+  return -1;
+}
+
 static const block_device_ops_t sdcard_ops = {
     .init = sdcard_init,
     .deinit = sdcard_deinit,
@@ -113,6 +142,7 @@ static const block_device_ops_t sdcard_ops = {
     .erase = sdcard_erase,
     .get_info = sdcard_get_info,
     .sync = sdcard_sync,
+    .is_present = sdcard_is_present,
 };
 
 block_device_t *sdcard_create(sdcard_adapter_t *adapter) {

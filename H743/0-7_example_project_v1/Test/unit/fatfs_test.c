@@ -17,9 +17,10 @@ static flash_strategy_t *g_fat_strat = NULL;
 static void base_test(void) {
   log_i("Starting FatFS Integration Test...");
 
-  // 1. 获取 SD 卡设备 (使用全局变量)
+  // 1. 获取 SD 卡设备
+  g_sd_dev = flash_factory_get(FLASH_EXT_SDCARD);
   if (!g_sd_dev) {
-    log_e("Global SD device is NULL");
+    log_e("Failed to get SD card device from factory");
     return;
   }
 
@@ -109,6 +110,7 @@ static void _fatfs_event_cb(const char *prefix, flash_event_t event) {
 }
 
 void fatfs_test_run(void) {
+
   log_i("Starting FatFS Hot-plug & Stability Test...");
   // 1. 设置回调
   flash_handler_set_callback(_fatfs_event_cb);

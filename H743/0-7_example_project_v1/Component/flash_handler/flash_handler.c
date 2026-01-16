@@ -78,7 +78,7 @@ void flash_handler_poll(void) {
 
   for (int i = 0; i < mount_count; i++) {
     mount_point_t *mp = &mount_table[i];
-    if (!mp->dev || !mp->dev->ops->sync)
+    if (!mp->dev)
       continue;
 
     // 1. 如果已断开且未到重试时间，则跳过（避免频繁初始化导致卡顿）
@@ -87,12 +87,33 @@ void flash_handler_poll(void) {
         continue;
     }
 
-    // 2. 探测设备
-    int ready = (BLOCK_DEV_SYNC(mp->dev) == 0);
+    // 2. 探测设备存在性（改进：优先使用is_present）
+    int present = 0;
+    if (mp->dev->ops->is_present) {
+      int detect_result = BLOCK_DEV_IS_PRESENT(mp->dev);
+      if (detect_result > 0) {
+        present = 1;
+      } else if (detect_result == -1) {
+        // 需要尝试初始化来确定，视为可能存在
+        present = 1;
+      }
+    } else if (mp->dev->ops->sync) {
+      // 回退: 使用sync结果判断
+      present = (BLOCK_DEV_SYNC(mp->dev) == 0);
+    }
 
     // 3. 状态切换逻辑
-    if (mp->status == FLASH_STATUS_DISCONNECTED && ready) {
-      log_i("Device %s detected, attempting mount...", mp->prefix);
+    if (mp->status == FLASH_STATUS_DISCONNECTED && present) {
+      log_i("Device %s detected, attempting init...", mp->prefix);
+
+      // 关键改进: 先重新初始化设备
+      if (BLOCK_DEV_INIT(mp->dev) != 0) {
+        log_w("Device %s init failed, will retry later", mp->prefix);
+        mp->next_retry_tick = now + 2000;
+        continue;
+      }
+
+      // 然后挂载文件系统
       if (mp->strategy && mp->strategy->ops->mount) {
         if (mp->strategy->ops->mount(mp->strategy, mp->dev) == 0) {
           mp->status = FLASH_STATUS_READY;
@@ -102,11 +123,13 @@ void flash_handler_poll(void) {
           mp->next_retry_tick = now + 2000;
         }
       }
-    } else if (mp->status == FLASH_STATUS_READY && !ready) {
+    } else if (mp->status == FLASH_STATUS_READY && !present) {
       log_w("Device %s removed", mp->prefix);
       if (mp->strategy && mp->strategy->ops->unmount) {
         mp->strategy->ops->unmount(mp->strategy);
       }
+      // 关键改进: 反初始化设备以清理硬件状态
+      BLOCK_DEV_DEINIT(mp->dev);
       mp->status = FLASH_STATUS_DISCONNECTED;
       mp->next_retry_tick = now + 1000; // 移除后延时探测
       _notify_event(mp->prefix, FLASH_EVENT_REMOVED);
