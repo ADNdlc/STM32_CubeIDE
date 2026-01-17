@@ -23,7 +23,27 @@ static lv_obj_t *left_zone;
 static lv_point_t start_pos;     // 手势开始位置
 static bool is_tracking = false; // 是否正在跟踪手势
 
-// ... (fire_gesture remains same)
+/**
+ * @brief 触发特定类型的手势回调
+ *
+ * @param type 手势类型
+ */
+static void fire_gesture(gesture_type_t type) {
+  if (type >= GESTURE_TYPE_MAX)
+    return;
+#ifndef NODEBUG
+  log_d("Fire gesture type %d", type);
+#endif
+  gesture_node_t *node = gesture_heads[type]; // 按照事件类型获取对应的回调链表
+  int count = 0;
+  while (node) { // 调用所有注册的回调
+    if (node->cb) {
+      node->cb();
+      count++;
+    }
+    node = node->next;
+  }
+}
 
 static void gesture_event_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e); // 事件代码
@@ -51,12 +71,12 @@ static void gesture_event_cb(lv_event_t *e) {
 
     if (target == top_zone &&
         dy > GESTURE_THRESHOLD) { // 最初触发手势的是top_zone ,且dy超过阈值
-      log_d("InputManager: Top swipe down detected (dy=%d)", dy);
+      log_d("Top swipe down detected (dy=%d)", dy);
       fire_gesture(GESTURE_TOP_SWIPE_DOWN); // 顶部下拉(无需松开)
       is_tracking = false;                  // 停止跟踪，避免重复触发
       lv_indev_reset(indev, NULL);          // 移交当前输入给panel_bg(没有松开)
     } else if (target == left_zone && dx > GESTURE_THRESHOLD) {
-      log_d("InputManager: Left swipe in detected (dx=%d)", dx);
+      log_d("Left swipe in detected (dx=%d)", dx);
       fire_gesture(GESTURE_LEFT_SWIPE_IN); // 侧边右滑
       is_tracking = false;
       lv_indev_reset(indev, NULL);
@@ -71,7 +91,7 @@ static void gesture_event_cb(lv_event_t *e) {
 
     if (target == bottom_zone &&
         dy < -GESTURE_THRESHOLD) { // 最初触发手势的是bottom_zone ,且dy超过阈值
-      log_d("InputManager: Bottom swipe up detected (dy=%d)", dy);
+      log_d("Bottom swipe up detected (dy=%d)", dy);
       fire_gesture(GESTURE_BOTTOM_SWIPE_UP); // 底部上滑(需要松开)
     }
     is_tracking = false;

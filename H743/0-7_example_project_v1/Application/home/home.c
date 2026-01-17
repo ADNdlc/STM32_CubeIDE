@@ -11,7 +11,7 @@
 
 // --- Bridge Functions ---
 static void on_gesture_home(void) {
-  log_d("UI: Home gesture triggered at ui.c level");
+  log_d("Home gesture triggered at ui.c level");
   app_manager_go_home();
 }
 

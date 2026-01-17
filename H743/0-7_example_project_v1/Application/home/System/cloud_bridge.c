@@ -16,7 +16,7 @@ static mqtt_service_t *g_mqtt_svc = NULL;
 static void on_prop_parsed(const char *prop_id, thing_value_t value,
                            void *ctx) {
   const char *device_id = (const char *)ctx;
-  log_i("CloudBridge: Applying property %s.%s from cloud", device_id, prop_id);
+  log_i("Applying property %s.%s from cloud", device_id, prop_id);
   // 云命令中解析出的属性值会通过此回调函数传递给物模型层
   thing_model_set_prop(device_id, prop_id, value, THING_SOURCE_CLOUD); //来源：云端
 }
@@ -32,7 +32,7 @@ static void on_mqtt_svc_event(mqtt_service_t *svc,
                               const mqtt_svc_event_t *event, void *user_data) {
   if (event->type == MQTT_SVC_EVENT_STATE_CHANGED) {
     if (event->state == MQTT_SVC_STATE_CONNECTED) {
-      log_i("CloudBridge: MQTT Connected, subscribing to command topics...");
+      log_i("MQTT Connected, subscribing to command topics...");
       // 订阅所有设备的命令控制主题
       uint8_t count = thing_model_get_count();
       for (uint8_t i = 0; i < count; i++) {
@@ -41,7 +41,7 @@ static void on_mqtt_svc_event(mqtt_service_t *svc,
           char topic[128];
           svc->adapter->get_cmd_topic(dev->device_id, topic, sizeof(topic));
           mqtt_svc_subscribe(svc, topic, 0);
-          log_i("CloudBridge: Subscribed to %s", topic);
+          log_i("Subscribed to %s", topic);
         }
       }
     }
@@ -98,7 +98,7 @@ void cloud_bridge_process(void) {
     for (uint8_t j = 0; j < dev->prop_count; j++) {
       thing_property_t *prop = &dev->properties[j];
       if (prop->is_dirty && prop->cloud_sync) { // 是否脏且需要同步
-        log_d("CloudBridge: Syncing dirty property %s.%s", dev->device_id, prop->id);
+        log_d("Syncing dirty property %s.%s", dev->device_id, prop->id);
         if (mqtt_svc_publish_property(g_mqtt_svc, dev, prop) == 0) {
           prop->is_dirty = false; // 成功同步后，将属性标记为干净
         }
