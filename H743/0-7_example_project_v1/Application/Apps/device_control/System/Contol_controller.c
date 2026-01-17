@@ -2,8 +2,14 @@
 #include "Contol_controller.h"
 #include "../UI/screens/Contol_view.h"
 #include "elog.h"
+#include "home/System/sys_config.h"
+#include "thing_model/thing_model.h"
 #include <assert.h>
 #include <string.h>
+
+extern thing_device_t *find_device_by_id(const char *id);
+extern thing_property_t *find_property_by_id(thing_device_t *dev,
+                                             const char *id);
 
 // 定义一个映射结构体和数组来存储控件
 #define MAX_UI_CONTROLS 32
@@ -158,10 +164,25 @@ void controller_init_main_tab(lv_obj_t *tab) {
   log_i("Found %d devices in thing model. Generating UI cards...",
         device_count);
 
+  bool dispersed = sys_config_get()->ui.dispersed_mode;
+  uint32_t card_index = 0;
+
   for (uint8_t i = 0; i < device_count; i++) { // 遍历所有设备
     thing_device_t *device = thing_model_get_device(i);
-    if (device) {
-      log_d("Creating card %d: %s (%s)", i, device->name, device->device_id);
+    if (!device)
+      continue;
+
+    if (dispersed) {
+      log_d("Generating dispersed cards for device: %s", device->device_id);
+      for (uint32_t p = 0; p < device->prop_count; p++) {
+        uint8_t row = 1 + (card_index / 3);
+        uint8_t col = card_index % 3;
+        view_create_property_card(tab, device, p, row, col);
+        card_index++;
+      }
+    } else {
+      log_d("Creating compact card %d: %s (%s)", i, device->name,
+            device->device_id);
       // 布局计算：每行放 3 个卡片，跳过第一行
       uint8_t row = 1 + (i / 3);
       uint8_t col = i % 3;
@@ -170,7 +191,8 @@ void controller_init_main_tab(lv_obj_t *tab) {
       view_create_device_card(tab, device, row, col);
     }
   }
-  log_i("Main Tab UI generation complete.");
+  log_i("Main Tab UI generation complete. Mode: %s",
+        dispersed ? "Dispersed" : "Compact");
 }
 
 void controller_init_user_tab(lv_obj_t *tab_user) {

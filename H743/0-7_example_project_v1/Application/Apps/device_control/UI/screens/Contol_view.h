@@ -17,6 +17,10 @@ typedef struct thing_device_t thing_device_t;
 lv_obj_t *view_create_device_card(lv_obj_t *parent,
                                   const thing_device_t *device, uint8_t row,
                                   uint8_t col);
+lv_obj_t *view_create_property_card(lv_obj_t *parent,
+                                    const thing_device_t *device,
+                                    uint32_t prop_index, uint8_t row,
+                                    uint8_t col);
 
 #ifdef __cplusplus
 }
