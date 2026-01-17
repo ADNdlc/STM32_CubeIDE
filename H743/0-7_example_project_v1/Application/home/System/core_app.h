@@ -26,12 +26,18 @@ typedef struct {
   app_resume_cb resume;   // 恢复
 } app_def_t;
 
+// 屏幕栈节点
+typedef struct screen_node_t {
+  lv_obj_t *obj;
+  struct screen_node_t *next;
+} screen_node_t;
+
 // app活动实例
 typedef struct app_t {
-  const app_def_t *def; // app对象
-  lv_obj_t *root_obj;   // lvgl根对象
-  void *user_data;      // 用户数据
-  struct app_t *prev;   // 列表指针
+  const app_def_t *def;        // app对象
+  screen_node_t *screen_stack; // 内部屏幕栈 (Stack Top)
+  void *user_data;             // 用户数据
+  struct app_t *prev;          // App 列表指针
 } app_t;
 
 #ifdef __cplusplus

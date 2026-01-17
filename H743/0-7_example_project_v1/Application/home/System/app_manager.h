@@ -35,6 +35,10 @@ void app_manager_start_app(const char *name); // 运行一个app
 void app_manager_go_back(void);               // 返回上一个app
 void app_manager_go_home(void);               // 返回主界面
 
+// 内部页面控制
+void app_manager_push_screen(lv_obj_t *obj); // 在当前app推入新页面
+void app_manager_pop_screen(void);           // 弹出当前页面
+
 #ifdef __cplusplus
 }
 #endif

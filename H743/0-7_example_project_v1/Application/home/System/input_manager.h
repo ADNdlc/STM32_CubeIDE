@@ -13,6 +13,7 @@ typedef enum {
   GESTURE_BOTTOM_PRESS,    // 底部区域按下
   GESTURE_TOP_SWIPE_DOWN,  // 顶部区域下滑
   GESTURE_BOTTOM_SWIPE_UP, // 底部区域上滑
+  GESTURE_LEFT_SWIPE_IN,   // 左侧边缘向内滑 (返回)
   GESTURE_TYPE_MAX
 } gesture_type_t;
 
@@ -24,7 +25,7 @@ typedef void (*gesture_cb_t)(void);
  *
  * 此模块负责处理全局输入事件和手势识别。
  *
-*/
+ */
 
 // 初始化全局输入/手势系统
 void input_manager_init(void);

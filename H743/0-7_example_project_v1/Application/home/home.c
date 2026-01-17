@@ -1,10 +1,11 @@
+#include "home.h"
 #include "SystemUI/ui_sys_bar.h"
 #include "SystemUI/ui_sys_panel.h"
 #include "app_manager.h"
 #include "input_manager.h"
 #include "screens/ui_screen_home.h"
 #include "sys_state.h"
-#include "home.h"
+
 #define LOG_TAG "UI"
 #include "elog.h"
 
@@ -49,6 +50,8 @@ void home_init(void) {
   // 绑定主页面输入事件
   input_manager_register_callback(GESTURE_BOTTOM_SWIPE_UP,
                                   on_gesture_home); // 上滑回调,返回home
+  input_manager_register_callback(GESTURE_LEFT_SWIPE_IN,
+                                  app_manager_pop_screen); // 侧滑回调,返回
 }
 
 void ui_Start(void) {
