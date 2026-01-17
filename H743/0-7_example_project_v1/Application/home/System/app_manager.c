@@ -6,7 +6,7 @@
 #define LOG_TAG "APP_MGR"
 #include "elog.h"
 
-#define MAX_APPS 20 // 最大注册app数量
+#define MAX_APPS 10 // 最大注册app数量
 
 typedef struct {
   const app_def_t *def;
@@ -17,6 +17,7 @@ static registered_app_t registry[MAX_APPS]; // app注册表
 static int registry_count = 0;              // 注册数量
 
 static app_t *app_stack = NULL; // 活动app实例栈顶(当前运行的app)
+static lv_obj_t * screen_stack = NULL;  // 屏幕栈顶
 
 void app_manager_init(void) {
   registry_count = 0;

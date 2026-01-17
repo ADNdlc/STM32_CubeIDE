@@ -7,6 +7,8 @@
 #include <assert.h>
 #include <string.h>
 
+#define DISPERSE 1
+
 extern thing_device_t *find_device_by_id(const char *id);
 extern thing_property_t *find_property_by_id(thing_device_t *dev,
                                              const char *id);
@@ -164,7 +166,7 @@ void controller_init_main_tab(lv_obj_t *tab) {
   log_i("Found %d devices in thing model. Generating UI cards...",
         device_count);
 
-  bool dispersed = sys_config_get()->ui.dispersed_mode;
+  bool dispersed = DISPERSE;  // test
   uint32_t card_index = 0;
 
   for (uint8_t i = 0; i < device_count; i++) { // 遍历所有设备
@@ -172,7 +174,7 @@ void controller_init_main_tab(lv_obj_t *tab) {
     if (!device)
       continue;
 
-    if (dispersed) {
+    if (dispersed) {  // 分散控件模式
       log_d("Generating dispersed cards for device: %s", device->device_id);
       for (uint32_t p = 0; p < device->prop_count; p++) {
         uint8_t row = 1 + (card_index / 3);

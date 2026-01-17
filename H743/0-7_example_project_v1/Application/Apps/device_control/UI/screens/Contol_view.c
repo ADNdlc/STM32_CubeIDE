@@ -14,15 +14,68 @@ extern void controller_register_ui_control(const char *deviceID,
                                            const char *propID, lv_obj_t *obj);
 extern void generic_control_event_cb(lv_event_t *e);
 
-static void settings_btn_event_cb(lv_event_t *e) {
-  app_manager_start_app("Settings");
-}
+static void settings_btn_event_cb(lv_event_t *e) {}
 
 // 主页网格布局定义(静态)
 static lv_coord_t main_row_dsc[] = {1,   180, 180,
                                     180, 180, LV_GRID_TEMPLATE_LAST}; // 高
 static lv_coord_t main_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1),
                                     LV_GRID_TEMPLATE_LAST}; // 宽
+
+static lv_obj_t *create_card_icon(lv_obj_t *parent, lv_obj_t *img, int img_w, int img_h
+){
+   // 1. 图标区域
+  lv_obj_t *img_icon = lv_obj_create(parent);
+  lv_obj_set_size(img_icon, img_w, img_h);                  // 目标大小
+  lv_obj_set_style_bg_opa(img_icon, LV_OPA_TRANSP, 0);      // 透明背景
+  lv_obj_set_style_pad_all(img_icon, 0, 0);                 // 无内边距
+  lv_obj_set_style_border_width(img_icon, 0, LV_PART_MAIN); // 无边框
+  lv_obj_clear_flag(img_icon, LV_OBJ_FLAG_SCROLLABLE);      // 禁止滚动
+  lv_obj_align(img_icon, LV_ALIGN_TOP_LEFT, 0, 0);
+  lv_obj_update_layout(img_icon); // 更新布局信息
+
+  // 获取设备图标
+  lv_obj_t *card_img = lv_img_create(img_icon);
+  lv_obj_align(card_img, LV_ALIGN_CENTER, 0, 0);
+  if (img) {
+    lv_img_set_src(card_img, img);
+  } else {
+    lv_img_set_src(card_img, res_get_src(RES_IMG_ICON_CONTROL)); // 使用缺省值
+  }
+  // 获取图标原始尺寸
+  lv_img_header_t header_img;
+  const void *img_src = lv_img_get_src(card_img);
+  lv_res_t res = lv_img_decoder_get_info(img_src, &header_img);
+  lv_coord_t zoom;
+  if (res == LV_RES_OK && header_img.w > 0 &&
+      header_img.h > 0) { // 检查图片信息是否成功获取且尺寸有效
+    lv_coord_t available_size = lv_obj_get_content_height(img_icon);
+    log_d("header size: %d", available_size);
+
+    // 计算基于宽度的缩放比例
+    // 将 available_size 转换为 int32_t 进行乘法，避免溢出，然后除以原始宽度
+    int32_t zoom_w = (int32_t)available_size * LV_IMG_ZOOM_NONE / header_img.w;
+
+    // 计算基于高度的缩放比例
+    int32_t zoom_h = (int32_t)available_size * LV_IMG_ZOOM_NONE / header_img.h;
+
+    // 为了确保图片完全可见且不被裁剪，我们需要选择较小的缩放比例
+    // 这样图片的两条边都能被限制在可用空间内
+    zoom = LV_MIN(zoom_w, zoom_h);
+
+    // 确保缩放比例不为0，以防极端情况导致显示异常
+    if (zoom <= 0) {
+      zoom = LV_IMG_ZOOM_NONE; // 如果计算结果不合理，则不缩放
+    }
+
+    lv_img_set_zoom(card_img, zoom);
+    log_d("img zoom: %d", zoom);
+  } else {
+    // 如果图片信息无法获取或尺寸无效，则不进行缩放（100%）
+    lv_img_set_zoom(card_img, LV_IMG_ZOOM_NONE); // LV_IMG_ZOOM_NONE 等同于 256
+  }
+  return img_icon;
+}
 
 // 释放控件上下文空间的事件回调
 static void free_context_event_cb(lv_event_t *e) {
@@ -168,65 +221,16 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
   lv_obj_update_layout(card); // 更新布局信息,获取容器大小
   lv_coord_t img_size = 8 * lv_obj_get_height(card) / 26; // 图片缩放目标大小
 
-  // 1. 图标区域
-  lv_obj_t *img_icon = lv_obj_create(card);
-  lv_obj_set_size(img_icon, img_size, img_size);            // 目标大小
-  lv_obj_set_style_bg_opa(img_icon, LV_OPA_TRANSP, 0);      // 透明背景
-  lv_obj_set_style_pad_all(img_icon, 0, 0);                 // 无内边距
-  lv_obj_set_style_border_width(img_icon, 0, LV_PART_MAIN); // 无边框
-  lv_obj_clear_flag(img_icon, LV_OBJ_FLAG_SCROLLABLE);      // 禁止滚动
-  lv_obj_align(img_icon, LV_ALIGN_TOP_LEFT, 0, 0);
-  lv_obj_update_layout(img_icon); // 更新布局信息
-
-  // 获取设备图标
-  lv_obj_t *card_img = lv_img_create(img_icon);
-  lv_obj_align(card_img, LV_ALIGN_CENTER, 0, 0);
-  if (device->icon) {
-    lv_img_set_src(card_img, device->icon);
-  } else {
-    lv_img_set_src(card_img, res_get_src(RES_IMG_ICON_CONTROL)); // 使用缺省值
-  }
-  // 获取图标原始尺寸
-  lv_img_header_t header_img;
-  const void *img_src = lv_img_get_src(card_img);
-  lv_res_t res = lv_img_decoder_get_info(img_src, &header_img);
-  lv_coord_t zoom;
-  if (res == LV_RES_OK && header_img.w > 0 &&
-      header_img.h > 0) { // 检查图片信息是否成功获取且尺寸有效
-    lv_coord_t available_size = lv_obj_get_content_height(img_icon);
-    log_d("header size: %d", available_size);
-
-    // 计算基于宽度的缩放比例
-    // 将 available_size 转换为 int32_t 进行乘法，避免溢出，然后除以原始宽度
-    int32_t zoom_w = (int32_t)available_size * LV_IMG_ZOOM_NONE / header_img.w;
-
-    // 计算基于高度的缩放比例
-    int32_t zoom_h = (int32_t)available_size * LV_IMG_ZOOM_NONE / header_img.h;
-
-    // 为了确保图片完全可见且不被裁剪，我们需要选择较小的缩放比例
-    // 这样图片的两条边都能被限制在可用空间内
-    zoom = LV_MIN(zoom_w, zoom_h);
-
-    // 确保缩放比例不为0，以防极端情况导致显示异常
-    if (zoom <= 0) {
-      zoom = LV_IMG_ZOOM_NONE; // 如果计算结果不合理，则不缩放
-    }
-
-    lv_img_set_zoom(card_img, zoom);
-    log_d("%s zoom: %d", device->name, zoom);
-  } else {
-    // 如果图片信息无法获取或尺寸无效，则不进行缩放（100%）
-    lv_img_set_zoom(card_img, LV_IMG_ZOOM_NONE); // LV_IMG_ZOOM_NONE 等同于 256
-  }
+  // 1. 设备图标
+  lv_obj_t *img_icon = create_card_icon(card, device->icon, img_size, img_size);
 
   // 2. 设备名称 (滚动标签)
   lv_obj_t *name_label = lv_label_create(card);
   lv_label_set_text(name_label, device->name);
   lv_obj_set_style_text_font(name_label, &lv_font_montserrat_22, LV_PART_MAIN);
-  lv_obj_set_width(name_label,
-                   34 * lv_obj_get_width(card) / 50); // 限制宽度以触发滚动
+  lv_obj_set_width(name_label, 34 * lv_obj_get_width(card) / 50); // 限制宽度以触发滚动
   lv_label_set_long_mode(name_label, LV_LABEL_LONG_SCROLL); // 往复滚动模式
-  lv_obj_align_to(name_label, img_icon, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+  lv_obj_align(name_label, LV_ALIGN_TOP_LEFT, img_size + 10, img_size/3);
   log_w("%s name label width: %d", device->name,
         3 * lv_obj_get_width(card) / 5);
 
@@ -423,24 +427,25 @@ lv_obj_t *view_create_property_card(lv_obj_t *parent,
   lv_obj_set_grid_cell(card, LV_GRID_ALIGN_STRETCH, col, 1,
                        LV_GRID_ALIGN_STRETCH, row, 1);
 
-  // 1. Device and Property Name
-  lv_obj_t *title = lv_label_create(card);
-  lv_label_set_text_fmt(title, "%s\n#7f7f7f %s#", device->name, prop->name);
-  lv_label_set_recolor(title, true);
-  lv_obj_set_style_text_font(title, &lv_font_montserrat_18, 0);
-  lv_obj_align(title, LV_ALIGN_TOP_LEFT, 0, 0);
+  // 1. Icon 
+  lv_obj_update_layout(card);
+  lv_coord_t img_size = 8 * lv_obj_get_height(card) / 30; // 图片缩放目标大小
+  lv_obj_t *img_icon = create_card_icon(card, device->icon, img_size, img_size);
+  lv_obj_align(img_icon, LV_ALIGN_TOP_LEFT, -img_size/6, -img_size/6);
 
-  // 2. Icon (Small)
-  lv_obj_t *img = lv_img_create(card);
-  if (device->icon) {
-    lv_img_set_src(img, device->icon);
-  } else {
-    lv_img_set_src(img, res_get_src(RES_IMG_ICON_CONTROL));
-  }
-  lv_img_set_zoom(img, 180);
-  lv_obj_align(img, LV_ALIGN_TOP_RIGHT, 0, 0);
-
-  // 3. Central Control (Large)
+  // 2. 设备名称和属性 (滚动标签)
+  lv_obj_t *name_label = lv_label_create(card);
+  lv_label_set_text(name_label, device->name);
+  lv_obj_set_style_text_font(name_label, &lv_font_montserrat_18, LV_PART_MAIN);
+  lv_obj_set_width(name_label, 34 * lv_obj_get_width(card) / img_size); // 限制宽度以触发滚动
+  lv_label_set_long_mode(name_label, LV_LABEL_LONG_SCROLL); // 往复滚动模式
+  lv_obj_align(name_label, LV_ALIGN_TOP_LEFT, img_size, img_size/5);
+  lv_obj_t * prop_label = lv_label_create(card);
+  lv_label_set_text(prop_label, prop->name);
+  lv_obj_set_style_text_font(prop_label, &lv_font_montserrat_24, LV_PART_MAIN);
+  lv_obj_align(prop_label, LV_ALIGN_BOTTOM_MID, 0, 0);
+  
+  // 3. 创建上下文
   control_event_ctx_t *ctx =
       (control_event_ctx_t *)lv_mem_alloc(sizeof(control_event_ctx_t));
   if (ctx) {
@@ -449,11 +454,12 @@ lv_obj_t *view_create_property_card(lv_obj_t *parent,
     lv_obj_add_event_cb(card, free_context_event_cb, LV_EVENT_DELETE, ctx);
   }
 
+  // 4. 创建ui控件
   lv_obj_t *ctrl = NULL;
   switch (prop->type) {
   case THING_PROP_TYPE_SWITCH:
     ctrl = lv_switch_create(card);
-    lv_obj_set_size(ctrl, 100, 50);
+    lv_obj_set_size(ctrl, LV_PCT(42), 40);
     lv_obj_center(ctrl);
     if (prop->value.b)
       lv_obj_add_state(ctrl, LV_STATE_CHECKED);
@@ -461,7 +467,7 @@ lv_obj_t *view_create_property_card(lv_obj_t *parent,
 
   case THING_PROP_TYPE_INT:
     ctrl = simple_slider_create(lv_color_hex(0x00AEEF), card);
-    lv_obj_set_size(ctrl, LV_PCT(80), 30);
+    lv_obj_set_size(ctrl, LV_PCT(95), 30);
     lv_obj_center(ctrl);
     lv_slider_set_range(ctrl, prop->min, prop->max);
     lv_slider_set_value(ctrl, prop->value.i, LV_ANIM_OFF);
@@ -470,8 +476,26 @@ lv_obj_t *view_create_property_card(lv_obj_t *parent,
   case THING_PROP_TYPE_FLOAT:
     ctrl = lv_label_create(card);
     lv_obj_set_style_text_font(ctrl, &lv_font_montserrat_32, 0);
-    lv_label_set_text_fmt(ctrl, "%.1f %s", prop->value.f,
-                          prop->unit ? prop->unit : "");
+    {
+      char buf[32];
+      snprintf(buf, sizeof(buf), "%.1f %s", prop->value.f,
+               prop->unit ? prop->unit : "");
+      lv_label_set_text(ctrl, buf);
+    }
+    lv_obj_center(ctrl);
+    break;
+
+  case THING_PROP_TYPE_STRING:
+  case THING_PROP_TYPE_ENUM:
+    ctrl = lv_label_create(card);
+    lv_obj_set_style_text_font(ctrl, &lv_font_montserrat_32, 0);
+    if (prop->type == THING_PROP_TYPE_STRING) {
+      lv_label_set_text(ctrl, prop->value.s ? prop->value.s : "N/A");
+    } else {
+      char buf[16];
+      snprintf(buf, sizeof(buf), "%d", prop->value.i);
+      lv_label_set_text(ctrl, buf);
+    }
     lv_obj_center(ctrl);
     break;
 

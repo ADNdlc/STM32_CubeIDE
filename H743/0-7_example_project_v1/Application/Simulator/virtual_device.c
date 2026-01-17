@@ -7,7 +7,13 @@
 
 
 #define DEV_ID "test2"
+//#define DEVICE_TEMPL
+//#define SENSOR_PROPS
+//#define SOCKET_PROP
+//#define LIGHT_PROP
+#define FULL_TYPE
 
+#ifdef DEVICE_TEMPL
 static bool device_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
                                thing_value_t value) {
   if (strcmp(dev->device_id, DEV_ID) == 0) {
@@ -21,7 +27,9 @@ static bool device_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
   }
   return false;
 }
+#endif
 
+#ifdef SENSOR_PROPS
 // 温湿度传感器设备回调
 static bool sensor_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
                                thing_value_t value) {
@@ -33,7 +41,9 @@ static bool sensor_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
   }
   return false;
 }
+#endif
 
+#ifdef SOCKET_PROP
 // 智能插座设备回调
 static bool socket_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
                                thing_value_t value) {
@@ -51,7 +61,9 @@ static bool socket_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
   }
   return false;
 }
+#endif // SOCKET_PROP
 
+#ifdef LIGHT_PROP
 // 智能灯泡设备回调
 static bool light_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
                               thing_value_t value) {
@@ -69,7 +81,8 @@ static bool light_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
   }
   return false;
 }
-
+#endif
+#ifdef FULL_TYPE
 // 全类型设备回调 - 支持所有thing_prop_type_t类型
 static bool full_type_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
                                   thing_value_t value) {
@@ -93,10 +106,12 @@ static bool full_type_prop_set_cb(struct thing_device_t *dev, const char *prop_i
   }
   return false;
 }
+#endif // !full_type_prop
 
 void devices_init(void) {
   log_i("Initializing hardware devices for Thing Model...");
 
+#ifdef DEVICE_TEMPL
   // 原有设备属性
   static thing_property_t device_props[] = {
       {.id = "led0",
@@ -118,7 +133,9 @@ void devices_init(void) {
 
   // 3. 注册物模型
   thing_model_register(&device_tmpl);
+#endif
 
+#ifdef SENSOR_PROPS
   // 温湿度传感器设备
   static thing_property_t sensor_props[] = {
       {.id = "switch",
@@ -149,7 +166,8 @@ void devices_init(void) {
                                 .on_prop_set = sensor_prop_set_cb};
 
   thing_model_register(&sensor_tmpl);
-
+#endif
+#ifdef SOCKET_PROP
   // 智能插座设备
   static thing_property_t socket_props[] = {
       {.id = "switch",
@@ -187,7 +205,8 @@ void devices_init(void) {
                                 .on_prop_set = socket_prop_set_cb};
 
   thing_model_register(&socket_tmpl);
-
+#endif // SOCKET_PROP
+#ifdef LIGHT_PROP
   // 智能灯泡设备
   static thing_property_t light_props[] = {
       {.id = "switch",
@@ -217,7 +236,8 @@ void devices_init(void) {
                                .on_prop_set = light_prop_set_cb};
 
   thing_model_register(&light_tmpl);
-
+#endif
+#ifdef FULL_TYPE
   // 全类型设备 - 包含所有thing_prop_type_t类型的属性
   static thing_property_t full_type_props[] = {
       {.id = "switch_prop",
@@ -260,7 +280,7 @@ void devices_init(void) {
                                    .on_prop_set = full_type_prop_set_cb};
 
   thing_model_register(&full_type_tmpl);
-
+#endif
   log_i("Device registration completed.");
 }
 
