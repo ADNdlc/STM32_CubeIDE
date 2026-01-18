@@ -261,7 +261,6 @@ int app_settings_save(const char *app_name, const char *config_file_name) {
   // 写入文件
   int res = flash_handler_write(path, 0, json_string, strlen(json_string));
   if (res < 0) {
-      Failed to load settings for app:
     log_e("%s settings save failed to %s", app_name, path);
     cJSON_free(json_string);
     cJSON_Delete(root);

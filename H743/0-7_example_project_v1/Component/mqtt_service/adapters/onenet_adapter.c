@@ -1,10 +1,9 @@
-#include "rtc_hal/rtc_hal.h"
 #include "cJSON.h"
 #include "home/System/sys_config.h"
 #include "mqtt_adapter.h"
+#include "rtc_hal/rtc_hal.h"
 #include <stdio.h>
 #include <string.h>
-
 
 #define ONENET_SERVER_HOST "mqtts.heclouds.com"
 #define ONENET_SERVER_PORT 1883
@@ -14,17 +13,17 @@
  */
 
 static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
-  const sys_config_t *cfg = sys_config_get();
+  const app_settings_t *cfg = sys_config_get();
 
   strcpy(out_params->host, ONENET_SERVER_HOST);
   out_params->port = ONENET_SERVER_PORT;
 
   // 对于 OneNet, client_id是设备id
-  strcpy(out_params->client_id, cfg->cloud.device_id);
+  strcpy(out_params->client_id, cfg->configs[CLOUD_DEVICE_ID].string);
   // username是产品id
-  strcpy(out_params->username, cfg->cloud.product_id);
+  strcpy(out_params->username, cfg->configs[CLOUD_PRODUCT_ID].string);
   // password
-  strcpy(out_params->password, cfg->cloud.device_secret);
+  strcpy(out_params->password, cfg->configs[CLOUD_DEVICE_SECRET].string);
 }
 
 /**
@@ -32,9 +31,9 @@ static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
  */
 static void onenet_get_post_topic(const char *device_id, char *out_topic,
                                   size_t size) {
-  const sys_config_t *cfg = sys_config_get();
+  const app_settings_t *cfg = sys_config_get();
   snprintf(out_topic, size, "$sys/%s/%s/thing/property/post",
-           cfg->cloud.product_id, device_id);
+           cfg->configs[CLOUD_PRODUCT_ID].string, device_id);
 }
 
 /**
@@ -42,9 +41,9 @@ static void onenet_get_post_topic(const char *device_id, char *out_topic,
  */
 static void onenet_get_cmd_topic(const char *device_id, char *out_topic,
                                  size_t size) {
-  const sys_config_t *cfg = sys_config_get();
+  const app_settings_t *cfg = sys_config_get();
   snprintf(out_topic, size, "$sys/%s/%s/thing/property/set",
-           cfg->cloud.product_id, device_id);
+           cfg->configs[CLOUD_PRODUCT_ID].string, device_id);
 }
 
 /**
@@ -158,9 +157,9 @@ static void onenet_get_reply_payload(const char *msg_id, int code,
 
 static void onenet_get_reply_topic(const char *device_id, char *out_topic,
                                    size_t size) {
-  const sys_config_t *cfg = sys_config_get();
+  const app_settings_t *cfg = sys_config_get();
   snprintf(out_topic, size, "$sys/%s/%s/thing/property/set_reply",
-           cfg->cloud.product_id, device_id);
+           cfg->configs[CLOUD_PRODUCT_ID].string, device_id);
 }
 
 const mqtt_adapter_t g_onenet_adapter = {

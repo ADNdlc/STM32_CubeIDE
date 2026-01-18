@@ -160,11 +160,10 @@ void net_mgr_wifi_enable(bool enable) {
 
   if (enable) {
     log_i("WiFi enabling requested...");
-    const sys_config_t *cfg = sys_config_get(); // 获取系统配置
-    log_d("sys_config_get: ssid=%s, pwd=%s", cfg->net.ssid, cfg->net.password);
+    log_d("sys_config_get: ssid=%s, pwd=%s", sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
     wifi_svc_set_mode(&g_wifi_svc, WIFI_MODE_STATION);
-    wifi_svc_connect(&g_wifi_svc, cfg->net.ssid,
-                     cfg->net.password); // 使用配置里的信息进行连接
+    wifi_svc_connect(&g_wifi_svc, sys_config_get_wifi_ssid(),
+                     sys_config_get_wifi_password()); // 使用配置里的信息进行连接
   } else {
     log_i("WiFi disabling requested...");
     wifi_svc_disconnect(&g_wifi_svc); // 断开连接

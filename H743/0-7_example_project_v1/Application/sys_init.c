@@ -84,10 +84,6 @@ int sys_services_init(void) {
   /*****************
    * 系统服务和组件
    *****************/
-
-#if SYS_CONFIG_ENABLE
-  sys_config_init(); // 初始化系统配置 (从Flash加载)
-#endif
 #if SYS_STATE_ENABLE
   sys_state_init(); // 初始化系统状态
 #endif
