@@ -75,7 +75,6 @@ void app_manager_register(app_def_t *app_def, int page_index) {
       app_def->settings->attr.is_dirty = 0;
     }
 
-
     log_i("Registered app: %s (hash: %u) at page: %d", app_def->name,
           app_name_hash, page_index);
   } else {
@@ -261,7 +260,7 @@ void app_manager_push_screen(lv_obj_t *obj) {
   app_stack->screen_stack = node;
 
   log_d("Push screen to app: %s", app_stack->def->name);
-  lv_scr_load_anim(obj, LV_SCR_LOAD_ANIM_FADE_IN, 300, 0, false);
+  lv_scr_load_anim(obj, LV_SCR_LOAD_ANIM_FADE_IN, 200, 0, false);
 }
 
 /**
@@ -280,6 +279,11 @@ void app_manager_pop_screen(void) {
     log_d("Pop screen from app: %s", app_stack->def->name);
     lv_scr_load_anim(app_stack->screen_stack->obj, LV_SCR_LOAD_ANIM_MOVE_RIGHT,
                      200, 0, true);
+
+    // 触发 resume 回调以便应用刷新内容
+    if (app_stack->def->resume) {
+      app_stack->def->resume(app_stack);
+    }
 
     // Note: lv_scr_load_anim with auto_del=true will delete the old screen
     // (popped->obj)

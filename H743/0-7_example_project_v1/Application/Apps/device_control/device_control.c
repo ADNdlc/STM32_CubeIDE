@@ -61,7 +61,8 @@ static lv_obj_t *create_device_control_screen(void) {
       // 初始化默认配置
       dvice_control_settings.configs[0].key = UI_DISPLAY_MODE_KEY;
       dvice_control_settings.configs[0].type = APP_CONFIG_TYPE_INT;
-      dvice_control_settings.configs[0].Int = UI_FULL_MODE; //or:UI_COMPACT_MODE
+      dvice_control_settings.configs[0].Int =
+          UI_FULL_MODE; // or:UI_COMPACT_MODE
       app_settings_update("DevControl", &dvice_control_settings);
     }
   }
@@ -102,4 +103,20 @@ static void pause_device_control_screen(struct app_t *app) {
  */
 static void resume_device_control_screen(struct app_t *app) {
   log_d("Device Control screen resumed.");
+  // 如果配置已更改，刷新主页面布局
+  if (dvice_control_settings.attr.is_dirty) {
+    log_i("Settings changed, refreshing main tab layout...");
+    // 寻找 tabview (在 create_device_control_screen 中创建)
+    lv_obj_t *tabview = lv_obj_get_child(app->screen_stack->obj, 0);
+    if (tabview) {
+      lv_obj_t *content = lv_tabview_get_content(tabview);  // 获取tabview内容对象
+      lv_obj_t *main_tab = lv_obj_get_child(content, 0);    // 获取第一个标签页(main_tab)
+      if (main_tab) {
+        lv_obj_clean(main_tab); // 清空标签页内容
+        controller_init_main_tab(main_tab); // 重新初始化标签页内容
+        // 保存配置并清除 dirty 标志，防止重复重绘
+        app_settings_save("DevControl", "DevControl");
+      }
+    }
+  }
 }

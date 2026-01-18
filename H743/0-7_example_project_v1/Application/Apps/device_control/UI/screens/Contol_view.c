@@ -1,11 +1,14 @@
 #define LOG_TAG "CTRL_VIEW"
 #include "Contol_view.h"
 #include "../../System/Contol_controller.h"
+#include "../../device_control.h"
 #include "../components/style_util.h"
+#include "app_manager.h"
 #include "elog.h"
 #include "lv_util.h"
 #include "res_manager.h"
 #include "thing_model/thing_model.h"
+
 
 #if 1
 
@@ -14,7 +17,12 @@ extern void controller_register_ui_control(const char *deviceID,
                                            const char *propID, lv_obj_t *obj);
 extern void generic_control_event_cb(lv_event_t *e);
 
-static void settings_btn_event_cb(lv_event_t *e) {}
+static void settings_btn_event_cb(lv_event_t *e) {
+  lv_obj_t *settings_scr = create_dev_control_settings_screen();
+  if (settings_scr) {
+    app_manager_push_screen(settings_scr);
+  }
+}
 
 // 主页网格布局定义(静态)
 static lv_coord_t main_row_dsc[] = {1,   180, 180,
@@ -22,9 +30,9 @@ static lv_coord_t main_row_dsc[] = {1,   180, 180,
 static lv_coord_t main_col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1),
                                     LV_GRID_TEMPLATE_LAST}; // 宽
 
-static lv_obj_t *create_card_icon(lv_obj_t *parent, lv_obj_t *img, int img_w, int img_h
-){
-   // 1. 图标区域
+static lv_obj_t *create_card_icon(lv_obj_t *parent, lv_obj_t *img, int img_w,
+                                  int img_h) {
+  // 1. 图标区域
   lv_obj_t *img_icon = lv_obj_create(parent);
   lv_obj_set_size(img_icon, img_w, img_h);                  // 目标大小
   lv_obj_set_style_bg_opa(img_icon, LV_OPA_TRANSP, 0);      // 透明背景
@@ -228,9 +236,10 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
   lv_obj_t *name_label = lv_label_create(card);
   lv_label_set_text(name_label, device->name);
   lv_obj_set_style_text_font(name_label, &lv_font_montserrat_22, LV_PART_MAIN);
-  lv_obj_set_width(name_label, 34 * lv_obj_get_width(card) / 50); // 限制宽度以触发滚动
+  lv_obj_set_width(name_label,
+                   34 * lv_obj_get_width(card) / 50); // 限制宽度以触发滚动
   lv_label_set_long_mode(name_label, LV_LABEL_LONG_SCROLL); // 往复滚动模式
-  lv_obj_align(name_label, LV_ALIGN_TOP_LEFT, img_size + 10, img_size/3);
+  lv_obj_align(name_label, LV_ALIGN_TOP_LEFT, img_size + 10, img_size / 3);
   log_w("%s name label width: %d", device->name,
         3 * lv_obj_get_width(card) / 5);
 
@@ -427,24 +436,25 @@ lv_obj_t *view_create_property_card(lv_obj_t *parent,
   lv_obj_set_grid_cell(card, LV_GRID_ALIGN_STRETCH, col, 1,
                        LV_GRID_ALIGN_STRETCH, row, 1);
 
-  // 1. Icon 
+  // 1. Icon
   lv_obj_update_layout(card);
   lv_coord_t img_size = 8 * lv_obj_get_height(card) / 30; // 图片缩放目标大小
   lv_obj_t *img_icon = create_card_icon(card, device->icon, img_size, img_size);
-  lv_obj_align(img_icon, LV_ALIGN_TOP_LEFT, -img_size/6, -img_size/6);
+  lv_obj_align(img_icon, LV_ALIGN_TOP_LEFT, -img_size / 6, -img_size / 6);
 
   // 2. 设备名称和属性 (滚动标签)
   lv_obj_t *name_label = lv_label_create(card);
   lv_label_set_text(name_label, device->name);
   lv_obj_set_style_text_font(name_label, &lv_font_montserrat_18, LV_PART_MAIN);
-  lv_obj_set_width(name_label, 34 * lv_obj_get_width(card) / img_size); // 限制宽度以触发滚动
+  lv_obj_set_width(name_label, 34 * lv_obj_get_width(card) /
+                                   img_size); // 限制宽度以触发滚动
   lv_label_set_long_mode(name_label, LV_LABEL_LONG_SCROLL); // 往复滚动模式
-  lv_obj_align(name_label, LV_ALIGN_TOP_LEFT, img_size, img_size/5);
-  lv_obj_t * prop_label = lv_label_create(card);
+  lv_obj_align(name_label, LV_ALIGN_TOP_LEFT, img_size, img_size / 5);
+  lv_obj_t *prop_label = lv_label_create(card);
   lv_label_set_text(prop_label, prop->name);
   lv_obj_set_style_text_font(prop_label, &lv_font_montserrat_24, LV_PART_MAIN);
   lv_obj_align(prop_label, LV_ALIGN_BOTTOM_MID, 0, 0);
-  
+
   // 3. 创建上下文
   control_event_ctx_t *ctx =
       (control_event_ctx_t *)lv_mem_alloc(sizeof(control_event_ctx_t));
