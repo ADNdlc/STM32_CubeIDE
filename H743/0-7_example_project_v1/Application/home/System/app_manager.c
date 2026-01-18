@@ -1,4 +1,5 @@
 #include "app_manager.h"
+#include "app_settings.h"
 #include "elog.h"
 #include <string.h>
 
@@ -22,18 +23,61 @@ void app_manager_init(void) {
   log_i("Initialized");
 }
 
+static uint32_t djb2_hash(const char *str) {
+  if (str == NULL) {
+    return 0;
+  }
+  uint32_t hash = 5381;
+  int c;
+  // 遍历字符串（自动处理'\0'结束符）
+  while ((c = (unsigned char)*str++)) {
+    // 等价于 hash = hash * 33 + c（位运算优化，速度更快）
+    hash = ((hash << 5) + hash) + c;
+  }
+  return hash;
+}
+
 /**
  * @brief 注册app
  *
  * @param app_def    app定义
  * @param page_index app在启动时加载的页面索引
  */
-void app_manager_register(const app_def_t *app_def, int page_index) {
-  if (registry_count < MAX_APPS && app_def) {
+void app_manager_register(app_def_t *app_def, int page_index) {
+  if (registry_count < MAX_APPS && app_def && app_def->name) {
+    // 检查是否有重复的应用名称
+    for (int i = 0; i < registry_count; i++) {
+      if (strcmp(registry[i].def->name, app_def->name) == 0) {
+        log_w("App with name '%s' already registered, skipping registration",
+              app_def->name);
+        return;
+      }
+    }
+    // 计算app名称的hash值
+    uint32_t app_name_hash = djb2_hash(app_def->name);
+
+    // 添加app_def到注册表
     registry[registry_count].def = app_def;
     registry[registry_count].page_index = page_index;
     registry_count++;
-    log_i("Registered app: %s at page: %d", app_def->name, page_index);
+
+    if (app_def->settings) { // 有配置选项
+      // 设置app_def中的settings的hash值
+      ((app_def_t *)app_def)->settings->hash = app_name_hash;
+      int res = app_settings_load(app_def->name,
+                                  app_def->name); // 直接使用app_name作为文件名
+      if (res == 0) {
+        app_def->settings->attr.is_loaded = true;
+      } else {
+        app_def->settings->attr.is_loaded = false;
+        log_w("Failed to load settings for app: %s", app_def->name);
+      }
+      app_def->settings->attr.is_dirty = 0;
+    }
+
+
+    log_i("Registered app: %s (hash: %u) at page: %d", app_def->name,
+          app_name_hash, page_index);
   } else {
     log_w("Failed to register app, registry full or invalid app");
   }
@@ -115,19 +159,6 @@ void app_manager_set_page_index(const char *name, int page_index) {
 }
 
 /**
- * @brief 释放app实例
- *
- * @param app app实例
- */
-static void free_app_instance(app_t *app) {
-  if (!app)
-    return;
-  if (app->def->destroy)
-    app->def->destroy(app); // 调用app的destroy回调
-  lv_mem_free(app);
-}
-
-/**
  * @brief 释放app实例的屏幕栈
  *
  * @param app app实例
@@ -140,12 +171,43 @@ static void free_screen_stack(app_t *app, lv_obj_t *skip_obj) {
   while (node) {
     screen_node_t *tmp = node;
     node = node->next;
-    if (tmp->obj && tmp->obj != skip_obj) {
-      lv_obj_del(tmp->obj);
+    if (tmp->obj) {
+      if (tmp->obj != skip_obj) {
+        lv_obj_del(tmp->obj);
+      } else {
+        // 如果某处正在使用该对象(如动画)，则设置为自动删除，由由底层清除
+        // 或者由于 lv_scr_load_anim(..., true)
+        // 已经处理了清理，这里只需要确保链表节点被释放
+      }
     }
     lv_mem_free(tmp);
   }
   app->screen_stack = NULL;
+}
+
+/**
+ * @brief 释放app实例
+ *
+ * @param app app实例
+ */
+static void free_app_instance(app_t *app, lv_obj_t *skip_obj) {
+  if (!app)
+    return;
+  // 1. 检查并保存设置
+  if (app->def->settings && app->def->settings->attr.is_dirty &&
+      app->def->settings->attr.is_loaded) {
+    app_settings_save(app->def->name, app->def->name); // 保存配置
+    app->def->settings->attr.is_dirty = false;
+  }
+  // 2. 销毁应用实例
+  if (app->def->destroy)
+    app->def->destroy(app); // 调用app的destroy回调
+
+  // 3. 释放屏幕栈
+  free_screen_stack(app, skip_obj);
+
+  // 4. 释放 app 对象内存
+  lv_mem_free(app);
 }
 
 /**
@@ -217,7 +279,7 @@ void app_manager_pop_screen(void) {
 
     log_d("Pop screen from app: %s", app_stack->def->name);
     lv_scr_load_anim(app_stack->screen_stack->obj, LV_SCR_LOAD_ANIM_MOVE_RIGHT,
-                     300, 0, true);
+                     200, 0, true);
 
     // Note: lv_scr_load_anim with auto_del=true will delete the old screen
     // (popped->obj)
@@ -253,13 +315,8 @@ void app_manager_go_back(void) {
                      300, 0, true);
   }
 
-  // 销毁当前应用及其所有内部屏幕
-  if (current->def->destroy) {
-    current->def->destroy(current);
-  }
-  // 注意：由 lv_scr_load_anim(..., true) 处理的活跃屏幕不需要手动删除
-  free_screen_stack(current, act_scr);
-  lv_mem_free(current);
+  // 销毁当前应用及其所有内部屏幕，包含自动保存设置
+  free_app_instance(current, act_scr);
 }
 
 /**
@@ -303,10 +360,7 @@ void app_manager_go_home(void) {
   while (app_stack != home) {
     app_t *temp = app_stack;
     app_stack = app_stack->prev;
-    if (temp->def->destroy)
-      temp->def->destroy(temp);
-    free_screen_stack(temp, act_scr);
-    lv_mem_free(temp);
+    free_app_instance(temp, act_scr);
   }
 
   if (home->def->resume)

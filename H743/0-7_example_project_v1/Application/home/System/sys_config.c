@@ -25,15 +25,6 @@
   "version=2018-10-31&res=products%2FSQKg9n0Ii0%2Fdevices%2Ftest2&et=" \
   "1855499668539&method=md5&sign=%2FHVmg4Xz2RfTRWEu44mApQ%3D%3D"
 
-// Internal storage header
-typedef struct
-{
-  uint32_t magic;
-  uint32_t length;
-  uint32_t checksum;
-  uint8_t data[0];
-} internal_cfg_header_t;
-
 static sys_config_t
     g_sys_config; // 当前系统配置(初始化时从外部flash加载或使用默认值)
 

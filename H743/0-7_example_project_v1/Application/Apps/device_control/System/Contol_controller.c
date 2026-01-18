@@ -1,11 +1,13 @@
 ﻿#define LOG_TAG "CTRL_CTRL"
 #include "Contol_controller.h"
 #include "../UI/screens/Contol_view.h"
+#include "../device_control.h"
 #include "elog.h"
 #include "home/System/sys_config.h"
 #include "thing_model/thing_model.h"
 #include <assert.h>
 #include <string.h>
+
 
 #define DISPERSE 1
 
@@ -166,15 +168,16 @@ void controller_init_main_tab(lv_obj_t *tab) {
   log_i("Found %d devices in thing model. Generating UI cards...",
         device_count);
 
-  bool dispersed = DISPERSE;  // test
-  uint32_t card_index = 0;
+  uint32_t dispersed = get_self_settings()->configs[0].Int;
+  log_d("Current dispersed mode: %d", dispersed);
 
+  uint32_t card_index = 0;
   for (uint8_t i = 0; i < device_count; i++) { // 遍历所有设备
     thing_device_t *device = thing_model_get_device(i);
     if (!device)
       continue;
 
-    if (dispersed) {  // 分散控件模式
+    if (dispersed == UI_COMPACT_MODE) { // 分散控件模式
       log_d("Generating dispersed cards for device: %s", device->device_id);
       for (uint32_t p = 0; p < device->prop_count; p++) {
         uint8_t row = 1 + (card_index / 3);
@@ -182,7 +185,7 @@ void controller_init_main_tab(lv_obj_t *tab) {
         view_create_property_card(tab, device, p, row, col);
         card_index++;
       }
-    } else {
+    } else if (dispersed == UI_FULL_MODE) {
       log_d("Creating compact card %d: %s (%s)", i, device->name,
             device->device_id);
       // 布局计算：每行放 3 个卡片，跳过第一行

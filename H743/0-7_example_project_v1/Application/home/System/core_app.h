@@ -1,8 +1,9 @@
-﻿#ifndef _CORE_APP_H
+﻿
+#ifndef _CORE_APP_H
 #define _CORE_APP_H
 
 #include "lvgl.h"
-#include "app_config.h"
+#include <app_settings.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +21,7 @@ typedef void (*app_resume_cb)(struct app_t *app);
 typedef struct {
   const char *name; // 名称
   const void *icon; // 图标(可缺省)
-  app_settings_t settings;
+  app_settings_t* settings; // 设置
   // 必须实现的回调
   app_create_cb create;   // 创建
   app_destroy_cb destroy; // 销毁
