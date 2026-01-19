@@ -20,16 +20,16 @@
 #pragma message("Environment: STM32 Hardware")
 #endif
 
-#define LVGL_ENABLE 1
+#define LVGL_ENABLE 0
 #define LVGL_DISP_INIT 1
 #define LVGL_INDEV_INIT 1
 #define LVGL_FS_INIT 1
 
-#define SYS_FLASH_HANDLER_ENABLE 0
-#define SYS_CONFIG_ENABLE 0
-#define NET_MGR_ENABLE 0
-#define SYS_STATE_ENABLE 0
-#define THING_MODEL_ENABLE 0
+#define SYS_FLASH_HANDLER_ENABLE 0 // flash处理器
+#define SYS_CONFIG_ENABLE 0        // 配置管理
+#define NET_MGR_ENABLE 0           // 网络管理
+#define SYS_STATE_ENABLE 0         // 系统状态
+#define THING_MODEL_ENABLE 0       // 物联网模型
 
 #define TEST_ENABLE 1
 

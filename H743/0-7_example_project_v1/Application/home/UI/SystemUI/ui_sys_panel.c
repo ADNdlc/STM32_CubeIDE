@@ -2,10 +2,12 @@
 #if !USE_Simulator
 #include "../../System/net_mgr.h"
 #endif
-#include "res_manager.h"
+#include "../screens/ui_wifi_scan.h"
+#include "app_manager.h"
 #include "input_manager.h"
-#include "sys_state.h"
 #include "lv_util.h"
+#include "res_manager.h"
+#include "sys_state.h"
 
 #define LOG_TAG "UI_SYS_PANEL"
 #include "elog.h"
@@ -30,11 +32,12 @@ static bool is_panel_active = false;   // 菜单状态
 /*********************
  *  STATIC PROTOTYPES
  *********************/
-static void event_panel_drag_cb(lv_event_t *e);    // 拖动回调
-static void delete_anim_ready_cb(lv_anim_t *anim); // 删除动画完成回调
-static void event_vol_cb(lv_event_t *e);           // 音量调节回调
-static void event_bri_cb(lv_event_t *e);           // 亮度调节回调
-static void event_wifi_cb(lv_event_t *e);          // WiFi开关回调
+static void event_panel_drag_cb(lv_event_t *e);      // 拖动回调
+static void delete_anim_ready_cb(lv_anim_t *anim);   // 删除动画完成回调
+static void event_vol_cb(lv_event_t *e);             // 音量调节回调
+static void event_bri_cb(lv_event_t *e);             // 亮度调节回调
+static void event_wifi_cb(lv_event_t *e);            // WiFi开关回调
+static void event_wifi_long_press_cb(lv_event_t *e); // WiFi长按回调(进入配网)
 
 /*********************
  *   STYLE HELPERS
@@ -90,13 +93,13 @@ static lv_obj_t *menu_child_container_create(lv_obj_t *parent, uint8_t col,
 /* -- 子组件创建 -- */
 /**
  * @brief 媒体组件
- * 
+ *
  * @param parent  父容器
  * @param col       列
- * @param col_span  列跨度 
+ * @param col_span  列跨度
  * @param row       行
  * @param row_span  行跨度
- * @return lv_obj_t* 
+ * @return lv_obj_t*
  */
 static lv_obj_t *multimedia_module_create(lv_obj_t *parent, uint8_t col,
                                           uint8_t col_span, uint8_t row,
@@ -110,11 +113,11 @@ static lv_obj_t *multimedia_module_create(lv_obj_t *parent, uint8_t col,
 
 /**
  * @brief 亮度滑块组件
- * 
+ *
  * @param parent 父容器
  * @param value  初始亮度值
- * 
- * @return lv_obj_t* 
+ *
+ * @return lv_obj_t*
  */
 static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
                                           uint8_t col, uint8_t col_span,
@@ -158,11 +161,11 @@ static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
 
 /**
  * @brief 音量滑块组件
- * 
+ *
  * @param parent 父容器
  * @param value  初始音量值
- * 
- * @return lv_obj_t* 
+ *
+ * @return lv_obj_t*
  */
 static lv_obj_t *volume_module_create(lv_obj_t *parent, uint8_t value,
                                       uint8_t col, uint8_t col_span,
@@ -206,14 +209,14 @@ static lv_obj_t *volume_module_create(lv_obj_t *parent, uint8_t value,
 
 /**
  * @brief wifi组件
- * 
+ *
  * @param parent 父容器
  * @param value  初始wifi状态
  * @param col    列
  * @param col_span 列跨度
  * @param row    行
  * @param row_span 行跨度
- * @return lv_obj_t* 
+ * @return lv_obj_t*
  */
 static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
                                     uint8_t col, uint8_t col_span, uint8_t row,
@@ -236,6 +239,8 @@ static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
   if (value)
     lv_obj_add_state(btn_wifi, LV_STATE_CHECKED);
   lv_obj_add_event_cb(btn_wifi, event_wifi_cb, LV_EVENT_VALUE_CHANGED, NULL);
+  lv_obj_add_event_cb(btn_wifi, event_wifi_long_press_cb, LV_EVENT_LONG_PRESSED,
+                      NULL);
 
   // icon
   lv_obj_t *img_wifi = lv_img_create(btn_wifi);
@@ -588,7 +593,7 @@ static void event_wifi_cb(lv_event_t *e) {
 #if !USE_Simulator
   net_mgr_wifi_enable(checked);
 #else
-log_d("wifi is connected.");
+  log_d("wifi is connected.");
 #endif
   // 图标颜色渲染
   lv_obj_t *img = lv_obj_get_child(btn, 0);
@@ -597,6 +602,29 @@ log_d("wifi is connected.");
       lv_obj_set_style_img_recolor(img, lv_color_hex(0xEEEEEE), 0);
     else
       lv_obj_set_style_img_recolor(img, lv_color_hex(0x333333), 0);
+  }
+}
+
+// WiFi 长按事件：进入配网页面
+static void event_wifi_long_press_cb(lv_event_t *e) {
+  log_i("WiFi long pressed, entering provisioning UI...");
+
+  if (!panel_content)
+    return;
+
+  // 1. 启动收起动画并关闭面板
+  lv_coord_t content_h = lv_obj_get_height(panel_content);
+  lv_anim_t *a = slide_anim_set(panel_content, lv_obj_get_y(panel_content),
+                                -(content_h + 10));
+  lv_anim_set_path_cb(a, lv_anim_path_ease_in);
+  lv_anim_set_time(a, 300);
+  lv_anim_set_ready_cb(a, delete_anim_ready_cb);
+  lv_anim_start(a);
+
+  // 2. 跳转到 WiFi 扫描页面
+  lv_obj_t *scan_scr = ui_wifi_scan_create();
+  if (scan_scr) {
+    app_manager_push_screen(scan_scr);
   }
 }
 

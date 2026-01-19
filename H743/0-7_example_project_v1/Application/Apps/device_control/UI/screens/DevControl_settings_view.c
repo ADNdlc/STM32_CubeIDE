@@ -34,12 +34,12 @@ lv_obj_t *create_dev_control_settings_screen(void) {
   lv_obj_center(list);
 
   lv_obj_t *btn_compact =
-      lv_list_add_btn(list, LV_SYMBOL_LIST, "Compact Card Mode");
+      lv_list_add_btn(list, LV_SYMBOL_LIST, "Compact Mode");
   lv_obj_add_event_cb(btn_compact, mode_selection_event_cb, LV_EVENT_CLICKED,
                       (void *)(uintptr_t)UI_FULL_MODE);
 
   lv_obj_t *btn_dispersed =
-      lv_list_add_btn(list, LV_SYMBOL_LIST, "Dispersed Property Mode");
+      lv_list_add_btn(list, LV_SYMBOL_LIST, "Dispersed Mode");
   lv_obj_add_event_cb(btn_dispersed, mode_selection_event_cb, LV_EVENT_CLICKED,
                       (void *)(uintptr_t)UI_COMPACT_MODE);
 

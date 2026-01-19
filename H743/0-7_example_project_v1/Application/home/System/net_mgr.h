@@ -1,6 +1,7 @@
 #ifndef APPLICATION_HOME_SYSTEM_NET_MGR_H_
 #define APPLICATION_HOME_SYSTEM_NET_MGR_H_
 
+#include "wifi_service/wifi_service.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -8,29 +9,39 @@
  * @brief 初始化网络管理器(wifi,mqtt,sntp,etc)
  *      此模块负责初始化网络相关所有驱动和服务
  *      以及服务间的协作
- * 
+ *
  */
 void net_mgr_init(void);
 
 /**
  * @brief 网络管理器循环处理函数
- * 
+ *
  */
 void net_mgr_process(void);
 
 /**
  * @brief 连接或断开WiFi
- * 
+ *
  * @param enable true:连接WiFi, false:断开WiFi
  */
 void net_mgr_wifi_enable(bool enable);
 
 /**
  * @brief 检查WiFi是否启用(与连接是否成功无关)
- * 
- * @return true 
- * @return false 
+ *
+ * @return true
+ * @return false
  */
 bool net_mgr_wifi_is_enabled(void);
+
+/**
+ * @brief 扫描附近 WiFi 热点
+ */
+int net_mgr_wifi_scan(wifi_scan_cb_t cb, void *arg);
+
+/**
+ * @brief 手动连接 WiFi 并保存配置
+ */
+int net_mgr_wifi_connect_manual(const char *ssid, const char *pwd);
 
 #endif /* APPLICATION_HOME_SYSTEM_NET_MGR_H_ */

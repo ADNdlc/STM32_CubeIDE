@@ -242,15 +242,34 @@ static void parse_scan_result(void *ctx, const char *line) {
   log_d("Parsed AP: %s (RSSI: %d)", ap->ssid, ap->rssi);
 }
 
+static void scan_finish_cb_t(void *ctx, AT_CmdResult_t result,
+                             const char *last_line) {
+  esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)ctx;
+  if (!self)
+    return;
+
+  if (self->scan_cb) {
+    // 从上下文中找到传入的回调,
+    self->scan_cb(self->scan_arg, self->scan_results, self->scan_count);
+    // 调用后清除回调，防止重复调用（如果需要的话，通常扫描是一次性的）
+    self->scan_cb = NULL;
+    self->scan_arg = NULL;
+  }
+}
+
 static int esp8266_scan(wifi_driver_t *base, wifi_scan_cb_t cb, void *arg) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)base;
   self->scan_count = 0; // Reset count
+  self->scan_cb = cb;   // Store callback
+  self->scan_arg = arg; // Store argument
 
   AT_Cmd_t at_cmd = {
       .cmd_str = "AT+CWLAP\r\n",
       .timeout_ms = 10000,
       .parser_cb =
           (at_parser_cb_t)parse_scan_result, // 解析函数设置为查询处理回调
+      .response_cb = (at_response_cb_t)scan_finish_cb_t,
+      .ctx = self, // 将self传入作为上下文，以便在回调中获取scan_results和cb
   };
 
   return at_controller_submit_cmd(self->at_ctrl, &at_cmd);

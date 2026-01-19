@@ -16,10 +16,10 @@ void wifi_service_init(wifi_service_t *self, wifi_driver_t *driver) {
 
 /**
  * @brief 注册状态变化回调
- * 
+ *
  * @param self 实例
  * @param cb   回调函数
- * @param user_data 用户数据指针 
+ * @param user_data 用户数据指针
  */
 void wifi_service_register_callback(wifi_service_t *self,
                                     wifi_service_event_cb_t cb,
@@ -30,9 +30,9 @@ void wifi_service_register_callback(wifi_service_t *self,
   self->user_data = user_data;
 }
 
-/** 
+/**
  * @brief 处理WiFi服务
- * 
+ *
  * @param self 实例
  */
 void wifi_svc_process(wifi_service_t *self) {
@@ -51,9 +51,9 @@ void wifi_svc_process(wifi_service_t *self) {
   }
 }
 
- /**
+/**
  * @brief 连接WiFi
- * 
+ *
  * @param self 实例
  * @param ssid WiFi名称
  * @param pwd  WiFi密码
@@ -67,7 +67,7 @@ int wifi_svc_connect(wifi_service_t *self, const char *ssid, const char *pwd) {
 
 /**
  * @brief 断开WiFi连接
- * 
+ *
  * @param self 实例
  * @return int 0:成功, -1:失败
  */
@@ -79,11 +79,11 @@ int wifi_svc_disconnect(wifi_service_t *self) {
 
 /**
  * @brief 扫描WiFi网络
- * 
+ *
  * @param self  实例
  * @param cb    扫描回调函数(传递结果)
  * @param arg   用户数据指针
- * @return int 
+ * @return int
  */
 int wifi_svc_scan(wifi_service_t *self, wifi_scan_cb_t cb, void *arg) {
   if (!self || !self->driver)
@@ -93,7 +93,7 @@ int wifi_svc_scan(wifi_service_t *self, wifi_scan_cb_t cb, void *arg) {
 
 /**
  * @brief 获取当前WiFi状态
- * 
+ *
  * @param self 实例
  * @return wifi_status_t 当前状态
  */
@@ -105,7 +105,7 @@ wifi_status_t wifi_svc_get_status(wifi_service_t *self) {
 
 /**
  * @brief 设置WiFi工作模式
- * 
+ *
  * @param self 实例
  * @param mode 工作模式
  * @return int 0:成功, -1:失败
@@ -114,21 +114,4 @@ int wifi_svc_set_mode(wifi_service_t *self, wifi_mode_t mode) {
   if (!self || !self->driver)
     return -1;
   return WIFI_SET_MODE(self->driver, mode);
-}
-
-#include "esp_8266/esp8266_wifi_driver.h"
-
-uint16_t wifi_svc_get_scan_count(wifi_service_t *self) {
-  if (!self || !self->driver)
-    return 0;
-  // TODO: Add generic way to get count if needed. For now cast to ESP8266.
-  esp8266_wifi_driver_t *drv = (esp8266_wifi_driver_t *)self->driver;
-  return drv->scan_count;
-}
-
-wifi_ap_info_t *wifi_svc_get_scan_results(wifi_service_t *self) {
-  if (!self || !self->driver)
-    return NULL;
-  esp8266_wifi_driver_t *drv = (esp8266_wifi_driver_t *)self->driver;
-  return drv->scan_results;
 }

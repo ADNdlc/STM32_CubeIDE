@@ -101,6 +101,22 @@ char *sys_config_get_wifi_password(void) {
   }
   return sys_config.configs[WIFI_PASSWORD].string; 
 }
+
+void sys_config_set_wifi_ssid(const char *ssid) { 
+  if(!sys_config.attr.is_loaded){
+    return;
+  }
+  sys_config.configs[WIFI_SSID].string = sys_malloc(SYS_CONFIG_MEM_SOURCE, sizeof(ssid));
+  memcpy(sys_config.configs[WIFI_SSID].string, ssid, sizeof(ssid));
+}
+void sys_config_set_wifi_password(const char *password) { 
+  if(!sys_config.attr.is_loaded){
+    return;
+  }
+  sys_config.configs[WIFI_PASSWORD].string = sys_malloc(SYS_CONFIG_MEM_SOURCE, sizeof(password));
+  memcpy(sys_config.configs[WIFI_PASSWORD].string, password, sizeof(password));
+}
+
 int sys_config_get_cloud_platform(void) { 
   if(!sys_config.attr.is_loaded){
     return -1;

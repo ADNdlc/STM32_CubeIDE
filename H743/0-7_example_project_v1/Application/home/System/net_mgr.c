@@ -160,10 +160,12 @@ void net_mgr_wifi_enable(bool enable) {
 
   if (enable) {
     log_i("WiFi enabling requested...");
-    log_d("sys_config_get: ssid=%s, pwd=%s", sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
+    log_d("sys_config_get: ssid=%s, pwd=%s", sys_config_get_wifi_ssid(),
+          sys_config_get_wifi_password());
     wifi_svc_set_mode(&g_wifi_svc, WIFI_MODE_STATION);
-    wifi_svc_connect(&g_wifi_svc, sys_config_get_wifi_ssid(),
-                     sys_config_get_wifi_password()); // 使用配置里的信息进行连接
+    wifi_svc_connect(
+        &g_wifi_svc, sys_config_get_wifi_ssid(),
+        sys_config_get_wifi_password()); // 使用配置里的信息进行连接
   } else {
     log_i("WiFi disabling requested...");
     wifi_svc_disconnect(&g_wifi_svc); // 断开连接
@@ -176,3 +178,21 @@ void net_mgr_wifi_enable(bool enable) {
  * @return g_wifi_target_state true:启用,false:禁用
  */
 bool net_mgr_wifi_is_enabled(void) { return g_wifi_target_state; }
+
+int net_mgr_wifi_scan(wifi_scan_cb_t cb, void *arg) {
+  log_i("WiFi Scan requested...");
+  return wifi_svc_scan(&g_wifi_svc, cb, arg);
+}
+
+int net_mgr_wifi_connect_manual(const char *ssid, const char *pwd) {
+  log_i("Manual WiFi connect: SSID=%s", ssid);
+
+  // 1. 更新系统配置
+  sys_config_set_wifi_ssid(ssid);
+  sys_config_set_wifi_password(pwd);
+
+  // 2. 启用 WiFi 并尝试连接
+  g_wifi_target_state = true;
+  //wifi_svc_set_mode(&g_wifi_svc, WIFI_MODE_STATION);
+  return wifi_svc_connect(&g_wifi_svc, sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
+}

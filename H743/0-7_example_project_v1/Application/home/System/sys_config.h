@@ -42,6 +42,8 @@ app_settings_t *sys_config_get(void);
 
 char *sys_config_get_wifi_ssid(void);
 char *sys_config_get_wifi_password(void);
+void sys_config_set_wifi_ssid(const char *ssid);
+void sys_config_set_wifi_password(const char *password);
 int sys_config_get_cloud_platform(void);
 char *sys_config_get_cloud_product_id(void);
 char *sys_config_get_cloud_device_id(void);
