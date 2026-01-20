@@ -53,7 +53,8 @@ static int _lfs_bd_sync(const struct lfs_config *c) {
 
 // --- Flash Strategy Operations Implementation ---
 
-static int _lfs_mount(flash_strategy_t *self, block_device_t *dev) {
+static int _lfs_mount(flash_strategy_t *self, block_device_t *dev,
+                      const char *mount_prefix) {
   lfs_strategy_impl_t *impl = (lfs_strategy_impl_t *)self;
   self->dev = dev;
 

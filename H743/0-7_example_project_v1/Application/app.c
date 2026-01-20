@@ -66,8 +66,12 @@ int app_init(void) {
 void app_run(void) {
 #if !CONFIG_RES_BURN_ENABLE
 #if !USE_Simulator
+#if THING_MODEL_ENABLE
   sys_devices_process();  // 本地设备处理
+#endif
+#if NET_MGR_ENABLE
   net_mgr_process();  // 网络服务处理
+#endif
 #endif
 #if LVGL_ENABLE
   lv_timer_handler(); // ui处理

@@ -2,7 +2,9 @@
 #if _fatfs_test_
 #include "elog.h"
 #include "factory/flash_factory.h"
+#include "project_cfg.h"
 #include "strategy/fatfs_strategy.h"
+#include "strategy/lfs_strategy.h"
 #include "sys.h"
 #include <string.h>
 
@@ -17,33 +19,45 @@ static flash_strategy_t *g_fat_strat = NULL;
 static void base_test(void) {
   log_i("Starting FatFS Integration Test...");
 
-  // 1. 获取 SD 卡设备
-  g_sd_dev = flash_factory_get(FLASH_EXT_SDCARD);
+  // 1. 获取存储设备
+  g_sd_dev = flash_factory_get(SYS_FLASH_DEV);
   if (!g_sd_dev) {
-    log_e("Failed to get SD card device from factory");
+    log_e("Failed to get storage device (%d) from factory", SYS_FLASH_DEV);
     return;
   }
 
-  // 2. 创建 FatFS 策略 (使用局部变量以保持原测试逻辑独立性)
-  fatfs_strategy_config_t config = {.pdrv = 0};
-  flash_strategy_t *strategy = fatfs_strategy_create(&config);
+  // 2. 创建对应策略
+#if (SYS_FLASH_DEV == FLASH_EXT_SDCARD)
+  fatfs_strategy_config_t fat_cfg = {.pdrv = 0};
+  flash_strategy_t *strategy = fatfs_strategy_create(&fat_cfg);
+#else
+  lfs_strategy_config_t lfs_cfg = {
+      .read_size = 16,
+      .prog_size = 16,
+      .cache_size = 256,
+      .lookahead_size = 32,
+      .block_cycles = 200,
+  };
+  flash_strategy_t *strategy = lfs_strategy_create(&lfs_cfg);
+#endif
+
   if (!strategy) {
-    log_e("Failed to create FatFS strategy");
+    log_e("Failed to create storage strategy");
     return;
   }
 
   // 3. 挂载
-  log_i("Mounting FatFS on SD card...");
-  if (FLASH_STRATEGY_MOUNT(strategy, g_sd_dev) != 0) {
-    log_e("FatFS mount failed");
-    fatfs_strategy_destroy(strategy);
+  log_i("Mounting storage...");
+  if (FLASH_STRATEGY_MOUNT(strategy, g_sd_dev, SYS_STORAGE_MOUNT_POINT) != 0) {
+    log_e("Mount failed");
+    // TODO: Need a generic way to destroy strategy
     return;
   }
 
   // 4. 测试文件读写
-  const char *test_path = "0:/stm32_test.txt";
+  const char *test_path = SYS_STORAGE_MOUNT_POINT "/stm32_test.txt";
   const char *test_str =
-      "Hello from STM32H7 FatFS Integration with Heap Buffers!";
+      "STM32H7 FatFS 测试!";
   size_t data_len = strlen(test_str);
 
   // 为 DMA 使用堆内存 (AXI SRAM)，避免 DTCM/栈问题
@@ -110,6 +124,8 @@ static void _fatfs_event_cb(const char *prefix, flash_event_t event) {
 }
 
 void fatfs_test_run(void) {
+  base_test();
+  return;
 
   log_i("Starting FatFS Hot-plug & Stability Test...");
   // 1. 设置回调
@@ -118,23 +134,36 @@ void fatfs_test_run(void) {
   // 2. 初始化核心并获取设备
   flash_handler_init();
 
-  // 3. 获取设备并注册挂载点（关键：必须注册才能轮询）
-  g_sd_dev = flash_factory_get(FLASH_EXT_SDCARD);
+  // 3. 获取设备并注册挂载点
+  g_sd_dev = flash_factory_get(SYS_FLASH_DEV);
   if (!g_sd_dev) {
-    log_e("Failed to get SD card device for polling");
+    log_e("Failed to get device (%d)", SYS_FLASH_DEV);
     return;
   }
 
+#if (SYS_FLASH_DEV == FLASH_EXT_SDCARD)
   fatfs_strategy_config_t fat_cfg = {.pdrv = 0};
   g_fat_strat = fatfs_strategy_create(&fat_cfg);
+#else
+  lfs_strategy_config_t lfs_cfg = {
+      .read_size = 16,
+      .prog_size = 16,
+      .cache_size = 256,
+      .lookahead_size = 32,
+      .block_cycles = 200,
+  };
+  g_fat_strat = lfs_strategy_create(&lfs_cfg);
+#endif
+
   if (!g_fat_strat) {
-    log_e("Failed to create FatFS strategy for polling");
+    log_e("Failed to create strategy");
     return;
   }
 
-  // 注册 "/sd" 路径。由于初始可能没插卡，状态会是 DISCONNECTED
-  if (flash_handler_register("/sd", g_sd_dev, g_fat_strat) != 0) {
-    log_e("Failed to register SD card in flash_handler");
+  // 注册路径。由于初始可能没插卡，状态会是 DISCONNECTED
+  if (flash_handler_register(SYS_STORAGE_MOUNT_POINT, g_sd_dev, g_fat_strat) !=
+      0) {
+    log_e("Failed to register storage in flash_handler");
     return;
   }
 

@@ -11,6 +11,7 @@
 #include "project_cfg.h"
 #include "rtc_factory.h"
 #include "rtc_hal/rtc_hal.h"
+#include "strategy/fatfs_strategy.h"
 #include "strategy/lfs_strategy.h"
 #include "thing_model/thing_model.h"
 #include <device_handle.h>
@@ -22,10 +23,10 @@
 #define FLASH_EXT_SPI 0
 #define FLASH_EXT_QSPI 1
 #define FLASH_EXT_NAND 2
-// 定义系统使用的flash设备(主要存储配置信息)
-#define SYS_FLASH_DEV FLASH_EXT_QSPI
-// 系统配置路径
-#define SYS_STORE_MOUNT_POINT "/sys"
+// 系统配置路径 (从 project_cfg.h 获取统一映射)
+#ifndef SYS_STORAGE_MOUNT_POINT
+#define SYS_STORAGE_MOUNT_POINT "/sys"
+#endif
 
 int sys_services_init(void) {
   log_i("Initializing system services...");
@@ -44,34 +45,36 @@ int sys_services_init(void) {
     log_e("Failed to get system storage device.");
     return -1;
   }
-  // 2.创建LFS策略和对应设备配置
+
+  // 3. 根据类型选择策略并在系统资源挂载点注册
+  flash_strategy_t *sys_strat = NULL;
+  block_dev_info_t dev_info;
+  BLOCK_DEV_GET_INFO(sys_dev, &dev_info);
+
+#if (SYS_FLASH_DEV == FLASH_EXT_SDCARD)
+  // SD卡使用 FatFS 策略
+  fatfs_strategy_config_t fat_cfg = {.pdrv = 0}; // 默认为盘符0
+  sys_strat = fatfs_strategy_create(&fat_cfg);
+#else
+  // 其他（SPI/QSPI）使用 LittleFS 策略
   lfs_strategy_config_t lfs_cfg = {
-#if (SYS_FLASH_DEV == FLASH_EXT_NAND)
-      .read_size = 2048,
-      .prog_size = 2048,
-      .cache_size = 2048,
-      .lookahead_size = 128, // Increase lookahead for larger device
-      .block_cycles = 500,
-#elif (SYS_FLASH_DEV == FLASH_EXT_QSPI)
       .read_size = 16,
       .prog_size = 16,
       .cache_size = 256,
       .lookahead_size = 32,
       .block_cycles = 200,
-#endif
   };
-  log_i("LFS Config: Read=%d, Prog=%d, Cache=%d, Lookahead=%d, Cycles=%d",
-        lfs_cfg.read_size, lfs_cfg.prog_size, lfs_cfg.cache_size,
-        lfs_cfg.lookahead_size, lfs_cfg.block_cycles);
-  flash_strategy_t *lfs_strat = lfs_strategy_create(&lfs_cfg);
-  if (!lfs_strat) {
-    log_e("LFS Strategy Create Failed");
+  sys_strat = lfs_strategy_create(&lfs_cfg);
+#endif
+
+  if (!sys_strat) {
+    log_e("Flash Strategy Create Failed");
     return -1;
   }
 
-  // 3. 注册系统资源挂载点
-  if (flash_handler_register(SYS_STORE_MOUNT_POINT, sys_dev, lfs_strat) != 0) {
-    log_e("LFS Handler Register Failed");
+  if (flash_handler_register(SYS_STORAGE_MOUNT_POINT, sys_dev, sys_strat) !=
+      0) {
+    log_e("Flash Handler Register Failed");
     return -1;
   }
 

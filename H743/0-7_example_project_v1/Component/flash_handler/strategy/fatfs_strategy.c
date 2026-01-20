@@ -154,19 +154,25 @@ DWORD get_fattime(void) {
 
 // --- Strategy Operations ---
 
-static int _fatfs_mount(flash_strategy_t *self, block_device_t *dev) {
+static int _fatfs_mount(flash_strategy_t *self, block_device_t *dev,
+                        const char *mount_prefix) {
   fatfs_strategy_impl_t *impl = (fatfs_strategy_impl_t *)self;
   self->dev = dev;
 
-  if (impl->pdrv >= FF_VOLUMES) {
-    log_e("Invalid pdrv: %d", impl->pdrv);
+  if (!mount_prefix) {
+    log_e("Mount prefix is NULL for FatFS");
     return -1;
   }
 
-  g_fatfs_devices[impl->pdrv] = dev;
+  // 如果传入的前缀不是以盘符形式（如 "0:"），且我们在 FF_VOLUMES
+  // 范围内，尝试转换
+  char path[16] = {0};
+  strncpy(path, mount_prefix, sizeof(path) - 1);
 
-  char path[4] = "0:";
-  path[0] = impl->pdrv + '0';
+  // 如果盘符不匹配，但 impl 记录了 pdrv，优先遵从 pdrv 以防多分区
+  // 但为了解耦，我们通常建议上层直接传入 "0:" 或 "1:"
+
+  g_fatfs_devices[impl->pdrv] = dev;
 
   FRESULT res = FR_NOT_READY;
   for (int retry = 0; retry < 3; retry++) {
@@ -209,8 +215,9 @@ static int _fatfs_mount(flash_strategy_t *self, block_device_t *dev) {
 static int _fatfs_unmount(flash_strategy_t *self) {
   fatfs_strategy_impl_t *impl = (fatfs_strategy_impl_t *)self;
   if (impl->mounted) {
-    char path[4] = "0:";
+    char path[4] = {0};
     path[0] = impl->pdrv + '0';
+    path[1] = ':';
     f_mount(NULL, path, 0);
     g_fatfs_devices[impl->pdrv] = NULL;
     impl->mounted = false;
@@ -250,6 +257,32 @@ static int _fatfs_write(flash_strategy_t *self, const char *path,
   fatfs_strategy_impl_t *impl = (fatfs_strategy_impl_t *)self;
   if (!impl->mounted)
     return -1;
+
+  // 自动创建父目录
+  char dir_path[256];
+  strncpy(dir_path, path, sizeof(dir_path) - 1);
+  dir_path[sizeof(dir_path) - 1] = '\0';
+
+  // 从后向前找最后一个 '/'，截断得到目录路径
+  char *last_slash = strrchr(dir_path, '/');
+  if (last_slash && last_slash != dir_path) {
+    *last_slash = '\0';
+    // 尝试逐级创建目录
+    char *p = dir_path;
+    // 跳过盘符部分 (如 "0:")
+    if (p[0] && p[1] == ':') {
+      p += 2;
+    }
+    while (*p) {
+      if (*p == '/') {
+        *p = '\0';
+        f_mkdir(dir_path); // 忽略错误，目录可能已存在
+        *p = '/';
+      }
+      p++;
+    }
+    f_mkdir(dir_path); // 创建最后一级目录
+  }
 
   FIL *file = impl->file;
   BYTE mode = FA_WRITE | FA_OPEN_ALWAYS;

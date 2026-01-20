@@ -146,8 +146,12 @@ int main(void)
 #endif
 
 #if TEST_ENABLE
+#if LVGL_ENABLE
+    lv_timer_handler();
+#else
     HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
     HAL_Delay(500);
+#endif
 #endif
     /* USER CODE END WHILE */
 

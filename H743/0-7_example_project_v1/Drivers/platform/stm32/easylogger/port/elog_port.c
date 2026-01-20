@@ -71,9 +71,7 @@ ElogErrCode elog_port_init(void) {
   }
 
   if (g_elog_queue) {
-    // 低波特率 (如 9600) 下，1000 字节约需 1s 发完。
-    // 这里设置每次等待 10ms，最多等待 100 次，总计 1s。
-    uart_queue_set_wait_config(g_elog_queue, 10, 100);
+    uart_queue_set_wait_config(g_elog_queue, 5, 20);
     uart_queue_set_auto_wait(g_elog_queue, 1);
   }
 

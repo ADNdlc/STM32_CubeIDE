@@ -115,18 +115,18 @@
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1962495330" name="dev_token.h" rcbsApplicability="disable" resourcePath="Component/mqtt_service/adapters/dev_token.h" toolsToInvoke=""/>
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.2073722398.1756314397" name="Contol_controller.h" rcbsApplicability="disable" resourcePath="Application/Apps/device_control/System/Contol_controller.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="old_ui/img/sys_bg|old_ui/img/sys_icon|lvgl_app/old_ui/app|old_ui/app/Contol|home/UI/assets/img/sys/icon_home.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
-						<entry excluding="mqtt_service/adapters/dev_token.c|old_esp_app|mqtt_service/adapters/dev_token.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="old_driver/dht11|old_driver/sdmmc_sdcard|old_driver/norflash|old_driver/NAND_MT29F4G08|old_device_driver/rgbLCD|platform/stm32/sys/delay.h|old_driver/esp_at|old_device_driver/lvgl|old_device_driver/sdram|old_device_driver/key|old_driver/touch_GT9147|platform/stm32/sys/delay.c|SYSTEM/usart|old_driver/led|BSP/device_driver/key/key.c|old_device_driver/test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="hal_init" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL/hal_init"/>
-						<entry excluding="lvgl-release-v8.3/examples|lvgl-release-v8.2/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LVGL"/>
-						<entry excluding="unit/main_test_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
 						<entry excluding="easylogger/plugins|easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib/EasyLogger"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib/FileSys"/>
+						<entry excluding="hal_init" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL"/>
+						<entry excluding="unit/main_test_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
+						<entry excluding="mqtt_service/adapters/dev_token.c|old_esp_app|mqtt_service/adapters/dev_token.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib/cjson"/>
+						<entry excluding="old_ui/img/sys_bg|old_ui/img/sys_icon|lvgl_app/old_ui/app|old_ui/app/Contol|home/UI/assets/img/sys/icon_home.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
+						<entry excluding="lvgl-release-v8.3/examples|lvgl-release-v8.2/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LVGL"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="HAL/hal_init"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

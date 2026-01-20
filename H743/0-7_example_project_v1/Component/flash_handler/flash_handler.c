@@ -1,8 +1,10 @@
 #include "flash_handler.h"
 #include "elog.h"
 #include "main.h"
+#include "project_cfg.h"
 #include "sys.h"
 #include <string.h>
+
 
 #define LOG_TAG "FlashHdlr"
 
@@ -45,11 +47,11 @@ int flash_handler_register(const char *prefix, block_device_t *dev,
   mount_table[mount_count].dev = dev;
   mount_table[mount_count].strategy = strategy;
   mount_table[mount_count].status = FLASH_STATUS_DISCONNECTED;
-  mount_table[mount_count].next_retry_tick = 0;
+  mount_table[mount_count].next_retry_tick = 0; // 首次轮询不延迟
 
   // 尝试初始挂载
   if (strategy && strategy->ops->mount) {
-    if (strategy->ops->mount(strategy, dev) == 0) {
+    if (strategy->ops->mount(strategy, dev, prefix) == 0) {
       mount_table[mount_count].status = FLASH_STATUS_READY;
       log_i("Mount point %s initialized as READY", prefix);
     } else {
@@ -74,6 +76,7 @@ static void _notify_event(const char *prefix, flash_event_t event) {
  * @brief 状态轮询
  */
 void flash_handler_poll(void) {
+#if FLASH_HANDLER_HOTPLUG_ENABLE
   uint32_t now = HAL_GetTick();
 
   for (int i = 0; i < mount_count; i++) {
@@ -115,7 +118,7 @@ void flash_handler_poll(void) {
 
       // 然后挂载文件系统
       if (mp->strategy && mp->strategy->ops->mount) {
-        if (mp->strategy->ops->mount(mp->strategy, mp->dev) == 0) {
+        if (mp->strategy->ops->mount(mp->strategy, mp->dev, mp->prefix) == 0) {
           mp->status = FLASH_STATUS_READY;
           _notify_event(mp->prefix, FLASH_EVENT_INSERTED);
         } else {
@@ -135,6 +138,7 @@ void flash_handler_poll(void) {
       _notify_event(mp->prefix, FLASH_EVENT_REMOVED);
     }
   }
+#endif
 }
 
 /**

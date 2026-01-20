@@ -4,9 +4,10 @@
  *  Created on: Jan 18, 2026
  *      Author: 12114
  */
-#include "project_cfg.h"
 #include "app_settings.h"
 #include "app_manager.h"
+#include "project_cfg.h"
+
 #if !USE_Simulator
 #include "flash_handler.h"
 #include "sys.h"
@@ -22,9 +23,10 @@
 #include "elog.h"
 
 #if !USE_Simulator
-#define APP_SETTINGS_CONFIG_PATH "0:/config/"
+#define APP_SETTINGS_CONFIG_PATH SYS_STORAGE_MOUNT_POINT SYS_CONFIG_DIR
 #else
-#define APP_SETTINGS_CONFIG_PATH "C:\\Users\\12114\\Desktop\\temp\\app_settings\\"
+#define APP_SETTINGS_CONFIG_PATH                                               \
+  "C:\\Users\\12114\\Desktop\\temp\\app_settings\\"
 #endif
 
 #define MAX_SETTINGS_BUFFER_SIZE 1024 // 文件系统操作缓冲
@@ -38,7 +40,7 @@ static char settings_buffer[MAX_SETTINGS_BUFFER_SIZE];
  * @return int 0成功，-1失败
  */
 int app_settings_load(const char *app_name, const char *config_file_name) {
-  app_def_t *app_def = app_manager_find_by_name(app_name);
+  app_def_t *app_def = (app_def_t *)app_manager_find_by_name(app_name);
   if (!app_def) {
     log_e("app not found when load settings");
     return -1;
@@ -255,7 +257,7 @@ int app_settings_save(const char *app_name, const char *config_file_name) {
 
 #if !USE_Simulator
   // 创建路径
-  char path[256] = {0};
+  static char path[256] = {0};
   snprintf(path, sizeof(path), APP_SETTINGS_CONFIG_PATH "%s", config_file_name);
 
   // 写入文件
