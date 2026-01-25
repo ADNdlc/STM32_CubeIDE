@@ -76,6 +76,13 @@ typedef enum {
   TOUCH_MAX_DEVICES
 } touch_device_id_t;
 
+// 光照传感器设备逻辑标识枚举
+typedef enum {
+  LS_BH1750 = 0,
+  //...
+  LS_MAX_DEVICES
+} light_sensor_device_id_t;
+
 // RTC 设备逻辑标识枚举
 typedef enum {
   RTC_DEVICE_0 = 0,
@@ -170,6 +177,12 @@ typedef struct {
   uint8_t i2c_addr_mode;        // I2C 地址模式 (0x14 或 0x5D)
 } touch_mapping_t;
 
+// 光照传感器设备映射结构体
+typedef struct {
+  i2c_soft_device_id_t i2c_id; // 使用的 I2C 设备 ID
+  uint8_t i2c_addr;            // I2C 设备地址
+} bh1750_mapping_t;
+
 // RTC 设备映射结构体
 typedef struct {
   RTC_HandleTypeDef *hrtc;
@@ -205,8 +218,10 @@ extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 extern const lcd_mapping_t lcd_mappings[LCD_MAX_DEVICES];
 extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 extern const i2c_soft_mapping_t i2c_soft_mappings[I2C_SOFT_MAX_DEVICES];
-extern const one_wire_soft_mapping_t one_wire_soft_mappings[ONE_WIRE_SOFT_MAX_DEVICES];
+extern const one_wire_soft_mapping_t
+    one_wire_soft_mappings[ONE_WIRE_SOFT_MAX_DEVICES];
 extern const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES];
+extern const bh1750_mapping_t bh1750_mappings[LS_MAX_DEVICES];
 extern const rtc_mapping_t rtc_mappings[RTC_MAX_DEVICES];
 extern const spi_mapping_t spi_mappings[SPI_MAX_DEVICES];
 extern const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES];

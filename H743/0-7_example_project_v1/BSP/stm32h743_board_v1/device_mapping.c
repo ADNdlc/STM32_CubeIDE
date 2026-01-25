@@ -81,6 +81,15 @@ const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES] = {
     },
 };
 
+// BH1750 光照传感器映射表定义
+const bh1750_mapping_t bh1750_mappings[LS_MAX_DEVICES] = {
+    [LS_BH1750] =
+        {
+            .i2c_id = I2C_SOFT_TOUCH, // 假设挂在触摸屏同一个软件I2C上
+            .i2c_addr = 0x23,         // ADDR 引脚接 GND 时的地址
+        },
+};
+
 // RTC 设备映射表定义
 const rtc_mapping_t rtc_mappings[RTC_MAX_DEVICES] = {[RTC_DEVICE_0] = {&hrtc}};
 
