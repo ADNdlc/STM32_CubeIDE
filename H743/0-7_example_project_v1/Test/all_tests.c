@@ -22,7 +22,7 @@
 #include "rtc_test.h"
 #include "sdcard_test.h"
 #include "sdram_test.h"
-#include "sys_config_test.h" // 添加sys_config测试头文件
+#include "sys_config_test.h"
 #include "sys_test.h"
 #include "touch_test.h"
 #include "uart_hal_test.h"

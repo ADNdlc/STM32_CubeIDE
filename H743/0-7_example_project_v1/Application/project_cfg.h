@@ -21,9 +21,9 @@
 #include "device_mapping.h"
 #endif
 
-#define TEST_ENABLE 0
+#define TEST_ENABLE 1
 
-#define LVGL_ENABLE 1
+#define LVGL_ENABLE 0
 #define LVGL_DISP_INIT 1
 #define LVGL_INDEV_INIT 1
 #define LVGL_FS_INIT 0
