@@ -25,8 +25,9 @@ typedef struct {
   int (*erase_block)(w25q_adapter_t *self, uint32_t addr);  // 擦除块
   int (*erase_chip)(w25q_adapter_t *self);                  // 擦除芯片
   int (*wait_busy)(w25q_adapter_t *self, uint32_t timeout); // 等待忙(写入/擦除)
-  int (*enter_4byte_addr_mode)(w25q_adapter_t *self);       // 进入4字节地址模式
-  int (*exit_4byte_addr_mode)(w25q_adapter_t *self);        // 退出4字节地址模式
+  int (*is_busy)(w25q_adapter_t *self);               // 检测是否忙(非阻塞)
+  int (*enter_4byte_addr_mode)(w25q_adapter_t *self); // 进入4字节地址模式
+  int (*exit_4byte_addr_mode)(w25q_adapter_t *self);  // 退出4字节地址模式
 } w25q_adapter_ops_t;
 
 struct w25q_adapter_t {

@@ -112,6 +112,23 @@ static int sdcard_sync(block_device_t *const self) {
 }
 
 /**
+ * @brief 检测SD卡是否忙
+ * @return 1=忙, 0=空闲
+ */
+static int sdcard_is_busy(block_device_t *const self) {
+  sdcard_t *dev = (sdcard_t *)self;
+  if (!dev || !dev->adapter) {
+    return 0;
+  }
+
+  if (dev->adapter->ops->is_ready) {
+    return dev->adapter->ops->is_ready(dev->adapter);
+  }
+
+  return 0;
+}
+
+/**
  * @brief 检测SD卡是否物理存在(用于热插拔)
  * @return 1=存在, 0=不存在, -1=不支持/需重新初始化
  */
@@ -126,11 +143,6 @@ static int sdcard_is_present(block_device_t *const self) {
     return dev->adapter->ops->detect(dev->adapter);
   }
 
-  // 回退: 使用is_ready判断
-  if (dev->adapter->ops->is_ready) {
-    return (dev->adapter->ops->is_ready(dev->adapter) == 0) ? 1 : 0;
-  }
-
   return -1;
 }
 
@@ -143,6 +155,7 @@ static const block_device_ops_t sdcard_ops = {
     .get_info = sdcard_get_info,
     .sync = sdcard_sync,
     .is_present = sdcard_is_present,
+    .is_busy = sdcard_is_busy,
 };
 
 block_device_t *sdcard_create(sdcard_adapter_t *adapter) {

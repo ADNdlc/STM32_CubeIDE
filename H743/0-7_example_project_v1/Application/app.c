@@ -11,9 +11,10 @@
 #include "sys_config.h"
 
 #if !USE_Simulator
+#include "device_handle.h"
 #include "hal_init.h"
 #include "sys_init.h"
-#include "device_handle.h"
+
 
 #include "home.h"
 #include "home/System/net_mgr.h"
@@ -22,21 +23,20 @@
 #endif
 
 #if LVGL_ENABLE
-#include "lvgl.h"
 #include "Colorwheel/colorwheel.h"
 #include "device_control/device_control.h"
+#include "lvgl.h"
+
 #if USE_Simulator
 #include "virtual_device.h"
 #endif
 #endif
 
-
-
 int app_init(void) {
-#if USE_Simulator   // 模拟器环境 
+#if USE_Simulator // 模拟器环境
   sys_config_init();
-  sys_state_init(); 
-  devices_init();   // 注册模拟设备
+  sys_state_init();
+  devices_init(); // 注册模拟设备
 #endif
 #if CONFIG_RES_BURN_ENABLE
   sys_delay_ms(1000);
@@ -49,7 +49,7 @@ int app_init(void) {
 #endif
 
 #if LVGL_ENABLE && !CONFIG_RES_BURN_ENABLE
-  home_init();        // 初始化ui核心功能
+  home_init(); // 初始化ui核心功能
 
   /* 注册各ui模块功能 */
   colorwheel_app_register(0);     // 注册 ColorWheel
@@ -67,10 +67,13 @@ void app_run(void) {
 #if !CONFIG_RES_BURN_ENABLE
 #if !USE_Simulator
 #if THING_MODEL_ENABLE
-  sys_devices_process();  // 本地设备处理
+  sys_devices_process(); // 本地设备处理
 #endif
 #if NET_MGR_ENABLE
-  net_mgr_process();  // 网络服务处理
+  net_mgr_process(); // 网络服务处理
+#endif
+#if SYS_FLASH_HANDLER_ENABLE
+  flash_handler_poll(); // Flash状态轮询(处理热插拔)
 #endif
 #endif
 #if LVGL_ENABLE

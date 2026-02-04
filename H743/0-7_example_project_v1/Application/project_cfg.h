@@ -33,8 +33,8 @@
 #define SYS_CONFIG_ENABLE 1            // 配置管理
 #define NET_MGR_ENABLE 1               // 网络管理
 #define SYS_STATE_ENABLE 1             // 系统状态
-#define THING_MODEL_ENABLE 1          // 物联网模型
-#define FLASH_HANDLER_HOTPLUG_ENABLE 0 // 禁用热拔插轮询以隔离问题
+#define THING_MODEL_ENABLE 1           // 物联网模型
+#define FLASH_HANDLER_HOTPLUG_ENABLE 1 // 启用热拔插轮询
 #endif
 
 // 设备 ID 定义
@@ -52,6 +52,5 @@
 
 #define SYS_CONFIG_DIR "/config/"         // 配置文件夹路径
 #define APP_SETTINGS_DIR "/app_settings/" // 应用设置导出文件夹
-
 
 #endif /* PROJECT_CFG_H_ */

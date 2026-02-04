@@ -204,6 +204,14 @@ static int w25q_sync(block_device_t *const self) {
   return dev->adapter->ops->wait_busy(dev->adapter, 1000);
 }
 
+static int w25q_is_busy(block_device_t *const self) {
+  w25qxx_t *dev = (w25qxx_t *)self;
+  if (dev->adapter && dev->adapter->ops->is_busy) {
+    return dev->adapter->ops->is_busy(dev->adapter);
+  }
+  return 0;
+}
+
 static const block_device_ops_t w25q_ops = {
     .init = w25q_init,
     .deinit = w25q_deinit,
@@ -212,6 +220,7 @@ static const block_device_ops_t w25q_ops = {
     .erase = w25q_erase,
     .get_info = w25q_get_info,
     .sync = w25q_sync,
+    .is_busy = w25q_is_busy,
 };
 
 /**

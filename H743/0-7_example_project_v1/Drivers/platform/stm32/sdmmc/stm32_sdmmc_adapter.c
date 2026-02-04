@@ -165,12 +165,14 @@ static int stm32_sdmmc_is_ready(sdcard_adapter_t *self) {
     return 0; // Succeed to allow flash_handler to try mounting (init)
   }
 
+  // Check if HAL is busy with an operation
   if (state != HAL_SD_STATE_READY) {
     return 1; // Busy or Transferring
   }
 
-  // Check card state electronically
-  return (HAL_SD_GetCardState(impl->hsd) == HAL_SD_CARD_TRANSFER) ? 0 : 1;
+  // Check card state via CMD13 (Electronic check)
+  HAL_SD_CardStateTypeDef card_state = HAL_SD_GetCardState(impl->hsd);
+  return (card_state == HAL_SD_CARD_TRANSFER) ? 0 : 1;
 }
 
 /**
@@ -182,17 +184,21 @@ static int stm32_sdmmc_detect(sdcard_adapter_t *self) {
 
   HAL_SD_StateTypeDef state = HAL_SD_GetState(impl->hsd);
 
-  // 已初始化成功，尝试获取卡状态
-  if (state == HAL_SD_STATE_READY) {
-    HAL_SD_CardStateTypeDef card_state = HAL_SD_GetCardState(impl->hsd);
-    if (card_state == HAL_SD_CARD_ERROR) {
-      return 0; // 卡不存在或通信错误
-    }
-    return 1; // 卡存在
+  // 如果处于RESET状态，说明还没初始化，需要尝试一次init来确定
+  if (state == HAL_SD_STATE_RESET) {
+    return -1;
   }
 
-  // 未初始化状态，返回-1表示需要尝试初始化来确定
-  return -1;
+  // 尝试获取卡状态 (CMD13)
+  // 如果卡不在，HAL通常会返回超时或错误
+  HAL_SD_CardStateTypeDef card_state = HAL_SD_GetCardState(impl->hsd);
+
+  if (card_state == HAL_SD_CARD_DISCONNECTED ||
+      card_state == HAL_SD_CARD_ERROR) {
+    return 0; // 卡可能被拔出
+  }
+
+  return 1; // 卡存在
 }
 
 /**
@@ -201,15 +207,28 @@ static int stm32_sdmmc_detect(sdcard_adapter_t *self) {
 static int stm32_sdmmc_reset(sdcard_adapter_t *self) {
   stm32_sdmmc_adapter_impl_t *impl = (stm32_sdmmc_adapter_impl_t *)self;
 
-  // 1. 强制反初始化HAL
+  log_i("SDMMC performing hardware reset...");
+
+  // 1. 禁用 NVIC 中断，防止重置过程中产生悬挂中断
+  HAL_NVIC_DisableIRQ(SDMMC1_IRQn);
+
+  // 2. 停止 DMA (如果有正在进行的传输)
+  if (impl->hsd->hdmarx) {
+    HAL_DMA_Abort(impl->hsd->hdmarx);
+  }
+  if (impl->hsd->hdmatx) {
+    HAL_DMA_Abort(impl->hsd->hdmatx);
+  }
+
+  // 3. 强制反初始化HAL，这通常会禁用时钟并复位寄存器
   HAL_SD_DeInit(impl->hsd);
 
-  // 2. 复位SDMMC外设时钟
+  // 4. 复位SDMMC外设时钟
   __HAL_RCC_SDMMC1_FORCE_RESET();
-  HAL_Delay(2);
+  HAL_Delay(5);
   __HAL_RCC_SDMMC1_RELEASE_RESET();
 
-  // 3. 延时等待卡稳定
+  // 5. 延时等待卡稳定
   HAL_Delay(50);
 
   log_i("SDMMC hardware reset completed");

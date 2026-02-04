@@ -16,8 +16,6 @@ typedef struct {
   uint8_t pdrv;
   bool mounted;
   FATFS fs;
-  FIL *file; // Shared file object on heap to avoid stack issues
-  uint8_t dma_buf[512] __attribute__((aligned(32))); // DMA safe bounce buffer
 } fatfs_strategy_impl_t;
 
 static block_device_t *g_fatfs_devices[FF_VOLUMES] = {0};
@@ -154,6 +152,31 @@ DWORD get_fattime(void) {
 
 // --- Strategy Operations ---
 
+static BYTE _map_flags(int flags) {
+  BYTE mode = 0;
+  if ((flags & FLASH_O_RDWR) == FLASH_O_RDWR)
+    mode = FA_READ | FA_WRITE;
+  else if (flags & FLASH_O_WRONLY)
+    mode = FA_WRITE;
+  else
+    mode = FA_READ;
+
+  if (flags & FLASH_O_CREAT) {
+    if (flags & FLASH_O_TRUNC)
+      mode |= FA_CREATE_ALWAYS;
+    else
+      mode |= FA_OPEN_ALWAYS;
+  }
+
+  if (flags & FLASH_O_APPEND) {
+    mode |= FA_OPEN_APPEND;
+  }
+
+  return mode;
+}
+
+// --- Strategy Operations ---
+
 static int _fatfs_mount(flash_strategy_t *self, block_device_t *dev,
                         const char *mount_prefix) {
   fatfs_strategy_impl_t *impl = (fatfs_strategy_impl_t *)self;
@@ -164,19 +187,11 @@ static int _fatfs_mount(flash_strategy_t *self, block_device_t *dev,
     return -1;
   }
 
-  // 如果传入的前缀不是以盘符形式（如 "0:"），且我们在 FF_VOLUMES
-  // 范围内，尝试转换
-  char path[16] = {0};
-  strncpy(path, mount_prefix, sizeof(path) - 1);
-
-  // 如果盘符不匹配，但 impl 记录了 pdrv，优先遵从 pdrv 以防多分区
-  // 但为了解耦，我们通常建议上层直接传入 "0:" 或 "1:"
-
   g_fatfs_devices[impl->pdrv] = dev;
 
   FRESULT res = FR_NOT_READY;
   for (int retry = 0; retry < 3; retry++) {
-    res = f_mount(&impl->fs, path, 1);
+    res = f_mount(&impl->fs, mount_prefix, 1);
     if (res == FR_OK)
       break;
     log_w("FatFS mount attempt %d failed (%d), retrying in 200ms...", retry + 1,
@@ -193,14 +208,14 @@ static int _fatfs_mount(flash_strategy_t *self, block_device_t *dev,
       return -1;
     }
     MKFS_PARM opt = {FM_ANY, 0, 0, 0, 0};
-    res = f_mkfs(path, &opt, work, FF_MAX_SS);
+    res = f_mkfs(mount_prefix, &opt, work, FF_MAX_SS);
     sys_free(FATFS_STRATEGY_MEMSOURCE, work);
 
     if (res != FR_OK) {
       log_e("FatFS format failed (%d)", res);
       return -1;
     }
-    res = f_mount(&impl->fs, path, 1);
+    res = f_mount(&impl->fs, mount_prefix, 1);
     if (res != FR_OK) {
       log_e("FatFS mount after format failed (%d)", res);
       return -1;
@@ -225,93 +240,192 @@ static int _fatfs_unmount(flash_strategy_t *self) {
   return 0;
 }
 
-static int _fatfs_read(flash_strategy_t *self, const char *path,
-                       uint32_t offset, uint8_t *buf, size_t size) {
+// File Operations
+
+static void *_fatfs_open(flash_strategy_t *self, const char *path, int flags) {
   fatfs_strategy_impl_t *impl = (fatfs_strategy_impl_t *)self;
   if (!impl->mounted)
-    return -1;
+    return NULL;
 
-  FIL *file = impl->file;
-  FRESULT res = f_open(file, path, FA_READ);
+  FIL *file = (FIL *)sys_malloc(FATFS_STRATEGY_MEMSOURCE, sizeof(FIL));
+  if (!file)
+    return NULL;
+
+  FRESULT res = f_open(file, path, _map_flags(flags));
   if (res != FR_OK) {
-    log_e("f_open for read failed (%d)", res);
+    sys_free(FATFS_STRATEGY_MEMSOURCE, file);
+    return NULL;
+  }
+  return (void *)file;
+}
+
+static int _fatfs_close(flash_strategy_t *self, void *file) {
+  if (!file)
     return -1;
-  }
-
-  if (offset > 0) {
-    f_lseek(file, offset);
-  }
-
-  UINT br;
-  res = f_read(file, buf, size, &br);
-  if (res != FR_OK) {
-    log_e("f_read failed (%d)", res);
-  }
-  f_close(file);
-
+  FRESULT res = f_close((FIL *)file);
+  sys_free(FATFS_STRATEGY_MEMSOURCE, file);
   return (res == FR_OK) ? 0 : -1;
 }
 
-static int _fatfs_write(flash_strategy_t *self, const char *path,
-                        uint32_t offset, const uint8_t *buf, size_t size) {
-  fatfs_strategy_impl_t *impl = (fatfs_strategy_impl_t *)self;
-  if (!impl->mounted)
-    return -1;
+static int _fatfs_read(flash_strategy_t *self, void *file, void *buf,
+                       size_t size) {
+  UINT br;
+  FRESULT res = f_read((FIL *)file, buf, size, &br);
+  return (res == FR_OK) ? (int)br : -1;
+}
 
-  // 自动创建父目录
-  char dir_path[256];
-  strncpy(dir_path, path, sizeof(dir_path) - 1);
-  dir_path[sizeof(dir_path) - 1] = '\0';
-
-  // 从后向前找最后一个 '/'，截断得到目录路径
-  char *last_slash = strrchr(dir_path, '/');
-  if (last_slash && last_slash != dir_path) {
-    *last_slash = '\0';
-    // 尝试逐级创建目录
-    char *p = dir_path;
-    // 跳过盘符部分 (如 "0:")
-    if (p[0] && p[1] == ':') {
-      p += 2;
-    }
-    while (*p) {
-      if (*p == '/') {
-        *p = '\0';
-        f_mkdir(dir_path); // 忽略错误，目录可能已存在
-        *p = '/';
-      }
-      p++;
-    }
-    f_mkdir(dir_path); // 创建最后一级目录
-  }
-
-  FIL *file = impl->file;
-  BYTE mode = FA_WRITE | FA_OPEN_ALWAYS;
-  FRESULT res = f_open(file, path, mode);
-  if (res != FR_OK) {
-    log_e("f_open for write failed (%d): %s", res, path);
-    return -1;
-  }
-
-  f_lseek(file, offset);
-
+static int _fatfs_write(flash_strategy_t *self, void *file, const void *buf,
+                        size_t size) {
   UINT bw;
-  res = f_write(file, buf, size, &bw);
-  if (res != FR_OK) {
-    log_e("f_write failed (%d)", res);
-  } else if (bw != size) {
-    log_w("f_write partial success: requested %d, wrote %d", size, bw);
-  }
-  f_sync(file);
-  f_close(file);
+  FRESULT res = f_write((FIL *)file, buf, size, &bw);
+  return (res == FR_OK) ? (int)bw : -1;
+}
 
-  return (res == FR_OK && bw == size) ? 0 : -1;
+static int _fatfs_seek(flash_strategy_t *self, void *file, int32_t offset,
+                       int whence) {
+  FIL *fp = (FIL *)file;
+  FSIZE_t target = 0;
+  switch (whence) {
+  case FLASH_SEEK_SET:
+    target = offset;
+    break;
+  case FLASH_SEEK_CUR:
+    target = f_tell(fp) + offset;
+    break;
+  case FLASH_SEEK_END:
+    target = f_size(fp) + offset;
+    break;
+  default:
+    return -1;
+  }
+  FRESULT res = f_lseek(fp, target);
+  return (res == FR_OK) ? 0 : -1;
+}
+
+static int32_t _fatfs_tell(flash_strategy_t *self, void *file) {
+  return (int32_t)f_tell((FIL *)file);
+}
+
+static int _fatfs_sync(flash_strategy_t *self, void *file) {
+  FRESULT res = f_sync((FIL *)file);
+  return (res == FR_OK) ? 0 : -1;
+}
+
+static int32_t _fatfs_size(flash_strategy_t *self, void *file) {
+  return (int32_t)f_size((FIL *)file);
+}
+
+// Filesystem Operations
+
+static int _fatfs_mkdir(flash_strategy_t *self, const char *path) {
+  FRESULT res = f_mkdir(path);
+  return (res == FR_OK || res == FR_EXIST) ? 0 : -1;
+}
+
+static int _fatfs_unlink(flash_strategy_t *self, const char *path) {
+  FRESULT res = f_unlink(path);
+  return (res == FR_OK) ? 0 : -1;
+}
+
+static int _fatfs_rename(flash_strategy_t *self, const char *old_path,
+                         const char *new_path) {
+  FRESULT res = f_rename(old_path, new_path);
+  return (res == FR_OK) ? 0 : -1;
+}
+
+static int _fatfs_stat(flash_strategy_t *self, const char *path,
+                       flash_stat_t *st) {
+  FILINFO fno;
+  FRESULT res = f_stat(path, &fno);
+  if (res != FR_OK)
+    return -1;
+
+  st->size = fno.fsize;
+  st->type = (fno.fattrib & AM_DIR) ? FLASH_TYPE_DIR : FLASH_TYPE_REG;
+  return 0;
+}
+
+// Directory Operations
+
+static void *_fatfs_opendir(flash_strategy_t *self, const char *path) {
+  DIR *dir = (DIR *)sys_malloc(FATFS_STRATEGY_MEMSOURCE, sizeof(DIR));
+  if (!dir)
+    return NULL;
+  FRESULT res = f_opendir(dir, path);
+  if (res != FR_OK) {
+    sys_free(FATFS_STRATEGY_MEMSOURCE, dir);
+    return NULL;
+  }
+  return (void *)dir;
+}
+
+static int _fatfs_readdir(flash_strategy_t *self, void *dir,
+                          flash_dirent_t *ent) {
+  FILINFO fno;
+  FRESULT res = f_readdir((DIR *)dir, &fno);
+  if (res != FR_OK || fno.fname[0] == 0)
+    return -1;
+
+  strncpy(ent->name, fno.fname, sizeof(ent->name) - 1);
+  ent->type = (fno.fattrib & AM_DIR) ? FLASH_TYPE_DIR : FLASH_TYPE_REG;
+  ent->size = fno.fsize;
+  return 0;
+}
+
+static int _fatfs_closedir(flash_strategy_t *self, void *dir) {
+  if (!dir)
+    return -1;
+  FRESULT res = f_closedir((DIR *)dir);
+  sys_free(FATFS_STRATEGY_MEMSOURCE, dir);
+  return (res == FR_OK) ? 0 : -1;
+}
+
+// Compatibility / Oneshot
+
+static int _fatfs_read_oneshot(flash_strategy_t *self, const char *path,
+                               uint32_t offset, uint8_t *buf, size_t size) {
+  void *file = _fatfs_open(self, path, FLASH_O_RDONLY);
+  if (!file)
+    return -1;
+  _fatfs_seek(self, file, offset, FLASH_SEEK_SET);
+  int br = _fatfs_read(self, file, buf, size);
+  _fatfs_close(self, file);
+  return (br == (int)size) ? 0 : -1;
+}
+
+static int _fatfs_write_oneshot(flash_strategy_t *self, const char *path,
+                                uint32_t offset, const uint8_t *buf,
+                                size_t size) {
+  void *file = _fatfs_open(self, path, FLASH_O_WRONLY | FLASH_O_CREAT);
+  if (!file)
+    return -1;
+  _fatfs_seek(self, file, offset, FLASH_SEEK_SET);
+  int bw = _fatfs_write(self, file, buf, size);
+  _fatfs_sync(self, file);
+  _fatfs_close(self, file);
+  return (bw == (int)size) ? 0 : -1;
 }
 
 static const flash_strategy_ops_t fatfs_ops = {
     .mount = _fatfs_mount,
     .unmount = _fatfs_unmount,
+    .open = _fatfs_open,
+    .close = _fatfs_close,
     .read = _fatfs_read,
     .write = _fatfs_write,
+    .seek = _fatfs_seek,
+    .tell = _fatfs_tell,
+    .sync = _fatfs_sync,
+    .size = _fatfs_size,
+    .mkdir = _fatfs_mkdir,
+    .unlink = _fatfs_unlink,
+    .rename = _fatfs_rename,
+    .stat = _fatfs_stat,
+    .opendir = _fatfs_opendir,
+    .readdir = _fatfs_readdir,
+    .closedir = _fatfs_closedir,
+    .read_oneshot = _fatfs_read_oneshot,
+    .write_oneshot = _fatfs_write_oneshot,
 };
 
 flash_strategy_t *fatfs_strategy_create(const fatfs_strategy_config_t *config) {
@@ -323,8 +437,6 @@ flash_strategy_t *fatfs_strategy_create(const fatfs_strategy_config_t *config) {
     if (config) {
       impl->pdrv = config->pdrv;
     }
-    // Pre-allocate FIL on heap
-    impl->file = (FIL *)sys_malloc(FATFS_STRATEGY_MEMSOURCE, sizeof(FIL));
     return &impl->parent;
   }
   return NULL;
@@ -332,11 +444,7 @@ flash_strategy_t *fatfs_strategy_create(const fatfs_strategy_config_t *config) {
 
 void fatfs_strategy_destroy(flash_strategy_t *strategy) {
   if (strategy) {
-    fatfs_strategy_impl_t *impl = (fatfs_strategy_impl_t *)strategy;
     _fatfs_unmount(strategy);
-    if (impl->file) {
-      sys_free(FATFS_STRATEGY_MEMSOURCE, impl->file);
-    }
     sys_free(FATFS_STRATEGY_MEMSOURCE, strategy);
   }
 }

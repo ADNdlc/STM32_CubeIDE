@@ -17,7 +17,6 @@
 #include <device_handle.h>
 #include <stddef.h>
 
-
 #define LOG_TAG "SYS_INIT"
 // 以下值根据device_mapping定义
 #define FLASH_EXT_SPI 0
@@ -55,6 +54,7 @@ int sys_services_init(void) {
   // SD卡使用 FatFS 策略
   fatfs_strategy_config_t fat_cfg = {.pdrv = 0}; // 默认为盘符0
   sys_strat = fatfs_strategy_create(&fat_cfg);
+  flash_device_type_t dev_type = FLASH_TYPE_POLLING;
 #else
   // 其他（SPI/QSPI）使用 LittleFS 策略
   lfs_strategy_config_t lfs_cfg = {
@@ -65,6 +65,7 @@ int sys_services_init(void) {
       .block_cycles = 200,
   };
   sys_strat = lfs_strategy_create(&lfs_cfg);
+  flash_device_type_t dev_type = FLASH_TYPE_STATIC;
 #endif
 
   if (!sys_strat) {
@@ -72,8 +73,8 @@ int sys_services_init(void) {
     return -1;
   }
 
-  if (flash_handler_register(SYS_STORAGE_MOUNT_POINT, sys_dev, sys_strat) !=
-      0) {
+  if (flash_handler_register(SYS_STORAGE_MOUNT_POINT, sys_dev, sys_strat,
+                             dev_type) != 0) {
     log_e("Flash Handler Register Failed");
     return -1;
   }
