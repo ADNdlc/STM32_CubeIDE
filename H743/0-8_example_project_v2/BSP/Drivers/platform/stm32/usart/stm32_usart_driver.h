@@ -12,7 +12,7 @@
 #include "usart_driver.h"
 
 typedef struct {
-  usart_driver_t base;
+  usart_driver_t base;	// 继承后扩展到平台实现
   UART_HandleTypeDef *huart;
 
   // 回调函数和上下文

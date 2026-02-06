@@ -45,7 +45,7 @@ typedef struct
   // 注册回调函数
   int (*set_callback)(usart_driver_t *self, // 驱动实例
                       usart_callback_t cb,  // 回调函数
-                      void *cb_context);    // 用户上下文(对象指针)
+                      void *cb_context);    // 上下文(对象指针)
 } usart_driver_ops_t;
 
 // USART 驱动基类
