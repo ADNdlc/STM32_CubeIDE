@@ -8,7 +8,7 @@
 #include "stm32_usart_driver.h"
 #include <stdlib.h>
 
-#define MAX_USART_INSTANCES 8
+#define MAX_USART_INSTANCES 4
 static stm32_usart_driver_t *g_usart_instances[MAX_USART_INSTANCES] = {0};
 static int stm32_usart_set_callback(usart_driver_t *base, usart_callback_t cb,
                                     void *ctx);
