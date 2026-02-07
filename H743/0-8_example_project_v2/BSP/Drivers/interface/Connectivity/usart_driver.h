@@ -15,26 +15,22 @@
 typedef struct usart_driver_t usart_driver_t;
 
 // 事件类型定义
-typedef enum
-{
+typedef enum{
   USART_EVENT_RX_COMPLETE, // 接收到数据
   USART_EVENT_TX_COMPLETE, // 发送完成
   USART_EVENT_ERROR,       // 发生错误
   USART_EVENT_RX_EVENT,
-  //USART_EVENT_2,
   //...
 } usart_event_t;
 
 // 回调函数原型
-// context: 用户上下文
+// context: 上下文
 // event: 事件类型
 // args: 事件参数(如接收到的数据长度等)
-typedef void (*usart_callback_t)(void *context, usart_event_t event,
-                                 void *args);
+typedef void (*usart_callback_t)(void *context, usart_event_t event, void *args);
 
 // USART 驱动操作接口 (虚函数表)
-typedef struct
-{
+typedef struct{
   int (*transmit)(usart_driver_t *self, const uint8_t *data, size_t size,
                   uint32_t timeout);
   int (*receive)(usart_driver_t *self, uint8_t *buffer, size_t size,
