@@ -1,6 +1,7 @@
 #ifndef HAL_USART_HAL_USART_HAL_H_
 #define HAL_USART_HAL_USART_HAL_H_
 
+#include "MemPool.h"
 #include "usart_driver.h"
 #include <stddef.h>
 

@@ -1,12 +1,7 @@
 #ifndef FACTORY_FACTORY_CONFIG_H_
 #define FACTORY_FACTORY_CONFIG_H_
 
-/*
- * 平台选择宏定义
- * 用于决定各工厂返回哪个平台的驱动实现
- */
-#define PLATFORM_STM32 1
-// #define PLATFORM_XXX   2
+#include "Project_cfg.h"
 
 // 默认使用STM32平台
 #ifndef TARGET_PLATFORM
@@ -19,7 +14,7 @@
 #define PWM_DRIVER_PLATFORM PLATFORM_STM32
 #define USART_DRIVER_PLATFORM PLATFORM_STM32
 #else
-#error "未定义有效的目标平台，请检查TARGET_PLATFORM配置"
+#error "factory_config: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
 #endif
 
 #endif /* FACTORY_FACTORY_CONFIG_H_ */

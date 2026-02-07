@@ -10,7 +10,7 @@
 #include "factory_config.h"
 
 #if (USART_DRIVER_PLATFORM == PLATFORM_STM32)
-#include "stm32_usart_driver.h"
+#include "usart/stm32_usart_driver.h" // 对应平台接口实现
 #endif
 
 static usart_driver_t *usart_drivers[USART_MAX_DEVICES] = {NULL};
@@ -20,15 +20,14 @@ usart_driver_t *usart_driver_get(usart_device_id_t id) {
     return NULL;
   }
 
-  if (usart_drivers[id] == NULL) {
-    const usart_mapping_t *mapping = &usart_mappings[id];
-
+  if (usart_drivers[id] == NULL) {  // 检查是否已初始化
+    const usart_mapping_t *mapping = &usart_mappings[id]; //根据ID获取设备配置
     // 检查物理资源是否定义
     if (mapping->resource == NULL) {
       return NULL;
     }
 
-// 根据平台配置创建相应的USART驱动实例
+/* 根据平台配置创建相应的USART驱动实例 */
 #if (USART_DRIVER_PLATFORM == PLATFORM_STM32)
     // 在STM32平台下，resource被视为UART_HandleTypeDef指针
     usart_drivers[id] = (usart_driver_t *)stm32_usart_driver_create(

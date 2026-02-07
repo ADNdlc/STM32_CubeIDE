@@ -49,9 +49,16 @@
 									<listOptionValue builtIn="false" value="../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="../A_Project_cfg"/>
+									<listOptionValue builtIn="false" value="../BSP/Board"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System/Sys"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System/MemPool"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Connectivity"/>
+									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32"/>
+									<listOptionValue builtIn="false" value="../BSP/HAL"/>
+									<listOptionValue builtIn="false" value="../Component"/>
+									<listOptionValue builtIn="false" value="../Component/utils"/>
+									<listOptionValue builtIn="false" value="../Component/uart_queue"/>
 									<listOptionValue builtIn="false" value="../Test"/>
 									<listOptionValue builtIn="false" value="../Test/Unit"/>
 									<listOptionValue builtIn="false" value="../Test/Integration"/>
@@ -81,6 +88,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="A_Project_cfg"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
@@ -162,6 +170,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="A_Project_cfg"/>
 						<entry excluding="HAL|Board" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
