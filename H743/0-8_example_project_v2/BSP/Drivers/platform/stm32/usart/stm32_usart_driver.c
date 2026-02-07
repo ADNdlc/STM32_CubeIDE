@@ -40,11 +40,22 @@ static int stm32_usart_receive(usart_driver_t *self, uint8_t *buffer,
                                size_t size, uint32_t timeout) {
   stm32_usart_driver_t *driver = (stm32_usart_driver_t *)self;
 
-  // 使用阻塞模式接收
-  if (HAL_UART_Receive(driver->huart, buffer, (uint16_t)size, timeout) ==
-      HAL_OK) {
+  HAL_StatusTypeDef status =
+      HAL_UART_Receive(driver->huart, buffer, (uint16_t)size, timeout);
+
+  if (status == HAL_OK) {
     return 0;
   }
+
+  // 如果出现错误（如溢出错误
+  // ORE），尝试清除错误标志，否则串口会一直锁定在错误状态
+  if (status == HAL_ERROR) {
+    if (__HAL_UART_GET_FLAG(driver->huart, UART_FLAG_ORE)) {
+      __HAL_UART_CLEAR_IT(driver->huart, UART_CLEAR_OREF);
+    }
+    // 也可以在此处添加对 FE (Framing Error), NE (Noise Error) 等的处理
+  }
+
   return -1;
 }
 
@@ -150,7 +161,6 @@ static void dispatch_irq(UART_HandleTypeDef *huart, usart_event_t event,
       break;
     }
   }
-
 }
 
 // HAL 库回调函数重写

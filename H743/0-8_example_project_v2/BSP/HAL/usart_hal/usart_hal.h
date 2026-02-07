@@ -2,6 +2,7 @@
 #define HAL_USART_HAL_USART_HAL_H_
 
 #include "MemPool.h"
+#include "usart_factory.h"
 #include "usart_driver.h"
 #include <stddef.h>
 
@@ -20,10 +21,10 @@ struct usart_hal_t{
   usart_driver_t *driver;
 };
 
-
-void usart_hal_init(usart_hal_t *self, usart_driver_t *driver);
 usart_hal_t* usart_hal_create(usart_driver_t *driver);
 void usart_hal_destroy(usart_hal_t *self);
+
+void usart_hal_init(usart_hal_t *self, usart_driver_t *driver);	//creat中已调用init
 
 
 /* 内联多态调用函数 */

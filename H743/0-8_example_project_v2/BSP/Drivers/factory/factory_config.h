@@ -1,7 +1,7 @@
 #ifndef FACTORY_FACTORY_CONFIG_H_
 #define FACTORY_FACTORY_CONFIG_H_
 
-#include "Project_cfg.h"
+#include "../../../A_Project_cfg/Project_cfg.h"
 
 // 默认使用STM32平台
 #ifndef TARGET_PLATFORM

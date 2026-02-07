@@ -15,14 +15,10 @@
 #define PLATFORM_STM32 1
 // #define PLATFORM_XXX   2
 
-/*
- * 硬件版本定义
- * 用于决定使用哪个版本的dev_map映射。
- */
-#define STM32H743_BOARD_V1 1
-
 
 #define TARGET_PLATFORM PLATFORM_STM32	// 平台选择
 
+/* ----- 运行配置 ----- */
+#define TEST_ENABLE	0	// 使能测试模式(不进入主程序)
 
 #endif /* APPLICATION_PROJECT_CFG_H_ */

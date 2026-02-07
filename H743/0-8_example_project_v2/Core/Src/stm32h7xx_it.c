@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    stm32h7xx_it.c
-  * @brief   Interrupt Service Routines.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2026 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    stm32h7xx_it.c
+ * @brief   Interrupt Service Routines.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -22,6 +22,11 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+#define LVGLHandler 0
+#define HAL_DMA2DHandler 0
+#define USE_MY_Handler 1
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,7 +63,6 @@
 extern DMA2D_HandleTypeDef hdma2d;
 extern NAND_HandleTypeDef hnand1;
 extern SDRAM_HandleTypeDef hsdram1;
-extern I2C_HandleTypeDef hi2c2;
 extern LTDC_HandleTypeDef hltdc;
 extern QSPI_HandleTypeDef hqspi;
 extern SD_HandleTypeDef hsd1;
@@ -71,7 +75,54 @@ extern DMA_HandleTypeDef hdma_usart2_tx;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
+#if USE_MY_Handler
+void HardFault_Handler_Print(uint32_t *hardfault_args) {
+  uint32_t stacked_r0 = hardfault_args[0];
+  uint32_t stacked_r1 = hardfault_args[1];
+  uint32_t stacked_r2 = hardfault_args[2];
+  uint32_t stacked_r3 = hardfault_args[3];
+  uint32_t stacked_r12 = hardfault_args[4];
+  uint32_t stacked_lr = hardfault_args[5];
+  uint32_t stacked_pc = hardfault_args[6];
+  uint32_t stacked_psr = hardfault_args[7];
 
+  uint32_t cfsr = SCB->CFSR;
+  uint32_t hfsr = SCB->HFSR;
+  uint32_t mmfar = SCB->MMFAR;
+  uint32_t bfar = SCB->BFAR;
+
+  char msg[512];
+  snprintf(msg, sizeof(msg),
+           "\n========================================\n"
+           "HardFault occurred!\n"
+           "Stacked: r0=%08lX, r1=%08lX, r2=%08lX, r3=%08lX\n"
+           "         r12=%08lX, lr=%08lX, pc=%08lX, psr=%08lX\n"
+           "FSRs:    CFSR=%08lX, HFSR=%08lX\n"
+           "Address: MMFAR=%08lX, BFAR=%08lX\n"
+           "========================================\n",
+           stacked_r0, stacked_r1, stacked_r2, stacked_r3, stacked_r12,
+           stacked_lr, stacked_pc, stacked_psr, cfsr, hfsr, mmfar, bfar);
+
+  if (CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk) {
+    for (int i = 0; msg[i] != '\0'; i++) {
+      ITM_SendChar(msg[i]);
+    }
+  }
+
+  if (huart1.Instance != NULL && __HAL_RCC_USART1_IS_CLK_ENABLED()) {
+    for (int i = 0; msg[i] != '\0'; i++) {
+      while (!(huart1.Instance->ISR & USART_ISR_TXE_TXFNF))
+        ;
+      huart1.Instance->TDR = (msg[i] & 0xFF);
+      while (!(huart1.Instance->ISR & USART_ISR_TC))
+        ;
+    }
+  }
+  while (1) {
+    __asm volatile("bkpt #0");
+  }
+}
+#endif
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -86,9 +137,12 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-   while (1)
-  {
+  while (1) {
   }
+#if USE_MY_Handler
+}
+#endif
+#if !USE_MY_Handler
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
@@ -98,7 +152,18 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+#else
+__attribute__((naked)) void HardFault_Handler(void) {
+  __asm volatile("TST 	lr, #4 \n"
+                 "ITE 	EQ \n"
+                 "MRSEQ 	r0, MSP \n"
+                 "MRSNE 	r0, PSP \n"
+                 "B 		HardFault_Handler_Print \n");
+#endif
+#if USE_MY_Handler
+}
+#endif
+#if !USE_MY_Handler
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -113,7 +178,18 @@ void HardFault_Handler(void)
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
-
+#else
+__attribute__((naked)) void MemManage_Handler(void) {
+  __asm volatile("TST 	lr, #4 \n"
+                 "ITE 	EQ \n"
+                 "MRSEQ 	r0, MSP \n"
+                 "MRSNE 	r0, PSP \n"
+                 "B 		HardFault_Handler_Print \n");
+#endif
+#if USE_MY_Handler
+}
+#endif
+#if !USE_MY_Handler
   /* USER CODE END MemoryManagement_IRQn 0 */
   while (1)
   {
@@ -128,7 +204,18 @@ void MemManage_Handler(void)
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
-
+#else
+__attribute__((naked)) void BusFault_Handler(void) {
+  __asm volatile("TST 	lr, #4 \n"
+                 "ITE 	EQ \n"
+                 "MRSEQ 	r0, MSP \n"
+                 "MRSNE 	r0, PSP \n"
+                 "B 		HardFault_Handler_Print \n");
+#endif
+#if USE_MY_Handler
+}
+#endif
+#if !USE_MY_Handler
   /* USER CODE END BusFault_IRQn 0 */
   while (1)
   {
@@ -143,7 +230,14 @@ void BusFault_Handler(void)
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
-
+#else
+__attribute__((naked)) void UsageFault_Handler(void) {
+  __asm volatile("TST 	lr, #4 \n"
+                 "ITE 	EQ \n"
+                 "MRSEQ 	r0, MSP \n"
+                 "MRSNE 	r0, PSP \n"
+                 "B 		HardFault_Handler_Print \n");
+#endif
   /* USER CODE END UsageFault_IRQn 0 */
   while (1)
   {
@@ -283,34 +377,6 @@ void TIM2_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles I2C2 event interrupt.
-  */
-void I2C2_EV_IRQHandler(void)
-{
-  /* USER CODE BEGIN I2C2_EV_IRQn 0 */
-
-  /* USER CODE END I2C2_EV_IRQn 0 */
-  HAL_I2C_EV_IRQHandler(&hi2c2);
-  /* USER CODE BEGIN I2C2_EV_IRQn 1 */
-
-  /* USER CODE END I2C2_EV_IRQn 1 */
-}
-
-/**
-  * @brief This function handles I2C2 error interrupt.
-  */
-void I2C2_ER_IRQHandler(void)
-{
-  /* USER CODE BEGIN I2C2_ER_IRQn 0 */
-
-  /* USER CODE END I2C2_ER_IRQn 0 */
-  HAL_I2C_ER_IRQHandler(&hi2c2);
-  /* USER CODE BEGIN I2C2_ER_IRQn 1 */
-
-  /* USER CODE END I2C2_ER_IRQn 1 */
-}
-
-/**
   * @brief This function handles USART1 global interrupt.
   */
 void USART1_IRQHandler(void)
@@ -419,6 +485,9 @@ void LTDC_ER_IRQHandler(void)
   HAL_LTDC_IRQHandler(&hltdc);
   /* USER CODE BEGIN LTDC_ER_IRQn 1 */
 
+#if !HAL_DMA2DHandler // 移到lvgl移植的处理中
+}
+#else
   /* USER CODE END LTDC_ER_IRQn 1 */
 }
 
@@ -428,6 +497,21 @@ void LTDC_ER_IRQHandler(void)
 void DMA2D_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2D_IRQn 0 */
+
+#if LVGLHandler
+  if ((DMA2D->ISR & DMA2D_FLAG_TC) != 0) {
+    DMA2D->IFCR = DMA2D_FLAG_TC; // 清除“传输完成”中断标志位
+    if (it_disp_drv != NULL) {
+      lv_disp_flush_ready(it_disp_drv); // 调用 lv_disp_flush_ready()
+      // log_i(LOG);
+    }
+  } else if ((DMA2D->ISR & DMA2D_FLAG_TE) != 0) { // 处理可能发生的错误中断
+    DMA2D->IFCR = DMA2D_FLAG_TE;                  // 清除“传输错误”中断标志位
+    if (it_disp_drv != NULL) {
+      lv_disp_flush_ready(it_disp_drv);
+    }
+  }
+#endif
 
   /* USER CODE END DMA2D_IRQn 0 */
   HAL_DMA2D_IRQHandler(&hdma2d);
@@ -442,11 +526,17 @@ void DMA2D_IRQHandler(void)
 void QUADSPI_IRQHandler(void)
 {
   /* USER CODE BEGIN QUADSPI_IRQn 0 */
-
+#endif
+#if !HAL_DMA2DHandler
+/**
+  * @brief This function handles QUADSPI global interrupt.
+  */
+void QUADSPI_IRQHandler(void)
+{
+#endif
   /* USER CODE END QUADSPI_IRQn 0 */
   HAL_QSPI_IRQHandler(&hqspi);
   /* USER CODE BEGIN QUADSPI_IRQn 1 */
-
   /* USER CODE END QUADSPI_IRQn 1 */
 }
 

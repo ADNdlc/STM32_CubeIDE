@@ -5,13 +5,13 @@
 
 static uint32_t g_fac_us = 0; /* us延时倍乘数 */
 
-static void stm32_sys_init(void) {
+void platform_sys_init(void) {
   // 一定要先更新SystemCoreClock
   SystemCoreClockUpdate();
   g_fac_us = SystemCoreClock / 1000000; // 获取系统频率
 }
 
-static void stm32_delay_us(uint32_t us) {
+void platform_delay_us(uint32_t us) {
   uint32_t ticks = us * g_fac_us;
   uint32_t told, tnow, tcnt = 0;
   uint32_t reload = SysTick->LOAD; /* LOAD的值 */
@@ -25,23 +25,23 @@ static void stm32_delay_us(uint32_t us) {
         tcnt += reload - tnow + told;
       }
       told = tnow;
-      if (tcnt  >= ticks) {
+      if (tcnt >= ticks) {
         break;
       }
     }
   }
 }
 
-static void stm32_delay_ms(uint32_t ms) {
+void platform_delay_ms(uint32_t ms) {
   while (ms) {
-    stm32_delay_us(1000);
+    platform_delay_us(1000);
     ms--;
   }
 }
 
-static uint32_t stm32_get_systick_ms(void) { return HAL_GetTick(); }
+uint32_t platform_get_systick_ms(void) { return HAL_GetTick(); }
 
-static uint32_t stm32_get_systick_us(void) {
+uint32_t platform_get_systick_us(void) {
   uint32_t load = SysTick->LOAD;
   if (load == 0)
     return 0; // Prevent div by zero if not init
@@ -63,17 +63,3 @@ static uint32_t stm32_get_systick_us(void) {
   uint32_t us_offset = (load - val) / ticks_per_us;
   return ms_now * 1000 + us_offset;
 }
-
-const SysOps stm32_sys_ops = {
-  .sys_init = stm32_sys_init,
-  .sys_delay_us = stm32_delay_us,
-  .sys_delay_us = stm32_delay_ms,
-  .sys_get_systick_ms = stm32_get_systick_ms,
-  .sys_get_systick_us = stm32_get_systick_us
-};
-
-SysOps *stm32_sys_ops_create(void){
-  return (SysOps *)&stm32_sys_ops;
-}
-
-

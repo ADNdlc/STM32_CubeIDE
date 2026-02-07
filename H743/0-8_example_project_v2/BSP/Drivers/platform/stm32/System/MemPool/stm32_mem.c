@@ -9,9 +9,9 @@
 #include "stm32_h7_malloc.h"
 
 // 平台内部配置
-#define STM32_MEM_INTERNAL	SRAMIN
-#define STM32_MEM_EXTERNAL	SRAMEX
-#define STM32_MEM_CUSTOM	SRAMDTCM //DTCM仅CPU和MDMA(通过AHBS)可以访问
+#define STM32_MEM_INTERNAL SRAMIN
+#define STM32_MEM_EXTERNAL SRAMEX
+#define STM32_MEM_CUSTOM SRAMDTCM // DTCM仅CPU和MDMA(通过AHBS)可以访问
 
 static void *stm32_mem_malloc(SysMemTag tag, uint32_t size) {
   uint8_t memx;
@@ -76,15 +76,10 @@ static void stm32_sys_mem_init_external(void) {
   my_mem_init(STM32_MEM_EXTERNAL);
 }
 
-const SysMem stm32_sys_mem = {
-	.mem_init_internal = stm32_sys_mem_init_internal,
-	.mem_init_internal = stm32_sys_mem_init_external,
-	.malloc = stm32_mem_malloc,
-	.free = stm32_mem_free,
-	.realloc = stm32_mem_realloc
-};
+const SysMem stm32_sys_mem = {.mem_init_internal = stm32_sys_mem_init_internal,
+                              .mem_init_external = stm32_sys_mem_init_external,
+                              .malloc = stm32_mem_malloc,
+                              .free = stm32_mem_free,
+                              .realloc = stm32_mem_realloc};
 
-SysMem *stm32_sys_mem_create(void){
-	return (SysMem *)&stm32_sys_mem;
-}
-
+SysMem *stm32_sys_mem_create(void) { return (SysMem *)&stm32_sys_mem; }

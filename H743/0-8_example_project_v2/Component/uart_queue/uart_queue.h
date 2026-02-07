@@ -8,8 +8,9 @@
 #ifndef UART_QUEUE_UART_QUEUE_H_
 #define UART_QUEUE_UART_QUEUE_H_
 
-#include "ring_buffer/ring_buffer.h"
 #include "Sys.h"
+#include "MemPool.h"
+#include "ring_buffer/ring_buffer.h"
 #include "usart_hal/usart_hal.h"
 #include <stdbool.h>
 #include <stddef.h>

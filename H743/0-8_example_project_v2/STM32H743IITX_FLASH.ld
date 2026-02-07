@@ -89,8 +89,8 @@ SECTIONS
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(4);
   } >FLASH
-  
-  /* ====== 测试程序段开始 ====== */
+
+ /* ====== 测试程序段开始 ====== */
   .test_registry :
   {
     . = ALIGN(4);
