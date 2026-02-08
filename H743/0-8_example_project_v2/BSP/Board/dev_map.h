@@ -10,6 +10,7 @@
 
 #include "dev_map_config.h"
 
+/* ----- USART ----- */
 // 定义串口逻辑ID，供上层应用和Factory层使用
 typedef enum {
   USART_ID_DEBUG = 0,   // 日志和调试
@@ -25,5 +26,18 @@ typedef struct {
 
 // 声明映射表
 extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
+
+/* ----- SDRAM ----- */
+typedef enum {
+  SDRAM_MAIN = 0,
+  //...
+  SDRAM_MAX_DEVICES
+} sdram_device_id_t;
+
+typedef struct {
+  void * resource;
+} sdram_mapping_t;
+
+extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 
 #endif /* BOARD_DEV_MAP_H_ */

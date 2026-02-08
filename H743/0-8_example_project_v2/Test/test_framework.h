@@ -35,7 +35,7 @@ typedef struct
                                            .desc = description,               \
                                            .setup = setup_fn,                 \
                                            .loop = loop_fn,                   \
-                                            .teardown = teardown_fn}
+                                           .teardown = teardown_fn}
 #else
 // 当TEST_ENABLE未定义时，将宏和函数替换为空操作
 #define REGISTER_TEST(test_name, description, setup_fn, loop_fn, teardown_fn) ((void)0)

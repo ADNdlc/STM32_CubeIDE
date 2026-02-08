@@ -19,6 +19,6 @@
 #define TARGET_PLATFORM PLATFORM_STM32	// 平台选择
 
 /* ----- 运行配置 ----- */
-#define TEST_ENABLE	0	// 使能测试模式(不进入主程序)
+#define TEST_ENABLE	1	// 使能测试模式(不进入主程序)
 
 #endif /* APPLICATION_PROJECT_CFG_H_ */

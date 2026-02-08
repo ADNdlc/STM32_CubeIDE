@@ -215,7 +215,7 @@ SECTIONS {
 		. = ALIGN(64);
 	} >SDRAM
 	
-		.sdram_map (ADDR(.sdram_pool) + SIZEOF(.sdram_pool)) (NOLOAD) :
+	.sdram_map (ADDR(.sdram_pool) + SIZEOF(.sdram_pool)) (NOLOAD) :
 	{
 		. = ALIGN(4);
 		KEEP(*(.sdram_map))

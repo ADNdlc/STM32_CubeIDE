@@ -1,7 +1,7 @@
 #ifndef FACTORY_FACTORY_CONFIG_H_
 #define FACTORY_FACTORY_CONFIG_H_
 
-#include "../../../A_Project_cfg/Project_cfg.h"
+#include "Project_cfg.h"
 
 // 默认使用STM32平台
 #ifndef TARGET_PLATFORM
@@ -10,9 +10,10 @@
 
 /* 各个驱动模块的平台选择配置 */
 #if (TARGET_PLATFORM == PLATFORM_STM32)
-#define GPIO_DRIVER_PLATFORM PLATFORM_STM32
-#define PWM_DRIVER_PLATFORM PLATFORM_STM32
-#define USART_DRIVER_PLATFORM PLATFORM_STM32
+#define GPIO_DRIVER_PLATFORM 	PLATFORM_STM32
+#define PWM_DRIVER_PLATFORM 	PLATFORM_STM32
+#define USART_DRIVER_PLATFORM 	PLATFORM_STM32
+#define SDRAM_DRIVER_PLATFORM 	PLATFORM_STM32
 #else
 #error "factory_config: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
 #endif

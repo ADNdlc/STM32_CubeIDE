@@ -55,11 +55,14 @@
 									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System/Sys"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System/MemPool"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Connectivity"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/factory"/>
+									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Device"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System/Sys"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System/MemPool"/>
+									<listOptionValue builtIn="false" value="../BSP/Drivers/factory"/>
+									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/connectivity"/>
+									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/device"/>
 									<listOptionValue builtIn="false" value="../BSP/HAL"/>
 									<listOptionValue builtIn="false" value="../Lib/EasyLogger/easylogger/inc"/>
 									<listOptionValue builtIn="false" value="../Lib/FileSys/FatFS/ff16/source"/>
@@ -207,6 +210,14 @@
 			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/0-8_example_project_v2"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/0-8_example_project_v2"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

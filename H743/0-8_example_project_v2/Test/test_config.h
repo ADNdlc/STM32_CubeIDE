@@ -15,8 +15,7 @@
 
 #if TEST_ENABLE
 #define ENABLE_TEST_LED 1
-#define ENABLE_TEST_MEM 0
-#define ENABLE_TEST_LOG 1
+#define ENABLE_TEST_SDRAM 1
 #endif
 
 #endif /* TEST_CONFIG_H_ */
