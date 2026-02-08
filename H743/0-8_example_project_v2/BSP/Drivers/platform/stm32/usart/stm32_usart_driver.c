@@ -6,6 +6,7 @@
  */
 
 #include "stm32_usart_driver.h"
+#include "MemPool.h"
 #include <stdlib.h>
 
 #define MAX_USART_INSTANCES 4
@@ -116,7 +117,7 @@ static const usart_driver_ops_t stm32_usart_ops = {
 
 stm32_usart_driver_t *stm32_usart_driver_create(UART_HandleTypeDef *huart) {
   stm32_usart_driver_t *driver =
-      (stm32_usart_driver_t *)malloc(sizeof(stm32_usart_driver_t));
+      (stm32_usart_driver_t *)sys_malloc(USART_MEMSOURCE, sizeof(stm32_usart_driver_t));
   if (driver) {
     driver->base.ops = &stm32_usart_ops;
     driver->huart = huart;
