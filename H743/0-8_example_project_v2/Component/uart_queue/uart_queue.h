@@ -8,10 +8,10 @@
 #ifndef UART_QUEUE_UART_QUEUE_H_
 #define UART_QUEUE_UART_QUEUE_H_
 
-#include "Sys.h"
+#include "usart_driver.h"
 #include "MemPool.h"
+#include "Sys.h"
 #include "ring_buffer/ring_buffer.h"
-#include "usart_hal/usart_hal.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -29,26 +29,26 @@ typedef struct uart_queue_t uart_queue_t;
  * @brief UART队列结构体
  */
 struct uart_queue_t {
-  ring_buffer_t tx_rb;         // 发送环形缓冲
-  ring_buffer_t rx_rb;         // 接收环形缓冲
-  const usart_hal_t *uart_hal; // 硬件抽象层
-  bool tx_busy;                // 发送忙标志
-  bool rx_enabled;             // 接收使能标志
-  size_t tx_current_len;       // 当前发送长度
-  size_t last_rx_pos;          // 记录上一次接收位置(针对循环DMA)
-  bool auto_wait;              // 是否启用发送缓冲区满自动等待
-  uint32_t wait_delay_ms;      // 每次等待的时间
-  uint16_t wait_max_count;     // 最大等待次数
+  ring_buffer_t tx_rb;               // 发送环形缓冲
+  ring_buffer_t rx_rb;               // 接收环形缓冲
+  const usart_driver_t *uart_driver; // 硬件驱动接口
+  bool tx_busy;                      // 发送忙标志
+  bool rx_enabled;                   // 接收使能标志
+  size_t tx_current_len;             // 当前发送长度
+  size_t last_rx_pos;                // 记录上一次接收位置(针对循环DMA)
+  bool auto_wait;                    // 是否启用发送缓冲区满自动等待
+  uint32_t wait_delay_ms;            // 每次等待的时间
+  uint16_t wait_max_count;           // 最大等待次数
 };
 
-uart_queue_t *uart_queue_create(const usart_hal_t *hal, uint8_t *tx_buffer,
-                                size_t tx_size, uint8_t *rx_buffer,
-                                size_t rx_size);
+uart_queue_t *uart_queue_create(const usart_driver_t *driver,
+                                uint8_t *tx_buffer, size_t tx_size,
+                                uint8_t *rx_buffer, size_t rx_size);
 
 void uart_queue_destroy(uart_queue_t *queue);
 
 // 初始化
-void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
+void uart_queue_init(uart_queue_t *queue, const usart_driver_t *driver,
                      uint8_t *tx_buffer, size_t tx_size, uint8_t *rx_buffer,
                      size_t rx_size);
 

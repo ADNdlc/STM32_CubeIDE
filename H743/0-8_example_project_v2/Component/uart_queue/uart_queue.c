@@ -40,18 +40,18 @@ static void uart_queue_try_start_tx(uart_queue_t *queue);
  * @brief 初始化UART队列
  *
  * @param queue 队列实例
- * @param hal USART硬件抽象
+ * @param driver USART硬件驱动
  * @param tx_buffer 发送缓冲区
  * @param tx_size 发送缓冲区大小
  * @param rx_buffer 接收缓冲区
  * @param rx_size 接收缓冲区大小
  */
-void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
+void uart_queue_init(uart_queue_t *queue, const usart_driver_t *driver,
                      uint8_t *tx_buffer, size_t tx_size, uint8_t *rx_buffer,
                      size_t rx_size) {
   rb_init(&queue->tx_rb, tx_buffer, tx_size);
   rb_init(&queue->rx_rb, rx_buffer, rx_size);
-  queue->uart_hal = hal;
+  queue->uart_driver = driver;
   queue->tx_busy = false;
   queue->rx_enabled = false;
   queue->tx_current_len = 0;
@@ -60,19 +60,19 @@ void uart_queue_init(uart_queue_t *queue, const usart_hal_t *hal,
   queue->wait_delay_ms = UART_QUEUE_AUTO_WAIT_DELAY_MS;
   queue->wait_max_count = UART_QUEUE_AUTO_WAIT_MAX_COUNT;
   // 设置回调函数
-  usart_hal_set_callback((usart_hal_t *)queue->uart_hal, uart_queue_callback,
-                         queue);
+  USART_SET_CALLBACK((usart_driver_t *)queue->uart_driver, uart_queue_callback,
+                     queue);
 }
 
-uart_queue_t *uart_queue_create(const usart_hal_t *hal, uint8_t *tx_buffer,
-                                size_t tx_size, uint8_t *rx_buffer,
-                                size_t rx_size) {
+uart_queue_t *uart_queue_create(const usart_driver_t *driver,
+                                uint8_t *tx_buffer, size_t tx_size,
+                                uint8_t *rx_buffer, size_t rx_size) {
   uart_queue_t *queue =
       (uart_queue_t *)sys_malloc(UARTQUEUE_MEMSOURCE, sizeof(uart_queue_t));
   if (!queue) {
     return NULL;
   }
-  uart_queue_init(queue, hal, tx_buffer, tx_size, rx_buffer, rx_size);
+  uart_queue_init(queue, driver, tx_buffer, tx_size, rx_buffer, rx_size);
   return queue;
 }
 
@@ -142,8 +142,8 @@ static void uart_queue_try_start_tx(uart_queue_t *queue) {
     if (tx_len > 0) {
       queue->tx_busy = true;
       queue->tx_current_len = tx_len;
-      if (usart_hal_transmit_asyn((usart_hal_t *)queue->uart_hal, tx_ptr,
-                                  tx_len) != 0) {
+      if (USART_TRANSMIT_ASYN((usart_driver_t *)queue->uart_driver, tx_ptr,
+                              tx_len) != 0) {
         queue->tx_busy = false;
         queue->tx_current_len = 0;
       }
@@ -254,8 +254,8 @@ void uart_queue_start_receive(uart_queue_t *queue) {
     // 启动异步接收 - 使用完整缓冲区以支持循环DMA
     // 注意：如果是循环模式，DMA将始终在整个缓冲区上循环，这与RingBuffer的逻辑大小一致
     if (queue->rx_rb.size > 0) {
-      usart_hal_receive_asyn((usart_hal_t *)queue->uart_hal,
-                             queue->rx_rb.buffer, queue->rx_rb.size);
+      USART_RECEIVE_ASYN((usart_driver_t *)queue->uart_driver,
+                         queue->rx_rb.buffer, queue->rx_rb.size);
     }
   }
 }
@@ -277,7 +277,7 @@ static void uart_queue_handle_tx_complete(uart_queue_t *queue) {
   size_t tx_len = rb_peek(&queue->tx_rb, &tx_ptr);
   if (tx_len > 0) {
     queue->tx_current_len = tx_len;
-    usart_hal_transmit_asyn((usart_hal_t *)queue->uart_hal, tx_ptr, tx_len);
+    USART_TRANSMIT_ASYN((usart_driver_t *)queue->uart_driver, tx_ptr, tx_len);
   } else {
     queue->tx_busy = false;
   }
@@ -294,8 +294,8 @@ static void uart_queue_handle_rx_complete(uart_queue_t *queue) {
     uint8_t *rx_ptr;
     size_t available_len = rb_peek_write(&queue->rx_rb, &rx_ptr);
     if (available_len > 0) {
-      usart_hal_receive_asyn((usart_hal_t *)queue->uart_hal, rx_ptr,
-                             available_len);
+      USART_RECEIVE_ASYN((usart_driver_t *)queue->uart_driver, rx_ptr,
+                         available_len);
     }
   }
 }
@@ -334,8 +334,8 @@ static void uart_queue_handle_rx_event(uart_queue_t *queue, void *args) {
     uint8_t *rx_ptr;
     size_t available_len = rb_peek_write(&queue->rx_rb, &rx_ptr);
     if (available_len > 0) {
-      usart_hal_receive_asyn((usart_hal_t *)queue->uart_hal, rx_ptr,
-                             available_len);
+      USART_RECEIVE_ASYN((usart_driver_t *)queue->uart_driver, rx_ptr,
+                         available_len);
     }
   }
 #endif
