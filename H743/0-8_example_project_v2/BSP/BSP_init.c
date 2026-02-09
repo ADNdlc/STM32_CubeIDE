@@ -7,19 +7,19 @@
 #include "Project_cfg.h"
 #if (TARGET_PLATFORM == PLATFORM_STM32)
 #include "stm32_mem.h"
-#define platform_sys_mem_create() \
+#define platform_sys_mem_create()                                              \
   stm32_sys_mem_create() // sys无工厂，简单使用宏来绑定
 #endif                   // TARGET_PLATFORM
 #include "MemPool.h"
 #include "Sys.h"
 #include "dev_map.h"
 #include "elog_init.h"
-#include "sdram_factory.h"
-#include "usart_factory.h"
-#include "uart_queue/uart_queue.h"
+#include "factory/sensor/thsensor_factory.h"
+#include "one_wire/stm32_one_wire_driver.h"
 
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
+extern void *g_ow_ambient; // 在 board_v1.c 中定义
 
 /* 调试串口队列用的缓冲区 */
 static uint8_t debug_tx_buf[4096];
@@ -70,4 +70,20 @@ void bsp_init(void) {
     }
   }
   sys_mem_init_external(); // 外部内存池初始化
+
+  /* ---- 温湿度传感器初始化 ---- */
+  stm32_one_wire_soft_config_t ow_config = {
+      .port = dht11_D_GPIO_Port, // GPIOB
+      .pin = dht11_D_Pin,        // GPIO_PIN_11
+  };
+  g_ow_ambient = (void *)stm32_one_wire_soft_create(&ow_config);
+
+  thsensor_driver_t *thsensor = thsensor_driver_get(TH_SENSOR_ID_AMBIENT);
+  if (thsensor) {
+    if (THSENSOR_INIT(thsensor) == 0) {
+      log_i("Ambient TH sensor (DHT11) initialized.");
+    } else {
+      log_w("Failed to initialize Ambient TH sensor.");
+    }
+  }
 }

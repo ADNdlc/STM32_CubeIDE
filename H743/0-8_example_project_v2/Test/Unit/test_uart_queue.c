@@ -12,7 +12,7 @@ static void test_uart_queue_overflow(void);
 static void test_uart_queue_receive(void);
 static void test_uart_queue_status(void);
 
-#define TEST_USART USART_ID_DEBUG
+#define TEST_USART USART_ID_ESP8266
 // 定义缓冲区大小
 #define TX_BUFFER_SIZE 256
 #define RX_BUFFER_SIZE 256
@@ -44,22 +44,23 @@ static void test_uart_queue_loop(void)
 
   // 运行各项测试
   test_uart_queue_basic_send();
-  sys_delay_ms(500);
+  sys_delay_ms(200);
 
   test_uart_queue_batch_send();
-  sys_delay_ms(500);
+  sys_delay_ms(200);
 
   test_uart_queue_overflow();
-  sys_delay_ms(500);
+  sys_delay_ms(200);
 
   test_uart_queue_status();
-  sys_delay_ms(500);
+  sys_delay_ms(200);
 
   test_uart_queue_receive();
-  sys_delay_ms(500);
+  sys_delay_ms(200);
 
   const char *end_msg = "========== UART Queue Test End ==========\r\n\r\n";
   USART_TRANSMIT(test_usart, (const uint8_t *)end_msg, strlen(end_msg), 1000);
+  sys_delay_ms(10000);
 }
 
 static void test_uart_queue_teardown(void)

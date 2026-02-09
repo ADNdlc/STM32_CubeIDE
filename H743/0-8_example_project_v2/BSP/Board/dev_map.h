@@ -13,17 +13,15 @@
 /* ----- USART ----- */
 // 定义串口逻辑ID，供上层应用和Factory层使用
 typedef enum {
-  USART_ID_DEBUG = 0,   // 日志和调试
-  USART_ID_ESP8266,     // 网络通信模块
+  USART_ID_DEBUG = 0, // 日志和调试
+  USART_ID_ESP8266,   // 网络通信模块
   // ...
   USART_MAX_DEVICES
 } usart_device_id_t;
-
 // 定义映射项结构（屏蔽平台差异）
 typedef struct {
-  void * resource; // 物理资源句柄
+  void *resource; //物理资源句柄
 } usart_mapping_t;
-
 // 声明映射表
 extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 
@@ -35,9 +33,36 @@ typedef enum {
 } sdram_device_id_t;
 
 typedef struct {
-  void * resource;
+  void *resource;
 } sdram_mapping_t;
 
 extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
+
+/* ----- one_wire ----- */
+typedef enum {
+  ONE_WIRE_DHT11 = 0,
+  //...
+  ONE_WIRE_MAX_DEVICES
+} one_wire_device_id_t;
+
+typedef struct {
+  void *resource;
+} one_wire_mapping_t;
+
+extern const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES];
+
+/* ----- 温湿度传感器 ----- */
+//温湿度传感器类型定义
+//温湿度传感器逻辑号
+typedef enum {
+  TH_SENSOR_ID_AMBIENT = 0, // 温湿度传感器
+  //...
+  TH_SENSOR_MAX
+} th_sensor_id_t;
+//设备资源映射结构
+typedef struct {
+  void *resource; // 关联的总线资源 (如 one_wire_driver_t* 或 i2c_driver_t*)
+} th_sensor_mapping_t;
+extern const th_sensor_mapping_t th_sensor_mappings[TH_SENSOR_MAX];
 
 #endif /* BOARD_DEV_MAP_H_ */

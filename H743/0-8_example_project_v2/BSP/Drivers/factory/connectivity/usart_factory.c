@@ -4,10 +4,9 @@
  *  Created on: Dec 1, 2025
  *      Author: 12114
  */
-
+#include "factory_config.h"
 #include "usart_factory.h"
 #include "dev_map.h"
-#include "factory_config.h"
 
 #if (USART_DRIVER_PLATFORM == PLATFORM_STM32)
 #include "usart/stm32_usart_driver.h" // 对应平台接口实现
