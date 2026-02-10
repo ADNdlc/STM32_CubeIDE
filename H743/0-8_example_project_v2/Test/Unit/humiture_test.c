@@ -4,18 +4,15 @@
  *  Created on: Feb 10, 2026
  *      Author: Antigravity
  */
-
+#include "test_config.h"
+#if ENABLE_TEST_HUMITURE
 #define LOG_TAG "TEST_HUM"
-
-#include "humiture_test.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
 #include "Sys.h"
 #include "elog.h"
 #include "humiture_factory.h"
-
 #include "test_framework.h"
 
 static void humiture_test_setup(void) { log_i("Humiture test started."); }
@@ -50,3 +47,4 @@ static void humiture_test_loop(void) {
 
 REGISTER_TEST(humiture, "DHT11/DHT22 sensor test", humiture_test_setup,
               humiture_test_loop, NULL);
+#endif

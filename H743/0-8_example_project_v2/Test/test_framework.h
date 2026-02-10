@@ -38,7 +38,6 @@ typedef struct
                                            .teardown = teardown_fn}
 #else
 // 当TEST_ENABLE未定义时，将宏和函数替换为空操作
-#define REGISTER_TEST(test_name, description, setup_fn, loop_fn, teardown_fn) ((void)0)
 static inline void Test_Framework_Init(void) { (void)0; }
 static inline void Test_Framework_Run(void) { (void)0; }
 static inline void Test_Framework_HandleInput(uint8_t cmd) { (void)cmd; (void)0; }

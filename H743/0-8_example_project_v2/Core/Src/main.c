@@ -125,7 +125,7 @@ int main(void) {
   GPIOB->ODR ^= (1 << 1);
   HAL_Delay(500);
 
-  bsp_init();
+  bsp_init(); // 驱动层初始化
   Test_Framework_Init();
 
   /* USER CODE END 2 */
@@ -133,12 +133,11 @@ int main(void) {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
+    Test_Framework_Run();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-#if TEST_ENABLE
-    Test_Framework_Run();
-#endif
+
   }
   /* USER CODE END 3 */
 }
