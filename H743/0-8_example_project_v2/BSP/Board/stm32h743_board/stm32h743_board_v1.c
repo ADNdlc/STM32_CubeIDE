@@ -26,7 +26,7 @@ const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES] = {
 
 // 温湿度传感器驱动映射表
 const th_sensor_mapping_t th_sensor_mappings[TH_SENSOR_MAX] = {
-    [TH_SENSOR_ID_AMBIENT] = {},
+    [TH_SENSOR_ID_AMBIENT] = {.resource = (void *)ONE_WIRE_DHT11 },
 };
 
 #endif // STM32H743_BOARD_V1

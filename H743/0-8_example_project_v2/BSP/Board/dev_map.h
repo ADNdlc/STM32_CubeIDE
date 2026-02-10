@@ -52,7 +52,6 @@ typedef struct {
 extern const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES];
 
 /* ----- 温湿度传感器 ----- */
-//温湿度传感器类型定义
 //温湿度传感器逻辑号
 typedef enum {
   TH_SENSOR_ID_AMBIENT = 0, // 温湿度传感器

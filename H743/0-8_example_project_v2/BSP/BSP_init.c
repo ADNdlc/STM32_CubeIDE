@@ -14,12 +14,14 @@
 #include "Sys.h"
 #include "dev_map.h"
 #include "elog_init.h"
-#include "factory/sensor/thsensor_factory.h"
+#include "sdram_factory.h"
+#include "usart_factory.h"
+#include "uart_queue.h"
+#include "humiture_factory.h"
 #include "one_wire/stm32_one_wire_driver.h"
 
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
-extern void *g_ow_ambient; // 在 board_v1.c 中定义
 
 /* 调试串口队列用的缓冲区 */
 static uint8_t debug_tx_buf[4096];
@@ -39,7 +41,7 @@ void bsp_init(void) {
   /* 1. 创建硬件抽象层串口对象 */
   usart_driver_t *g_debug_uart = usart_driver_get(USART_ID_DEBUG);
 
-  /* 2. 创建并初始化全局队列 */
+  /* 2. 创建并初始化日志串口队列 */
   if (g_debug_uart) {
     g_debug_queue =
         uart_queue_create(g_debug_uart, debug_tx_buf, sizeof(debug_tx_buf),
@@ -72,15 +74,9 @@ void bsp_init(void) {
   sys_mem_init_external(); // 外部内存池初始化
 
   /* ---- 温湿度传感器初始化 ---- */
-  stm32_one_wire_soft_config_t ow_config = {
-      .port = dht11_D_GPIO_Port, // GPIOB
-      .pin = dht11_D_Pin,        // GPIO_PIN_11
-  };
-  g_ow_ambient = (void *)stm32_one_wire_soft_create(&ow_config);
-
-  thsensor_driver_t *thsensor = thsensor_driver_get(TH_SENSOR_ID_AMBIENT);
-  if (thsensor) {
-    if (THSENSOR_INIT(thsensor) == 0) {
+  humiture_driver_t *humiture_dev = humiture_driver_get(TH_SENSOR_ID_AMBIENT);
+  if (humiture_dev) {
+    if (HUMITURE_INIT(humiture_dev) == 0) {
       log_i("Ambient TH sensor (DHT11) initialized.");
     } else {
       log_w("Failed to initialize Ambient TH sensor.");

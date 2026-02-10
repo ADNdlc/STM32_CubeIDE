@@ -12,6 +12,7 @@
 
 #include "humiture_driver.h"
 #include "one_wire_driver.h"
+#include "one_wire_factory.h"
 #include <stdint.h>
 
 

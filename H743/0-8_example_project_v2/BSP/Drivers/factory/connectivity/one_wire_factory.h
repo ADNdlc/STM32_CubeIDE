@@ -18,6 +18,6 @@
  * @param id One-Wire 软件模拟设备 ID
  * @return One-Wire 驱动实例指针，失败返回 NULL
  */
-one_wire_driver_t *one_wire_soft_driver_get(one_wire_device_id_t id);
+one_wire_driver_t *one_wire_driver_get(one_wire_device_id_t id);
 
 #endif /* FACTORY_ONE_WIRE_FACTORY_H_ */
