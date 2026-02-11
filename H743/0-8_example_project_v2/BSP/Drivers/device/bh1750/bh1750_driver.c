@@ -14,10 +14,16 @@
 #include <stdlib.h>
 
 // BH1750 指令
+// BH1750 指令定义
+#define BH1750_CMD_POWER_DOWN 0x00
 #define BH1750_POWER_ON 0x01
 #define BH1750_RESET 0x07
-#define BH1750_CONTINUOUS_H_RES_MODE                                           \
-  0x10 // 连续高分辨率模式, 1lx 分辨率, 120ms 测量时间
+#define BH1750_CMD_CH_RES 0x10  // 连续 H 分辨率模式 (1lx, 120ms)
+#define BH1750_CMD_CH_RES2 0x11 // 连续 H 分辨率模式2 (0.5lx, 120ms)
+#define BH1750_CMD_CL_RES 0x13  // 连续 L 分辨率模式 (4lx, 16ms)
+#define BH1750_CMD_ONE_TIME_H_RES 0x20 // 一次性 H 分辨率模式 (1lx, 120ms),测试后自动进入断电模式
+#define BH1750_CMD_ONE_TIME_H_RES2 0x21// 一次性 H 分辨率模式2 (0.5lx, 120ms),测试后自动进入断电模式
+#define BH1750_CMD_ONE_TIME_L_RES 0x23 // 一次性 L 分辨率模式 (4lx, 16ms),测试后自动进入断电模式
 
 // 默认 I2C 地址 (ADDR 引脚接地)
 #define BH1750_DEFAULT_ADDR (0x23 << 1)
@@ -37,7 +43,7 @@ static int stm32_bh1750_init(illuminance_driver_t *self) {
     return -1;
   }
 
-  cmd = BH1750_CONTINUOUS_H_RES_MODE;
+  cmd = BH1750_CMD_CH_RES;
   if (I2C_MASTER_TRANSMIT(drv->i2c_drv, drv->dev_addr, &cmd, 1, 100) != 0) {
     log_e("BH1750 Set Mode failed!");
     return -1;
