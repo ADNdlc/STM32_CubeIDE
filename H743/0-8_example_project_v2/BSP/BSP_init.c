@@ -73,13 +73,4 @@ void bsp_init(void) {
   }
   sys_mem_init_external(); // 外部内存池初始化
 
-  /* ---- 温湿度传感器初始化 ---- */
-  humiture_driver_t *humiture_dev = humiture_driver_get(TH_SENSOR_ID_AMBIENT);
-  if (humiture_dev) {
-    if (HUMITURE_INIT(humiture_dev) == 0) {
-      log_i("Ambient TH sensor (DHT11) initialized.");
-    } else {
-      log_w("Failed to initialize Ambient TH sensor.");
-    }
-  }
 }

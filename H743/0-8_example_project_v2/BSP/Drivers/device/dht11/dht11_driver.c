@@ -38,7 +38,6 @@ static int stm32_dht11_init(humiture_driver_t *self) {
   sys_delay_ms(DHT11_RST_TIME_MS);
   ONE_WIRE_WRITE(drv->ow_drv, 1);
   sys_delay_us(DHT11_WAIT_TIME_US);
-
   if (dht11_check(drv) != 0) {
     log_e("DHT11 response check failed!");
     return -1;
@@ -101,15 +100,21 @@ static int dht11_check(dht11_driver_t *self) {
     retry++;
     sys_delay_us(1);
   }
-  if (retry >= 200)
-    return -1;
+
+  if (retry >= 300){
+	log_e("DHT11 response timeout!");
+	return -1;
+  }
+
   retry = 0;
   while (!ONE_WIRE_READ(self->ow_drv) && retry < 200) {
     retry++;
     sys_delay_us(1);
   }
-  if (retry >= 200)
+  if (retry >= 200){
+    log_e("DHT11 module error!");
     return -2;
+  }
   return 0;
 }
 

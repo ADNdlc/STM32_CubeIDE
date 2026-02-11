@@ -64,4 +64,16 @@ typedef struct {
 } th_sensor_mapping_t;
 extern const th_sensor_mapping_t th_sensor_mappings[TH_SENSOR_MAX];
 
+/* ----- i2c ----- */
+typedef enum {
+  I2C_BUS_SENSOR = 0, // 传感器I2C总线
+  //...
+  I2C_MAX_DEVICES
+} i2c_device_id_t;
+typedef struct {
+  void *resource; // 硬件总线资源
+} i2c_mapping_t;
+extern const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES];
+
+
 #endif /* BOARD_DEV_MAP_H_ */
