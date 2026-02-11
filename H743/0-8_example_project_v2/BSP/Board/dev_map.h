@@ -67,6 +67,7 @@ extern const th_sensor_mapping_t th_sensor_mappings[TH_SENSOR_MAX];
 /* ----- i2c ----- */
 typedef enum {
   I2C_BUS_SENSOR = 0, // 传感器I2C总线
+  I2C_BUS_TOUCH  = 1,
   //...
   I2C_MAX_DEVICES
 } i2c_device_id_t;
