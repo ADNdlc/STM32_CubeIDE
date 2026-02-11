@@ -1,30 +1,31 @@
 /*
  * bh1750_driver.h
  *
- *  Created on: Jan 25, 2026
+ *  Created on: Feb 11, 2026
  *      Author: Antigravity
  *
- *  BH1750 数字光照传感器驱动
- *  适配 i2c_driver 接口
+ *  BH1750 光照传感器驱动 (I2C)
  */
 
-#ifndef DEVICE_BH1750_BH1750_DRIVER_H_
-#define DEVICE_BH1750_BH1750_DRIVER_H_
+#ifndef BSP_DRIVERS_DEVICE_BH1750_BH1750_DRIVER_H_
+#define BSP_DRIVERS_DEVICE_BH1750_BH1750_DRIVER_H_
 
 #include "i2c_driver.h"
-#include <stdint.h>
-
-// BH1750 指令定义
-#define BH1750_CMD_POWER_DOWN 0x00
-#define BH1750_CMD_POWER_ON 0x01
-#define BH1750_CMD_RESET 0x07
-#define BH1750_CMD_CH_RES 0x10  // 连续 H 分辨率模式 (1lx, 120ms)
-#define BH1750_CMD_CH_RES2 0x11 // 连续 H 分辨率模式2 (0.5lx, 120ms)
-#define BH1750_CMD_CL_RES 0x13  // 连续 L 分辨率模式 (4lx, 16ms)
-#define BH1750_CMD_ONE_TIME_H_RES 0x20 // 一次性 H 分辨率模式 (1lx, 120ms),测试后自动进入断电模式
-#define BH1750_CMD_ONE_TIME_H_RES2 0x21// 一次性 H 分辨率模式2 (0.5lx, 120ms),测试后自动进入断电模式
-#define BH1750_CMD_ONE_TIME_L_RES 0x23 // 一次性 L 分辨率模式 (4lx, 16ms),测试后自动进入断电模式
+#include "illuminance_driver.h"
 
 
+// BH1750 驱动结构体
+typedef struct {
+  illuminance_driver_t base; // 基类
+  i2c_driver_t *i2c_drv;     // 依赖的 I2C 驱动
+  uint16_t dev_addr;         // I2C 设备地址
+} bh1750_driver_t;
 
-#endif /* DEVICE_BH1750_BH1750_DRIVER_H_ */
+/**
+ * @brief 创建 BH1750 驱动实例
+ * @param i2c_drv I2C 驱动实例
+ * @return 光照传感器驱动指针
+ */
+illuminance_driver_t *bh1750_driver_create(i2c_driver_t *i2c_drv);
+
+#endif /* BSP_DRIVERS_DEVICE_BH1750_BH1750_DRIVER_H_ */

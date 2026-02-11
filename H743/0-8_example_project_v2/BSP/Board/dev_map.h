@@ -20,7 +20,7 @@ typedef enum {
 } usart_device_id_t;
 // 定义映射项结构（屏蔽平台差异）
 typedef struct {
-  void *resource; //物理资源句柄
+  void *resource; // 物理资源句柄
 } usart_mapping_t;
 // 声明映射表
 extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
@@ -52,13 +52,13 @@ typedef struct {
 extern const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES];
 
 /* ----- 温湿度传感器 ----- */
-//温湿度传感器逻辑号
+// 温湿度传感器逻辑号
 typedef enum {
   TH_SENSOR_ID_AMBIENT = 0, // 温湿度传感器
   //...
   TH_SENSOR_MAX
 } th_sensor_id_t;
-//设备资源映射结构
+// 设备资源映射结构
 typedef struct {
   void *resource; // 关联的总线资源 (如 one_wire_driver_t* 或 i2c_driver_t*)
 } th_sensor_mapping_t;
@@ -75,5 +75,15 @@ typedef struct {
 } i2c_mapping_t;
 extern const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES];
 
+/* ----- 光照传感器 ----- */
+typedef enum {
+  LIGHT_SENSOR_ID_AMBIENT = 0, // 环境光传感器
+  //...
+  LIGHT_SENSOR_MAX
+} light_sensor_id_t;
+typedef struct {
+  void *resource; // 关联的总线资源 (如 i2c_driver_t*)
+} light_sensor_mapping_t;
+extern const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX];
 
 #endif /* BOARD_DEV_MAP_H_ */
