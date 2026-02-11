@@ -6,17 +6,18 @@
  */
 #include "test_config.h"
 #if ENABLE_TEST_HUMITURE
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 #include "Sys.h"
 #include "elog.h"
 #include "humiture_factory.h"
 #include "test_framework.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 
 #define LOG_TAG "TEST_HUM"
 static humiture_driver_t *sensor;
-static void humiture_test_setup(void) { 
+static void humiture_test_setup(void) {
   log_i("Humiture test started.");
   sensor = humiture_driver_get(TH_SENSOR_ID_AMBIENT);
   if (sensor == NULL) {
@@ -25,11 +26,12 @@ static void humiture_test_setup(void) {
   }
   static bool initialized = false;
   if (!initialized) {
-    if (HUMITURE_INIT(sensor) == 0)
+    if (HUMITURE_INIT(sensor) == 0) {
       initialized = true;
-    else
-      return;
-  } 
+    } else {
+      log_e("Failed to init sensor!");
+    }
+  }
 }
 
 static void humiture_test_loop(void) {
@@ -45,9 +47,8 @@ static void humiture_test_loop(void) {
   }
 }
 
-static void humiture_test_teardown(void){
-	log_i("Humiture test stopped.");
-}
+static void humiture_test_teardown(void) { log_i("Humiture test stopped."); }
 
-REGISTER_TEST(humiture, "humiture sensor test", humiture_test_setup, humiture_test_loop, humiture_test_teardown);
+REGISTER_TEST(humiture, "humiture sensor test", humiture_test_setup,
+              humiture_test_loop, humiture_test_teardown);
 #endif

@@ -47,6 +47,8 @@ static void illuminance_test_loop(void) {
   }
 }
 
+static void illuminance_test_teardown(void) { log_i("Illuminance test done."); }
+
 REGISTER_TEST(illuminance, "BH1750 light sensor test", illuminance_test_setup,
-              illuminance_test_loop, NULL);
+              illuminance_test_loop, illuminance_test_teardown);
 #endif
