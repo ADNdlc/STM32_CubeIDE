@@ -84,10 +84,10 @@ static void test_sdram_run(void) {
 
 static void test_sdram_teardown(void) {
   for (int i = 0; i < TEST_NUMBER; i++) {
-	if(pExternal[i] != NULL){
-		sys_free(SYS_MEM_EXTERNAL, pExternal[i]);
-		pExternal[i] = NULL;
-	}
+    if (pExternal[i] != NULL) {
+      sys_free(SYS_MEM_EXTERNAL, pExternal[i]);
+      pExternal[i] = NULL;
+    }
   }
   log_i("SDRAM Malloc/Free Test PASSED.");
   log_i("SDRAM Test Teardown: Completed.");

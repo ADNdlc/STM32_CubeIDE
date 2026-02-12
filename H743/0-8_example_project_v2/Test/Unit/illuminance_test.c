@@ -6,13 +6,13 @@
  */
 #include "test_config.h"
 #if ENABLE_TEST_ILLUMINANCE
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 #include "Sys.h"
 #include "elog.h"
 #include "illuminance_factory.h"
 #include "test_framework.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #define LOG_TAG "TEST_LUX"
 

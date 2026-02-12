@@ -14,7 +14,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-
 #define LOG_TAG "TEST_HUM"
 static humiture_driver_t *sensor;
 static void humiture_test_setup(void) {

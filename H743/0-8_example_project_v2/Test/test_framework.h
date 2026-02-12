@@ -7,15 +7,14 @@
 #ifndef TEST_FRAMEWORK_H_
 #define TEST_FRAMEWORK_H_
 
+#include "Project_cfg.h"
 #include <stdint.h>
 #include <stdio.h>
-#include "Project_cfg.h"
 
 #if TEST_ENABLE
 typedef void (*TestFunc_t)(void);
 
-typedef struct
-{
+typedef struct {
   const char *name;
   const char *desc;
   TestFunc_t setup;
@@ -29,18 +28,21 @@ typedef struct
  * .test_registry 的段中
  * 2. __attribute__((used)) : 告诉编译器即使没人显式调用，也不要优化掉它
  */
-#define REGISTER_TEST(test_name, description, setup_fn, loop_fn, teardown_fn) \
-  const TestCase_t test_##test_name __attribute__((                           \
-      section(".test_registry"), used)) = {.name = #test_name,                \
-                                           .desc = description,               \
-                                           .setup = setup_fn,                 \
-                                           .loop = loop_fn,                   \
+#define REGISTER_TEST(test_name, description, setup_fn, loop_fn, teardown_fn)  \
+  const TestCase_t test_##test_name __attribute__((                            \
+      section(".test_registry"), used)) = {.name = #test_name,                 \
+                                           .desc = description,                \
+                                           .setup = setup_fn,                  \
+                                           .loop = loop_fn,                    \
                                            .teardown = teardown_fn}
 #else
 // 当TEST_ENABLE未定义时，将宏和函数替换为空操作
 static inline void Test_Framework_Init(void) { (void)0; }
 static inline void Test_Framework_Run(void) { (void)0; }
-static inline void Test_Framework_HandleInput(uint8_t cmd) { (void)cmd; (void)0; }
+static inline void Test_Framework_HandleInput(uint8_t cmd) {
+  (void)cmd;
+  (void)0;
+}
 static inline void Test_List_All(void) { (void)0; }
 #endif
 

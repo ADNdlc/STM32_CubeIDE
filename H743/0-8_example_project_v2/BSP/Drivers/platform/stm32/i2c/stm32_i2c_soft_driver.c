@@ -9,7 +9,6 @@
 #include "stm32_i2c_driver.h"
 #include <stdlib.h>
 
-
 // 默认延时（微秒）
 #define DEFAULT_I2C_DELAY_US 2
 
@@ -206,10 +205,10 @@ static uint8_t stm32_i2c_soft_read_byte(stm32_i2c_driver_t *self, uint8_t ack) {
   // 发送应答
   if (ack) {
     // 发送 ACK (SDA=0)
-	stm32_i2c_soft_ack(self);
+    stm32_i2c_soft_ack(self);
   } else {
     // 发送 NACK (SDA=1)
-	stm32_i2c_soft_nack(self);
+    stm32_i2c_soft_nack(self);
   }
 
   return receive;

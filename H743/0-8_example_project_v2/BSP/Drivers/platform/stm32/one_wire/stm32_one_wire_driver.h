@@ -13,7 +13,7 @@
 #include "one_wire_driver.h"
 #include "stm32h7xx_hal.h"
 
-#define ONE_WIRE_MEMSOURCE  SYS_MEM_INTERNAL
+#define ONE_WIRE_MEMSOURCE SYS_MEM_INTERNAL
 
 // One-Wire 软件模拟配置
 typedef struct {
@@ -23,7 +23,7 @@ typedef struct {
 
 // STM32 软件模拟 One-Wire 驱动结构体
 typedef struct {
-  one_wire_driver_t base;         // 继承自 one_wire_driver_t 接口
+  one_wire_driver_t base; // 继承自 one_wire_driver_t 接口
 
   stm32_one_wire_config_t config; // 配置
   uint8_t initialized;            // 初始化标志
@@ -34,7 +34,8 @@ typedef struct {
  * @param config One-Wire 配置参数
  * @return 驱动实例指针，失败返回 NULL
  */
-one_wire_driver_t * stm32_one_wire_soft_create(const stm32_one_wire_config_t *config);
+one_wire_driver_t *
+stm32_one_wire_soft_create(const stm32_one_wire_config_t *config);
 void stm32_one_wire_soft_destroy(stm32_one_wire_driver_t *drv);
 
 #endif /* PLATFORM_STM32_ONE_WIRE_STM32_ONE_WIRE_SOFT_DRIVER_H_ */

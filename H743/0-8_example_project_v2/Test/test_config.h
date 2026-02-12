@@ -14,8 +14,8 @@
 #include "elog.h"
 
 #if TEST_ENABLE
-#define ENABLE_TEST_LED 0
-#define ENABLE_TEST_SDRAM 0
+#define ENABLE_TEST_LED 1
+#define ENABLE_TEST_SDRAM 1
 #define ENABLE_TEST_HUMITURE 1
 #define ENABLE_TEST_ILLUMINANCE 1
 

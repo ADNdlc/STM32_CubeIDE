@@ -13,7 +13,6 @@
 #include "stm32h7xx_hal.h"
 #include <stdint.h>
 
-
 // STM32 I2C 软件模拟配置
 typedef struct {
   GPIO_TypeDef *scl_port;

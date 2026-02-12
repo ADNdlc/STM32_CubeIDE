@@ -11,11 +11,11 @@
 #include "stm32h7xx_hal.h"
 #include "usart_driver.h"
 
-//从哪里分配
-#define USART_MEMSOURCE  SYS_MEM_INTERNAL
+// 从哪里分配
+#define USART_MEMSOURCE SYS_MEM_INTERNAL
 
 typedef struct {
-  usart_driver_t base;	// 继承后扩展到平台实现
+  usart_driver_t base; // 继承后扩展到平台实现
   UART_HandleTypeDef *huart;
 
   // 回调函数和上下文

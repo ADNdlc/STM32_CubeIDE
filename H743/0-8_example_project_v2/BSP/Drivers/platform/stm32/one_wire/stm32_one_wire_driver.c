@@ -7,9 +7,10 @@
 
 #include "one_wire/stm32_one_wire_driver.h"
 
-#include "Sys.h"
 #include "MemPool.h"
+#include "Sys.h"
 #include <stdlib.h>
+
 
 // 静态函数声明
 static int stm32_ow_init(one_wire_driver_t *self);
@@ -42,7 +43,7 @@ static int stm32_ow_init(one_wire_driver_t *self) {
 }
 
 static void stm32_ow_set_mode(one_wire_driver_t *self, uint8_t mode) {
-	stm32_one_wire_driver_t *drv = (stm32_one_wire_driver_t *)self;
+  stm32_one_wire_driver_t *drv = (stm32_one_wire_driver_t *)self;
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   GPIO_InitStruct.Pin = drv->config.pin;
 
@@ -58,13 +59,13 @@ static void stm32_ow_set_mode(one_wire_driver_t *self, uint8_t mode) {
 }
 
 static void stm32_ow_write(one_wire_driver_t *self, uint8_t data) {
-	stm32_one_wire_driver_t *drv = (stm32_one_wire_driver_t *)self;
+  stm32_one_wire_driver_t *drv = (stm32_one_wire_driver_t *)self;
   HAL_GPIO_WritePin(drv->config.port, drv->config.pin,
                     data ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 static uint8_t stm32_ow_read(one_wire_driver_t *self) {
-	stm32_one_wire_driver_t *drv = (stm32_one_wire_driver_t *)self;
+  stm32_one_wire_driver_t *drv = (stm32_one_wire_driver_t *)self;
   return (uint8_t)HAL_GPIO_ReadPin(drv->config.port, drv->config.pin);
 }
 
@@ -75,8 +76,8 @@ static void stm32_ow_release(one_wire_driver_t *self) {
 one_wire_driver_t *
 stm32_one_wire_soft_create(const stm32_one_wire_config_t *config) {
   // 使用 sys_malloc 分配内存
-  stm32_one_wire_driver_t *drv =
-      (stm32_one_wire_driver_t *)sys_malloc(ONE_WIRE_MEMSOURCE, sizeof(stm32_one_wire_driver_t));
+  stm32_one_wire_driver_t *drv = (stm32_one_wire_driver_t *)sys_malloc(
+      ONE_WIRE_MEMSOURCE, sizeof(stm32_one_wire_driver_t));
   if (drv) {
     drv->base.ops = &stm32_ow_ops;
     drv->config = *config;

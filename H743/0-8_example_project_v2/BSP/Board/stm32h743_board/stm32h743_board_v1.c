@@ -3,11 +3,26 @@
 
 #if (STM32H743_BOARD_V1 == TARGET_BOARD)
 #include "fmc.h"
+#include "gpio/stm32_gpio_driver.h"
 #include "i2c/stm32_i2c_driver.h"
 #include "main.h"
 #include "one_wire/stm32_one_wire_driver.h"
 #include "usart.h"
 
+// GPIO 设备配置
+static const stm32_gpio_config_t all_gpio_configs[GPIO_MAX_DEVICES] = {
+    [TOUCH_RST] = {.pin = touch_RST_Pin, .port = touch_RST_GPIO_Port},
+    [TOUCH_INT] = {.pin = touch_INT_Pin, .port = touch_INT_GPIO_Port},
+    [GPIO_ID_LED0] = {.pin = LED0_Pin, .port = LED0_GPIO_Port},
+    [GPIO_ID_LED1] = {.pin = LED1_Pin, .port = LED1_GPIO_Port},
+};
+// GPIO 设备映射表定义
+const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
+    [TOUCH_RST] = {.resource = (void *)&all_gpio_configs[TOUCH_RST]},
+    [TOUCH_INT] = {.resource = (void *)&all_gpio_configs[TOUCH_INT]},
+    [GPIO_ID_LED0] = {.resource = (void *)&all_gpio_configs[GPIO_ID_LED0]},
+    [GPIO_ID_LED1] = {.resource = (void *)&all_gpio_configs[GPIO_ID_LED1]},
+};
 
 // USART 设备映射表定义
 const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
@@ -16,10 +31,6 @@ const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
 };
 
 // I2C 资源
-static const stm32_i2c_config_t sensor_i2c_config = {
-    .is_soft = 0,
-    .resource.hi2c = &hi2c2,
-};
 static const stm32_i2c_soft_config_t touch_i2c_bus = {
     .scl_port = touch_SCL_GPIO_Port,
     .scl_pin = touch_SCL_Pin,
@@ -27,14 +38,14 @@ static const stm32_i2c_soft_config_t touch_i2c_bus = {
     .sda_pin = touch_SDA_Pin,
     .delay_us = 0,
 };
-static const stm32_i2c_config_t touch_i2c_config = {
-    .is_soft = 1,
-    .resource.soft_config = (stm32_i2c_soft_config_t *)&touch_i2c_bus,
+static const stm32_i2c_config_t all_i2c_configs[I2C_MAX_DEVICES] = {
+    [I2C_BUS_SENSOR] = {.is_soft = 0, .resource.hi2c = &hi2c2},
+    [I2C_BUS_TOUCH] = {.is_soft = 1, .resource.soft_config = (stm32_i2c_soft_config_t *)&touch_i2c_bus},
 };
 // I2C 设备映射表定义
 const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES] = {
-    [I2C_BUS_SENSOR] = {.resource = (void *)&sensor_i2c_config},
-    [I2C_BUS_TOUCH] = {.resource = (void *)&touch_i2c_config},
+    [I2C_BUS_SENSOR] = {.resource = (void *)&all_i2c_configs[I2C_BUS_SENSOR]},
+    [I2C_BUS_TOUCH] = {.resource = (void *)&all_i2c_configs[I2C_BUS_TOUCH]},
 };
 
 // SDRAM 设备映射表定义

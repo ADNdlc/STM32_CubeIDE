@@ -10,6 +10,20 @@
 
 #include "dev_map_config.h"
 
+/* ----- GPIO ----- */
+typedef enum {
+  TOUCH_RST = 0,
+  TOUCH_INT = 1,
+  GPIO_ID_LED0 = 2,
+  GPIO_ID_LED1 = 3,
+  //...
+  GPIO_MAX_DEVICES
+} gpio_device_id_t;
+typedef struct {
+  void *resource;
+} gpio_mapping_t;
+extern const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES];
+
 /* ----- USART ----- */
 // 定义串口逻辑ID，供上层应用和Factory层使用
 typedef enum {
@@ -31,11 +45,9 @@ typedef enum {
   //...
   SDRAM_MAX_DEVICES
 } sdram_device_id_t;
-
 typedef struct {
   void *resource;
 } sdram_mapping_t;
-
 extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 
 /* ----- one_wire ----- */
@@ -44,11 +56,9 @@ typedef enum {
   //...
   ONE_WIRE_MAX_DEVICES
 } one_wire_device_id_t;
-
 typedef struct {
   void *resource;
 } one_wire_mapping_t;
-
 extern const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES];
 
 /* ----- 温湿度传感器 ----- */

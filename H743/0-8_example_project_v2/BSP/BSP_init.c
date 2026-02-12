@@ -14,11 +14,12 @@
 #include "Sys.h"
 #include "dev_map.h"
 #include "elog_init.h"
-#include "sdram_factory.h"
-#include "usart_factory.h"
-#include "uart_queue.h"
 #include "humiture_factory.h"
 #include "one_wire/stm32_one_wire_driver.h"
+#include "sdram_factory.h"
+#include "uart_queue.h"
+#include "usart_factory.h"
+
 
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
@@ -72,5 +73,4 @@ void bsp_init(void) {
     }
   }
   sys_mem_init_external(); // 外部内存池初始化
-
 }
