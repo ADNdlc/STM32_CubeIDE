@@ -4,8 +4,10 @@
 #if (STM32H743_BOARD_V1 == TARGET_BOARD)
 #include "fmc.h"
 #include "i2c/stm32_i2c_driver.h"
-#include "usart.h"
+#include "main.h"
 #include "one_wire/stm32_one_wire_driver.h"
+#include "usart.h"
+
 
 // USART 设备映射表定义
 const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
@@ -15,24 +17,24 @@ const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
 
 // I2C 资源
 static const stm32_i2c_config_t sensor_i2c_config = {
-	.is_soft = 0,
-	.resource = (void *)&hi2c2,
+    .is_soft = 0,
+    .resource.hi2c = &hi2c2,
 };
 static const stm32_i2c_soft_config_t touch_i2c_bus = {
-	.scl_port = touch_SCL_GPIO_Port,
-	.scl_pin = touch_SCL_Pin,
-	.sda_port = touch_SDA_GPIO_Port,
-	.sda_pin = touch_SDA_Pin,
-	.delay_us = 0,
+    .scl_port = touch_SCL_GPIO_Port,
+    .scl_pin = touch_SCL_Pin,
+    .sda_port = touch_SDA_GPIO_Port,
+    .sda_pin = touch_SDA_Pin,
+    .delay_us = 0,
 };
 static const stm32_i2c_config_t touch_i2c_config = {
-	.is_soft = 1,
-	.resource = (void *)&touch_i2c_bus,
+    .is_soft = 1,
+    .resource.soft_config = (stm32_i2c_soft_config_t *)&touch_i2c_bus,
 };
 // I2C 设备映射表定义
 const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES] = {
     [I2C_BUS_SENSOR] = {.resource = (void *)&sensor_i2c_config},
-	[I2C_BUS_TOUCH]  = {.resource = (void *)&touch_i2c_config},
+    [I2C_BUS_TOUCH] = {.resource = (void *)&touch_i2c_config},
 };
 
 // SDRAM 设备映射表定义

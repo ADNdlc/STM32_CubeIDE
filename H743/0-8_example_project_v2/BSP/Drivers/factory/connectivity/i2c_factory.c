@@ -32,9 +32,9 @@ i2c_driver_t *i2c_driver_get(i2c_device_id_t id) {
     }
 
 #if (TARGET_PLATFORM == PLATFORM_STM32)
-    // 在 STM32 平台下，resource 被视为 I2C_HandleTypeDef 指针
+    // 在 STM32 平台下，resource 被视为 stm32_i2c_config_t 指针
     i2c_drivers[id] =
-    		STM32_I2C_DRIVER_CREATE((stm32_i2c_config_t *)mapping);
+        STM32_I2C_DRIVER_CREATE((stm32_i2c_config_t *)mapping->resource);
 #else
 #error "i2c_factory: 未定义 TARGET_PLATFORM 或平台不支持"
 #endif
