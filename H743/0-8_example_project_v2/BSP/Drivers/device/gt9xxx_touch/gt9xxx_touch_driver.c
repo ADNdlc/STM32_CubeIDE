@@ -9,10 +9,11 @@
  */
 
 #include "gt9xxx_touch_driver.h"
-#include "sys.h"
 #include "MemPool.h"
+#include "sys.h"
 #include <stdlib.h>
 #include <string.h>
+
 
 //=========================
 // 触摸点寄存器地址表
@@ -28,12 +29,15 @@ static const uint16_t GT9XXX_TPX_TBL[10] = {
 // 私有辅助函数
 //=========================
 
+#define isPressed(drv) (drv)->base.touch_data.state
+#define Call_Touch_Data(dev) (drv)->base.touch_data
 /**
  * @brief 向 GT9xxx 写入数据
  */
-static inline int gt9xxx_wr_reg(gt9xxx_touch_driver_t *drv, uint16_t reg, uint8_t *buf,
-                         uint8_t len) {
-
+static inline int gt9xxx_wr_reg(gt9xxx_touch_driver_t *drv, uint16_t reg,
+                                uint8_t *buf, uint8_t len) {
+  return I2C_MEM_WRITE(drv->bus.i2c, drv->bus.addr_mode << 1, reg,
+                       I2C_MEMADD_SIZE_16BIT, buf, len, 100);
 }
 
 /**
@@ -41,28 +45,22 @@ static inline int gt9xxx_wr_reg(gt9xxx_touch_driver_t *drv, uint16_t reg, uint8_
  */
 static int gt9xxx_rd_reg(gt9xxx_touch_driver_t *drv, uint16_t reg, uint8_t *buf,
                          uint8_t len) {
-
+  return I2C_MEM_READ(drv->bus.i2c, drv->bus.addr_mode << 1, reg,
+                      I2C_MEMADD_SIZE_16BIT, buf, len, 100);
 }
 
 /**
  * @brief 设置 RST 引脚电平
  */
 static inline void gt9xxx_rst_set(gt9xxx_touch_driver_t *drv, uint8_t value) {
-  GPIO_WRITE(drv->config.rst_gpio, value);
+  GPIO_WRITE(drv->bus.rst_gpio, value);
 }
 
 /**
  * @brief 设置 INT 引脚电平（用于设置地址模式）
  */
 static inline void gt9xxx_int_set(gt9xxx_touch_driver_t *drv, uint8_t value) {
-  GPIO_WRITE(drv->config.int_gpio, value);
-}
-
-/**
- * @brief 读取 INT 引脚电平
- */
-static inline uint8_t gt9xxx_int_read(gt9xxx_touch_driver_t *drv) {
-  return GPIO_READ(drv->config.int_gpio);
+  GPIO_WRITE(drv->bus.int_gpio, value);
 }
 
 //=========================
@@ -76,17 +74,9 @@ static int gt9xxx_init(touch_driver_t *self) {
   gt9xxx_touch_driver_t *drv = (gt9xxx_touch_driver_t *)self;
   uint8_t temp[5];
 
-  if (drv->initialized) {
-    return 0;
-  }
-
-  // 初始化 I2C
-  I2C_INIT(drv->config.i2c);
-
-  // 复位时序：根据地址模式设置 INT 引脚状态
-  // 地址 0x14: 释放 RST 时 INT 为高
-  // 地址 0x5D: 释放 RST 时 INT 为低
-  if (drv->config.addr_mode == GT9XXX_ADDR_0x14) {
+  // 1. 设置复位时序确定 I2C 地址
+  GPIO_SET_MODE(drv->bus.int_gpio, GPIO_PushPullOutput);
+  if (drv->bus.addr_mode == GT9XXX_ADDR_0x14) {
     gt9xxx_int_set(drv, 1); // INT=HIGH for 0x14
   } else {
     gt9xxx_int_set(drv, 0); // INT=LOW for 0x5D
@@ -97,144 +87,116 @@ static int gt9xxx_init(touch_driver_t *self) {
   gt9xxx_rst_set(drv, 1); // 释放复位
   sys_delay_ms(10);
 
+  // 释放 INT 引脚为浮空输入模式
+  GPIO_SET_MODE(drv->bus.int_gpio, GPIO_FloatInput);
   sys_delay_ms(100);
 
-  // 读取产品 ID
+  // 2. 读取产品 ID
   if (gt9xxx_rd_reg(drv, GT9XXX_PID_REG, temp, 4) != 0) {
     return -1;
   }
   temp[4] = 0;
 
-  // 验证产品 ID
-  if (strcmp((char *)temp, "911") && strcmp((char *)temp, "9147") &&
-      strcmp((char *)temp, "1158") && strcmp((char *)temp, "9271")) {
-    // 未识别的触摸芯片
-    return -2;
-  }
-
-  // 保存设备 ID
-  strncpy(drv->device_id, (char *)temp, sizeof(drv->device_id) - 1);
-  drv->device_id[sizeof(drv->device_id) - 1] = '\0';
-
-  // 根据芯片型号设置最大触摸点数
-  if (strcmp((char *)temp, "9271") == 0) {
-    drv->max_points = 10; // GT9271 支持 10 点触摸
+  // 3. 验证并识别芯片型号
+  if (strcmp((char *)temp, "911") == 0 || strcmp((char *)temp, "9147") == 0 ||
+      strcmp((char *)temp, "1158") == 0) {
+    drv->max_points = 5;
+  } else if (strcmp((char *)temp, "9271") == 0) {
+    drv->max_points = 10;
   } else {
-    drv->max_points = 5; // 其他芯片支持 5 点触摸
+    // 默认回退到 5 点
+    drv->max_points = 5;
   }
+  strncpy(drv->device_id, (char *)temp, sizeof(drv->device_id) - 1);
 
-  // 软复位
+  // 4. 软复位
   temp[0] = 0x02;
   gt9xxx_wr_reg(drv, GT9XXX_CTRL_REG, temp, 1);
   sys_delay_ms(10);
-
-  // 结束复位，进入读坐标状态
   temp[0] = 0x00;
   gt9xxx_wr_reg(drv, GT9XXX_CTRL_REG, temp, 1);
 
-  drv->initialized = 1;
   return 0;
 }
 
 /**
  * @brief 扫描触摸屏获取触摸数据
- * @return 0=无触摸, 1=有触摸, <0=错误
  */
-static int gt9xxx_scan(touch_driver_t *self, touch_data_t *data) {
+static int gt9xxx_scan(touch_driver_t *self) {
   gt9xxx_touch_driver_t *drv = (gt9xxx_touch_driver_t *)self;
-  uint8_t temp[4];
   uint8_t state = 0;
   uint8_t cmd = 0;
-
-  if (data == NULL) {
-    return -1;
-  }
-
-  // 初始化输出
-  data->count = 0;
+  uint8_t temp[4];
 
   // 读取触摸状态
   if (gt9xxx_rd_reg(drv, GT9XXX_GSTID_REG, &state, 1) != 0) {
     return -2;
   }
 
-  // 检查是否有有效数据
-  if (state & 0x80) {
-    // 清除状态标志
-    cmd = 0;
-    gt9xxx_wr_reg(drv, GT9XXX_GSTID_REG, &cmd, 1);
-  } else {
-    return 0; // 无触摸
+  // 检查是否有有效采集数据 (Buffer Ready bit)
+  if (!(state & 0x80)) {
+    return 0; // 无新坐标
   }
 
   // 获取触摸点数量
   uint8_t touch_count = state & 0x0F;
-  if (touch_count == 0 || touch_count > drv->max_points) {
-    return 0; // 无效触摸
+  if (touch_count > TOUCH_MAX_POINTS) {
+    touch_count = 0; // 异常
   }
+
+  drv->base.touch_data.point_count = touch_count;
+  drv->base.touch_data.state =
+      (touch_count > 0) ? TOUCH_STATE_PRESSED : TOUCH_STATE_RELEASED;
 
   // 读取每个触摸点的坐标
   for (uint8_t i = 0; i < touch_count; i++) {
     if (gt9xxx_rd_reg(drv, GT9XXX_TPX_TBL[i], temp, 4) != 0) {
-      return -3;
+      break;
     }
-    data->points[i].x = ((uint16_t)temp[1] << 8) | temp[0];
-    data->points[i].y = ((uint16_t)temp[3] << 8) | temp[2];
+    drv->base.touch_data.points[i].x = ((uint16_t)temp[1] << 8) | temp[0];
+    drv->base.touch_data.points[i].y = ((uint16_t)temp[3] << 8) | temp[2];
   }
-  data->count = touch_count;
 
-  return 1; // 有触摸
+  // 清除标志位，准备下一次采集
+  cmd = 0;
+  gt9xxx_wr_reg(drv, GT9XXX_GSTID_REG, &cmd, 1);
+
+  return (touch_count > 0) ? 1 : 0;
 }
 
-/**
- * @brief 获取支持的最大触摸点数
- */
-static uint8_t gt9xxx_get_max_points(touch_driver_t *self) {
-  gt9xxx_touch_driver_t *drv = (gt9xxx_touch_driver_t *)self;
-  return drv->max_points;
+static Touch_Data_t *gt9xxx_get_touch_data(touch_driver_t *self) {
+  return &self->touch_data;
 }
 
-/**
- * @brief 获取设备ID字符串
- */
-static const char *gt9xxx_get_device_id(touch_driver_t *self) {
-  gt9xxx_touch_driver_t *drv = (gt9xxx_touch_driver_t *)self;
-  return drv->device_id;
-}
-
-//==========
-// 虚函数表
-//==========
-
+// 接口实现
 static const touch_driver_ops_t gt9xxx_touch_ops = {
-
+    .init = gt9xxx_init,
+    .get_touch_data = gt9xxx_get_touch_data,
+    .scan = gt9xxx_scan,
 };
 
 //===========
 // 公共函数
 //===========
-
-gt9xxx_touch_driver_t *gt9xxx_touch_create(const gt9xxx_config_t *config) {
-  if (config == NULL || config->i2c == NULL || config->rst_gpio == NULL ||
-      config->int_gpio == NULL) {
+touch_driver_t *gt9xxx_touch_create(const gt9xxx_bus_t *bus) {
+  if (bus == NULL || bus->i2c == NULL || bus->rst_gpio == NULL ||
+		  bus->int_gpio == NULL) {
     return NULL;
   }
 
-  gt9xxx_touch_driver_t *drv =
-      (gt9xxx_touch_driver_t *)sys_malloc(SYS_MEM_INTERNAL, sizeof(gt9xxx_touch_driver_t));
+  gt9xxx_touch_driver_t *drv = (gt9xxx_touch_driver_t *)sys_malloc(
+      SYS_MEM_INTERNAL, sizeof(gt9xxx_touch_driver_t));
   if (drv) {
     memset(drv, 0, sizeof(gt9xxx_touch_driver_t));
     drv->base.ops = &gt9xxx_touch_ops;
-    drv->config = *config;
-    drv->max_points = 5; // 默认 5 点触摸
-    drv->initialized = 0;
+    drv->bus = *bus;
   }
 
-  return drv;
+  return (touch_driver_t *)drv;
 }
 
 void gt9xxx_touch_destroy(gt9xxx_touch_driver_t *drv) {
   if (drv) {
-    free(drv);
+    sys_free(SYS_MEM_INTERNAL, drv);
   }
 }

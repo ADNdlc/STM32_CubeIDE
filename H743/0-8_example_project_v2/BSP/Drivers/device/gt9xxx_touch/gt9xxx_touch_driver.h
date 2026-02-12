@@ -16,7 +16,6 @@
 #include "i2c_driver.h"
 #include "touch_driver.h"
 
-
 //==============================================================================
 // GT9XXX 寄存器定义
 //==============================================================================
@@ -54,21 +53,28 @@ typedef enum {
 // GT9xxx 驱动配置和结构体
 //==============================================================================
 
-// GT9xxx 驱动配置
+// GT9xxx 配置
+typedef struct {
+  void *i2c_conf;       	 // I2C 驱动实例
+  void *rst_gpio_conf;      // RST 引脚驱动
+  void *int_gpio_conf;      // INT 引脚驱动
+  gt9xxx_addr_mode_t addr_mode_conf; // I2C 地址模式
+} gt9xxx_config_t;
+
+// GT9xxx 通信
 typedef struct {
   i2c_driver_t *i2c;            // I2C 驱动实例
   gpio_driver_t *rst_gpio;      // RST 引脚驱动
   gpio_driver_t *int_gpio;      // INT 引脚驱动
   gt9xxx_addr_mode_t addr_mode; // I2C 地址模式
-} gt9xxx_config_t;
+} gt9xxx_bus_t;
 
 // GT9xxx 驱动结构体
 typedef struct {
   touch_driver_t base;    // 继承自 touch_driver_t 基类
-  gt9xxx_config_t config; // 配置
-  uint8_t max_points;     // 支持的最大触摸点数
+  gt9xxx_bus_t bus;    // 通信依赖
+  uint8_t max_points;	  // 最大触摸数量(自动判断所以没放在config里)
   char device_id[8];      // 设备ID字符串
-  uint8_t initialized;    // 初始化标志
 } gt9xxx_touch_driver_t;
 
 //==============================================================================
@@ -80,7 +86,7 @@ typedef struct {
  * @param config 配置参数
  * @return 驱动实例指针，失败返回 NULL
  */
-gt9xxx_touch_driver_t *gt9xxx_touch_create(const gt9xxx_config_t *config);
+touch_driver_t *gt9xxx_touch_create(const gt9xxx_bus_t *bus);
 
 /**
  * @brief 销毁 GT9xxx 触摸屏驱动实例

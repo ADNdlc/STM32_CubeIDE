@@ -77,7 +77,7 @@ extern const th_sensor_mapping_t th_sensor_mappings[TH_SENSOR_MAX];
 /* ----- i2c ----- */
 typedef enum {
   I2C_BUS_SENSOR = 0, // 传感器I2C总线
-  I2C_BUS_TOUCH  = 1,
+  I2C_BUS_TOUCH = 1,
   //...
   I2C_MAX_DEVICES
 } i2c_device_id_t;
@@ -96,5 +96,15 @@ typedef struct {
   void *resource; // 关联的总线资源 (如 i2c_driver_t*)
 } light_sensor_mapping_t;
 extern const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX];
+
+/* ----- 触摸屏 ----- */
+typedef enum { 
+  TOUCH_ID_UI = 0, 
+  TOUCH_MAX 
+} touch_id_t;
+typedef struct {
+  void *resource; // 逻辑资源映射
+} touch_mapping_t;
+extern const touch_mapping_t touch_mappings[TOUCH_MAX];
 
 #endif /* BOARD_DEV_MAP_H_ */

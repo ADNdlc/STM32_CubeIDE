@@ -16,6 +16,10 @@ typedef struct i2c_driver_t i2c_driver_t;
 
 #define USE_I2C_MEM
 
+// I2C 寄存器地址长度
+#define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+#define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+
 // I2C 驱动操作接口 (虚函数表)
 typedef struct {
   // 基础收发 (同步)

@@ -40,7 +40,9 @@ static const stm32_i2c_soft_config_t touch_i2c_bus = {
 };
 static const stm32_i2c_config_t all_i2c_configs[I2C_MAX_DEVICES] = {
     [I2C_BUS_SENSOR] = {.is_soft = 0, .resource.hi2c = &hi2c2},
-    [I2C_BUS_TOUCH] = {.is_soft = 1, .resource.soft_config = (stm32_i2c_soft_config_t *)&touch_i2c_bus},
+    [I2C_BUS_TOUCH] = {.is_soft = 1,
+                       .resource.soft_config =
+                           (stm32_i2c_soft_config_t *)&touch_i2c_bus},
 };
 // I2C 设备映射表定义
 const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES] = {
@@ -69,6 +71,17 @@ const th_sensor_mapping_t th_sensor_mappings[TH_SENSOR_MAX] = {
 // 光照传感器驱动映射表
 const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX] = {
     [LIGHT_SENSOR_ID_AMBIENT] = {.resource = (void *)I2C_BUS_SENSOR},
+};
+
+static const gt9xxx_config_t gt9xxx_config = {
+    .i2c_conf = (void *)I2C_BUS_TOUCH,
+    .rst_gpio_conf  = (void *)TOUCH_RST,
+    .int_gpio_conf  = (void *)TOUCH_INT,
+    .addr_mode_conf  = GT9XXX_ADDR_0x14,
+};
+// 触摸屏驱动映射表
+const touch_mapping_t touch_mappings[TOUCH_MAX] = {
+    [TOUCH_ID_UI] = {.resource = (void *)&gt9xxx_config},
 };
 
 #endif // STM32H743_BOARD_V1

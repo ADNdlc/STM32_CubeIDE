@@ -45,4 +45,8 @@
 //...
 #define DEV_LIGHT USE_BH1750 // 光照传感器选择
 
+/* 触摸屏类型选择 */
+#define USE_GT9XXX 1
+#define DEV_TOUCH USE_GT9XXX
+
 #endif /* BOARD_DEV_MAP_CONFIG_H_ */
