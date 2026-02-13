@@ -1,5 +1,5 @@
 #include "test_config.h"
-#if USART_QUEUE_TEST_LED
+#if ENABLE_TEST_USART_QUEUE
 #include "test_framework.h"
 #include "uart_queue/uart_queue.h"
 #include "usart_factory.h"

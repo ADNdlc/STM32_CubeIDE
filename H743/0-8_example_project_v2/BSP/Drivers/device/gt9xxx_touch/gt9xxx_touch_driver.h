@@ -55,9 +55,9 @@ typedef enum {
 
 // GT9xxx 配置
 typedef struct {
-  void *i2c_conf;       	 // I2C 驱动实例
-  void *rst_gpio_conf;      // RST 引脚驱动
-  void *int_gpio_conf;      // INT 引脚驱动
+  void *i2c_conf;       	// I2C 驱动配置
+  void *rst_gpio_conf;      // RST 引脚配置
+  void *int_gpio_conf;      // INT 引脚配置
   gt9xxx_addr_mode_t addr_mode_conf; // I2C 地址模式
 } gt9xxx_config_t;
 

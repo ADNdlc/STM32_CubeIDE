@@ -103,8 +103,11 @@ typedef enum {
   TOUCH_MAX 
 } touch_id_t;
 typedef struct {
-  void *resource; // 逻辑资源映射
+  void *resource;
 } touch_mapping_t;
 extern const touch_mapping_t touch_mappings[TOUCH_MAX];
+
+
+#define CALL_RESOURE(config, type, res_name) ((type)(((config*)mapping->resource)->res_name))
 
 #endif /* BOARD_DEV_MAP_H_ */

@@ -2,12 +2,13 @@
 #include "dev_map_config.h"
 
 #if (STM32H743_BOARD_V1 == TARGET_BOARD)
+#include "main.h"
 #include "fmc.h"
+#include "usart.h"
 #include "gpio/stm32_gpio_driver.h"
 #include "i2c/stm32_i2c_driver.h"
-#include "main.h"
 #include "one_wire/stm32_one_wire_driver.h"
-#include "usart.h"
+#include "gt9xxx_touch/gt9xxx_touch_driver.h"
 
 // GPIO 设备配置
 static const stm32_gpio_config_t all_gpio_configs[GPIO_MAX_DEVICES] = {

@@ -4,10 +4,11 @@
  *  Created on: Feb 12, 2026
  *      Author: Antigravity
  */
+#include "test_config.h"
+#if ENABLE_TEST_TOUCH
 
 #define LOG_TAG "TEST_TOUCH"
 
-#include "touch_test.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -17,9 +18,11 @@
 #include "touch_factory.h"
 #include "test_framework.h"
 
+  touch_driver_t *drv;
+
 static void touch_test_setup(void) {
   log_i("Touch test started.");
-  touch_driver_t *drv = touch_driver_get(TOUCH_ID_UI);
+  drv = touch_driver_get(TOUCH_ID_UI);
   if (drv) {
     log_i("Touch driver instance found.");
   } else {
@@ -32,8 +35,6 @@ static void touch_test_loop(void) {
   if (sys_get_systick_ms() - last_tick < 20) // 50Hz 采样
     return;
   last_tick = sys_get_systick_ms();
-
-  touch_driver_t *drv = touch_driver_get(TOUCH_ID_UI);
   if (drv == NULL)
     return;
 
@@ -46,5 +47,12 @@ static void touch_test_loop(void) {
   }
 }
 
+static void touch_test_teardown(){
+  drv = NULL;
+  log_i("Touch test teardown.");
+}
+
 REGISTER_TEST(touch, "GT9xxx touch screen test", touch_test_setup,
-              touch_test_loop, NULL);
+              touch_test_loop, touch_test_teardown);
+#endif
+
