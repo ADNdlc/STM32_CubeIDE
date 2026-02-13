@@ -11,9 +11,10 @@
 #include <stddef.h>
 
 #if (DEV_TOUCH == USE_GT9XXX)
-#include "i2c_factory.h"
 #include "gpio_factory.h"
 #include "gt9xxx_touch/gt9xxx_touch_driver.h"
+#include "i2c_factory.h"
+
 
 #endif
 
@@ -28,11 +29,12 @@ touch_driver_t *touch_driver_get(touch_id_t id) {
     const touch_mapping_t *mapping = &touch_mappings[id];
 
 #if (DEV_TOUCH == USE_GT9XXX)
+    gt9xxx_config_t *conf = (gt9xxx_config_t *)mapping->resource;
     gt9xxx_bus_t bus = {
-        .i2c = i2c_driver_get( CALL_RESOURE(gt9xxx_config_t, i2c_device_id_t, i2c_conf) ),
-        .rst_gpio = gpio_driver_get( CALL_RESOURE(gt9xxx_config_t, gpio_device_id_t, rst_gpio_conf) ),
-        .int_gpio = gpio_driver_get( CALL_RESOURE(gt9xxx_config_t, gpio_device_id_t, int_gpio_conf) ),
-        .addr_mode = ((gt9xxx_config_t*)mapping->resource)->addr_mode_conf,
+        .i2c = i2c_driver_get(conf->i2c_id),
+        .rst_gpio = gpio_driver_get(conf->rst_gpio_id),
+        .int_gpio = gpio_driver_get(conf->int_gpio_id),
+        .addr_mode = conf->addr_mode,
     };
 
     touch_drivers[id] = gt9xxx_touch_create(&bus);

@@ -2,13 +2,15 @@
 #include "dev_map_config.h"
 
 #if (STM32H743_BOARD_V1 == TARGET_BOARD)
-#include "main.h"
 #include "fmc.h"
-#include "usart.h"
 #include "gpio/stm32_gpio_driver.h"
-#include "i2c/stm32_i2c_driver.h"
-#include "one_wire/stm32_one_wire_driver.h"
 #include "gt9xxx_touch/gt9xxx_touch_driver.h"
+#include "i2c/stm32_i2c_driver.h"
+#include "main.h"
+#include "one_wire/stm32_one_wire_driver.h"
+#include "rtc/stm32_rtc_driver.h"
+#include "usart.h"
+
 
 /*************
  * 总线配置表
@@ -36,14 +38,16 @@ const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
 };
 
 // I2C 设备配置
-static const stm32_i2c_soft_config_t touch_soft_i2c_bus = { // 软件i2c配置
+static const stm32_i2c_soft_config_t touch_soft_i2c_bus = {
+    // 软件i2c配置
     .scl_port = touch_SCL_GPIO_Port,
     .scl_pin = touch_SCL_Pin,
     .sda_port = touch_SDA_GPIO_Port,
     .sda_pin = touch_SDA_Pin,
     .delay_us = 0,
 };
-static const stm32_i2c_config_t all_i2c_configs[I2C_MAX_DEVICES] = { // 硬件i2c配置
+static const stm32_i2c_config_t all_i2c_configs[I2C_MAX_DEVICES] = {
+    // 硬件i2c配置
     [I2C_BUS_SENSOR] = {.is_soft = 0, .resource.hi2c = &hi2c2},
     [I2C_BUS_TOUCH] = {.is_soft = 1,
                        .resource.soft_config =
@@ -59,6 +63,10 @@ const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES] = {
 const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES] = {
     [SDRAM_MAIN] = {.resource = (void *)&hsdram1}};
 
+// RTC 逻辑号映射表
+const rtc_mapping_t rtc_mappings[RTC_MAX] = {
+    [RTC_ID_INTERNAL] = {.resource = (void *)&hrtc},
+};
 
 // One-Wire 设备配置
 static const stm32_one_wire_config_t dht11_congfig = {
@@ -86,10 +94,10 @@ const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX] = {
 
 // "触摸屏"总线配置
 static const gt9xxx_config_t gt9xxx_config = {
-    .i2c_conf = (void *)I2C_BUS_TOUCH,
-    .rst_gpio_conf  = (void *)TOUCH_RST,
-    .int_gpio_conf  = (void *)TOUCH_INT,
-    .addr_mode_conf  = GT9XXX_ADDR_0x14,
+    .i2c_id = I2C_BUS_TOUCH,
+    .rst_gpio_id = TOUCH_RST,
+    .int_gpio_id = TOUCH_INT,
+    .addr_mode = GT9XXX_ADDR_0x14,
 };
 // "触摸屏"逻辑号映射表
 const touch_mapping_t touch_mappings[TOUCH_MAX] = {

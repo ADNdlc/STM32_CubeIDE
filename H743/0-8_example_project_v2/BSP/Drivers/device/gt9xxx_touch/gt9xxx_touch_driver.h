@@ -12,9 +12,12 @@
 #ifndef DEVICE_GT9XXX_TOUCH_DRIVER_H_
 #define DEVICE_GT9XXX_TOUCH_DRIVER_H_
 
+#include "dev_map.h"
 #include "gpio_driver.h"
 #include "i2c_driver.h"
 #include "touch_driver.h"
+#include <stdint.h>
+
 
 //==============================================================================
 // GT9XXX 寄存器定义
@@ -53,15 +56,15 @@ typedef enum {
 // GT9xxx 驱动配置和结构体
 //=========================
 
-// GT9xxx 配置
+// GT9xxx 配置 (用于 Board mapping)
 typedef struct {
-  void *i2c_conf;       	// I2C 驱动配置
-  void *rst_gpio_conf;      // RST 引脚配置
-  void *int_gpio_conf;      // INT 引脚配置
-  gt9xxx_addr_mode_t addr_mode_conf; // I2C 地址模式
+  i2c_device_id_t i2c_id;       // I2C 逻辑 ID
+  gpio_device_id_t rst_gpio_id; // RST 引脚逻辑 ID
+  gpio_device_id_t int_gpio_id; // INT 引脚逻辑 ID
+  gt9xxx_addr_mode_t addr_mode; // I2C 地址模式
 } gt9xxx_config_t;
 
-// GT9xxx 通信
+// GT9xxx 通信依赖 (由 Factory 注入)
 typedef struct {
   i2c_driver_t *i2c;            // I2C 驱动实例
   gpio_driver_t *rst_gpio;      // RST 引脚驱动
@@ -71,10 +74,10 @@ typedef struct {
 
 // GT9xxx 驱动结构体
 typedef struct {
-  touch_driver_t base;    // 继承自 touch_driver_t 基类
-  gt9xxx_bus_t bus;     // 通信依赖
-  uint8_t max_points;	  // 最大触摸数量(自动判断所以没放在config里)
-  char device_id[8];      // 设备ID字符串
+  touch_driver_t base; // 继承自 touch_driver_t 基类
+  gt9xxx_bus_t bus;    // 通信依赖
+  uint8_t max_points;  // 最大触摸数量
+  char device_id[8];   // 设备ID字符串
 } gt9xxx_touch_driver_t;
 
 //============
@@ -83,7 +86,7 @@ typedef struct {
 
 /**
  * @brief 创建 GT9xxx 触摸屏驱动实例
- * @param config 配置参数
+ * @param bus 通信依赖
  * @return 驱动实例指针，失败返回 NULL
  */
 touch_driver_t *gt9xxx_touch_create(const gt9xxx_bus_t *bus);

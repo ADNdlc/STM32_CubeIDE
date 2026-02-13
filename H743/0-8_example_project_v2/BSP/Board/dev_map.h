@@ -7,6 +7,9 @@
 
 #ifndef BOARD_DEV_MAP_H_
 #define BOARD_DEV_MAP_H_
+#include <stdbool.h>
+#include <stdint.h>
+
 
 #include "dev_map_config.h"
 
@@ -98,16 +101,21 @@ typedef struct {
 extern const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX];
 
 /* ----- 触摸屏 ----- */
-typedef enum { 
-  TOUCH_ID_UI = 0, 
-  TOUCH_MAX 
-} touch_id_t;
+typedef enum { TOUCH_ID_UI = 0, TOUCH_MAX } touch_id_t;
 typedef struct {
   void *resource;
 } touch_mapping_t;
 extern const touch_mapping_t touch_mappings[TOUCH_MAX];
 
+/* ----- RTC ----- */
+typedef enum { RTC_ID_INTERNAL = 0, RTC_MAX } rtc_device_id_t;
+typedef struct {
+  void *resource;
+} rtc_mapping_t;
+extern const rtc_mapping_t rtc_mappings[RTC_MAX];
+
 // 辅助宏
-#define CALL_RESOURE(config, type, res_name) ((type)(((config*)mapping->resource)->res_name))
+#define CALL_RESOURE(config, type, res_name)                                   \
+  ((type)(((config *)mapping->resource)->res_name))
 
 #endif /* BOARD_DEV_MAP_H_ */
