@@ -47,6 +47,6 @@
 
 /* 触摸屏类型选择 */
 #define USE_GT9XXX 1
-#define DEV_TOUCH USE_GT9XXX
+#define DEV_TOUCH USE_GT9XXX // 触摸屏驱动选择
 
 #endif /* BOARD_DEV_MAP_CONFIG_H_ */

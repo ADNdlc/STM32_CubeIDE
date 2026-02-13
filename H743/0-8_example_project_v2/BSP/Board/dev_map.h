@@ -107,7 +107,7 @@ typedef struct {
 } touch_mapping_t;
 extern const touch_mapping_t touch_mappings[TOUCH_MAX];
 
-
+// 辅助宏
 #define CALL_RESOURE(config, type, res_name) ((type)(((config*)mapping->resource)->res_name))
 
 #endif /* BOARD_DEV_MAP_H_ */
