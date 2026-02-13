@@ -20,8 +20,10 @@
 #include "rtc_factory.h"
 #include "test_framework.h"
 
+ rtc_driver_t *rtc;
+
 static void rtc_test_setup(void) {
-  rtc_driver_t *rtc = rtc_driver_get(RTC_ID_INTERNAL);
+  rtc = rtc_driver_get(RTC_ID_INTERNAL);
   if (!rtc) {
     log_e("RTC driver not found!");
     return;
@@ -45,11 +47,8 @@ static void rtc_test_loop(void) {
   if (sys_get_systick_ms() - last_tick < 1000)
     return;
   last_tick = sys_get_systick_ms();
-
-  rtc_driver_t *rtc = rtc_driver_get(RTC_ID_INTERNAL);
   if (!rtc)
     return;
-
   rtc_time_t time;
   rtc_date_t date;
   RTC_GET_TIME(rtc, &time);
@@ -59,5 +58,10 @@ static void rtc_test_loop(void) {
         date.month, date.day, time.hour, time.minute, time.second, date.week);
 }
 
-REGISTER_TEST(rtc, "Internal RTC test", rtc_test_setup, rtc_test_loop, NULL);
+static void rtc_test_teardown(){
+  rtc = NULL;
+  log_i("RTC test teardown.");
+}
+
+REGISTER_TEST(rtc, "Internal RTC test", rtc_test_setup, rtc_test_loop, rtc_test_teardown);
 #endif
