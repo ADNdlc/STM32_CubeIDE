@@ -46,6 +46,7 @@ MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 64K
+  EXT_RAM (xrw)   : ORIGIN = 0x68000000,  LENGTH = 1M
 }
 
 /* Sections */
@@ -186,6 +187,16 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >RAM
+
+  /* 外部 SRAM 内存管理段 */
+  .ext_sram (NOLOAD) :
+  {
+    . = ALIGN(64);
+    *(.ext_sram_pool)
+    . = ALIGN(4);
+    *(.ext_sram_map)
+    . = ALIGN(4);
+  } >EXT_RAM
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :

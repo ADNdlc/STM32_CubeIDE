@@ -18,9 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "i2c.h"
 #include "rtc.h"
 #include "spi.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -90,23 +92,25 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   GPIOB->ODR ^= (1 << 0);
   GPIOB->ODR ^= (1 << 1);
   HAL_Delay(500);
 
   bsp_init(); // 驱动层初始化
-  Test_Framework_Init();
+  //Test_Framework_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  Test_Framework_Run();
+	  //Test_Framework_Run();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -14,10 +14,8 @@
 
 /* ----- GPIO ----- */
 typedef enum {
-  TOUCH_RST = 0,
-  TOUCH_INT = 1,
-  GPIO_ID_LED0 = 2,
-  GPIO_ID_LED1 = 3,
+  GPIO_ID_LED0 = 0,
+  GPIO_ID_LED1,
   //...
   GPIO_MAX_DEVICES
 } gpio_device_id_t;
@@ -41,45 +39,9 @@ typedef struct {
 // 声明映射表
 extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 
-/* ----- SDRAM ----- */
-typedef enum {
-  SDRAM_MAIN = 0,
-  //...
-  SDRAM_MAX_DEVICES
-} sdram_device_id_t;
-typedef struct {
-  void *resource;
-} sdram_mapping_t;
-extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
-
-/* ----- one_wire ----- */
-typedef enum {
-  ONE_WIRE_DHT11 = 0,
-  //...
-  ONE_WIRE_MAX_DEVICES
-} one_wire_device_id_t;
-typedef struct {
-  void *resource;
-} one_wire_mapping_t;
-extern const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES];
-
-/* ----- 温湿度传感器 ----- */
-// 温湿度传感器逻辑号
-typedef enum {
-  TH_SENSOR_ID_AMBIENT = 0, // 温湿度传感器
-  //...
-  TH_SENSOR_MAX
-} th_sensor_id_t;
-// 设备资源映射结构
-typedef struct {
-  void *resource; // 关联的总线资源 (如 one_wire_driver_t* 或 i2c_driver_t*)
-} th_sensor_mapping_t;
-extern const th_sensor_mapping_t th_sensor_mappings[TH_SENSOR_MAX];
-
 /* ----- i2c ----- */
 typedef enum {
   I2C_BUS_SENSOR = 0, // 传感器I2C总线
-  I2C_BUS_TOUCH = 1,
   //...
   I2C_MAX_DEVICES
 } i2c_device_id_t;
@@ -87,17 +49,6 @@ typedef struct {
   void *resource; // 硬件总线资源
 } i2c_mapping_t;
 extern const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES];
-
-/* ----- qspi ----- */
-typedef enum {
-  QSPI_ID_FLASH = 0, // QSPI Flash
-  //...
-  QSPI_MAX_DEVICES
-} qspi_device_id_t;
-typedef struct {
-  void *resource; // 硬件总线资源
-} qspi_mapping_t;
-extern const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES];
 
 /* ----- spi ----- */
 typedef enum {
@@ -121,13 +72,6 @@ typedef struct {
   void *resource; // 关联的总线资源 (如 i2c_driver_t*)
 } light_sensor_mapping_t;
 extern const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX];
-
-/* ----- 触摸屏 ----- */
-typedef enum { TOUCH_ID_UI = 0, TOUCH_MAX } touch_id_t;
-typedef struct {
-  void *resource;
-} touch_mapping_t;
-extern const touch_mapping_t touch_mappings[TOUCH_MAX];
 
 /* ----- RTC ----- */
 typedef enum { RTC_ID_INTERNAL = 0, RTC_MAX } rtc_device_id_t;

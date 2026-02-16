@@ -8,7 +8,6 @@
 #include "uart_queue.h"
 #include "stdio.h"
 #include <stdlib.h>
-#include "stm32h7xx_hal.h"
 #include "string.h"
 #include "sys.h"
 #include "MemPool.h"

@@ -6,14 +6,15 @@
  */
 
 #include "stm32_rtc_driver.h"
-#include <string.h>
 #include <stdlib.h>
-//#include "MemPool.h"
+#include <string.h>
+
+// #include "MemPool.h"
 
 #if (TARGET_PLATFORM == PLATFORM_STM32)
 
 // 使用备份寄存器 0 存储初始化标志
-#define RTC_BKP_INIT_FLAG_REG RTC_BKP_DR0
+#define RTC_BKP_INIT_FLAG_REG RTC_BKP_DR1
 #define RTC_BKP_INIT_FLAG_VALUE 0x5051 // "SQ" or any magic number
 
 typedef struct {
@@ -28,8 +29,6 @@ static int stm32_rtc_set_time(rtc_driver_t *self, rtc_time_t *time) {
   sTime.Hours = time->hour;
   sTime.Minutes = time->minute;
   sTime.Seconds = time->second;
-  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
 
   if (HAL_RTC_SetTime(drv->hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK) {
     return -1;
@@ -116,7 +115,8 @@ rtc_driver_t *stm32_rtc_driver_create(RTC_HandleTypeDef *hrtc) {
   stm32_rtc_driver_t *drv = (stm32_rtc_driver_t *)sys_malloc(
       SYS_MEM_INTERNAL, sizeof(stm32_rtc_driver_t));
 #else
-  stm32_rtc_driver_t *drv = (stm32_rtc_driver_t *)malloc(sizeof(stm32_rtc_driver_t));
+  stm32_rtc_driver_t *drv =
+      (stm32_rtc_driver_t *)malloc(sizeof(stm32_rtc_driver_t));
 #endif
   if (drv) {
     memset(drv, 0, sizeof(stm32_rtc_driver_t));

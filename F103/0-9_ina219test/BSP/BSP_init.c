@@ -14,7 +14,7 @@
 #include "Sys.h"
 #include "dev_map.h"
 #include "elog_init.h"
-#include "uart_queue.h"
+#include "uart_queue/uart_queue.h"
 #include "usart_factory.h"
 
 
