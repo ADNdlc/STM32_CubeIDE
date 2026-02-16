@@ -8,9 +8,10 @@
 #include "i2c/stm32_i2c_driver.h"
 #include "main.h"
 #include "one_wire/stm32_one_wire_driver.h"
+#include "qspi/stm32_qspi_driver.h"
+#include "quadspi.h"
 #include "rtc/stm32_rtc_driver.h"
 #include "usart.h"
-
 
 /*************
  * 总线配置表
@@ -76,6 +77,11 @@ static const stm32_one_wire_config_t dht11_congfig = {
 // One-Wire 逻辑号映射表
 const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES] = {
     [ONE_WIRE_DHT11] = {.resource = (void *)&dht11_congfig},
+};
+
+// QSPI 逻辑号映射表
+const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES] = {
+    [QSPI_ID_FLASH] = {.resource = (void *)&hqspi},
 };
 
 /*************

@@ -10,7 +10,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
 #include "dev_map_config.h"
 
 /* ----- GPIO ----- */
@@ -88,6 +87,17 @@ typedef struct {
   void *resource; // 硬件总线资源
 } i2c_mapping_t;
 extern const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES];
+
+/* ----- qspi ----- */
+typedef enum {
+  QSPI_ID_FLASH = 0, // QSPI Flash
+  //...
+  QSPI_MAX_DEVICES
+} qspi_device_id_t;
+typedef struct {
+  void *resource; // 硬件总线资源
+} qspi_mapping_t;
+extern const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES];
 
 /* ----- 光照传感器 ----- */
 typedef enum {
