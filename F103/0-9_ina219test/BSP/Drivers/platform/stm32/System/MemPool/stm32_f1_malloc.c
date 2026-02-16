@@ -61,7 +61,7 @@
 
     #ifdef USE_EXTERNAL_MEM
     static uint8_t mem2base[MEM2_MAX_SIZE]
-        __attribute__((section(".ext_sram_pool"), aligned(64))); // 外部SRAM
+        __attribute__((section(".sdram_pool"), aligned(64))); // 外部SRAM
     #endif
 
     /* 内存管理表 */
@@ -69,7 +69,7 @@
     
     #ifdef USE_EXTERNAL_MEM
     static MT_TYPE mem2mapbase[MEM2_ALLOC_TABLE_SIZE]
-        __attribute__((section(".ext_sram_map"))); /* 外部SRAM内存池MAP */
+        __attribute__((section(".sdram_map"))); /* 外部SRAM内存池MAP */
     #endif
 #endif
 

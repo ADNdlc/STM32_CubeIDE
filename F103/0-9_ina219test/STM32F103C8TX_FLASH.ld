@@ -46,7 +46,6 @@ MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 64K
-  EXT_RAM (xrw)   : ORIGIN = 0x68000000,  LENGTH = 1M
 }
 
 /* Sections */
@@ -188,16 +187,6 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
-  /* 外部 SRAM 内存管理段 */
-  .ext_sram (NOLOAD) :
-  {
-    . = ALIGN(64);
-    *(.ext_sram_pool)
-    . = ALIGN(4);
-    *(.ext_sram_map)
-    . = ALIGN(4);
-  } >EXT_RAM
-
   /* Remove information from the compiler libraries */
   /DISCARD/ :
   {
@@ -207,4 +196,34 @@ SECTIONS
   }
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
+}
+
+/* 定义外部内存区域 */
+MEMORY {
+  SDRAM (xrw) : ORIGIN = 0X68000000, LENGTH = 1M  /* 定义SDRAM区域 */
+}
+
+
+SECTIONS {
+	/* LTDC缓存 */
+	.sdram_section (NOLOAD) : {
+		. = ALIGN(16);
+		*(.sdram_section)  /* 将变量放入此段 */
+		. = ALIGN(16);	
+	} > SDRAM
+	
+	/* ---------------------- ↓ 外部SDRAM ↓ ----------------------- */
+	/* NOLOAD 属性告诉加载器不要在烧录时初始化这片内存 */
+	.sdram_pool 0X68000000 (NOLOAD) :
+	{
+		. = ALIGN(64);
+		KEEP(*(.sdram_pool))
+		. = ALIGN(64);
+	} >SDRAM
+	
+	.sdram_map (ADDR(.sdram_pool) + SIZEOF(.sdram_pool)) (NOLOAD) :
+	{
+		. = ALIGN(4);
+		KEEP(*(.sdram_map))
+	} >SDRAM
 }
