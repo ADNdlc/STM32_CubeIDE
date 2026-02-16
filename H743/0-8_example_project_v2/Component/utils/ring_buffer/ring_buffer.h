@@ -8,13 +8,9 @@
 #ifndef UART_QUEUE_RING_BUFFER_H_
 #define UART_QUEUE_RING_BUFFER_H_
 
-#include "MemPool.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
-//从哪里分配
-#define RINGBUF_MEMSOURCE SYS_MEM_INTERNAL
 
 // 环形缓冲区
 typedef struct {

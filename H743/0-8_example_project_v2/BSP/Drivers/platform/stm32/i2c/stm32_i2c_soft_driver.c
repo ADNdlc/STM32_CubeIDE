@@ -4,10 +4,10 @@
  *  Created on: Feb 11, 2026
  *      Author: 12114
  */
-#include "MemPool.h"
-#include "Sys.h"
 #include "stm32_i2c_driver.h"
+#include "Sys.h"
 #include <stdlib.h>
+#include "MemPool.h"
 
 // 默认延时（微秒）
 #define DEFAULT_I2C_DELAY_US 2
@@ -353,8 +353,12 @@ stm32_i2c_soft_driver_create(const stm32_i2c_soft_config_t *config) {
   if (config == NULL) {
     return NULL;
   }
+#ifdef USE_MEMPOOL
   stm32_i2c_driver_t *drv = (stm32_i2c_driver_t *)sys_malloc(
       SYS_MEM_INTERNAL, sizeof(stm32_i2c_driver_t));
+#else
+  stm32_i2c_driver_t *drv = (stm32_i2c_driver_t *)malloc(sizeof(stm32_i2c_driver_t));
+#endif
   if (drv) {
     drv->base.ops = &stm32_soft_i2c_ops;
     drv->config.is_soft = 1;

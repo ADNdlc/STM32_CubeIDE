@@ -63,3 +63,7 @@ uint32_t platform_get_systick_us(void) {
   uint32_t us_offset = (load - val) / ticks_per_us;
   return ms_now * 1000 + us_offset;
 }
+
+uint32_t platform_get_CoreClock(void) {
+  return SystemCoreClock;
+}

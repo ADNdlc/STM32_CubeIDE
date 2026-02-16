@@ -7,9 +7,14 @@
 
 #include "uart_queue.h"
 #include "stdio.h"
+#include <stdlib.h>
 #include "stm32h7xx_hal.h"
 #include "string.h"
 #include "sys.h"
+#include "MemPool.h"
+#ifdef USE_MEMPOOL
+#define UARTQUEUE_MEMSOURCE SYS_MEM_INTERNAL // 从哪里分配
+#endif
 
 #define Rx_Manual_restart 0
 
@@ -67,8 +72,13 @@ void uart_queue_init(uart_queue_t *queue, const usart_driver_t *driver,
 uart_queue_t *uart_queue_create(const usart_driver_t *driver,
                                 uint8_t *tx_buffer, size_t tx_size,
                                 uint8_t *rx_buffer, size_t rx_size) {
+#ifdef USE_MEMPOOL
   uart_queue_t *queue =
       (uart_queue_t *)sys_malloc(UARTQUEUE_MEMSOURCE, sizeof(uart_queue_t));
+#else
+  uart_queue_t *queue =
+      (uart_queue_t *)malloc(sizeof(uart_queue_t));
+#endif
   if (!queue) {
     return NULL;
   }
@@ -78,7 +88,11 @@ uart_queue_t *uart_queue_create(const usart_driver_t *driver,
 
 void uart_queue_destroy(uart_queue_t *queue) {
   if (queue) {
+#ifdef USE_MEMPOOL
     sys_free(UARTQUEUE_MEMSOURCE, queue);
+#else
+    free(queue);
+#endif
   }
 }
 

@@ -41,7 +41,6 @@ void bsp_init(void) {
 
   /* 1. 创建硬件抽象层串口对象 */
   usart_driver_t *g_debug_uart = usart_driver_get(USART_ID_DEBUG);
-
   /* 2. 创建并初始化日志串口队列 */
   if (g_debug_uart) {
     g_debug_queue =
@@ -55,7 +54,9 @@ void bsp_init(void) {
   }
   /* 3. elog初始化 */
   if (elog_init_and_config() == ELOG_NO_ERR) {
-    log_i("This is an INFO message.");
+    log_i("log init success.");
+    log_a("log lvel: %s.", ELOG_LVL_TOTAL_NUM);
+    log_i("sys CoreClock: %d MHz",sys_get_CoreClock());
   } else {
     elog_deinit();
   }

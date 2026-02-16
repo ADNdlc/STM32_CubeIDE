@@ -9,7 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sys.h"
-
+#include "MemPool.h"
+#ifdef USE_MEMPOOL
+//从哪里分配
+#define RINGBUF_MEMSOURCE SYS_MEM_INTERNAL
+#endif
 /**
  * @brief 获取两个值中的较小值
  */
@@ -22,7 +26,12 @@
  * @return 成功返回环形缓冲区对象指针，失败返回NULL
  */
 ring_buffer_t* rb_create(uint8_t *buffer, size_t size) {
+#ifdef USE_MEMPOOL
     ring_buffer_t *rb = (ring_buffer_t *)sys_malloc(RINGBUF_MEMSOURCE, sizeof(ring_buffer_t));
+#else
+    ring_buffer_t *rb = (ring_buffer_t *)malloc(sizeof(ring_buffer_t));
+
+#endif
     if (!rb) return NULL;
     rb_init(rb, buffer, size);
     return rb;
@@ -34,7 +43,11 @@ ring_buffer_t* rb_create(uint8_t *buffer, size_t size) {
  */
 void rb_destroy(ring_buffer_t *rb) {
   if (rb) {
+#ifdef USE_MEMPOOL
 	  sys_free(RINGBUF_MEMSOURCE, rb);
+#else
+	  free(rb);
+#endif
   }
 }
 

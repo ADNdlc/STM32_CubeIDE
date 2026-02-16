@@ -9,15 +9,11 @@
 #define UART_QUEUE_UART_QUEUE_H_
 
 #include "usart_driver.h"
-#include "MemPool.h"
 #include "Sys.h"
 #include "ring_buffer/ring_buffer.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
-// 从哪里分配
-#define UARTQUEUE_MEMSOURCE SYS_MEM_INTERNAL
 
 #define UART_QUEUE_AUTO_WAIT_DELAY_MS 5   // 每次自动等待时的阻塞时间（毫秒）
 #define UART_QUEUE_AUTO_WAIT_MAX_COUNT 20 // 自动等待最大次数
