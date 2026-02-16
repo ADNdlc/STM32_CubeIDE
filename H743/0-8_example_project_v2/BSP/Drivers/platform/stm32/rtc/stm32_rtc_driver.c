@@ -6,6 +6,7 @@
  */
 
 #include "stm32_rtc_driver.h"
+#include <stdlib.h>
 #include "MemPool.h"
 #include <string.h>
 
@@ -111,8 +112,12 @@ rtc_driver_t *stm32_rtc_driver_create(RTC_HandleTypeDef *hrtc) {
   if (hrtc == NULL)
     return NULL;
 
+#ifdef USE_MEMPOOL
   stm32_rtc_driver_t *drv = (stm32_rtc_driver_t *)sys_malloc(
       SYS_MEM_INTERNAL, sizeof(stm32_rtc_driver_t));
+#else
+  stm32_rtc_driver_t *drv = (stm32_rtc_driver_t *)malloc(sizeof(stm32_rtc_driver_t));
+#endif
   if (drv) {
     memset(drv, 0, sizeof(stm32_rtc_driver_t));
     drv->base.ops = &stm32_rtc_ops;

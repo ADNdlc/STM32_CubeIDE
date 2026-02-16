@@ -6,6 +6,7 @@
  */
 
 #include "stm32_qspi_driver.h"
+#include <stdlib.h>
 #include "MemPool.h"
 #include <string.h>
 
@@ -98,8 +99,12 @@ static const qspi_driver_ops_t stm32_qspi_ops = {
 };
 
 qspi_driver_t *stm32_qspi_driver_create(QSPI_HandleTypeDef *hqspi) {
+#ifdef USE_MEMPOOL
   stm32_qspi_driver_t *driver = (stm32_qspi_driver_t *)sys_malloc(
       QSPI_MEMSOURCE, sizeof(stm32_qspi_driver_t));
+#else
+  stm32_qspi_driver_t *driver = (stm32_qspi_driver_t *)malloc(sizeof(stm32_qspi_driver_t));
+#endif
   if (driver) {
     memset(driver, 0, sizeof(stm32_qspi_driver_t));
     driver->base.ops = &stm32_qspi_ops;

@@ -6,8 +6,8 @@
  */
 
 #include "stm32_i2c_driver.h"
-#include "MemPool.h"
 #include <stdlib.h>
+#include "MemPool.h"
 
 #define I2C_MEMSOURCE SYS_MEM_INTERNAL
 
@@ -62,8 +62,12 @@ static const i2c_driver_ops_t stm32_i2c_ops = {
 };
 
 i2c_driver_t *stm32_i2c_driver_create(I2C_HandleTypeDef *hi2c) {
+#ifdef USE_MEMPOOL
   stm32_i2c_driver_t *driver = (stm32_i2c_driver_t *)sys_malloc(
       I2C_MEMSOURCE, sizeof(stm32_i2c_driver_t));
+#else
+  stm32_i2c_driver_t *driver = (stm32_i2c_driver_t *)malloc(sizeof(stm32_i2c_driver_t));
+#endif
   if (driver) {
     driver->base.ops = &stm32_i2c_ops;
     driver->config.resource.hi2c = hi2c;

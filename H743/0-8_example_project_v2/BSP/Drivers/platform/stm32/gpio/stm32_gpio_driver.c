@@ -6,8 +6,8 @@
  */
 
 #include "stm32_gpio_driver.h"
-#include "MemPool.h"
 #include <stdlib.h>
+#include "MemPool.h"  // 不使用内存池就注释掉
 
 // STM32 GPIO 驱动操作实现
 static void stm32_gpio_write(gpio_driver_t *self, uint8_t value) {
@@ -65,8 +65,12 @@ static const gpio_driver_ops_t stm32_gpio_ops = {
 
 // 创建 STM32 GPIO 驱动实例
 gpio_driver_t *stm32_gpio_create(const stm32_gpio_config_t *config) {
+#ifdef USE_MEMPOOL
   stm32_gpio_driver_t *drv = (stm32_gpio_driver_t *)sys_malloc(
       SYS_MEM_INTERNAL, sizeof(stm32_gpio_driver_t));
+#else
+  stm32_gpio_driver_t *drv = (stm32_gpio_driver_t *)malloc(sizeof(stm32_gpio_driver_t));
+#endif
   if (drv) {
     drv->base.ops = &stm32_gpio_ops;
     drv->config = *config;

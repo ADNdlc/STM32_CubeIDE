@@ -6,9 +6,8 @@
  */
 
 #include "one_wire/stm32_one_wire_driver.h"
-
+#include <stdlib.h>
 #include "MemPool.h"
-#include "Sys.h"
 #include <stdlib.h>
 
 
@@ -75,9 +74,13 @@ static void stm32_ow_release(one_wire_driver_t *self) {
 
 one_wire_driver_t *
 stm32_one_wire_soft_create(const stm32_one_wire_config_t *config) {
+#ifdef USE_MEMPOOL
   // 使用 sys_malloc 分配内存
   stm32_one_wire_driver_t *drv = (stm32_one_wire_driver_t *)sys_malloc(
       ONE_WIRE_MEMSOURCE, sizeof(stm32_one_wire_driver_t));
+#else
+  stm32_one_wire_driver_t *drv = (stm32_one_wire_driver_t *)malloc(sizeof(stm32_one_wire_driver_t));
+#endif
   if (drv) {
     drv->base.ops = &stm32_ow_ops;
     drv->config = *config;
@@ -88,6 +91,10 @@ stm32_one_wire_soft_create(const stm32_one_wire_config_t *config) {
 
 void stm32_one_wire_soft_destroy(stm32_one_wire_driver_t *drv) {
   if (drv) {
+#ifdef USE_MEMPOOL
     sys_free(ONE_WIRE_MEMSOURCE, drv);
+#else
+    free(drv);
+#endif
   }
 }

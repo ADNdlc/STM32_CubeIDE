@@ -6,8 +6,8 @@
  */
 
 #include "stm32_usart_driver.h"
-#include "MemPool.h"
 #include <stdlib.h>
+#include "MemPool.h"
 
 #define MAX_USART_INSTANCES 4
 static stm32_usart_driver_t *g_usart_instances[MAX_USART_INSTANCES] = {0};
@@ -48,13 +48,10 @@ static int stm32_usart_receive(usart_driver_t *self, uint8_t *buffer,
     return 0;
   }
 
-  // 如果出现错误（如溢出错误
-  // ORE），尝试清除错误标志，否则串口会一直锁定在错误状态
+  // 如果出现错误，尝试清除错误标志
   if (status == HAL_ERROR) {
-    if (__HAL_UART_GET_FLAG(driver->huart, UART_FLAG_ORE)) {
-      __HAL_UART_CLEAR_IT(driver->huart, UART_CLEAR_OREF);
-    }
-    // 也可以在此处添加对 FE (Framing Error), NE (Noise Error) 等的处理
+    // 清除各种可能的错误标志
+    __HAL_UART_CLEAR_FLAG(driver->huart, UART_FLAG_ORE | UART_FLAG_NE | UART_FLAG_FE | UART_FLAG_PE);
   }
 
   return -1;
@@ -116,8 +113,12 @@ static const usart_driver_ops_t stm32_usart_ops = {
 };
 
 stm32_usart_driver_t *stm32_usart_driver_create(UART_HandleTypeDef *huart) {
+#ifdef USE_MEMPOOL
   stm32_usart_driver_t *driver = (stm32_usart_driver_t *)sys_malloc(
       USART_MEMSOURCE, sizeof(stm32_usart_driver_t));
+#else
+  stm32_usart_driver_t *driver = (stm32_usart_driver_t *)malloc(sizeof(stm32_usart_driver_t));
+#endif
   if (driver) {
     driver->base.ops = &stm32_usart_ops;
     driver->huart = huart;

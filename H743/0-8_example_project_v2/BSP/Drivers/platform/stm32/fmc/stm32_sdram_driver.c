@@ -7,6 +7,7 @@
 
 #include "stm32_sdram_driver.h"
 #include <stdlib.h>
+#include "MemPool.h"
 
 // W9825G6KH specific constants (Standard SDRAM Mode Register)
 #define SDRAM_MODEREG_BURST_LENGTH_1 ((uint16_t)0x0000)
@@ -78,10 +79,13 @@ static int stm32_sdram_init(sdram_driver_t *self) {
 static const sdram_driver_ops_t sdram_ops = {
     .init = stm32_sdram_init, .send_command = stm32_sdram_send_command};
 
-#include "MemPool.h"
 sdram_driver_t *stm32_sdram_create(SDRAM_HandleTypeDef *hsdram) {
+#ifdef USE_MEMPOOL
   stm32_sdram_driver_t *driver = (stm32_sdram_driver_t *)sys_malloc(
       RAMDEV_MEMSOURCE, sizeof(stm32_sdram_driver_t));
+#else
+  stm32_sdram_driver_t *driver = (stm32_sdram_driver_t *)malloc(sizeof(stm32_sdram_driver_t));
+#endif
   if (driver) {
     driver->base.ops = &sdram_ops;
     driver->hsdram = hsdram;

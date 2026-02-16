@@ -36,6 +36,7 @@ extern const SysMem *g_sys_mem;
 // 内存池功能初始化
 void sys_mem_init(const SysMem *mem);
 
+#define USE_MEMPOOL
 
 /* ----- 业务层统一调用的封装函数 ----- */
 static inline void sys_mem_init_internal(void) {

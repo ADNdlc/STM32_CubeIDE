@@ -6,6 +6,7 @@
  */
 
 #include "stm32_spi_driver.h"
+#include <stdlib.h>
 #include "MemPool.h"
 #include <string.h>
 
@@ -44,8 +45,12 @@ static const spi_driver_ops_t stm32_spi_ops = {
 };
 
 spi_driver_t *stm32_spi_driver_create(SPI_HandleTypeDef *hspi) {
+#ifdef USE_MEMPOOL
   stm32_spi_driver_t *driver = (stm32_spi_driver_t *)sys_malloc(
       SPI_MEMSOURCE, sizeof(stm32_spi_driver_t));
+#else
+  stm32_spi_driver_t *driver = (stm32_spi_driver_t *)malloc(sizeof(stm32_spi_driver_t));
+#endif
   if (driver) {
     memset(driver, 0, sizeof(stm32_spi_driver_t));
     driver->base.ops = &stm32_spi_ops;
