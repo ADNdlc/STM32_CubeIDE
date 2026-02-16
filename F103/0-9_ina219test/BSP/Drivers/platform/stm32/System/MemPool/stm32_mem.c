@@ -10,8 +10,11 @@
 
 // 平台内部配置
 #define STM32_MEM_INTERNAL SRAMIN
+#ifdef USE_EXTERNAL_MEM
 #define STM32_MEM_EXTERNAL SRAMEX
-
+#else
+#define STM32_MEM_EXTERNAL SRAMIN
+#endif
 static void *stm32_mem_malloc(SysMemTag tag, uint32_t size) {
   uint8_t memx;
   switch (tag) {
