@@ -99,6 +99,18 @@ typedef struct {
 } qspi_mapping_t;
 extern const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES];
 
+/* ----- spi ----- */
+typedef enum {
+  SPI_ID_1 = 0,
+  SPI_ID_2 = 1,
+  //...
+  SPI_MAX_DEVICES
+} spi_device_id_t;
+typedef struct {
+  void *resource; // 硬件总线资源
+} spi_mapping_t;
+extern const spi_mapping_t spi_mappings[SPI_MAX_DEVICES];
+
 /* ----- 光照传感器 ----- */
 typedef enum {
   LIGHT_SENSOR_ID_AMBIENT = 0, // 环境光传感器

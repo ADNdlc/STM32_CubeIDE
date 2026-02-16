@@ -11,7 +11,10 @@
 #include "qspi/stm32_qspi_driver.h"
 #include "quadspi.h"
 #include "rtc/stm32_rtc_driver.h"
+#include "spi.h"
+#include "spi/stm32_spi_driver.h"
 #include "usart.h"
+
 
 /*************
  * 总线配置表
@@ -82,6 +85,11 @@ const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES] = {
 // QSPI 逻辑号映射表
 const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES] = {
     [QSPI_ID_FLASH] = {.resource = (void *)&hqspi},
+};
+
+// SPI 逻辑号映射表
+const spi_mapping_t spi_mappings[SPI_MAX_DEVICES] = {
+    [SPI_ID_1] = {.resource = (void *)&hspi1},
 };
 
 /*************
