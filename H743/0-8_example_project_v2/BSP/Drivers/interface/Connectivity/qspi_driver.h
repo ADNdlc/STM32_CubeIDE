@@ -14,6 +14,30 @@
 // 前向声明
 typedef struct qspi_driver_t qspi_driver_t;
 
+// QSPI 模式常量 (通用定义)
+#define QSPI_INSTRUCTION_NONE 0
+#define QSPI_INSTRUCTION_1_LINE 1
+#define QSPI_INSTRUCTION_2_LINES 2
+#define QSPI_INSTRUCTION_4_LINES 3
+
+#define QSPI_ADDRESS_NONE 0
+#define QSPI_ADDRESS_1_LINE 1
+#define QSPI_ADDRESS_2_LINES 2
+#define QSPI_ADDRESS_4_LINES 3
+
+#define QSPI_ADDRESS_8BITS 0
+#define QSPI_ADDRESS_16BITS 1
+#define QSPI_ADDRESS_24BITS 2
+#define QSPI_ADDRESS_32BITS 3
+
+#define QSPI_DATA_NONE 0
+#define QSPI_DATA_1_LINE 1
+#define QSPI_DATA_2_LINES 2
+#define QSPI_DATA_4_LINES 3
+
+#define QSPI_SIOO_INST_EVERY_CMD 0
+#define QSPI_SIOO_INST_ONLY_FIRST_CMD 1
+
 // QSPI 指令结构体 (参考 HAL_QSPI_CommandTypeDef)
 typedef struct {
   uint32_t Instruction;        /* 指令码 */
