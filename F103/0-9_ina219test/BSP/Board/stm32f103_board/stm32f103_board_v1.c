@@ -56,8 +56,6 @@ const spi_mapping_t spi_mappings[SPI_MAX_DEVICES] = {
 /*************
  * 设备配置表
  *************/
-
-
 // "光照传感器"逻辑号映射表
 const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX] = {
     [LIGHT_SENSOR_ID_AMBIENT] = {.resource = (void *)I2C_BUS_SENSOR},

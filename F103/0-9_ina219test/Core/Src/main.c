@@ -103,14 +103,14 @@ int main(void)
   HAL_Delay(500);
 
   bsp_init(); // 驱动层初始化
-  //Test_Framework_Init();
+  Test_Framework_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //Test_Framework_Run();
+	  Test_Framework_Run();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

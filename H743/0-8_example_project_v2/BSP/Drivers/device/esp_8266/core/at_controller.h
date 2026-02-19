@@ -127,7 +127,7 @@ int at_controller_submit_cmd(at_controller_t *self, AT_Cmd_t *cmd);
  */
 void at_controller_report_fault(at_controller_t *self);
 
-/* ===================== at_dispatcher ===================== */
+/* ===================== at_dispatcher.h ===================== */
 /**
  * @brief 注册一个 URC处理函数
  * @param self 控制器实例
