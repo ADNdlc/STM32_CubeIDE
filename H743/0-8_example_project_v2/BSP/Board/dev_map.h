@@ -7,8 +7,10 @@
 
 #ifndef BOARD_DEV_MAP_H_
 #define BOARD_DEV_MAP_H_
+#include "nor_flash_driver.h"
 #include <stdbool.h>
 #include <stdint.h>
+
 
 #include "dev_map_config.h"
 
@@ -41,17 +43,6 @@ typedef struct {
 // 声明映射表
 extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 
-/* ----- SDRAM ----- */
-typedef enum {
-  SDRAM_MAIN = 0,
-  //...
-  SDRAM_MAX_DEVICES
-} sdram_device_id_t;
-typedef struct {
-  void *resource;
-} sdram_mapping_t;
-extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
-
 /* ----- one_wire ----- */
 typedef enum {
   ONE_WIRE_DHT11 = 0,
@@ -62,19 +53,6 @@ typedef struct {
   void *resource;
 } one_wire_mapping_t;
 extern const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES];
-
-/* ----- 温湿度传感器 ----- */
-// 温湿度传感器逻辑号
-typedef enum {
-  TH_SENSOR_ID_AMBIENT = 0, // 温湿度传感器
-  //...
-  TH_SENSOR_MAX
-} th_sensor_id_t;
-// 设备资源映射结构
-typedef struct {
-  void *resource; // 关联的总线资源 (如 one_wire_driver_t* 或 i2c_driver_t*)
-} th_sensor_mapping_t;
-extern const th_sensor_mapping_t th_sensor_mappings[TH_SENSOR_MAX];
 
 /* ----- i2c ----- */
 typedef enum {
@@ -111,6 +89,37 @@ typedef struct {
 } spi_mapping_t;
 extern const spi_mapping_t spi_mappings[SPI_MAX_DEVICES];
 
+/* ----- SDRAM ----- */
+typedef enum {
+  SDRAM_MAIN = 0,
+  //...
+  SDRAM_MAX_DEVICES
+} sdram_device_id_t;
+typedef struct {
+  void *resource;
+} sdram_mapping_t;
+extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
+
+/* ----- RTC ----- */
+typedef enum { RTC_ID_INTERNAL = 0, RTC_MAX } rtc_device_id_t;
+typedef struct {
+  void *resource;
+} rtc_mapping_t;
+extern const rtc_mapping_t rtc_mappings[RTC_MAX];
+
+/* ----- 温湿度传感器 ----- */
+// 温湿度传感器逻辑号
+typedef enum {
+  TH_SENSOR_ID_AMBIENT = 0, // 温湿度传感器
+  //...
+  TH_SENSOR_MAX
+} th_sensor_id_t;
+// 设备资源映射结构
+typedef struct {
+  void *resource; // 关联的总线资源 (如 one_wire_driver_t* 或 i2c_driver_t*)
+} th_sensor_mapping_t;
+extern const th_sensor_mapping_t th_sensor_mappings[TH_SENSOR_MAX];
+
 /* ----- 光照传感器 ----- */
 typedef enum {
   LIGHT_SENSOR_ID_AMBIENT = 0, // 环境光传感器
@@ -129,12 +138,13 @@ typedef struct {
 } touch_mapping_t;
 extern const touch_mapping_t touch_mappings[TOUCH_MAX];
 
-/* ----- RTC ----- */
-typedef enum { RTC_ID_INTERNAL = 0, RTC_MAX } rtc_device_id_t;
+/* ----- norflash ----- */
+typedef enum { NOR_FLASH_SYS = 0, NOR_FLASH_MAX } norflash_id_t;
 typedef struct {
-  void *resource;
-} rtc_mapping_t;
-extern const rtc_mapping_t rtc_mappings[RTC_MAX];
+  nor_flash_info_t *manual_info; // 手动配置项(可缺省)
+  void *resource;               // 硬件总线资源
+} norflash_mapping_t;
+extern const norflash_mapping_t norflash_mappings[NOR_FLASH_MAX];
 
 // 辅助宏
 #define CALL_RESOURE(config, type, res_name)                                   \

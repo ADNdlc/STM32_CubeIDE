@@ -15,7 +15,6 @@
 #include "spi/stm32_spi_driver.h"
 #include "usart.h"
 
-
 /*************
  * 总线配置表
  *************/
@@ -116,6 +115,15 @@ static const gt9xxx_config_t gt9xxx_config = {
 // "触摸屏"逻辑号映射表
 const touch_mapping_t touch_mappings[TOUCH_MAX] = {
     [TOUCH_ID_UI] = {.resource = (void *)&gt9xxx_config},
+};
+
+// "NORflash设备表"
+const norflash_mapping_t norflash_mappings[NOR_FLASH_MAX] = {
+    [NOR_FLASH_SYS] =
+        {
+            .resource = (void *)QSPI_ID_FLASH,
+            .manual_info = NULL,
+        },
 };
 
 #endif // STM32H743_BOARD_V1

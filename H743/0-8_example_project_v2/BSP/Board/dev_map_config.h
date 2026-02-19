@@ -49,4 +49,8 @@
 #define USE_GT9XXX 1
 #define DEV_TOUCH USE_GT9XXX // 触摸屏驱动选择
 
+/* NOR Flash类型选择 */
+#define USE_W25Q 1
+#define DEV_NORFLASH USE_W25Q // NOR Flash驱动选择
+
 #endif /* BOARD_DEV_MAP_CONFIG_H_ */
