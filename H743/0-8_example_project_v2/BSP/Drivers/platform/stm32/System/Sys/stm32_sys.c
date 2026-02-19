@@ -67,3 +67,11 @@ uint32_t platform_get_systick_us(void) {
 uint32_t platform_get_CoreClock(void) {
   return SystemCoreClock;
 }
+
+void platform_display_irq(){
+  __disable_irq();
+}
+
+void platform_enable_irq(){
+  __enable_irq();
+}

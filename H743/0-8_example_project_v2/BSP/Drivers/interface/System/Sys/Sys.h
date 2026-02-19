@@ -13,6 +13,7 @@ void platform_delay_us(uint32_t us);
 uint32_t platform_get_systick_ms(void);
 uint32_t platform_get_systick_us(void);
 uint32_t platform_get_CoreClock(void);
+void platform_display_irq(void);
 */
 
 /*
@@ -25,5 +26,8 @@ uint32_t platform_get_CoreClock(void);
 #define sys_get_systick_ms() platform_get_systick_ms()
 #define sys_get_systick_us() platform_get_systick_us()
 #define sys_get_CoreClock() platform_get_CoreClock() // 获取系统时钟频率(MHz)
+#define sys_display_irq() platform_display_irq()
+#define sys_enable_irq() platform_enable_irq()
+
 
 #endif /* DRIVERS_INTERFACE_SYSTEM_SYS_SYS_H_ */
