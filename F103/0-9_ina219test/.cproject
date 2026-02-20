@@ -63,11 +63,13 @@
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System/MemPool"/>
+									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Timer"/>
 									<listOptionValue builtIn="false" value="../A_Project_cfg"/>
 									<listOptionValue builtIn="false" value="../Component"/>
 									<listOptionValue builtIn="false" value="../Component/utils"/>
 									<listOptionValue builtIn="false" value="../Component/logger"/>
 									<listOptionValue builtIn="false" value="../Test"/>
+									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/timer"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1163098614" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -129,11 +131,13 @@
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System"/>
 									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System/MemPool"/>
+									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Timer"/>
 									<listOptionValue builtIn="false" value="../A_Project_cfg"/>
 									<listOptionValue builtIn="false" value="../Component"/>
 									<listOptionValue builtIn="false" value="../Component/utils"/>
 									<listOptionValue builtIn="false" value="../Component/logger"/>
 									<listOptionValue builtIn="false" value="../Test"/>
+									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/timer"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.2057113640" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -253,4 +257,5 @@
 			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="refreshScope"/>
 </cproject>

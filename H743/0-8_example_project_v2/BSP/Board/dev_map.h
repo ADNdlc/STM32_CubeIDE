@@ -107,6 +107,18 @@ typedef struct {
 } rtc_mapping_t;
 extern const rtc_mapping_t rtc_mappings[RTC_MAX];
 
+/* ----- Timer ----- */
+typedef enum {
+	TIMER_ID_1 = 0,
+	TIMER_ID_2,
+
+	TIMER_ID_MAX
+} timer_device_id_t;
+typedef struct {
+  void *resource;
+} timer_mapping_t;
+extern const timer_mapping_t timer_mappings[TIMER_ID_MAX];
+
 /* ----- 温湿度传感器 ----- */
 // 温湿度传感器逻辑号
 typedef enum {

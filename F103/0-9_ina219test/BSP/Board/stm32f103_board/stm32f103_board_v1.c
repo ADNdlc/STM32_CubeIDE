@@ -9,7 +9,7 @@
 #include "rtc/stm32_rtc_driver.h"
 #include "spi.h"
 #include "spi/stm32_spi_driver.h"
-
+#include "tim.h"
 
 
 /*************
@@ -47,6 +47,10 @@ const rtc_mapping_t rtc_mappings[RTC_MAX] = {
     [RTC_ID_INTERNAL] = {.resource = (void *)&hrtc},
 };
 
+// Timer 逻辑号映射表
+const timer_mapping_t timer_mappings[TIMER_ID_MAX] = {
+    [TIMER_ID_1] = {.resource = (void *)&htim1},
+};
 
 // SPI 逻辑号映射表
 const spi_mapping_t spi_mappings[SPI_MAX_DEVICES] = {

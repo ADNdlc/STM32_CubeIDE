@@ -11,6 +11,7 @@
 #include "qspi/stm32_qspi_driver.h"
 #include "quadspi.h"
 #include "rtc/stm32_rtc_driver.h"
+#include "tim.h"
 #include "spi.h"
 #include "spi/stm32_spi_driver.h"
 #include "usart.h"
@@ -69,6 +70,11 @@ const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES] = {
 // RTC 逻辑号映射表
 const rtc_mapping_t rtc_mappings[RTC_MAX] = {
     [RTC_ID_INTERNAL] = {.resource = (void *)&hrtc},
+};
+
+// Timer 逻辑号映射表
+const timer_mapping_t timer_mappings[TIMER_ID_MAX] = {
+    [TIMER_ID_1] = {.resource = (void *)&htim6},
 };
 
 // One-Wire 设备配置

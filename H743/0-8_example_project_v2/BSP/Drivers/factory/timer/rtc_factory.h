@@ -11,7 +11,6 @@
 #include "dev_map.h"
 #include "rtc_driver.h"
 
-
 /**
  * @brief 获取 RTC 驱动实例
  * @param id RTC 逻辑 ID
