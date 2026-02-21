@@ -15,7 +15,6 @@
 /* ----- GPIO ----- */
 typedef enum {
   GPIO_ID_LED0 = 0,
-  GPIO_ID_LED1,
   //...
   GPIO_MAX_DEVICES
 } gpio_device_id_t;

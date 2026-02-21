@@ -6,7 +6,7 @@
  */
 
 #include "ina219_driver.h"
-#include "stm32_hal.h" // 获取 HAL_GetTick
+#include "Sys.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -82,7 +82,7 @@ static int ina219_init(PowerMonitor_Dev_t *dev) {
   // 4. 重置状态
   self->accumulated_charge_mAs = 0;
   self->accumulated_energy_mWs = 0;
-  self->last_process_tick = HAL_GetTick();
+  self->last_process_tick = sys_get_systick_ms();
 
   // 5. 初始化异步接收队列
   // 注意：默认我们将指针指向 CURRENT 寄存器，以便后续异步读取
@@ -200,7 +200,7 @@ void ina219_process_data(PowerMonitor_Dev_t *dev) {
   double avg_current_mA = avg_current_raw * self->current_lsb_mA;
 
   // 2. 计算时间差
-  uint32_t now = HAL_GetTick();
+  uint32_t now = sys_get_systick_ms();
   if (now < self->last_process_tick) {
     // 溢出处理
     self->last_process_tick = now;

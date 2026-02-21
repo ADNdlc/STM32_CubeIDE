@@ -6,6 +6,8 @@
  *
  *  基于 Factory 的底层 Flash 读写与 XIP 测试
  */
+#include "test_config.h"
+#if ENABLE_TEST_FLASH
 
 #define LOG_TAG "TEST_FLASH"
 
@@ -110,5 +112,11 @@ static void flash_test_loop(void) {
   log_i("--- Test Finished ---");
 }
 
+static void flash_test_teardown(){
+  flash = NULL;
+  log_i("Flash test teardown.");
+}
+
 REGISTER_TEST(flash_ll, "NOR Flash Low-level Factory test", flash_test_setup,
-              flash_test_loop, NULL);
+              flash_test_loop, flash_test_teardown);
+#endif

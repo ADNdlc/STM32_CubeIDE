@@ -4,10 +4,12 @@
  *  Created on: Feb 11, 2026
  *      Author: 12114
  */
-#include "stm32_i2c_driver.h"
 #include "Sys.h"
-#include <stdlib.h>
 #include "MemPool.h"
+#include "stm32_i2c_driver.h"
+#include <stdlib.h>
+
+// #include "MemPool.h"
 
 // 默认延时（微秒）
 #define DEFAULT_I2C_DELAY_US 2
@@ -342,6 +344,9 @@ static int stm32_soft_i2c_mem_read(i2c_driver_t *self, uint16_t dev_addr,
 static const i2c_driver_ops_t stm32_soft_i2c_ops = {
     .master_transmit = stm32_soft_i2c_master_transmit,
     .master_receive = stm32_soft_i2c_master_receive,
+    .master_transmit_asyn = NULL,
+    .master_receive_asyn = NULL,
+    .set_callback = NULL,
 #ifdef USE_I2C_MEM
     .mem_write = stm32_soft_i2c_mem_write,
     .mem_read = stm32_soft_i2c_mem_read,
@@ -357,7 +362,8 @@ stm32_i2c_soft_driver_create(const stm32_i2c_soft_config_t *config) {
   stm32_i2c_driver_t *drv = (stm32_i2c_driver_t *)sys_malloc(
       SYS_MEM_INTERNAL, sizeof(stm32_i2c_driver_t));
 #else
-  stm32_i2c_driver_t *drv = (stm32_i2c_driver_t *)malloc(sizeof(stm32_i2c_driver_t));
+  stm32_i2c_driver_t *drv =
+      (stm32_i2c_driver_t *)malloc(sizeof(stm32_i2c_driver_t));
 #endif
   if (drv) {
     drv->base.ops = &stm32_soft_i2c_ops;

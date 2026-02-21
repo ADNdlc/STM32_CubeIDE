@@ -3,6 +3,7 @@
  */
 
 #include "stm32_timer_driver.h"
+#include "MemPool.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -170,8 +171,15 @@ timer_driver_t *stm32_timer_driver_create(TIM_HandleTypeDef *htim) {
       return (timer_driver_t *)find_timer_driver(htim->Instance);
   }
 
+#ifdef USE_MEMPOOL
   stm32_timer_driver_t *driver =
-      (stm32_timer_driver_t *)malloc(sizeof(stm32_timer_driver_t));
+      (stm32_timer_driver_t *)sys_malloc(TIMER_MEMSOURCE, sizeof(stm32_timer_driver_t));
+#else
+stm32_timer_driver_t *driver =
+    (stm32_timer_driver_t *)malloc(sizeof(stm32_timer_driver_t));
+#endif
+
+
   if (driver) {
     driver->base.ops = &stm32_timer_ops;
     driver->htim = htim;

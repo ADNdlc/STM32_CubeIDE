@@ -21,6 +21,7 @@
 #define ENABLE_TEST_ILLUMINANCE 0
 #define ENABLE_TEST_TOUCH 0
 #define ENABLE_TEST_RTC 1
+#define ENABLE_TEST_FLASH 1
 #endif
 
 #endif /* TEST_CONFIG_H_ */

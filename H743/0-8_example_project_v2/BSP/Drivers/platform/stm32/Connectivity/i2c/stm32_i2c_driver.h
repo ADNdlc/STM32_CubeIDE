@@ -10,7 +10,7 @@
 
 #include "i2c.h"
 #include "i2c_driver.h"
-#include "stm32h7xx_hal.h"
+#include "stm32H7xx_hal.h"
 #include <stdint.h>
 
 // STM32 I2C 软件模拟配置
@@ -34,6 +34,8 @@ typedef struct {
 typedef struct {
   i2c_driver_t base; // 基类
   stm32_i2c_config_t config;
+  i2c_callback_t callback;
+  void *callback_context;
 } stm32_i2c_driver_t;
 
 // 修正后的构造函数宏

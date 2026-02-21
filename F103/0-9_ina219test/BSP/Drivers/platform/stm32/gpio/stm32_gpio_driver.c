@@ -7,7 +7,7 @@
 
 #include "stm32_gpio_driver.h"
 #include <stdlib.h>
-//#include "MemPool.h"  // 不使用内存池就注释掉
+#include "MemPool.h"  // 不使用内存池就注释掉
 
 // STM32 GPIO 驱动操作实现
 static void stm32_gpio_write(gpio_driver_t *self, uint8_t value) {

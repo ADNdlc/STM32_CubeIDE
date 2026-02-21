@@ -4,6 +4,8 @@
 #include "stm32H7xx_hal.h"
 #include "timer_driver.h"
 
+#define TIMER_MEMSOURCE SYS_MEM_INTERNAL
+
 // STM32 定时器驱动结构体
 typedef struct {
   timer_driver_t base;       // 基类
