@@ -7,7 +7,7 @@
 #define NULL 0
 #endif
 
-#define USE_EXTERNAL_MEM
+//#define USE_EXTERNAL_MEM
 
 /* 定义两个内存池 */
 #define SRAMIN      0       /* 内部SRAM, 共64KB */

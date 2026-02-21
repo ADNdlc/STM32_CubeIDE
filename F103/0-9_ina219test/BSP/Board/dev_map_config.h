@@ -24,9 +24,9 @@
  */
 #if (TARGET_PLATFORM == PLATFORM_STM32)
 #define STM32H743_BOARD_V1 1
-// #define XXX_BOARD_VXX  2
+#define STM32F103_BOARD_V1 2
 
-#define TARGET_BOARD STM32H743_BOARD_V1 // 硬件版本选择
+#define TARGET_BOARD STM32F103_BOARD_V1 // 硬件版本选择
 #else
 #error "dev_map_config: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
 #endif

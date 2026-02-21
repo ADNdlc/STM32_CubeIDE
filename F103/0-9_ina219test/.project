@@ -122,16 +122,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Test/Unit/flash_lowlevel_test.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/flash_lowlevel_test.c</locationURI>
-		</link>
-		<link>
-			<name>Test/Unit/humiture_test.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/humiture_test.c</locationURI>
-		</link>
-		<link>
 			<name>Test/Unit/illuminance_test.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/illuminance_test.c</locationURI>
@@ -152,11 +142,6 @@
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_led.c</locationURI>
 		</link>
 		<link>
-			<name>Test/Unit/test_sdram.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_sdram.c</locationURI>
-		</link>
-		<link>
 			<name>Test/Unit/test_timer.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_timer.c</locationURI>
@@ -165,11 +150,6 @@
 			<name>Test/Unit/test_uart_queue.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_uart_queue.c</locationURI>
-		</link>
-		<link>
-			<name>Test/Unit/touch_test.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/touch_test.c</locationURI>
 		</link>
 		<link>
 			<name>Test/core/test_framework.c</name>

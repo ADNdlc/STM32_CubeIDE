@@ -10,9 +10,9 @@ static gpio_driver_t *led0;
 static gpio_driver_t *led1;
 #endif
 
-void test_led_on(void) { GPIO_WRITE(led0, 1); }
+void test_led_on(void) { GPIO_WRITE(led0, 0); }
 
-void test_led_off(void) { GPIO_WRITE(led0, 0); }
+void test_led_off(void) { GPIO_WRITE(led0, 1); }
 
 #ifdef STM32H743xx
 void test_led2_on(void) { GPIO_WRITE(led1, 1); }
@@ -24,12 +24,22 @@ static void test_led_setup(void) {
 #ifdef STM32H743xx
   led1 = gpio_driver_get(GPIO_ID_LED1);
 #endif
+  if (led0 == NULL) {
+    log_e("LED0 not found");
+    return;
+  }
+#ifdef STM32H743xx
+  if (led1 == NULL) {
+    log_e("LED1 not found");
+    return;
+  }
+#endif
   log_i("LED Test Setup: Ensuring GPIOB is ready.");
 }
 
 static void test_led_loop(void) {
   static uint32_t last_tick = 0;
-  if (sys_get_systick_ms() - last_tick >= 500) {
+  if (sys_get_systick_ms() - last_tick >= 1000) {
     last_tick = sys_get_systick_ms();
 #ifdef STM32H743xx
     GPIO_TOGGLE(led1);

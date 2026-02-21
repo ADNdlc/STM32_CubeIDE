@@ -1,7 +1,7 @@
 #include "dev_map.h"
 #include "dev_map_config.h"
 
-#if (STM32H743_BOARD_V1 == TARGET_BOARD)
+#if (STM32F103_BOARD_V1 == TARGET_BOARD)
 #include "usart.h"
 #include "gpio/stm32_gpio_driver.h"
 #include "i2c/stm32_i2c_driver.h"
@@ -64,4 +64,4 @@ const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX] = {
 };
 
 
-#endif // STM32H743_BOARD_V1
+#endif // STM32F103_BOARD_V1

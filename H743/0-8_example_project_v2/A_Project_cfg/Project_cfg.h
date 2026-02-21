@@ -10,5 +10,6 @@
 
 /* ----- 运行配置 ----- */
 #define TEST_ENABLE	1	// 使能测试模式(不进入主程序)
+#define PRINTF_FLOAT_ENABLED
 
 #endif /* APPLICATION_PROJECT_CFG_H_ */
