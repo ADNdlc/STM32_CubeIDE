@@ -55,7 +55,7 @@ void bsp_init(void) {
   /* 3. elog初始化 */
   if (elog_init_and_config() == ELOG_NO_ERR) {
     log_i("log init success.");
-    log_a("log lvel: %s.", ELOG_LVL_TOTAL_NUM);
+    log_a("log lvel: %d", ELOG_LVL_TOTAL_NUM);
     log_i("sys CoreClock: %d MHz",sys_get_CoreClock());
   } else {
     elog_deinit();

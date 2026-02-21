@@ -1,5 +1,5 @@
 #include "test_config.h"
-#if 1 // 临时开启测试
+#if ENABLE_TEST_TIMER // 临时开启测试
 #include "dev_map.h"
 #include "gpio_driver.h"
 #include "gpio_factory.h"

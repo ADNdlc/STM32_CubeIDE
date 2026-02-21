@@ -9,7 +9,7 @@
 #define BSP_DEVICE_DRIVER_LED_STM32_GPIO_ADAPTER_H_
 
 #include "gpio_driver.h"
-#include "stm32h7xx_hal.h"
+#include "HAL_include.h"
 
 // One-Wire 软件模拟配置
 typedef struct {

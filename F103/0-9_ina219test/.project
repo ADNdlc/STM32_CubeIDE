@@ -37,11 +37,6 @@
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/A_Project_cfg/HAL_include.h</locationURI>
 		</link>
 		<link>
-			<name>A_Project_cfg/HAL_include.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/A_Project_cfg/HAL_include.h</locationURI>
-		</link>
-		<link>
 			<name>Component/i2c_queue</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -62,19 +57,19 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger</name>
+			<name>Lib/EasyLogger</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Test/test_framework.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/test_framework.c</locationURI>
+			<name>Test/Unit</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Test/test_framework.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/test_framework.h</locationURI>
+			<name>Test/core</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>Component/i2c_queue/i2c_queue.c</name>
@@ -122,24 +117,69 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/inc</name>
+			<name>Lib/EasyLogger/easylogger</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
+			<name>Test/Unit/flash_lowlevel_test.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/flash_lowlevel_test.c</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/port</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
+			<name>Test/Unit/humiture_test.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/humiture_test.c</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/src</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
+			<name>Test/Unit/illuminance_test.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/illuminance_test.c</locationURI>
+		</link>
+		<link>
+			<name>Test/Unit/rtc_test.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/rtc_test.c</locationURI>
+		</link>
+		<link>
+			<name>Test/Unit/test_ina219.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_ina219.c</locationURI>
+		</link>
+		<link>
+			<name>Test/Unit/test_led.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_led.c</locationURI>
+		</link>
+		<link>
+			<name>Test/Unit/test_sdram.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_sdram.c</locationURI>
+		</link>
+		<link>
+			<name>Test/Unit/test_timer.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_timer.c</locationURI>
+		</link>
+		<link>
+			<name>Test/Unit/test_uart_queue.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_uart_queue.c</locationURI>
+		</link>
+		<link>
+			<name>Test/Unit/touch_test.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/touch_test.c</locationURI>
+		</link>
+		<link>
+			<name>Test/core/test_framework.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/core/test_framework.c</locationURI>
+		</link>
+		<link>
+			<name>Test/core/test_framework.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/core/test_framework.h</locationURI>
 		</link>
 		<link>
 			<name>BSP/Drivers/device/bh1750</name>
@@ -207,49 +247,24 @@
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Component/utils/ring_buffer/ring_buffer.h</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/inc/elog.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/inc/elog.h</locationURI>
-		</link>
-		<link>
-			<name>Lib/easylogger/inc/elog_cfg.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/inc/elog_cfg.h</locationURI>
-		</link>
-		<link>
-			<name>Lib/easylogger/plugins/file</name>
+			<name>Lib/EasyLogger/easylogger/inc</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins/flash</name>
+			<name>Lib/EasyLogger/easylogger/plugins</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/port/elog_port.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/port/elog_port.c</locationURI>
+			<name>Lib/EasyLogger/easylogger/port</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/src/elog.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/src/elog.c</locationURI>
-		</link>
-		<link>
-			<name>Lib/easylogger/src/elog_async.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/src/elog_async.c</locationURI>
-		</link>
-		<link>
-			<name>Lib/easylogger/src/elog_buf.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/src/elog_buf.c</locationURI>
-		</link>
-		<link>
-			<name>Lib/easylogger/src/elog_utils.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/src/elog_utils.c</locationURI>
+			<name>Lib/EasyLogger/easylogger/src</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>BSP/Drivers/device/bh1750/bh1750_driver.c</name>
@@ -362,44 +377,49 @@
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/BSP/Drivers/interface/Timer/timer_driver.h</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins/file/elog_file.c</name>
+			<name>Lib/EasyLogger/easylogger/inc/elog.h</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/file/elog_file.c</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/inc/elog.h</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins/file/elog_file.h</name>
+			<name>Lib/EasyLogger/easylogger/inc/elog_cfg.h</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/file/elog_file.h</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/inc/elog_cfg.h</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins/file/elog_file_cfg.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/file/elog_file_cfg.h</locationURI>
+			<name>Lib/EasyLogger/easylogger/plugins/file</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins/file/elog_file_port.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/file/elog_file_port.c</locationURI>
+			<name>Lib/EasyLogger/easylogger/plugins/flash</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins/flash/elog_flash.c</name>
+			<name>Lib/EasyLogger/easylogger/port/elog_port.c</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/flash/elog_flash.c</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/port/elog_port.c</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins/flash/elog_flash.h</name>
+			<name>Lib/EasyLogger/easylogger/src/elog.c</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/flash/elog_flash.h</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/src/elog.c</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins/flash/elog_flash_cfg.h</name>
+			<name>Lib/EasyLogger/easylogger/src/elog_async.c</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/flash/elog_flash_cfg.h</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/src/elog_async.c</locationURI>
 		</link>
 		<link>
-			<name>Lib/easylogger/plugins/flash/elog_flash_port.c</name>
+			<name>Lib/EasyLogger/easylogger/src/elog_buf.c</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/flash/elog_flash_port.c</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/src/elog_buf.c</locationURI>
+		</link>
+		<link>
+			<name>Lib/EasyLogger/easylogger/src/elog_utils.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/src/elog_utils.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/Drivers/factory/connectivity/inc/gpio_factory.h</name>
@@ -500,6 +520,46 @@
 			<name>BSP/Drivers/platform/stm32/System/System_port.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/BSP/Drivers/platform/stm32/System/System_port.h</locationURI>
+		</link>
+		<link>
+			<name>Lib/EasyLogger/easylogger/plugins/file/elog_file.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/file/elog_file.c</locationURI>
+		</link>
+		<link>
+			<name>Lib/EasyLogger/easylogger/plugins/file/elog_file.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/file/elog_file.h</locationURI>
+		</link>
+		<link>
+			<name>Lib/EasyLogger/easylogger/plugins/file/elog_file_cfg.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/file/elog_file_cfg.h</locationURI>
+		</link>
+		<link>
+			<name>Lib/EasyLogger/easylogger/plugins/file/elog_file_port.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/file/elog_file_port.c</locationURI>
+		</link>
+		<link>
+			<name>Lib/EasyLogger/easylogger/plugins/flash/elog_flash.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/flash/elog_flash.c</locationURI>
+		</link>
+		<link>
+			<name>Lib/EasyLogger/easylogger/plugins/flash/elog_flash.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/flash/elog_flash.h</locationURI>
+		</link>
+		<link>
+			<name>Lib/EasyLogger/easylogger/plugins/flash/elog_flash_cfg.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/flash/elog_flash_cfg.h</locationURI>
+		</link>
+		<link>
+			<name>Lib/EasyLogger/easylogger/plugins/flash/elog_flash_port.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Lib/EasyLogger/easylogger/plugins/flash/elog_flash_port.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/Drivers/platform/stm32/Connectivity/gpio/stm32_gpio_driver.c</name>
