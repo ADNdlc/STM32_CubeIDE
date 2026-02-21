@@ -14,7 +14,7 @@
 
 // 使用备份寄存器 0 存储初始化标志
 #define RTC_BKP_INIT_FLAG_REG RTC_BKP_DR0
-#define RTC_BKP_INIT_FLAG_VALUE 0x5051 // "SQ" or any magic number
+#define RTC_BKP_INIT_FLAG_VALUE 0x5051 // 校验数字
 
 typedef struct {
   rtc_driver_t base;

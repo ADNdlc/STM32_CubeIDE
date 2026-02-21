@@ -46,30 +46,29 @@
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F1xx/Include"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
-									<listOptionValue builtIn="false" value="../Lib/EasyLogger/easylogger/inc"/>
 									<listOptionValue builtIn="false" value="../BSP"/>
 									<listOptionValue builtIn="false" value="../BSP/Board"/>
 									<listOptionValue builtIn="false" value="../BSP/Board/stm32h743_board"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System/Sys"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Connectivity"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System/Sys"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System/MemPool"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Device"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/device"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/connectivity"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/device"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System/MemPool"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Timer"/>
 									<listOptionValue builtIn="false" value="../A_Project_cfg"/>
-									<listOptionValue builtIn="false" value="../Component"/>
-									<listOptionValue builtIn="false" value="../Component/utils"/>
-									<listOptionValue builtIn="false" value="../Component/logger"/>
 									<listOptionValue builtIn="false" value="../Test"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/timer"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/Connectivity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/Device}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/System/Sys}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/System/MemPool}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/Timer}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/platform/stm32/System}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/platform/stm32/System/Sys}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/platform/stm32/System/MemPool}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/connectivity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/device}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/timer}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/Component}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/Component/utils}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/Lib/EasyLogger/easylogger/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/connectivity/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/device/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/Test}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/A_Project_cfg}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1163098614" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -114,30 +113,29 @@
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F1xx/Include"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
-									<listOptionValue builtIn="false" value="../Lib/EasyLogger/easylogger/inc"/>
 									<listOptionValue builtIn="false" value="../BSP"/>
 									<listOptionValue builtIn="false" value="../BSP/Board"/>
 									<listOptionValue builtIn="false" value="../BSP/Board/stm32h743_board"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System/Sys"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Connectivity"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System/Sys"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/System/MemPool"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Device"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/device"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/connectivity"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/device"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/platform/stm32/System/MemPool"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/interface/Timer"/>
 									<listOptionValue builtIn="false" value="../A_Project_cfg"/>
-									<listOptionValue builtIn="false" value="../Component"/>
-									<listOptionValue builtIn="false" value="../Component/utils"/>
-									<listOptionValue builtIn="false" value="../Component/logger"/>
 									<listOptionValue builtIn="false" value="../Test"/>
-									<listOptionValue builtIn="false" value="../BSP/Drivers/factory/timer"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/Connectivity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/Device}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/System/Sys}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/System/MemPool}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/interface/Timer}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/platform/stm32/System}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/platform/stm32/System/Sys}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/platform/stm32/System/MemPool}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/connectivity}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/device}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/timer}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/Component}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/Component/utils}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/Lib/EasyLogger/easylogger/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/connectivity/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/BSP/Drivers/factory/device/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/Test}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/0-8_example_project_v2/A_Project_cfg}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.2057113640" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -155,13 +153,13 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="A_Project_cfg"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry excluding="EasyLogger/easylogger/plugins|EasyLogger/easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Lib"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry excluding="easylogger/port|easylogger/plugins|EasyLogger/easylogger/plugins|EasyLogger/easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Lib"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -257,5 +255,13 @@
 			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/0-9_ina219test"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/0-9_ina219test"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

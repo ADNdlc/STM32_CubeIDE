@@ -1,6 +1,7 @@
 #include "test_config.h"
-#if 0 //
+#if ENABLE_TEST_POWER // 临时开启测试
 #include "dev_map.h"
+#include "i2c/stm32_i2c_driver.h"
 #include "ina219/ina219_driver.h"
 #include "test_framework.h"
 #include "timer_factory.h"

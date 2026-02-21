@@ -1,7 +1,7 @@
 #ifndef BSP_DEVICE_DRIVER_PLATFORM_STM32_TIMER_DRIVER_H_
 #define BSP_DEVICE_DRIVER_PLATFORM_STM32_TIMER_DRIVER_H_
 
-#include "stm32H7xx_hal.h"
+#include "HAL_include.h"
 #include "timer_driver.h"
 
 #define TIMER_MEMSOURCE SYS_MEM_INTERNAL

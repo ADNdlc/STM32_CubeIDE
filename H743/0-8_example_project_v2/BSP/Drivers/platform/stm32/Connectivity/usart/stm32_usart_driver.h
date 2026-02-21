@@ -8,7 +8,7 @@
 #ifndef BSP_DEVICE_DRIVER_PLATFORM_STM32_DEVICE_STM32_USART_DRIVER_H_
 #define BSP_DEVICE_DRIVER_PLATFORM_STM32_DEVICE_STM32_USART_DRIVER_H_
 
-#include "stm32h7xx_hal.h"
+#include "HAL_include.h"
 #include "usart_driver.h"
 
 // 从哪里分配

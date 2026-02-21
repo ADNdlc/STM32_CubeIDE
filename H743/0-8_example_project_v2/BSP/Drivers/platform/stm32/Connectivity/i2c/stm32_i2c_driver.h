@@ -10,7 +10,7 @@
 
 #include "i2c.h"
 #include "i2c_driver.h"
-#include "stm32H7xx_hal.h"
+#include "HAL_include.h"
 #include <stdint.h>
 
 // STM32 I2C 软件模拟配置

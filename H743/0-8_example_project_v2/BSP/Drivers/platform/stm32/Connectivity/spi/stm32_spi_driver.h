@@ -9,7 +9,7 @@
 #define BSP_DRIVERS_PLATFORM_STM32_SPI_DRIVER_H_
 
 #include "spi_driver.h"
-#include "stm32h7xx_hal.h"
+#include "HAL_include.h"
 
 // STM32 SPI 驱动派生类
 typedef struct {
