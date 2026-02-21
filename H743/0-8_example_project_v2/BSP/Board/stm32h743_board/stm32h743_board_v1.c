@@ -53,6 +53,7 @@ static const stm32_i2c_soft_config_t touch_soft_i2c_bus = {
 static const stm32_i2c_config_t all_i2c_configs[I2C_MAX_DEVICES] = {
     // 硬件i2c配置
     [I2C_BUS_SENSOR] = {.is_soft = 0, .resource.hi2c = &hi2c2},
+    [I2C_BUS_PWR] = {.is_soft = 0, .resource.hi2c = &hi2c3},
     [I2C_BUS_TOUCH] = {.is_soft = 1,
                        .resource.soft_config =
                            (stm32_i2c_soft_config_t *)&touch_soft_i2c_bus},
@@ -60,6 +61,7 @@ static const stm32_i2c_config_t all_i2c_configs[I2C_MAX_DEVICES] = {
 // I2C 逻辑号映射表
 const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES] = {
     [I2C_BUS_SENSOR] = {.resource = (void *)&all_i2c_configs[I2C_BUS_SENSOR]},
+    [I2C_BUS_PWR] = {.resource = (void *)&all_i2c_configs[I2C_BUS_PWR]},
     [I2C_BUS_TOUCH] = {.resource = (void *)&all_i2c_configs[I2C_BUS_TOUCH]},
 };
 

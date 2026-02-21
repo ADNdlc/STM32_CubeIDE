@@ -49,7 +49,7 @@ const rtc_mapping_t rtc_mappings[RTC_MAX] = {
 
 // Timer 逻辑号映射表
 const timer_mapping_t timer_mappings[TIMER_ID_MAX] = {
-    [TIMER_ID_1] = {.resource = (void *)&htim1},
+    [TIMER_ID_1] = {.resource = (void *)&htim2},
 };
 
 // SPI 逻辑号映射表

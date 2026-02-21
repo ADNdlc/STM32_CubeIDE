@@ -215,13 +215,12 @@ void stm32_timer_driver_destroy(timer_driver_t *driver_base) {
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   // 1. 保护系统心跳 (假设 System Tick 使用的是某个 Timer)
-  // 如果你的 SysTick 使用的是 Systick 硬件定时器，这步可忽略
+  // 如果SysTick 使用的是 Systick 硬件定时器，这步可忽略
   // 但 HAL 库有时会用 TIM6/7 做时基，必须保护
   if (htim->Instance == uwTickPrio) { // 注意：这里通常需要检查具体的 TIM Instance
       return; 
   }
-
-  // 2. 查找并执行我们的驱动回调
+  // 2. 查找并执行驱动回调
   stm32_timer_driver_t *driver = find_timer_driver(htim->Instance);
   if (driver && driver->callback) {
     driver->callback(driver->callback_context);

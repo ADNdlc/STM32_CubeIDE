@@ -23,7 +23,7 @@
 #define ENABLE_TEST_RTC 0
 #define ENABLE_TEST_FLASH 0
 #define ENABLE_TEST_POWER 0
-#define ENABLE_TEST_TIMER 0
+#define ENABLE_TEST_TIMER 1
 #endif
 
 #endif /* TEST_CONFIG_H_ */

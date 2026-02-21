@@ -22,7 +22,7 @@ typedef struct {
   PowerMonitor_Dev_t base;
 
   // 依赖
-  i2c_driver_t *i2c_driver;
+  i2c_driver_t *i2c_driver;	// 通信
   i2c_queue_t rx_queue; // 异步接收队列
 
   // 配置

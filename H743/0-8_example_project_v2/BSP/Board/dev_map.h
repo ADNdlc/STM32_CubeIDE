@@ -57,7 +57,8 @@ extern const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES];
 /* ----- i2c ----- */
 typedef enum {
   I2C_BUS_SENSOR = 0, // 传感器I2C总线
-  I2C_BUS_TOUCH = 1,
+  I2C_BUS_PWR,	    // 电源监测(高占用)
+  I2C_BUS_TOUCH,
   //...
   I2C_MAX_DEVICES
 } i2c_device_id_t;

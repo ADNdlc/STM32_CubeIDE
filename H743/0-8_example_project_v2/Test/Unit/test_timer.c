@@ -10,9 +10,12 @@
 static timer_driver_t *timer0;
 static gpio_driver_t *led0;
 
+#define cycle 1000
+
 static void timer_callback(void *context) {
   if (led0) {
     GPIO_TOGGLE(led0);
+    log_i(".");
   }
 }
 
@@ -24,9 +27,9 @@ static void test_timer_setup(void) {
 
   if (timer0) {
     TIMER_SET_CALLBACK(timer0, timer_callback, NULL);
-    TIMER_SET_PERIOD(timer0, 500); // 500ms
+    TIMER_SET_PERIOD(timer0, cycle);
     TIMER_START(timer0);
-    log_i("Timer Test Setup: Timer ID 1 started with 500ms period.");
+    log_i("Timer Test Setup: Timer ID 1 started with %dms period.", cycle);
   } else {
     log_e("Timer Test Setup: Failed to get timer driver ID 1.");
   }
@@ -43,7 +46,7 @@ static void test_timer_teardown(void) {
   }
 }
 
-REGISTER_TEST(TIMER, "Periodic Timer Test - Toggle LED0 every 500ms",
+REGISTER_TEST(TIMER, "Periodic Timer Test - Toggle LED0 every cycle",
               test_timer_setup, test_timer_loop, test_timer_teardown);
 
 #endif

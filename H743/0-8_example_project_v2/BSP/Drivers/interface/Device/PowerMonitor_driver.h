@@ -33,17 +33,15 @@ typedef struct PowerMonitor_Dev PowerMonitor_Dev_t;
 
 typedef struct {
   // 1. 初始化
-  int (*init)(PowerMonitor_Dev_t *dev);
-
+  int (*init)(void *config);
   // 2. 获取瞬时值
   int (*read_instant)(PowerMonitor_Dev_t *dev, Power_Instant_Data_t *data);
-
-  // 3. 获取累计值 (库仑计)
-  int (*read_accumulated)(PowerMonitor_Dev_t *dev,
-                          Power_Accumulated_Data_t *data);
-
+  // 3. 获取累计值
+  int (*read_accumulated)(PowerMonitor_Dev_t *dev, Power_Accumulated_Data_t *data);
   // 4. 重置累计
   int (*reset_counters)(PowerMonitor_Dev_t *dev);
+  // 5. 报警设置 (可选)
+  int (*set_over_current_limit)(PowerMonitor_Dev_t *dev, float limit_mA);
 
 } PowerMonitor_Ops_t;
 
@@ -52,9 +50,10 @@ struct PowerMonitor_Dev {
 };
 
 // 辅助宏
-#define PM_INIT(dev) (dev)->ops->init(dev)
+#define PM_INIT(dev, config) (dev)->ops->init(config)
 #define PM_READ_INSTANT(dev, data) (dev)->ops->read_instant(dev, data)
 #define PM_READ_ACCUMULATED(dev, data) (dev)->ops->read_accumulated(dev, data)
 #define PM_RESET(dev) (dev)->ops->reset_counters(dev)
+#define PM_SET_OVER_CURRENT_LIMIT(dev, limit_mA) (dev)->ops->set_over_current_limit(dev, limit_mA)
 
 #endif /* DRIVERS_INTERFACE_DEVICE_POWER_MONITOR_DRIVER_H_ */

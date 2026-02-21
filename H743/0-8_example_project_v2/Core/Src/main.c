@@ -116,6 +116,7 @@ int main(void)
   MX_SPI1_Init();
   MX_QUADSPI_Init();
   MX_I2C2_Init();
+  MX_I2C3_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
