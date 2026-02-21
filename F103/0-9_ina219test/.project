@@ -147,11 +147,6 @@
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_timer.c</locationURI>
 		</link>
 		<link>
-			<name>Test/Unit/test_uart_queue.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_uart_queue.c</locationURI>
-		</link>
-		<link>
 			<name>Test/core/test_framework.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/core/test_framework.c</locationURI>

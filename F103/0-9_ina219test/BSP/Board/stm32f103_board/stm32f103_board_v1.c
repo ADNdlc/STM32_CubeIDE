@@ -33,11 +33,13 @@ const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
 
 static const stm32_i2c_config_t all_i2c_configs[I2C_MAX_DEVICES] = {
     // 硬件i2c配置
-    [I2C_BUS_SENSOR] = {.is_soft = 0, .resource.hi2c = &hi2c1},
+    [I2C_BUS_SENSOR] = {.is_soft = 0, .resource.hi2c = &hi2c2},
+    [I2C_BUS_PWR] = {.is_soft = 0, .resource.hi2c = &hi2c1},
 };
 // I2C 逻辑号映射表
 const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES] = {
     [I2C_BUS_SENSOR] = {.resource = (void *)&all_i2c_configs[I2C_BUS_SENSOR]},
+    [I2C_BUS_PWR] = {.resource = (void *)&all_i2c_configs[I2C_BUS_PWR]},
 };
 
 // RTC 逻辑号映射表

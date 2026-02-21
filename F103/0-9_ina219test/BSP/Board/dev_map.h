@@ -41,6 +41,7 @@ extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 /* ----- i2c ----- */
 typedef enum {
   I2C_BUS_SENSOR = 0, // 传感器I2C总线
+  I2C_BUS_PWR, // 传感器I2C总线
   //...
   I2C_MAX_DEVICES
 } i2c_device_id_t;
