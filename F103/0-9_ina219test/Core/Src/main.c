@@ -102,11 +102,11 @@ int main(void)
   MX_I2C2_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  GPIOB->ODR ^= (1 << 0);
-  GPIOB->ODR ^= (1 << 1);
+  GPIOB->BSRR = (1 << 0);
   HAL_Delay(500);
 
   bsp_init(); // 驱动层初始化
+
   Test_Framework_Init();
   /* USER CODE END 2 */
 
@@ -114,7 +114,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  Test_Framework_Run();
+	Test_Framework_Run();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -182,11 +182,10 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
 	  __disable_irq();
-	  GPIOB->ODR ^= (1 << 0);
-	  GPIOB->ODR ^= (1 << 1);
+	  GPIOC->ODR ^= (1 << 13);
 	  while (1) {
 	    GPIOB->ODR ^= (1 << 0); // PB0
-	    for (__IO int i = 0; i < 10000; i++) {
+	    for (__IO int i = 0; i < 1000; i++) {
 	      for (__IO int j = 0; j < 1000; j++) {
 	      }
 	    }

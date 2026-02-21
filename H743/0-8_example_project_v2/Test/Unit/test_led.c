@@ -28,13 +28,18 @@ static void test_led_setup(void) {
     log_e("LED0 not found");
     return;
   }
+
+  // 显式初始化 GPIO 模式
+  GPIO_SET_MODE(led0, GPIO_PushPullOutput);
+
 #ifdef STM32H743xx
   if (led1 == NULL) {
     log_e("LED1 not found");
     return;
   }
+  GPIO_SET_MODE(led1, GPIO_PushPullOutput);
 #endif
-  log_i("LED Test Setup: Ensuring GPIOB is ready.");
+  log_i("LED Test Setup: Ensuring GPIOs are ready.");
 }
 
 static void test_led_loop(void) {

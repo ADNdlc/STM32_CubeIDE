@@ -4,8 +4,9 @@
 
 #include "stm32_timer_driver.h"
 #include "MemPool.h"
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
+
 
 #define MAX_TIMER_INSTANCES 8
 static stm32_timer_driver_t *timer_instances[MAX_TIMER_INSTANCES] = {0};
@@ -52,18 +53,18 @@ static uint32_t get_timer_clock_freq(TIM_HandleTypeDef *htim) {
   if (instance_addr >= APB2PERIPH_BASE) {
     pclk = HAL_RCC_GetPCLK2Freq();
     // 获取 APB2 分频系数
-#if defined(RCC_CFGR_PPRE2)
-    ppre = (RCC->CFGR & RCC_CFGR_PPRE2) >> RCC_CFGR_PPRE2_Pos;
-#elif defined(RCC_D2CFGR_D2PPRE2) // H7
+#if defined(STM32H743xx)
     ppre = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE2) >> RCC_D2CFGR_D2PPRE2_Pos;
+#elif defined(STM32F103xB)
+    ppre = (RCC->CFGR & RCC_CFGR_PPRE2) >> RCC_CFGR_PPRE2_Pos;
 #endif
   } else {
     pclk = HAL_RCC_GetPCLK1Freq();
     // 获取 APB1 分频系数
-#if defined(RCC_CFGR_PPRE1)
-    ppre = (RCC->CFGR & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos;
-#elif defined(RCC_D2CFGR_D2PPRE1) // H7
+#if defined(STM32H743xx)
     ppre = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE1) >> RCC_D2CFGR_D2PPRE1_Pos;
+#elif defined(STM32F103xB)
+    ppre = (RCC->CFGR & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos;
 #endif
   }
 
@@ -82,7 +83,7 @@ static int stm32_timer_start(timer_driver_t *self) {
   stm32_timer_driver_t *driver = (stm32_timer_driver_t *)self;
   // 清除更新标志位，防止启动时立即进入中断（如果是停止状态下修改过配置）
   __HAL_TIM_CLEAR_FLAG(driver->htim, TIM_FLAG_UPDATE);
-  
+
   if (HAL_TIM_Base_Start_IT(driver->htim) != HAL_OK) {
     return -1;
   }
@@ -99,7 +100,8 @@ static int stm32_timer_stop(timer_driver_t *self) {
 
 static int stm32_timer_set_period(timer_driver_t *self, uint32_t period_ms) {
   stm32_timer_driver_t *driver = (stm32_timer_driver_t *)self;
-  if (period_ms == 0) return -1;
+  if (period_ms == 0)
+    return -1;
 
   uint32_t timer_clk = get_timer_clock_freq(driver->htim);
   // 计算所需的总 Tick 数
@@ -110,13 +112,17 @@ static int stm32_timer_set_period(timer_driver_t *self, uint32_t period_ms) {
   uint32_t psc = 0;
   uint32_t arr = total_ticks - 1;
 
-  // 检测是否为 32 位定时器 (F4/H7 的 TIM2 和 TIM5)
+  // 检测是否为 32 位定时器 (仅 H7/F4 等的部分 TIM2/TIM5 才是 32 位)
   bool is_32bit = false;
+#if defined(STM32H743xx)
 #if defined(TIM2)
-  if (driver->htim->Instance == TIM2) is_32bit = true;
+  if (driver->htim->Instance == TIM2)
+    is_32bit = true;
 #endif
 #if defined(TIM5)
-  if (driver->htim->Instance == TIM5) is_32bit = true;
+  if (driver->htim->Instance == TIM5)
+    is_32bit = true;
+#endif
 #endif
 
   uint32_t max_arr_val = is_32bit ? 0xFFFFFFFF : 0xFFFF;
@@ -164,21 +170,21 @@ static const timer_driver_ops_t stm32_timer_ops = {
 // ---------------- 构造与析构 ----------------
 
 timer_driver_t *stm32_timer_driver_create(TIM_HandleTypeDef *htim) {
-  if (!htim) return NULL;
+  if (!htim)
+    return NULL;
 
   // 检查该句柄是否已经被注册过，防止重复创建
   if (find_timer_driver(htim->Instance) != NULL) {
-      return (timer_driver_t *)find_timer_driver(htim->Instance);
+    return (timer_driver_t *)find_timer_driver(htim->Instance);
   }
 
 #ifdef USE_MEMPOOL
-  stm32_timer_driver_t *driver =
-      (stm32_timer_driver_t *)sys_malloc(TIMER_MEMSOURCE, sizeof(stm32_timer_driver_t));
+  stm32_timer_driver_t *driver = (stm32_timer_driver_t *)sys_malloc(
+      TIMER_MEMSOURCE, sizeof(stm32_timer_driver_t));
 #else
-stm32_timer_driver_t *driver =
-    (stm32_timer_driver_t *)malloc(sizeof(stm32_timer_driver_t));
+  stm32_timer_driver_t *driver =
+      (stm32_timer_driver_t *)malloc(sizeof(stm32_timer_driver_t));
 #endif
-
 
   if (driver) {
     driver->base.ops = &stm32_timer_ops;
@@ -186,14 +192,15 @@ stm32_timer_driver_t *driver =
     driver->callback = NULL;
     driver->callback_context = NULL;
     driver->period_ms = 0;
-    
+
     register_timer_instance(driver);
   }
   return (timer_driver_t *)driver;
 }
 
 void stm32_timer_driver_destroy(timer_driver_t *driver_base) {
-  if (!driver_base) return;
+  if (!driver_base)
+    return;
 
   stm32_timer_driver_t *driver = (stm32_timer_driver_t *)driver_base;
 
@@ -214,12 +221,9 @@ void stm32_timer_driver_destroy(timer_driver_t *driver_base) {
  * 注意：所有开启中断的 TIM 都会进入这里
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-  // 1. 保护系统心跳 (假设 System Tick 使用的是某个 Timer)
-  // 如果SysTick 使用的是 Systick 硬件定时器，这步可忽略
-  // 但 HAL 库有时会用 TIM6/7 做时基，必须保护
-  if (htim->Instance == uwTickPrio) { // 注意：这里通常需要检查具体的 TIM Instance
-      return; 
-  }
+  // 1. 保护系统心跳 (如果使用的是 TIM 作为 SysTick 时基)
+  // uwTickPrio 是中断优先级，不应直接与 Instance 比较。
+  // 如果当前工程使用 TIMx 作为心跳，请在此处添加具体的保护逻辑。
   // 2. 查找并执行驱动回调
   stm32_timer_driver_t *driver = find_timer_driver(htim->Instance);
   if (driver && driver->callback) {

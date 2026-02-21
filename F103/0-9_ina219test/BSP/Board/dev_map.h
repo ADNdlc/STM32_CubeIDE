@@ -27,7 +27,6 @@ extern const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES];
 // 定义串口逻辑ID，供上层应用和Factory层使用
 typedef enum {
   USART_ID_DEBUG = 0, // 日志和调试
-  USART_ID_ESP8266,   // 网络通信模块
   // ...
   USART_MAX_DEVICES
 } usart_device_id_t;
@@ -41,7 +40,7 @@ extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 /* ----- i2c ----- */
 typedef enum {
   I2C_BUS_SENSOR = 0, // 传感器I2C总线
-  I2C_BUS_PWR, // 传感器I2C总线
+  I2C_BUS_PWR,
   //...
   I2C_MAX_DEVICES
 } i2c_device_id_t;
@@ -53,7 +52,6 @@ extern const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES];
 /* ----- spi ----- */
 typedef enum {
   SPI_ID_1 = 0,
-  SPI_ID_2 = 1,
   //...
   SPI_MAX_DEVICES
 } spi_device_id_t;

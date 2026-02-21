@@ -21,6 +21,9 @@ static void timer_callback(void *context) {
 
 static void test_timer_setup(void) {
   led0 = gpio_driver_get(GPIO_ID_LED0);
+  if (led0) {
+    GPIO_SET_MODE(led0, GPIO_PushPullOutput);
+  }
 
   // 使用逻辑 ID 获取定时器驱动
   timer0 = timer_driver_get(TIMER_ID_1);
