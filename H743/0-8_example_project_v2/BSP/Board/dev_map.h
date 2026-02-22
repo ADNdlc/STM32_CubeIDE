@@ -159,6 +159,18 @@ typedef struct {
 } norflash_mapping_t;
 extern const norflash_mapping_t norflash_mappings[NOR_FLASH_MAX];
 
+/* ----- 电源监测 ----- */
+typedef enum {
+  POWER_MONITOR_ID_MAIN = 0, // 主电源监测
+  //...
+  POWER_MONITOR_MAX
+} power_monitor_id_t;
+typedef struct {
+  
+  void *resource; // 关联的总线资源 (如 i2c_driver_t*)
+} power_monitor_mapping_t;
+extern const power_monitor_mapping_t power_monitor_mappings[POWER_MONITOR_MAX];
+
 // 辅助宏
 #define CALL_RESOURE(config, type, res_name)                                   \
   ((type)(((config *)mapping->resource)->res_name))

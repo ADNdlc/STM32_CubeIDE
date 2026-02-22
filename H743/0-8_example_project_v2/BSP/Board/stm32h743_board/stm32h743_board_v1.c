@@ -134,4 +134,9 @@ const norflash_mapping_t norflash_mappings[NOR_FLASH_MAX] = {
         },
 };
 
+// "电源监测"逻辑号映射表
+const power_monitor_mapping_t power_monitor_mappings[POWER_MONITOR_MAX] = {
+    [POWER_MONITOR_ID_MAIN] = {.resource = (void *)I2C_BUS_PWR},
+};
+
 #endif // STM32H743_BOARD_V1

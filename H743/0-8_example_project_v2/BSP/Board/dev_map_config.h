@@ -53,4 +53,8 @@
 #define USE_W25Q 1
 #define DEV_NORFLASH USE_W25Q // NOR Flash驱动选择
 
+/* 电源监测类型 */
+#define USE_INA219 1
+#define DEV_POWER_MONITOR USE_INA219 // 电源监测驱动选择
+
 #endif /* BOARD_DEV_MAP_CONFIG_H_ */
