@@ -5,12 +5,16 @@
  *      Author: Antigravity
  */
 
-#include "ina219_driver.h"
-#include "MemPool.h"
-#include "Sys.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define LOG_TAG "INA219"
+#include "elog.h"
+
+#include "MemPool.h"
+#include "Sys.h"
+#include "ina219_driver.h"
 
 #define INA219_MEMSOURCE SYS_MEM_INTERNAL
 // 驱动程序配置
@@ -141,15 +145,18 @@ static int ina219_compute_calibration(ina219_driver_t *self);
 // 初始化核心计算参数
 static int ina219_compute_calibration(ina219_driver_t *self) {
   // 1. 计算 Current_LSB = Max_Expected_Current / 2^15
-  self->current_lsb = self->config->max_current_A * 1000.0f / 32768.0f  ;
+  self->current_lsb = self->config->max_current_A * 1000.0f / 32768.0f;
 
   // 2. 计算 Calibration Register = 0.04096 / (Current_LSB * Rshunt)
-  float cal = 0.04096f /
-              ((self->current_lsb / 1000.0f) * self->config->shunt_resistor_ohm);
+  float cal = 0.04096f / ((self->current_lsb / 1000.0f) *
+                          self->config->shunt_resistor_ohm);
   self->cal_value = (uint16_t)cal;
 
   // 3. 计算 Power_LSB = 20 * Current_LSB
   self->power_lsb = 20.0f * self->current_lsb;
+
+  log_d("Calibration: LSB=%.6f A/bit, Cal=%u, PowerLSB=%.6f mW/bit",
+        self->current_lsb / 1000.0f, self->cal_value, self->power_lsb);
 
   return 0;
 }
@@ -161,6 +168,7 @@ static int ina219_compute_calibration(ina219_driver_t *self) {
  * @param next_state 下一个状态
  */
 static void ina219_fsm_step(ina219_driver_t *self, ina219_state_t next_state) {
+  //log_d("FSM: %d -> %d", self->fsm_state, next_state);
   self->fsm_state = next_state;
   int status = 0;
   switch (self->fsm_state) {
@@ -211,6 +219,7 @@ static void ina219_fsm_step(ina219_driver_t *self, ina219_state_t next_state) {
 static void ina219_i2c_callback(void *context, i2c_event_t event, void *args) {
   ina219_driver_t *self = (ina219_driver_t *)context;
   if (event == I2C_EVENT_ERROR) {
+    log_e("I2C Error at state %d", self->fsm_state);
     self->fsm_state = INA219_STATE_IDLE;
     return;
   }
@@ -256,6 +265,9 @@ static void ina219_i2c_callback(void *context, i2c_event_t event, void *args) {
     self->accumulated_data.charge_mAh +=
         self->instant_data.current_mA * interval_h;
 
+    log_d("Sample Done: %.2f mV, %.2f mA", self->instant_data.voltage_mV,
+          self->instant_data.current_mA);
+
     self->fsm_state = INA219_STATE_IDLE; // 结束一轮,进入空闲
     break;
   }
@@ -282,7 +294,7 @@ static void ina219_timer_callback(void *context) {
  * @return int 0成功, 非 0失败
  */
 static int ina219_read_instant(PowerMonitor_driver_t *drv,
-                                     Power_Instant_Data_t *data) {
+                               Power_Instant_Data_t *data) {
   ina219_driver_t *self = (ina219_driver_t *)drv;
   memcpy(data, &self->instant_data, sizeof(Power_Instant_Data_t));
   return 0;
@@ -296,7 +308,7 @@ static int ina219_read_instant(PowerMonitor_driver_t *drv,
  * @return int 0成功, 非 0失败
  */
 static int ina219_read_accumulated(PowerMonitor_driver_t *drv,
-                                         Power_Accumulated_Data_t *data) {
+                                   Power_Accumulated_Data_t *data) {
   ina219_driver_t *self = (ina219_driver_t *)drv;
   memcpy(data, &self->accumulated_data, sizeof(Power_Accumulated_Data_t));
   return 0;
@@ -357,6 +369,10 @@ PowerMonitor_driver_t *ina219_create(i2c_driver_t *i2c, timer_driver_t *timer,
     TIMER_SET_CALLBACK(timer, ina219_timer_callback, self); // 设置定时任务回调
     TIMER_SET_PERIOD(timer, INA219_SAMPLING_PERIOD_MS);     // 设置任务间隔
     TIMER_START(timer);                                     // 启动任务
+
+    log_d("Driver created at addr 0x%02X", config->dev_addr);
+  } else {
+    log_e("Failed to allocate driver memory");
   }
   return (PowerMonitor_driver_t *)self;
 }
