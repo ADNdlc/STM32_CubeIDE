@@ -18,7 +18,8 @@
 
 #define INA219_MEMSOURCE SYS_MEM_INTERNAL
 // 驱动程序配置
-#define INA219_SAMPLING_PERIOD_MS 100 // 10Hz 采样频率
+#define INA219_SAMPLING_PERIOD_MS 100   // 10Hz 采样频率
+#define INA219_CURRENT_DEADZONE_MA 0.1f // 电流计死区
 #define INA219_ADC_AVG_64                                                      \
   (INA219_CFG_BADCRES_12BIT_64S_34MS |                                         \
    INA219_CFG_SADCRES_12BIT_64S_34MS) // 芯片ADC周期
@@ -168,7 +169,7 @@ static int ina219_compute_calibration(ina219_driver_t *self) {
  * @param next_state 下一个状态
  */
 static void ina219_fsm_step(ina219_driver_t *self, ina219_state_t next_state) {
-  //log_d("FSM: %d -> %d", self->fsm_state, next_state);
+  // log_d("FSM: %d -> %d", self->fsm_state, next_state);
   self->fsm_state = next_state;
   int status = 0;
   switch (self->fsm_state) {
@@ -234,7 +235,8 @@ static void ina219_i2c_callback(void *context, i2c_event_t event, void *args) {
     // 总线电压寄存器 [15:3] 包含数据, [2] CNVR, [1] OVF
     self->instant_data.voltage_mV = ((int16_t)raw_v >> 3) * 4.0f; // 4mV per LSB
 
-    ina219_fsm_step(self, INA219_STATE_READ_CURR); // 进入读取电流状态
+    ina219_fsm_step(self,
+                    INA219_STATE_WRITE_PTR_CURR); // 进入设置电流寄存器地址
     break;
   }
 
@@ -246,7 +248,7 @@ static void ina219_i2c_callback(void *context, i2c_event_t event, void *args) {
     int16_t raw_i = (int16_t)((self->i2c_buffer[0] << 8) | self->i2c_buffer[1]);
     self->instant_data.current_mA = raw_i * self->current_lsb;
 
-    ina219_fsm_step(self, INA219_STATE_READ_POW); // 进入读取功率状态
+    ina219_fsm_step(self, INA219_STATE_WRITE_PTR_POW); // 进入设置功率寄存器地址
     break;
   }
 
@@ -258,12 +260,26 @@ static void ina219_i2c_callback(void *context, i2c_event_t event, void *args) {
     uint16_t raw_p = (self->i2c_buffer[0] << 8) | self->i2c_buffer[1];
     self->instant_data.power_mW = raw_p * self->power_lsb;
 
-    // 完成一轮采样，进行电量统计
+    // 4. 死区过滤：处理零位偏移噪声
+    if (self->instant_data.current_mA > -INA219_CURRENT_DEADZONE_MA &&
+        self->instant_data.current_mA < INA219_CURRENT_DEADZONE_MA) {
+      self->instant_data.current_mA = 0;
+      self->instant_data.power_mW = 0;
+    }
+
+    // 5. 完成一轮采样，进行电量统计
     double interval_h = INA219_SAMPLING_PERIOD_MS / 3600000.0;
-    self->accumulated_data.energy_mWh +=
-        self->instant_data.power_mW * interval_h;
+
+    // 电荷累计 (mAh)：支持正负方向（充放电）
     self->accumulated_data.charge_mAh +=
         self->instant_data.current_mA * interval_h;
+
+    // 能量累计 (mWh)：通常指做功消耗，取功率绝对值累计（或者仅正向累计）
+    // 此处采用功率绝对值，防止噪声波动导致能量减少
+    float p_abs = (self->instant_data.power_mW > 0)
+                      ? self->instant_data.power_mW
+                      : -self->instant_data.power_mW;
+    self->accumulated_data.energy_mWh += p_abs * interval_h;
 
     log_d("Sample Done: %.2f mV, %.2f mA", self->instant_data.voltage_mV,
           self->instant_data.current_mA);
