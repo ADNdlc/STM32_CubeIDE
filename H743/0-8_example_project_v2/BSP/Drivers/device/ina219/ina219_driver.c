@@ -281,9 +281,9 @@ static void ina219_timer_callback(void *context) {
  * @param data 返回值
  * @return int 0成功, 非 0失败
  */
-static int stm32_ina219_read_instant(PowerMonitor_Dev_t *dev,
+static int ina219_read_instant(PowerMonitor_driver_t *drv,
                                      Power_Instant_Data_t *data) {
-  ina219_driver_t *self = (ina219_driver_t *)dev;
+  ina219_driver_t *self = (ina219_driver_t *)drv;
   memcpy(data, &self->instant_data, sizeof(Power_Instant_Data_t));
   return 0;
 }
@@ -295,9 +295,9 @@ static int stm32_ina219_read_instant(PowerMonitor_Dev_t *dev,
  * @param data 累计数据
  * @return int 0成功, 非 0失败
  */
-static int stm32_ina219_read_accumulated(PowerMonitor_Dev_t *dev,
+static int ina219_read_accumulated(PowerMonitor_driver_t *drv,
                                          Power_Accumulated_Data_t *data) {
-  ina219_driver_t *self = (ina219_driver_t *)dev;
+  ina219_driver_t *self = (ina219_driver_t *)drv;
   memcpy(data, &self->accumulated_data, sizeof(Power_Accumulated_Data_t));
   return 0;
 }
@@ -308,17 +308,17 @@ static int stm32_ina219_read_accumulated(PowerMonitor_Dev_t *dev,
  * @param dev 驱动实例
  * @return int 0成功, 非 0失败
  */
-static int stm32_ina219_reset_counters(PowerMonitor_Dev_t *dev) {
-  ina219_driver_t *self = (ina219_driver_t *)dev;
+static int ina219_reset_counters(PowerMonitor_driver_t *drv) {
+  ina219_driver_t *self = (ina219_driver_t *)drv;
   self->accumulated_data.charge_mAh = 0;
   self->accumulated_data.energy_mWh = 0;
   return 0;
 }
 
 static const PowerMonitor_Ops_t ina219_ops = {
-    .read_instant = stm32_ina219_read_instant,
-    .read_accumulated = stm32_ina219_read_accumulated,
-    .reset_counters = stm32_ina219_reset_counters,
+    .read_instant = ina219_read_instant,
+    .read_accumulated = ina219_read_accumulated,
+    .reset_counters = ina219_reset_counters,
     .set_over_current_limit = NULL};
 
 PowerMonitor_driver_t *ina219_create(i2c_driver_t *i2c, timer_driver_t *timer,
@@ -358,5 +358,5 @@ PowerMonitor_driver_t *ina219_create(i2c_driver_t *i2c, timer_driver_t *timer,
     TIMER_SET_PERIOD(timer, INA219_SAMPLING_PERIOD_MS);     // 设置任务间隔
     TIMER_START(timer);                                     // 启动任务
   }
-  return (PowerMonitor_Dev_t *)self;
+  return (PowerMonitor_driver_t *)self;
 }

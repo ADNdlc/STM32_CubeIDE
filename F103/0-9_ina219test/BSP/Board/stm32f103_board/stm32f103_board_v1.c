@@ -10,7 +10,7 @@
 #include "spi.h"
 #include "spi/stm32_spi_driver.h"
 #include "tim.h"
-
+#include "ina219/ina219_driver.h"
 
 /*************
  * 总线配置表
@@ -65,5 +65,19 @@ const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX] = {
     [LIGHT_SENSOR_ID_AMBIENT] = {.resource = (void *)I2C_BUS_SENSOR},
 };
 
+const ina219_factory_config_t ina219_factory_config = {
+    .i2c_id = I2C_BUS_PWR,
+    .timer_id = TIMER_ID_1,
+    .config =
+        {
+            .dev_addr = INA219_I2C_ADDRESS_CONF_0,
+            .shunt_resistor_ohm = 0.1,
+            .max_current_A = 1.0,
+        },
+};
+// "电源监测"逻辑号映射表
+const power_monitor_mapping_t power_monitor_mappings[POWER_MONITOR_MAX] = {
+    [POWER_MONITOR_ID_MAIN] = {.resource = (void *)&ina219_factory_config},
+};
 
 #endif // STM32F103_BOARD_V1

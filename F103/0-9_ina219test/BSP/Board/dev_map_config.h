@@ -35,18 +35,14 @@
  * 各个硬件类型选择
  * 用于决定使用哪个版本的设备驱动创建
  */
-/* 温湿度传感器类型 */
-#define USE_DHT11 1
-// #define USE_DHT22 2
-#define DEV_HUMITURE USE_DHT11 // 温湿度传感器选择
-
 /* 光照传感器类型 */
 #define USE_BH1750 1
 //...
 #define DEV_LIGHT USE_BH1750 // 光照传感器选择
 
-/* 触摸屏类型选择 */
-#define USE_GT9XXX 1
-#define DEV_TOUCH USE_GT9XXX // 触摸屏驱动选择
+
+/* 电源监测类型 */
+#define USE_INA219 1
+#define DEV_POWER_MONITOR USE_INA219 // 电源监测驱动选择
 
 #endif /* BOARD_DEV_MAP_CONFIG_H_ */

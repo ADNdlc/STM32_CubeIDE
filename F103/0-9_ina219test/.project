@@ -117,24 +117,9 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Test/Unit/flash_lowlevel_test.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/flash_lowlevel_test.c</locationURI>
-		</link>
-		<link>
-			<name>Test/Unit/humiture_test.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/humiture_test.c</locationURI>
-		</link>
-		<link>
 			<name>Test/Unit/illuminance_test.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/illuminance_test.c</locationURI>
-		</link>
-		<link>
-			<name>Test/Unit/rtc_test.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/rtc_test.c</locationURI>
 		</link>
 		<link>
 			<name>Test/Unit/test_ina219.c</name>
@@ -147,9 +132,9 @@
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_led.c</locationURI>
 		</link>
 		<link>
-			<name>Test/Unit/test_sdram.c</name>
+			<name>Test/Unit/test_power_monitor.c</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_sdram.c</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_power_monitor.c</locationURI>
 		</link>
 		<link>
 			<name>Test/Unit/test_timer.c</name>
@@ -160,11 +145,6 @@
 			<name>Test/Unit/test_uart_queue.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_uart_queue.c</locationURI>
-		</link>
-		<link>
-			<name>Test/Unit/touch_test.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/touch_test.c</locationURI>
 		</link>
 		<link>
 			<name>Test/core/test_framework.c</name>
@@ -457,9 +437,19 @@
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/BSP/Drivers/factory/connectivity/src/usart_factory.c</locationURI>
 		</link>
 		<link>
+			<name>BSP/Drivers/factory/device/inc/PowerMonitor_factory.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/BSP/Drivers/factory/device/inc/PowerMonitor_factory.h</locationURI>
+		</link>
+		<link>
 			<name>BSP/Drivers/factory/device/inc/illuminance_factory.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/BSP/Drivers/factory/device/inc/illuminance_factory.h</locationURI>
+		</link>
+		<link>
+			<name>BSP/Drivers/factory/device/src/PowerMonitor_factory.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/BSP/Drivers/factory/device/src/PowerMonitor_factory.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/Drivers/factory/device/src/illuminance_factory.c</name>

@@ -14,11 +14,12 @@
 #include "elog.h"
 
 #if TEST_ENABLE
-#define ENABLE_TEST_LED 1
-#define ENABLE_TEST_ILLUMINANCE 1
+#define ENABLE_TEST_LED 0
+#define ENABLE_TEST_ILLUMINANCE 0
 #define ENABLE_TEST_RTC 0
 #define ENABLE_TEST_POWER 0
 #define ENABLE_TEST_TIMER 1
+#define ENABLE_TEST_POWER_MONITOR 1
 #endif
 
 #endif /* TEST_CONFIG_H_ */
