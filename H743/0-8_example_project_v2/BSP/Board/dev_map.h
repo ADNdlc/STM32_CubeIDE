@@ -11,7 +11,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
 #include "dev_map_config.h"
 
 /* ----- GPIO ----- */
@@ -57,7 +56,7 @@ extern const one_wire_mapping_t one_wire_mappings[ONE_WIRE_MAX_DEVICES];
 /* ----- i2c ----- */
 typedef enum {
   I2C_BUS_SENSOR = 0, // 传感器I2C总线
-  I2C_BUS_PWR,	    // 电源监测(高占用)
+  I2C_BUS_PWR,        // 电源监测(高占用)
   I2C_BUS_TOUCH,
   //...
   I2C_MAX_DEVICES
@@ -110,10 +109,10 @@ extern const rtc_mapping_t rtc_mappings[RTC_MAX];
 
 /* ----- Timer ----- */
 typedef enum {
-	TIMER_ID_1 = 0,
-	TIMER_ID_2,
+  TIMER_ID_1 = 0,
+  TIMER_ID_2,
 
-	TIMER_ID_MAX
+  TIMER_ID_MAX
 } timer_device_id_t;
 typedef struct {
   void *resource;
@@ -155,7 +154,7 @@ extern const touch_mapping_t touch_mappings[TOUCH_MAX];
 typedef enum { NOR_FLASH_SYS = 0, NOR_FLASH_MAX } norflash_id_t;
 typedef struct {
   nor_flash_info_t *manual_info; // 手动配置项(可缺省)
-  void *resource;               // 硬件总线资源
+  void *resource;                // 硬件总线资源
 } norflash_mapping_t;
 extern const norflash_mapping_t norflash_mappings[NOR_FLASH_MAX];
 
@@ -166,7 +165,6 @@ typedef enum {
   POWER_MONITOR_MAX
 } power_monitor_id_t;
 typedef struct {
-  
   void *resource; // 关联的总线资源 (如 i2c_driver_t*)
 } power_monitor_mapping_t;
 extern const power_monitor_mapping_t power_monitor_mappings[POWER_MONITOR_MAX];

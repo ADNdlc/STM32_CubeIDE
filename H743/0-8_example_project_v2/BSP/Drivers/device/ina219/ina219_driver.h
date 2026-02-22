@@ -9,9 +9,12 @@
 #define DRIVERS_DEVICE_INA219_INA219_DRIVER_H_
 
 #include "PowerMonitor_driver.h"
+#include "dev_map.h"
 #include "i2c_driver.h"
 #include "timer_driver.h"
 #include <stdint.h>
+
+#define u8 uint8_t
 
 // I2C 地址配置
 #define INA219_I2C_ADDRESS_CONF_0 (u8)(0x40 << 1) // A0 = GND, A1 = GND
@@ -51,12 +54,18 @@ typedef struct {
 } ina219_config_t;
 
 typedef struct {
+  i2c_device_id_t i2c_id;
+  timer_device_id_t timer_id;
+  ina219_config_t config;
+} ina219_factory_config_t;
+
+typedef struct {
   PowerMonitor_driver_t base; // 实现接口的功能
   // 依赖
   i2c_driver_t *i2c_driver; // 通信依赖
   timer_driver_t *timer;    // ina219没有硬件积分，因此需要定时采样软件累计
   // 配置
-  ina219_config_t config; // 硬件参数
+  ina219_config_t *config; // 硬件参数
   // 核心计算参数
   float current_lsb;  // 电流解析度 (mA/bit)
   float power_lsb;    // 功率解析度 (mW/bit)

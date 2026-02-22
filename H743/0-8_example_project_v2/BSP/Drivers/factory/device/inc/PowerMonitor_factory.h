@@ -11,6 +11,6 @@
 #include "PowerMonitor_driver.h"
 #include "dev_map.h"
 
-PowerMonitor_driver_t *PowerMonitor_factory_get(PowerMonitor_id_t id);
+PowerMonitor_driver_t *PowerMonitor_factory_get(power_monitor_id_t id);
 
 #endif /* DRIVERS_FACTORY_DEVICE_INC_POWERMONITOR_FACTORY_H_ */

@@ -141,11 +141,11 @@ static int ina219_compute_calibration(ina219_driver_t *self);
 // 初始化核心计算参数
 static int ina219_compute_calibration(ina219_driver_t *self) {
   // 1. 计算 Current_LSB = Max_Expected_Current / 2^15
-  self->current_lsb = self->config.max_current_A * 1000.0f / 32768.0f;
+  self->current_lsb = self->config->max_current_A * 1000.0f / 32768.0f  ;
 
   // 2. 计算 Calibration Register = 0.04096 / (Current_LSB * Rshunt)
   float cal = 0.04096f /
-              ((self->current_lsb / 1000.0f) * self->config.shunt_resistor_ohm);
+              ((self->current_lsb / 1000.0f) * self->config->shunt_resistor_ohm);
   self->cal_value = (uint16_t)cal;
 
   // 3. 计算 Power_LSB = 20 * Current_LSB
@@ -166,34 +166,34 @@ static void ina219_fsm_step(ina219_driver_t *self, ina219_state_t next_state) {
   switch (self->fsm_state) {
   case INA219_STATE_WRITE_PTR_BUSV:
     self->i2c_buffer[0] = INA219_REG_BUSVOLTAGE;
-    status = I2C_MASTER_TRANSMIT_ASYN(self->i2c_driver, self->config.dev_addr,
+    status = I2C_MASTER_TRANSMIT_ASYN(self->i2c_driver, self->config->dev_addr,
                                       self->i2c_buffer, 1);
     break;
 
   case INA219_STATE_READ_BUSV:
-    status = I2C_MASTER_RECEIVE_ASYN(self->i2c_driver, self->config.dev_addr,
+    status = I2C_MASTER_RECEIVE_ASYN(self->i2c_driver, self->config->dev_addr,
                                      self->i2c_buffer, 2);
     break;
 
   case INA219_STATE_WRITE_PTR_CURR:
     self->i2c_buffer[0] = INA219_REG_CURRENT;
-    status = I2C_MASTER_TRANSMIT_ASYN(self->i2c_driver, self->config.dev_addr,
+    status = I2C_MASTER_TRANSMIT_ASYN(self->i2c_driver, self->config->dev_addr,
                                       self->i2c_buffer, 1);
     break;
 
   case INA219_STATE_READ_CURR:
-    status = I2C_MASTER_RECEIVE_ASYN(self->i2c_driver, self->config.dev_addr,
+    status = I2C_MASTER_RECEIVE_ASYN(self->i2c_driver, self->config->dev_addr,
                                      self->i2c_buffer, 2);
     break;
 
   case INA219_STATE_WRITE_PTR_POW:
     self->i2c_buffer[0] = INA219_REG_POWER;
-    status = I2C_MASTER_TRANSMIT_ASYN(self->i2c_driver, self->config.dev_addr,
+    status = I2C_MASTER_TRANSMIT_ASYN(self->i2c_driver, self->config->dev_addr,
                                       self->i2c_buffer, 1);
     break;
 
   case INA219_STATE_READ_POW:
-    status = I2C_MASTER_RECEIVE_ASYN(self->i2c_driver, self->config.dev_addr,
+    status = I2C_MASTER_RECEIVE_ASYN(self->i2c_driver, self->config->dev_addr,
                                      self->i2c_buffer, 2);
     break;
 
@@ -333,7 +333,7 @@ PowerMonitor_driver_t *ina219_create(i2c_driver_t *i2c, timer_driver_t *timer,
     self->base.ops = &ina219_ops;
     self->i2c_driver = i2c;
     self->timer = timer;
-    self->config = *config;
+    self->config = config;
 
     // 1. 初始化计算
     ina219_compute_calibration(self);

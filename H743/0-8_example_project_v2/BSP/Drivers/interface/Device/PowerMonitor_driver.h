@@ -29,24 +29,24 @@ typedef struct {
 } Power_Accumulated_Data_t;
 
 // 驱动句柄前向声明
-typedef struct PowerMonitor_Dev PowerMonitor_Dev_t;
+typedef struct PowerMonitor_driver_t PowerMonitor_driver_t;
 
 typedef struct {
   // 1. 获取瞬时值
-  int (*read_instant)(PowerMonitor_Dev_t *dev, Power_Instant_Data_t *data);
+  int (*read_instant)(PowerMonitor_driver_t *dev, Power_Instant_Data_t *data);
   // 2. 获取累计值
-  int (*read_accumulated)(PowerMonitor_Dev_t *dev,
+  int (*read_accumulated)(PowerMonitor_driver_t *dev,
                           Power_Accumulated_Data_t *data);
   // 3. 重置累计
-  int (*reset_counters)(PowerMonitor_Dev_t *dev);
+  int (*reset_counters)(PowerMonitor_driver_t *dev);
   // 4. 报警设置 (可选)
-  int (*set_over_current_limit)(PowerMonitor_Dev_t *dev, float limit_mA);
+  int (*set_over_current_limit)(PowerMonitor_driver_t *dev, float limit_mA);
 
 } PowerMonitor_Ops_t;
 
-typedef struct PowerMonitor_driver_t {
+struct PowerMonitor_driver_t {
   const PowerMonitor_Ops_t *ops;
-} PowerMonitor_driver_t;
+};
 
 // 辅助宏
 #define PM_READ_INSTANT(dev, data) (dev)->ops->read_instant(dev, data)

@@ -6,14 +6,15 @@
 #include "gpio/stm32_gpio_driver.h"
 #include "gt9xxx_touch/gt9xxx_touch_driver.h"
 #include "i2c/stm32_i2c_driver.h"
+#include "ina219/ina219_driver.h"
 #include "main.h"
 #include "one_wire/stm32_one_wire_driver.h"
 #include "qspi/stm32_qspi_driver.h"
 #include "quadspi.h"
 #include "rtc/stm32_rtc_driver.h"
-#include "tim.h"
 #include "spi.h"
 #include "spi/stm32_spi_driver.h"
+#include "tim.h"
 #include "usart.h"
 
 /*************
@@ -134,9 +135,19 @@ const norflash_mapping_t norflash_mappings[NOR_FLASH_MAX] = {
         },
 };
 
+const ina219_factory_config_t ina219_factory_config = {
+    .i2c_id = I2C_BUS_PWR,
+    .timer_id = TIMER_ID_1,
+    .config =
+        {
+            .dev_addr = INA219_I2C_ADDRESS_CONF_0,
+            .shunt_resistor_ohm = 0.1,
+            .max_current_A = 1.0,
+        },
+};
 // "电源监测"逻辑号映射表
 const power_monitor_mapping_t power_monitor_mappings[POWER_MONITOR_MAX] = {
-    [POWER_MONITOR_ID_MAIN] = {.resource = (void *)I2C_BUS_PWR},
+    [POWER_MONITOR_ID_MAIN] = {.resource = (void *)&ina219_factory_config},
 };
 
 #endif // STM32H743_BOARD_V1
