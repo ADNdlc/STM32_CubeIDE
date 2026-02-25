@@ -6,7 +6,7 @@
  *
  *  基于 Factory 的底层 Flash 读写与 XIP 测试
  */
-#include "../test_config.h"
+#include "test_config.h"
 #if ENABLE_TEST_FLASH
 
 #define LOG_TAG "TEST_FLASH"

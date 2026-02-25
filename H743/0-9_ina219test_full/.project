@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>0-9_ina219test</name>
+	<name>0-9_ina219test_完整</name>
 	<comment></comment>
 	<projects>
 		<project>0-8_example_project_v2</project>
@@ -120,6 +120,11 @@
 			<name>Test/Unit/illuminance_test.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/illuminance_test.c</locationURI>
+		</link>
+		<link>
+			<name>Test/Unit/test_ina219.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H743/0-8_example_project_v2/Test/Unit/test_ina219.c</locationURI>
 		</link>
 		<link>
 			<name>Test/Unit/test_led.c</name>

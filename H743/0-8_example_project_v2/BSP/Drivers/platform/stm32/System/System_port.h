@@ -1,7 +1,7 @@
 #ifndef PLATFORM_STM32_SYS_PORT_H_
 #define PLATFORM_STM32_SYS_PORT_H_
 
-#include "Project_cfg.h"
+#include "dev_map_config.h"
 #if (TARGET_PLATFORM == PLATFORM_STM32)
 /*
  * STM32 平台桥接

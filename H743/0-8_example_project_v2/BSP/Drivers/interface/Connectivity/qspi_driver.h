@@ -37,6 +37,7 @@ typedef struct qspi_driver_t qspi_driver_t;
 
 #define QSPI_SIOO_INST_EVERY_CMD 0
 #define QSPI_SIOO_INST_ONLY_FIRST_CMD 1
+#define QSPI_DDR_HHC_NONE 0
 
 // QSPI 指令结构体 (参考 HAL_QSPI_CommandTypeDef)
 typedef struct {

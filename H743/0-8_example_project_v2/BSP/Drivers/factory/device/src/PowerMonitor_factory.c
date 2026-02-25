@@ -47,6 +47,5 @@ PowerMonitor_driver_t *PowerMonitor_factory_get(power_monitor_id_t id) {
 
 #endif
   }
-#line 49
   return power_monitor_drivers[id];
 }

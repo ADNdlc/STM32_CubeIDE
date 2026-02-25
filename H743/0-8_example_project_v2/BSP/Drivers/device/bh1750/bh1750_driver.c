@@ -8,10 +8,13 @@
 #define LOG_TAG "BH1750"
 
 #include "bh1750_driver.h"
-#include "MemPool.h"
 #include "Sys.h"
 #include "elog.h"
 #include <stdlib.h>
+#include "MemPool.h"
+#ifdef USE_MEMPOOL
+#define BH1750_MEMSOURCE SYS_MEM_INTERNAL // 从哪里分配
+#endif
 
 // BH1750 指令
 // BH1750 指令定义
@@ -78,8 +81,15 @@ static const illuminance_driver_ops_t bh1750_ops = {
 /* --- 驱动构造 --- */
 
 illuminance_driver_t *bh1750_driver_create(i2c_driver_t *i2c_drv) {
+
+#ifdef USE_MEMPOOL
   bh1750_driver_t *drv =
       (bh1750_driver_t *)sys_malloc(BH1750_MEMSOURCE, sizeof(bh1750_driver_t));
+#else
+  bh1750_driver_t *drv =
+      (bh1750_driver_t *)malloc(sizeof(bh1750_driver_t));
+#endif
+
   if (drv) {
     drv->base.ops = &bh1750_ops;
     drv->i2c_drv = i2c_drv;

@@ -19,7 +19,7 @@
 #define INA219_MEMSOURCE SYS_MEM_INTERNAL
 // 驱动程序配置
 #define INA219_SAMPLING_PERIOD_MS 100   // 10Hz 采样频率
-#define INA219_CURRENT_DEADZONE_MA 0.1f // 电流计死区
+#define INA219_CURRENT_DEADZONE_MA 0.5f // 电流计死区
 #define INA219_ADC_AVG_64                                                      \
   (INA219_CFG_BADCRES_12BIT_64S_34MS |                                         \
    INA219_CFG_SADCRES_12BIT_64S_34MS) // 芯片ADC周期

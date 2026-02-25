@@ -54,13 +54,7 @@ bool uart_queue_send(uart_queue_t *queue, const uint8_t *data, size_t len);
 // 设置是否启用发送缓冲区满自动等待
 void uart_queue_set_auto_wait(uart_queue_t *queue, bool enabled);
 
-/**
- * @brief 设置自动等待的参数
- *
- * @param queue 队列实例
- * @param delay_ms 每次等待的时间（毫秒）
- * @param max_count 最大等待次数
- */
+// 设置自动等待的参数
 void uart_queue_set_wait_config(uart_queue_t *queue, uint32_t delay_ms,
                                 uint16_t max_count);
 
