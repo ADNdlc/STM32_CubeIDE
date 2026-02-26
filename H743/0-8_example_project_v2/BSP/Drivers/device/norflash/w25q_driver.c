@@ -26,6 +26,11 @@
 #define W25Q_READ_ID 0x9F
 #define W25Q_READ_SFDP 0x5A
 
+// W25Q 4-byte 指令集 (32MB及以上容量使用)
+#define W25Q_QUAD_IO_READ_4B 0xEC
+#define W25Q_QUAD_PAGE_PROGRAM_4B 0x34
+#define W25Q_SECTOR_ERASE_4B 0x21
+
 /**
  * @brief 等待忙标志失效
  */
@@ -140,12 +145,20 @@ static int w25q_read(nor_flash_driver_t *self, uint32_t addr, uint8_t *buf,
   w25q_driver_t *drv = (w25q_driver_t *)self;
   qspi_command_t cmd = {0};
 
-  cmd.Instruction = W25Q_QUAD_IO_READ;
+  if (drv->base.info.total_size > (16 * 1024 * 1024)) {
+    cmd.Instruction = W25Q_QUAD_IO_READ_4B;
+    cmd.AddressSize = QSPI_DRV_ADDR_32BITS;
+  } else {
+    cmd.Instruction = W25Q_QUAD_IO_READ;
+    cmd.AddressSize = QSPI_DRV_ADDR_24BITS;
+  }
   cmd.InstructionMode = QSPI_DRV_INSTR_1_LINE;
   cmd.AddressMode = QSPI_DRV_ADDR_4_LINES;
-  cmd.AddressSize = QSPI_DRV_ADDR_24BITS;
   cmd.Address = addr;
-  cmd.DummyCycles = 6;
+  cmd.AlternateByteMode = QSPI_DRV_ADDR_4_LINES;
+  cmd.AlternateBytesSize = QSPI_DRV_ADDR_8BITS;
+  cmd.AlternateBytes = 0xFF;
+  cmd.DummyCycles = 4;
   cmd.DataMode = QSPI_DRV_DATA_4_LINES;
   cmd.NbData = len;
 
@@ -159,10 +172,15 @@ static int w25q_write_page(w25q_driver_t *drv, uint32_t addr,
   if (w25q_write_enable(drv) != 0)
     return -1;
 
-  cmd.Instruction = W25Q_QUAD_PAGE_PROGRAM;
+  if (drv->base.info.total_size > (16 * 1024 * 1024)) {
+    cmd.Instruction = W25Q_QUAD_PAGE_PROGRAM_4B;
+    cmd.AddressSize = QSPI_DRV_ADDR_32BITS;
+  } else {
+    cmd.Instruction = W25Q_QUAD_PAGE_PROGRAM;
+    cmd.AddressSize = QSPI_DRV_ADDR_24BITS;
+  }
   cmd.InstructionMode = QSPI_DRV_INSTR_1_LINE;
   cmd.AddressMode = QSPI_DRV_ADDR_1_LINE;
-  cmd.AddressSize = QSPI_DRV_ADDR_24BITS;
   cmd.Address = addr;
   cmd.DataMode = QSPI_DRV_DATA_4_LINES;
   cmd.NbData = len;
@@ -201,10 +219,15 @@ static int w25q_erase_sector(nor_flash_driver_t *self, uint32_t addr) {
   if (w25q_write_enable(drv) != 0)
     return -1;
 
-  cmd.Instruction = W25Q_SECTOR_ERASE;
+  if (drv->base.info.total_size > (16 * 1024 * 1024)) {
+    cmd.Instruction = W25Q_SECTOR_ERASE_4B;
+    cmd.AddressSize = QSPI_DRV_ADDR_32BITS;
+  } else {
+    cmd.Instruction = W25Q_SECTOR_ERASE;
+    cmd.AddressSize = QSPI_DRV_ADDR_24BITS;
+  }
   cmd.InstructionMode = QSPI_DRV_INSTR_1_LINE;
   cmd.AddressMode = QSPI_DRV_ADDR_1_LINE;
-  cmd.AddressSize = QSPI_DRV_ADDR_24BITS;
   cmd.Address = addr;
 
   if (QSPI_COMMAND(drv->qspi, &cmd, 100) != 0)
@@ -216,11 +239,19 @@ static int w25q_set_mode(nor_flash_driver_t *self, nor_flash_mode_t mode) {
   w25q_driver_t *drv = (w25q_driver_t *)self;
   if (mode == NOR_FLASH_MODE_XIP) {
     qspi_command_t cmd = {0};
-    cmd.Instruction = W25Q_QUAD_IO_READ;
+    if (drv->base.info.total_size > (16 * 1024 * 1024)) {
+      cmd.Instruction = W25Q_QUAD_IO_READ_4B;
+      cmd.AddressSize = QSPI_DRV_ADDR_32BITS;
+    } else {
+      cmd.Instruction = W25Q_QUAD_IO_READ;
+      cmd.AddressSize = QSPI_DRV_ADDR_24BITS;
+    }
     cmd.InstructionMode = QSPI_DRV_INSTR_1_LINE;
     cmd.AddressMode = QSPI_DRV_ADDR_4_LINES;
-    cmd.AddressSize = QSPI_DRV_ADDR_24BITS;
-    cmd.DummyCycles = 6;
+    cmd.AlternateByteMode = QSPI_DRV_ADDR_4_LINES;
+    cmd.AlternateBytesSize = QSPI_DRV_ADDR_8BITS;
+    cmd.AlternateBytes = 0xFF;
+    cmd.DummyCycles = 4;
     cmd.DataMode = QSPI_DRV_DATA_4_LINES;
     cmd.SIOOMode = QSPI_DRV_SIOO_INST_EVERY_CMD;
     return QSPI_MEMORY_MAPPED(drv->qspi, &cmd);
@@ -229,7 +260,7 @@ static int w25q_set_mode(nor_flash_driver_t *self, nor_flash_mode_t mode) {
 }
 
 static int w25q_get_info(nor_flash_driver_t *self, nor_flash_info_t *info) {
-  *info = &self->info;
+  *info = self->info;
   return 0;
 }
 

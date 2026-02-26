@@ -49,12 +49,15 @@ static void convert_command(qspi_command_t *src, QSPI_CommandTypeDef *dest) {
       : (src->AddressSize == QSPI_DRV_ADDR_32BITS) ? QSPI_ADDRESS_32_BITS
                                                    : QSPI_ADDRESS_8_BITS;
 
-  dest->AlternateBytesSize =
-      (src->AlternateBytesSize == QSPI_DRV_ADDR_8BITS)    ? QSPI_ADDRESS_8_BITS
-      : (src->AlternateBytesSize == QSPI_DRV_ADDR_16BITS) ? QSPI_ADDRESS_16_BITS
-      : (src->AlternateBytesSize == QSPI_DRV_ADDR_24BITS) ? QSPI_ADDRESS_24_BITS
-      : (src->AlternateBytesSize == QSPI_DRV_ADDR_32BITS) ? QSPI_ADDRESS_32_BITS
-                                                          : QSPI_ADDRESS_8_BITS;
+  dest->AlternateBytesSize = (src->AlternateBytesSize == QSPI_DRV_ADDR_8BITS)
+                                 ? QSPI_ALTERNATE_BYTES_8_BITS
+                             : (src->AlternateBytesSize == QSPI_DRV_ADDR_16BITS)
+                                 ? QSPI_ALTERNATE_BYTES_16_BITS
+                             : (src->AlternateBytesSize == QSPI_DRV_ADDR_24BITS)
+                                 ? QSPI_ALTERNATE_BYTES_24_BITS
+                             : (src->AlternateBytesSize == QSPI_DRV_ADDR_32BITS)
+                                 ? QSPI_ALTERNATE_BYTES_32_BITS
+                                 : QSPI_ALTERNATE_BYTES_8_BITS;
 
   dest->AlternateByteMode = (src->AlternateByteMode == QSPI_DRV_ADDR_1_LINE)
                                 ? QSPI_ALTERNATE_BYTES_1_LINE
