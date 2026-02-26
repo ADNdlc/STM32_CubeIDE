@@ -112,7 +112,7 @@ static void flash_test_loop(void) {
   log_i("--- Test Finished ---");
 }
 
-static void flash_test_teardown(){
+static void flash_test_teardown() {
   flash = NULL;
   log_i("Flash test teardown.");
 }

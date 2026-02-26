@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "crc.h"
 #include "dma.h"
 #include "dma2d.h"
 #include "i2c.h"
@@ -117,6 +118,7 @@ int main(void)
   MX_QUADSPI_Init();
   MX_I2C2_Init();
   MX_I2C3_Init();
+  MX_CRC_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
