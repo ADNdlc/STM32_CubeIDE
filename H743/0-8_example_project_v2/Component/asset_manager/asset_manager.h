@@ -78,4 +78,9 @@ int asset_manager_write_res(uint32_t id, uint32_t type, const uint8_t *data,
  */
 int asset_manager_end_update(void);
 
+/**
+ * @brief 软重置状态 (仅用于模拟掉电测试)
+ */
+int asset_manager_force_reset_state(void);
+
 #endif /* COMPONENT_ASSET_MANAGER_H_ */

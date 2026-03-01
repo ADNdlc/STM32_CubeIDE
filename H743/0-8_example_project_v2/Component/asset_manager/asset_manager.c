@@ -18,7 +18,12 @@
 // TOC 默认分布在一二号扇区 (4KB)
 #define ASSET_TOC_A_ADDR 0x00000000
 #define ASSET_TOC_B_ADDR 0x00001000
-#define ASSET_DATA_ADDR 0x00002000
+
+// 数据区分为 A/B 两个区块 (W25Q128 为 16MB，我们按 8MB 为界限平分)
+// Data A 使用从 0x00002000 到 0x007FFFFF
+// Data B 使用从 0x00800000 到 0x00FFFFFF
+#define ASSET_DATA_A_ADDR 0x00002000
+#define ASSET_DATA_B_ADDR 0x00800000
 
 // XIP 在 H7 上的映射起始地址 (由 QSPI 硬件或 MPU 决定，H7 默认为 0x90000000)
 #define XIP_BASE_ADDRESS 0x90000000
@@ -235,7 +240,13 @@ int asset_manager_begin_update(uint32_t item_count) {
   update_ctx.new_header.magic = ASSET_MAGIC;
   update_ctx.new_header.sequence_num = active_header.sequence_num + 1;
   update_ctx.new_header.item_count = item_count;
-  update_ctx.new_header.data_offset = ASSET_DATA_ADDR;
+
+  // A/B 分区数据隔离
+  if (update_ctx.target_toc_addr == ASSET_TOC_A_ADDR) {
+    update_ctx.new_header.data_offset = ASSET_DATA_A_ADDR;
+  } else {
+    update_ctx.new_header.data_offset = ASSET_DATA_B_ADDR;
+  }
 
   // 4. 分配新 Items 内存
   update_ctx.new_items = (res_item_t *)sys_malloc(
@@ -270,12 +281,14 @@ int asset_manager_write_res(uint32_t id, uint32_t type, const uint8_t *data,
   nor_flash_info_t info;
   NOR_FLASH_GET_INFO(asset_flash, &info);
 
-  uint32_t abs_write_addr = ASSET_DATA_ADDR + update_ctx.current_data_offset;
+  uint32_t abs_write_addr =
+      update_ctx.new_header.data_offset + update_ctx.current_data_offset;
 
   // 按需擦除目标数据区
   while (update_ctx.current_data_offset + size >
          update_ctx.erased_data_offset) {
-    uint32_t erase_addr = ASSET_DATA_ADDR + update_ctx.erased_data_offset;
+    uint32_t erase_addr =
+        update_ctx.new_header.data_offset + update_ctx.erased_data_offset;
     if (NOR_FLASH_ERASE_SECTOR(asset_flash, erase_addr) != 0)
       return -3;
     update_ctx.erased_data_offset += info.sector_size;
@@ -352,4 +365,27 @@ error:
   update_ctx.is_updating = false;
   NOR_FLASH_SET_MODE(asset_flash, NOR_FLASH_MODE_XIP);
   return -3;
+}
+
+// 仅用于测试/模拟掉电重启
+int asset_manager_force_reset_state(void) {
+  if (update_ctx.is_updating) {
+    update_ctx.is_updating = false;
+    if (update_ctx.new_items) {
+      sys_free(SYS_MEM_INTERNAL, update_ctx.new_items);
+      update_ctx.new_items = NULL;
+    }
+  }
+  if (active_items) {
+    sys_free(SYS_MEM_INTERNAL, active_items);
+    active_items = NULL;
+  }
+  memset(&active_header, 0, sizeof(res_header_t));
+  active_toc_addr = 0;
+  if (asset_flash) {
+    uint8_t d;
+    NOR_FLASH_READ(asset_flash, 0, &d, 1);
+  }
+  asset_flash = NULL;
+  return 0;
 }

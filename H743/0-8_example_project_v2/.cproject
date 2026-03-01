@@ -81,6 +81,7 @@
 									<listOptionValue builtIn="false" value="../Test/Unit"/>
 									<listOptionValue builtIn="false" value="../Test/Integration"/>
 									<listOptionValue builtIn="false" value="../Test"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Component/asset_manager}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1551559815" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
