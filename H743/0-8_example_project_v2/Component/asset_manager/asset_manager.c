@@ -4,7 +4,6 @@
  *  Created on: Feb 26, 2026
  *      Author: Antigravity
  */
-
 #define LOG_TAG "ASSET_MGR"
 
 #include "asset_manager.h"
