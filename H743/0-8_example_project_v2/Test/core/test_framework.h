@@ -50,5 +50,6 @@ void Test_Framework_Init(void);
 void Test_Framework_Run(void);
 void Test_Framework_HandleInput(uint8_t cmd);
 void Test_List_All(void);
+void Stop_Current_Test();
 
 #endif /* TEST_FRAMEWORK_H_ */

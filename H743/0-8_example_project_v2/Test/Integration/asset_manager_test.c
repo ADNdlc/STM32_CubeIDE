@@ -122,6 +122,7 @@ static void asset_mgr_test_loop(void) {
   }
 
   log_i("--- Asset Manager Test Finished ---");
+  Stop_Current_Test();
 }
 
 static void asset_mgr_test_teardown(void) { log_i("Asset test teardown."); }
