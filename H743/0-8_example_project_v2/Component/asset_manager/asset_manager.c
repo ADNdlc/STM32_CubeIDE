@@ -29,7 +29,8 @@
 #define XIP_BASE_ADDRESS 0x90000000
 
 static nor_flash_driver_t *asset_flash = NULL;
-static uint32_t active_toc_addr = 0;
+// 0xFFFFFFFF 代表尚未加载任何有效表
+static uint32_t active_toc_addr = 0xFFFFFFFF;
 static res_header_t active_header = {0};
 static res_item_t *active_items = NULL; // 动态分配的 TOC 内存缓存
 
@@ -226,7 +227,7 @@ int asset_manager_begin_update(uint32_t item_count) {
   update_ctx.target_toc_addr = (active_toc_addr == ASSET_TOC_A_ADDR)
                                    ? ASSET_TOC_B_ADDR
                                    : ASSET_TOC_A_ADDR;
-  if (active_toc_addr == 0)
+  if (active_toc_addr == 0xFFFFFFFF)
     update_ctx.target_toc_addr = ASSET_TOC_A_ADDR; // Initial case
 
   // 2. 擦除目标 TOC 扇区
@@ -381,7 +382,7 @@ int asset_manager_force_reset_state(void) {
     active_items = NULL;
   }
   memset(&active_header, 0, sizeof(res_header_t));
-  active_toc_addr = 0;
+  active_toc_addr = 0xFFFFFFFF;
   if (asset_flash) {
     uint8_t d;
     NOR_FLASH_READ(asset_flash, 0, &d, 1);
