@@ -5,6 +5,9 @@
 #include "fmc.h"
 #include "gpio/stm32_gpio_driver.h"
 #include "gt9xxx_touch/gt9xxx_touch_driver.h"
+#include "Multimedia/stm32_ltdc_driver.h"
+#include "ltdc.h"
+#include "dma2d.h"
 #include "i2c/stm32_i2c_driver.h"
 #include "ina219/ina219_driver.h"
 #include "main.h"
@@ -124,6 +127,22 @@ static const gt9xxx_config_t gt9xxx_config = {
 // "触摸屏"逻辑号映射表
 const touch_mapping_t touch_mappings[TOUCH_MAX] = {
     [TOUCH_ID_UI] = {.resource = (void *)&gt9xxx_config},
+};
+
+static const lcd_screen_info_t ui_screen_info = {
+	.buffer_addr = 0x0,
+	.dir = HORIZONTAL,
+	.format = LCD_PIXEL_RGB565,
+	.width = 800,
+	.height = 480,
+};
+static const stm32_ltdc_config_t ltdc_config = {
+	.hltdc = &hltdc,
+	.hdma2d = &hdma2d,
+	.layer = 0,
+};
+const lcd_mapping_t lcd_mappings[LCD_ID_MAX] = {
+	[LCD_ID_UI] = {.info = ui_screen_info, .resource = (void *)&ltdc_config},
 };
 
 // "NORflash设备表"

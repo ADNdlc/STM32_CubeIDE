@@ -7,11 +7,12 @@
 
 #ifndef BOARD_DEV_MAP_H_
 #define BOARD_DEV_MAP_H_
-#include "nor_flash_driver.h"
 #include <stdbool.h>
 #include <stdint.h>
 
 #include "dev_map_config.h"
+#include "nor_flash_driver.h"
+#include "lcd_screen_driver.h"
 
 /* ----- GPIO ----- */
 typedef enum {
@@ -149,6 +150,14 @@ typedef struct {
   void *resource;
 } touch_mapping_t;
 extern const touch_mapping_t touch_mappings[TOUCH_MAX];
+
+/* ----- LCD屏 ----- */
+typedef enum { LCD_ID_UI = 0, LCD_ID_MAX } lcd_id_t;
+typedef struct {
+  void *resource;
+  lcd_screen_info_t info;
+} lcd_mapping_t;
+extern const lcd_mapping_t lcd_mappings[LCD_ID_MAX];
 
 /* ----- norflash ----- */
 typedef enum { NOR_FLASH_SYS = 0, NOR_FLASH_MAX } norflash_id_t;

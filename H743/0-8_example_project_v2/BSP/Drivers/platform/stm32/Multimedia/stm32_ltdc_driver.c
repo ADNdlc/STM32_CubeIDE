@@ -10,174 +10,210 @@
 #include "Sys.h"
 #include <string.h>
 
-
 #define LTDC_DRV_MEM_SOURCE SYS_MEM_INTERNAL
 
-/* 像素字节跨度 (RGB565 为 2 字节) */
-#define PIXEL_SIZE 2
+/* ================= 辅助函数 ================= */
 
-/**
- * @brief 等待 DMA2D 完成
- */
-static int stm32_ltdc_wait_until_ready(lcd_driver_t *self) {
-  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)self;
-  if (!drv->hdma2d)
-    return 0;
+#define DMA2D_WAIT_IDLE()                   \
+  while ((DMA2D->CR & DMA2D_CR_START) != 0){}
 
-  while (drv->hdma2d->State == HAL_DMA2D_STATE_BUSY)
-    ;
+// 获取像素字节数
+static inline uint8_t get_pixel_bytes(pixel_format_t fmt){
+  if (fmt == LCD_PIXEL_RGB565)
+    return 2;
+  if (fmt == LCD_PIXEL_ARGB8888)
+    return 4;
+  return 4; // 默认
+}
+
+/* ================= 接口实现 ================= */
+
+static int stm32_lcd_init(lcd_driver_t *self){
+  stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
+
+  // 配置 LTDC 层地址
+  HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)self->info.buffer_addr, impl->layer_index);
   return 0;
 }
 
-/**
- * @brief 初始化
- */
-static int stm32_ltdc_init(lcd_driver_t *self) {
-  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)self;
+static int stm32_lcd_set_buffer(lcd_driver_t *self, void *buffer){
+  stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
+  self->info.buffer_addr = buffer;
 
-  // 核心初始化已由 MX_LTDC_Init 完成
-  // 这里主要确保显存地址正确挂载
-  if (drv->hltdc && drv->frame_buffer) {
-    HAL_LTDC_SetAddress(drv->hltdc, drv->frame_buffer, 0);
+  // 立即更新硬件层地址
+  HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)buffer, impl->layer_index);
+  return 0;
+}
+
+static int stm32_lcd_set_dir(lcd_driver_t *self, disp_direction_t direction){
+  // 对于 LTDC，硬件旋转通常比较复杂，这里只修改软件逻辑
+  // 如果需要硬件旋转，需要 DMA2D 的复杂配置或修改扫描方向
+  self->info.dir = direction;
+  // 交换宽高的逻辑应在应用层或 draw_point 中处理
+  return 0;
+}
+
+static int stm32_lcd_display_on(lcd_driver_t *self){
+  stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
+  __HAL_LTDC_ENABLE(impl->hltdc);
+  return 0;
+}
+
+static int stm32_lcd_display_off(lcd_driver_t *self){
+  stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
+  __HAL_LTDC_DISABLE(impl->hltdc);
+  return 0;
+}
+
+static uint32_t stm32_lcd_read_point(lcd_driver_t *self, uint16_t x, uint16_t y){
+  // 简单实现：CPU 直接读取显存
+  // 注意：如果是 H7，可能需要处理 Cache 一致性 (SCB_InvalidateDCache_by_Addr)
+  uint8_t bytes = get_pixel_bytes(self->info.format);
+  uint32_t offset = (y * self->info.width + x) * bytes;
+  uint32_t addr = (uint32_t)self->info.buffer_addr + offset;
+
+  if (bytes == 2)
+  {
+    return *(uint16_t *)addr;
   }
-
-  return 0;
-}
-
-/**
- * @brief 绘制/填充色块 (使用 DMA2D 硬件加速)
- */
-static int stm32_ltdc_fill(lcd_driver_t *self, uint16_t sx, uint16_t sy,
-                           uint16_t ex, uint16_t ey, uint32_t color) {
-  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)self;
-  if (sx > ex || sy > ey)
-    return -1;
-
-  uint16_t width = ex - sx + 1;
-  uint16_t height = ey - sy + 1;
-
-  // 计算目标起始物理地址
-  uint32_t dest_addr =
-      drv->frame_buffer + (sy * self->info.width + sx) * PIXEL_SIZE;
-
-  stm32_ltdc_wait_until_ready(self);
-
-  // 使用 DMA2D R2M (Register to Memory) 模式填充纯色
-  if (HAL_DMA2D_Start(drv->hdma2d, color, dest_addr, width, height) != HAL_OK) {
-    return -2;
+  else
+  {
+    return *(uint32_t *)addr;
   }
-
-  return 0;
 }
 
-/**
- * @brief 画面缓冲区填充 (对接 LVGL 刷新核心)
- */
-static int stm32_ltdc_color_fill(lcd_driver_t *self, uint16_t sx, uint16_t sy,
-                                 uint16_t ex, uint16_t ey,
-                                 const void *color_p) {
-  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)self;
-  if (sx > ex || sy > ey || !color_p)
-    return -1;
-
-  uint16_t width = ex - sx + 1;
-  uint16_t height = ey - sy + 1;
-
-  // 计算目标起始物理地址
-  uint32_t dest_addr =
-      drv->frame_buffer + (sy * self->info.width + sx) * PIXEL_SIZE;
-
-  stm32_ltdc_wait_until_ready(self);
-
-  // 配置 DMA2D M2M (Memory to Memory) 模式，并设置 Offset
-  drv->hdma2d->Init.Mode = DMA2D_M2M;
-  drv->hdma2d->Init.OutputOffset =
-      self->info.width - width; // 每一行结束后跳过多少像素到下一行
-
-  // 注意：如果输入源也是块，需要设置 Foreground Offset，但通常 LVGL 传入的
-  // color_p 是紧凑数组
-  drv->hdma2d->LayerCfg[1].InputOffset = 0;
-
-  if (HAL_DMA2D_Init(drv->hdma2d) != HAL_OK)
-    return -3;
-  if (HAL_DMA2D_ConfigLayer(drv->hdma2d, 1) != HAL_OK)
-    return -4;
-
-  // 启动传输
-  if (HAL_DMA2D_Start(drv->hdma2d, (uint32_t)color_p, dest_addr, width,
-                      height) != HAL_OK) {
-    return -2;
-  }
-
-  return 0;
-}
-
-/**
- * @brief 绘制像素
- */
-static int stm32_ltdc_draw_point(lcd_driver_t *self, uint16_t x, uint16_t y,
-                                 uint32_t color) {
-  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)self;
+static int stm32_lcd_draw_point(lcd_driver_t *self, uint16_t x, uint16_t y, uint32_t color){
   if (x >= self->info.width || y >= self->info.height)
     return -1;
 
-  uint16_t *buf = (uint16_t *)drv->frame_buffer;
-  buf[y * self->info.width + x] = (uint16_t)color;
+  uint8_t bytes = get_pixel_bytes(self->info.format);
+  uint32_t offset = (y * self->info.width + x) * bytes;
+  uint32_t addr = (uint32_t)self->info.buffer_addr + offset;
+
+  // 直接写内存
+  if (bytes == 2)
+  {
+    *(volatile uint16_t *)addr = (uint16_t)color;
+  }
+  else
+  {
+    *(volatile uint32_t *)addr = color;
+  }
   return 0;
 }
 
-/**
- * @brief 读取像素
- */
-static uint32_t stm32_ltdc_read_point(lcd_driver_t *self, uint16_t x,
-                                      uint16_t y) {
-  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)self;
-  if (x >= self->info.width || y >= self->info.height)
-    return 0;
+/* 使用 DMA2D 进行纯色填充 (高性能) */
+static int stm32_lcd_fill_rect(lcd_driver_t *self, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t color){
+  // 1. 计算目标地址
+  uint8_t bytes = (self->info.format == LCD_PIXEL_RGB565) ? 2 : 4;
+  uint32_t dest_addr = (uint32_t)self->info.buffer_addr + (y * self->info.width + x) * bytes;
 
-  uint16_t *buf = (uint16_t *)drv->frame_buffer;
-  return buf[y * self->info.width + x];
-}
+  // 2. 确保上一次传输已完成
+  DMA2D_WAIT_IDLE();
 
-static int stm32_ltdc_display_on(lcd_driver_t *self) {
-  __HAL_LTDC_ENABLE(((stm32_ltdc_driver_t *)self)->hltdc);
+  // 3. 配置模式：寄存器到内存 (R2M = 0x03)
+  DMA2D->CR = 0x00030000UL;
+
+  // 4. 配置输出颜色
+  DMA2D->OCOLR = color;
+
+  // 5. 配置输出地址
+  DMA2D->OMAR = dest_addr;
+
+  // 6. 配置输出偏移 (Output Offset)
+  // 偏移量 = 总画布宽度 - 填充窗口宽度
+  DMA2D->OOR = self->info.width - w;
+
+  // 7. 配置输出格式 (假设 info.format 已经映射好，或者需要 switch 转换)
+  // RGB565 = 2, ARGB8888 = 0, RGB888 = 1
+  uint32_t pixel_fmt = (self->info.format == LCD_PIXEL_RGB565) ? 2 : 0;
+  DMA2D->OPFCCR = pixel_fmt;
+
+  // 8. 配置高(PL) 和 宽(NLR)
+  // 高度在用于高16位，像素宽度在低16位
+  DMA2D->NLR = (h << 16) | (w & 0xFFFF);
+
+  // 9. 启动传输
+  DMA2D->CR |= DMA2D_CR_START;
+
+  // 10. 等待完成 (如果需要同步)
+  // 对于 LVGL，通常不需要在这里死等，可以交给上层或在下一次调用前等
+  DMA2D_WAIT_IDLE();
+
   return 0;
 }
 
-static int stm32_ltdc_display_off(lcd_driver_t *self) {
-  __HAL_LTDC_DISABLE(((stm32_ltdc_driver_t *)self)->hltdc);
+/* 使用 DMA2D 进行图片搬运 (高性能) */
+static int stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const void *bitmap){
+  uint8_t bytes = (self->info.format == LCD_PIXEL_RGB565) ? 2 : 4;
+  uint32_t dest_addr = (uint32_t)self->info.buffer_addr + (y * self->info.width + x) * bytes;
+
+  DMA2D_WAIT_IDLE();
+
+  /* --- 配置前景层 (源数据) --- */
+  // 设定源地址
+  DMA2D->FGMAR = (uint32_t)bitmap;
+
+  // 设定源偏移 (Source Offset)
+  // 如果是拷贝整张小图，源偏移通常为 0 (连续读取)
+  // 如果是从大图里抠图，这里需要计算
+  DMA2D->FGOR = 0;
+
+  // 设定前景格式 (假设源图片格式和屏幕格式一致，否则需要 PFC)
+  uint32_t pixel_fmt = (self->info.format == LCD_PIXEL_RGB565) ? 2 : 0;
+  DMA2D->FGPFCCR = pixel_fmt; // 设置前景层格式
+
+  /* --- 配置输出层 (目标显存) --- */
+  DMA2D->OMAR = dest_addr;
+  DMA2D->OOR = self->info.width - w; // 关键：跳过屏幕右侧剩余部分换行
+  DMA2D->OPFCCR = pixel_fmt;
+
+  /* --- 配置通用控制 --- */
+  DMA2D->NLR = (h << 16) | (w & 0xFFFF);
+
+  // 模式：内存到内存 (M2M = 0x00)
+  DMA2D->CR = 0x00000000UL;
+
+  // 启动
+  DMA2D->CR |= DMA2D_CR_START;
+
+  DMA2D_WAIT_IDLE();
+
   return 0;
 }
+
+/* ================= 构造函数 ================= */
 
 static const lcd_driver_ops_t stm32_ltdc_ops = {
-    .init = stm32_ltdc_init,
-    .draw_point = stm32_ltdc_draw_point,
-    .read_point = stm32_ltdc_read_point,
-    .fill = stm32_ltdc_fill,
-    .color_fill = stm32_ltdc_color_fill,
-    .display_on = stm32_ltdc_display_on,
-    .display_off = stm32_ltdc_display_off,
-    .wait_until_ready = stm32_ltdc_wait_until_ready,
+    .init = stm32_lcd_init,
+    .set_buffer = stm32_lcd_set_buffer,
+    .set_dir = stm32_lcd_set_dir,
+    .display_on = stm32_lcd_display_on,
+    .display_off = stm32_lcd_display_off,
+    .read_point = stm32_lcd_read_point,
+    .draw_point = stm32_lcd_draw_point,
+    .fill_rect = stm32_lcd_fill_rect,
+    .draw_bitmap = stm32_lcd_draw_bitmap,
 };
 
-lcd_driver_t *stm32_ltdc_driver_create(LTDC_HandleTypeDef *hltdc,
-                                       DMA2D_HandleTypeDef *hdma2d,
-                                       uint32_t fb_addr) {
-  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)sys_malloc(
-      LTDC_DRV_MEM_SOURCE, sizeof(stm32_ltdc_driver_t));
+lcd_driver_t *stm32_ltdc_driver_create(stm32_ltdc_config_t* congfig,
+                                       lcd_screen_info_t info){
+  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)sys_malloc(LTDC_DRV_MEM_SOURCE, sizeof(stm32_ltdc_driver_t));
   if (!drv)
     return NULL;
 
   memset(drv, 0, sizeof(stm32_ltdc_driver_t));
-  drv->base.ops = &stm32_ltdc_ops;
-  drv->hltdc = hltdc;
-  drv->hdma2d = hdma2d;
-  drv->frame_buffer = fb_addr;
 
-  // 默认 800x480 RGB565 (基于 MX_LTDC_Init 配置)
-  drv->base.info.width = 800;
-  drv->base.info.height = 480;
-  drv->base.info.format = LCD_COLOR_RGB565;
+  // 初始化虚函数表
+  drv->base.ops = &stm32_ltdc_ops;
+
+  // 初始化基本信息 (因为 info 是结构体了，直接赋值拷贝)
+  drv->base.info = info;
+
+  // 初始化派生类私有数据
+  drv->hltdc = congfig->hltdc;
+  drv->hdma2d = congfig->hdma2d;
+  drv->layer_index = congfig->layer;
 
   return (lcd_driver_t *)drv;
 }
