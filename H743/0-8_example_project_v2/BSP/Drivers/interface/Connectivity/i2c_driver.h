@@ -30,7 +30,7 @@ typedef enum {
 // I2C 回调函数原型
 typedef void (*i2c_callback_t)(void *context, i2c_event_t event, void *args);
 
-// I2C 驱动操作接口 (虚函数表)
+// I2C 驱动操作接口
 typedef struct {
   // 基础收发 (同步)
   int (*master_transmit)(i2c_driver_t *self, uint16_t dev_addr,

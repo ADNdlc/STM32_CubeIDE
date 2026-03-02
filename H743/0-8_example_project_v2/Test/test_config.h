@@ -26,6 +26,7 @@
 #define ENABLE_TEST_POWER_MONITOR 0
 #define ENABLE_TEST_TIMER 0
 #define ENABLE_TEST_ASSET_MANAGER 1
+#define ENABLE_TEST_LCD 1
 #endif
 
 #endif /* TEST_CONFIG_H_ */

@@ -14,7 +14,7 @@
 // 前向声明
 typedef struct spi_driver_t spi_driver_t;
 
-// SPI 驱动操作接口 (虚函数表)
+// SPI 驱动操作接口
 typedef struct {
   // 发送数据
   int (*transmit)(spi_driver_t *self, const uint8_t *data, uint16_t size,
