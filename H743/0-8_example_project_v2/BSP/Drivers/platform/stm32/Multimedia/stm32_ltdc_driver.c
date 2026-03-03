@@ -268,21 +268,19 @@ static int stm32_lcd_swap_buffer(lcd_driver_t *self) {
   // 1. 确保 DMA2D 绘图已完成
   DMA2D_WAIT_IDLE();
 
-  // 2. 维护 Cache 一致性 (H7 必须将 Cache 数据刷入物理显存)
-  // 如果 SDRAM 区配置为 Non-cacheable，则不需要此步。
-  // uint32_t fb_size =
-  //     self->info.width * self->info.height *
-  //     get_pixel_bytes(self->info.format);
-  // SCB_CleanDCache_by_Addr((uint32_t *)self->info.back_buffer, fb_size);
-
-  // 3. 交换内部指针
+  // 2. 交换内部指针
   void *tmp = self->info.buffer_addr;
   self->info.buffer_addr = self->info.back_buffer;
   self->info.back_buffer = tmp;
 
-  // 4. 申请硬件地址重载 (使用 NoReload 配合垂直消隐重载)
+  // 3. 申请硬件地址重载 (使用 NoReload 配合垂直消隐重载)
   HAL_LTDC_SetAddress_NoReload(impl->hltdc, (uint32_t)self->info.buffer_addr,
                                impl->layer_index);
+
+  // 4. 判断是否开启异步中断模式
+  if (self->swap_done_cb != NULL) {
+    __HAL_LTDC_ENABLE_IT(impl->hltdc, LTDC_IT_RR);
+  }
 
   // 5. 配置为垂直消隐期生效 (VSYNC reload)
   HAL_LTDC_Reload(impl->hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
@@ -298,17 +296,20 @@ static int stm32_lcd_wait_swap(lcd_driver_t *self) {
 
   // 只有未配置回调时，才走传统的 CPU 死等轮询
   stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
-  while ((impl->hltdc->Instance->SRCR & LTDC_SRCR_VBR) != 0) { }
+  while ((impl->hltdc->Instance->SRCR & LTDC_SRCR_VBR) != 0) {
+  }
   return 0;
 }
 
-static int stm32_lcd_set_swap_cb(lcd_driver_t *self, lcd_async_cb_t cb, void *user_data) {
+static int stm32_lcd_set_swap_cb(lcd_driver_t *self, lcd_async_cb_t cb,
+                                 void *user_data) {
   self->swap_done_cb = cb;
   self->swap_cb_data = user_data;
   return 0;
 }
 
-static int stm32_lcd_set_fill_cb(lcd_driver_t *self, lcd_async_cb_t cb, void *user_data) {
+static int stm32_lcd_set_fill_cb(lcd_driver_t *self, lcd_async_cb_t cb,
+                                 void *user_data) {
   self->fill_done_cb = cb;
   self->fill_cb_data = user_data;
   return 0;
@@ -331,8 +332,8 @@ static const lcd_driver_ops_t stm32_ltdc_ops = {
     .get_act_dir = stm32_lcd_get_act_dir,
     .swap_buffer = stm32_lcd_swap_buffer,
     .wait_swap = stm32_lcd_wait_swap,
-	.set_swap_cb = stm32_lcd_set_swap_cb,
-	.set_fill_cb = stm32_lcd_set_fill_cb,
+    .set_swap_cb = stm32_lcd_set_swap_cb,
+    .set_fill_cb = stm32_lcd_set_fill_cb,
 };
 
 lcd_driver_t *stm32_ltdc_driver_create(stm32_ltdc_config_t *congfig,
