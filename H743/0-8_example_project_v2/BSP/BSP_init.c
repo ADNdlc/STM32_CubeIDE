@@ -15,11 +15,12 @@
 #include "dev_map.h"
 #include "elog_init.h"
 #include "humiture_factory.h"
-#include "one_wire/stm32_one_wire_driver.h"
+#include "lvgl.h"
+#include "lvgl/porting/lv_port_disp.h"
 #include "sdram_factory.h"
+#include "timer_factory.h"
 #include "uart_queue.h"
 #include "usart_factory.h"
-
 
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
@@ -27,6 +28,9 @@ uart_queue_t *g_debug_queue = NULL;
 /* 调试串口队列用的缓冲区 */
 static uint8_t debug_tx_buf[4096];
 static uint8_t debug_rx_buf[64];
+
+/* 供 Timer 回调使用的 LVGL 心跳 */
+static void lv_tick_cb(void *ctx) { lv_tick_inc(1); }
 
 void bsp_init(void) {
 #ifndef platform_sys_mem_create
@@ -56,7 +60,7 @@ void bsp_init(void) {
   if (elog_init_and_config() == ELOG_NO_ERR) {
     log_i("log init success.");
     log_a("log lvel: %d", ELOG_LVL_TOTAL_NUM);
-    log_i("sys CoreClock: %d MHz",sys_get_CoreClock());
+    log_i("sys CoreClock: %d MHz", sys_get_CoreClock());
   } else {
     elog_deinit();
   }
@@ -74,4 +78,20 @@ void bsp_init(void) {
     }
   }
   sys_mem_init_external(); // 外部内存池初始化
+
+  /* ---- LVGL 初始化 ---- */
+  lv_init();
+  lv_port_disp_init();
+  log_i("LVGL core init success.");
+
+  /* ---- LVGL 定时器触发 (时基) ---- */
+  timer_driver_t *timer_lv = timer_driver_get(TIMER_ID_LV);
+  if (timer_lv) {
+    TIMER_SET_PERIOD(timer_lv, 1);
+    TIMER_SET_CALLBACK(timer_lv, lv_tick_cb, NULL);
+    TIMER_START(timer_lv);
+    log_i("LVGL timer tick starte(1ms).");
+  } else {
+    log_e("LVGL timer tick init failed!");
+  }
 }

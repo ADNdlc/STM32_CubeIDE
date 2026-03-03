@@ -112,7 +112,7 @@ extern const rtc_mapping_t rtc_mappings[RTC_MAX];
 
 /* ----- Timer ----- */
 typedef enum {
-  TIMER_ID_1 = 0,
+  TIMER_ID_LV = 0,
   TIMER_ID_2,
 
   TIMER_ID_MAX

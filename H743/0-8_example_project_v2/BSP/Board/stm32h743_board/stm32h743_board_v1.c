@@ -82,7 +82,7 @@ const rtc_mapping_t rtc_mappings[RTC_MAX] = {
 
 // Timer 逻辑号映射表
 const timer_mapping_t timer_mappings[TIMER_ID_MAX] = {
-    [TIMER_ID_1] = {.resource = (void *)&htim6},
+    [TIMER_ID_LV] = {.resource = (void *)&htim6},
 };
 
 // One-Wire 设备配置
@@ -168,7 +168,7 @@ const norflash_mapping_t norflash_mappings[NOR_FLASH_MAX] = {
 
 const ina219_factory_config_t ina219_factory_config = {
     .i2c_id = I2C_BUS_PWR,
-    .timer_id = TIMER_ID_1,
+    .timer_id = TIMER_ID_LV,
     .config =
         {
             .dev_addr = INA219_I2C_ADDRESS_CONF_0,
