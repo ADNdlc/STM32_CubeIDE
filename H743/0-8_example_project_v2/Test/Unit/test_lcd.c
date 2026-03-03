@@ -90,7 +90,7 @@ static void test_lcd_loop(void) {
   // Bouncing Box Animation Loop - Double Buffered
   int16_t x = 0, y = 0;
   int16_t dx = 5, dy = 5;
-  uint16_t box_w = 150, box_h = 100;
+  uint16_t box_w = 100, box_h = 100;
   uint32_t color = 0xF800; // Red
 
   uint32_t end_time = sys_get_systick_ms() + 10000;
@@ -100,7 +100,7 @@ static void test_lcd_loop(void) {
     LCD_FILL(lcd, x, y, box_w, box_h, color); // 在后台绘制新帧
 
     // 2. 申请 VSYNC 同步切换 (会将 back 改为 front)
-    //LCD_SWAP_BUFFER(lcd);
+    LCD_SWAP_BUFFER(lcd);
 
     // 计算下一帧坐标
     x += dx;
@@ -117,7 +117,7 @@ static void test_lcd_loop(void) {
       color = (color == 0xF800) ? 0x001F : 0xF800; // Toggle to Blue if red
     }
     // 3. 等待垂直消隐生效 (切换完成，原来的 front 变成了新的 back)
-    //LCD_WAIT_SWAP(lcd);
+    LCD_WAIT_SWAP(lcd);
   }
 
   log_i("LCD animation test passed.");

@@ -149,7 +149,7 @@ static int stm32_lcd_fill_rect(lcd_driver_t *self, uint16_t x, uint16_t y,
 
   // 8. 配置高(PL) 和 宽(NLR)
   // 高度在用于高16位，像素宽度在低16位
-  DMA2D->NLR = (h << 16) | (w & 0xFFFF);
+  DMA2D->NLR = (w << 16) | (h & 0xFFFF);
 
   // 9. 启动传输
   DMA2D->CR |= DMA2D_CR_START;
@@ -189,7 +189,7 @@ static int stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y,
   DMA2D->OPFCCR = pixel_fmt;
 
   /* --- 配置通用控制 --- */
-  DMA2D->NLR = (h << 16) | (w & 0xFFFF);
+  DMA2D->NLR = (w << 16) | (h & 0xFFFF);
 
   // 模式：内存到内存 (M2M = 0x00)
   DMA2D->CR = 0x00000000UL;
