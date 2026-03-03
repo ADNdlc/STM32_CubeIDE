@@ -22,7 +22,9 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32_ltdc_driver.h"
 
+extern lcd_driver_t *lcd;
 #define LVGLHandler 0
 #define HAL_DMA2DHandler 1
 #define USE_MY_Handler 1
@@ -598,14 +600,11 @@ void LTDC_IRQHandler(void)
 void LTDC_ER_IRQHandler(void)
 {
   /* USER CODE BEGIN LTDC_ER_IRQn 0 */
-
+  stm32_lcd_ltdc_irq_handler(lcd);
   /* USER CODE END LTDC_ER_IRQn 0 */
   HAL_LTDC_IRQHandler(&hltdc);
   /* USER CODE BEGIN LTDC_ER_IRQn 1 */
 
-#if !HAL_DMA2DHandler // 移到lvgl移植的处理中
-}
-#else
   /* USER CODE END LTDC_ER_IRQn 1 */
 }
 
@@ -615,22 +614,7 @@ void LTDC_ER_IRQHandler(void)
 void DMA2D_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2D_IRQn 0 */
-
-#if LVGLHandler
-  if ((DMA2D->ISR & DMA2D_FLAG_TC) != 0) {
-    DMA2D->IFCR = DMA2D_FLAG_TC; // 清除“传输完成”中断标志位
-    if (it_disp_drv != NULL) {
-      lv_disp_flush_ready(it_disp_drv); // 调用 lv_disp_flush_ready()
-      // log_i(LOG);
-    }
-  } else if ((DMA2D->ISR & DMA2D_FLAG_TE) != 0) { // 处理可能发生的错误中断
-    DMA2D->IFCR = DMA2D_FLAG_TE;                  // 清除“传输错误”中断标志位
-    if (it_disp_drv != NULL) {
-      lv_disp_flush_ready(it_disp_drv);
-    }
-  }
-#endif
-
+  stm32_lcd_dma2d_irq_handler(lcd);
   /* USER CODE END DMA2D_IRQn 0 */
   HAL_DMA2D_IRQHandler(&hdma2d);
   /* USER CODE BEGIN DMA2D_IRQn 1 */
@@ -644,14 +628,7 @@ void DMA2D_IRQHandler(void)
 void QUADSPI_IRQHandler(void)
 {
   /* USER CODE BEGIN QUADSPI_IRQn 0 */
-#endif
-#if !HAL_DMA2DHandler
-/**
-  * @brief This function handles QUADSPI global interrupt.
-  */
-void QUADSPI_IRQHandler(void)
-{
-#endif
+
   /* USER CODE END QUADSPI_IRQn 0 */
   HAL_QSPI_IRQHandler(&hqspi);
   /* USER CODE BEGIN QUADSPI_IRQn 1 */
