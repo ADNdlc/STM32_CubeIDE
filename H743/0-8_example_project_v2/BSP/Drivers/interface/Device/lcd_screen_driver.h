@@ -18,9 +18,17 @@ typedef enum { HORIZONTAL = 0, VERTICAL = 1 } disp_direction_t;
 
 typedef enum {
   LCD_PIXEL_RGB565 = 2,  // 2 bytes per pixel
-  LCD_PIXEL_RGB888 = 3,  // 3 bytes per pixel
   LCD_PIXEL_ARGB8888 = 4 // 4 bytes per pixel
 } pixel_format_t;
+
+// 获取像素字节数
+static inline uint8_t get_pixel_bytes(pixel_format_t fmt) {
+  if (fmt == LCD_PIXEL_RGB565)
+    return 2;
+  if (fmt == LCD_PIXEL_ARGB8888)
+    return 4;
+  return 4; // 默认
+}
 
 /**
  * @brief LCD 信息结构体
@@ -30,7 +38,8 @@ typedef struct {
   uint16_t height;
   pixel_format_t format;
   disp_direction_t dir;
-  void *buffer_addr; // 使用 void* 更通用，因为可能是 SDRAM 地址
+  void *buffer_addr; // 前台缓冲区 (正在显示)
+  void *back_buffer; // 后台缓冲区 (正在绘制)
 } lcd_screen_info_t;
 
 /**
@@ -41,14 +50,19 @@ typedef struct {
   int (*init)(lcd_driver_t *self);
 
   /* 缓冲区管理 */
-  int (*set_buffer)(lcd_driver_t *self, void *buffer);
-  void* (*get_act_buffer)(lcd_driver_t *self);
+  int (*set_buffer)(lcd_driver_t *self, void *buf1, void *buf2);
+  void *(*get_act_buffer)(lcd_driver_t *self);
+  void *(*get_back_buffer)(lcd_driver_t *self);
 
   /* 控制指令 */
   int (*set_dir)(lcd_driver_t *self, disp_direction_t direction);
   disp_direction_t (*get_act_dir)(lcd_driver_t *self);
   int (*display_on)(lcd_driver_t *self);
   int (*display_off)(lcd_driver_t *self);
+
+  /* 双缓冲控制 */
+  int (*swap_buffer)(lcd_driver_t *self);
+  int (*wait_swap)(lcd_driver_t *self);
 
   /* 绘图指令 */
   uint32_t (*read_point)(lcd_driver_t *self, uint16_t x, uint16_t y);
@@ -72,10 +86,16 @@ typedef struct lcd_driver_t {
 } lcd_driver_t;
 
 #define LCD_INIT(self) (self)->ops->init(self)
-#define LCD_SET_BUFFER(self, buffer) (self)->ops->set_buffer(self, buffer)
+#define LCD_SET_BUFFER(self, buffer, type)                                     \
+  (self)->ops->set_buffer(self, buffer, type)
+#define LCD_GET_ACT_BUFFER(self) (self)->ops->get_act_buffer(self)
+#define LCD_GET_BACK_BUFFER(self) (self)->ops->get_back_buffer(self)
 #define LCD_SET_DIR(self, dir) (self)->ops->set_dir(self, dir)
+#define LCD_GET_ACT_DIR(self) (self)->ops->get_act_dir(self)
 #define LCD_DISPLAY_ON(self) (self)->ops->display_on(self)
 #define LCD_DISPLAY_OFF(self) (self)->ops->display_off(self)
+#define LCD_SWAP_BUFFER(self) (self)->ops->swap_buffer(self)
+#define LCD_WAIT_SWAP(self) (self)->ops->wait_swap(self)
 #define LCD_READ_POINT(self, x, y) (self)->ops->read_point(self, x, y)
 #define LCD_DRAW_POINT(self, x, y, color)                                      \
   (self)->ops->draw_point(self, x, y, color)

@@ -1,10 +1,11 @@
 #include "test_config.h"
 #if ENABLE_TEST_LCD
-#include "Sys.h"
 #include "MemPool.h"
+#include "Sys.h"
 #include "dev_map.h"
 #include "lcd_screen_factory.h"
 #include "test_framework.h"
+
 
 #define LCD_TEST_ASSERT(cond)                                                  \
   if (!(cond)) {                                                               \
@@ -27,38 +28,30 @@
   }
 
 static lcd_driver_t *lcd = NULL;
-static uint8_t* buffer1= NULL;
-static uint8_t* buffer2= NULL;
+static void *buffer1 = NULL;
+static void *buffer2 = NULL;
 
 static void test_lcd_setup(void) {
   log_i("LCD Test Setup: Initializing LCD.");
-  buffer1 = sys_malloc(SYS_MEM_EXTERNAL, lcd->info.width * lcd->info.height * 2);
-  if (!buffer1) {
-    log_e("Failed to allocate buffer1");
-    Stop_Current_Test();
-    return;
-  }
-
-  buffer2 = LCD_GET_ACT_BUFFER(lcd);
-  if (!buffer2) {
-    log_e("Failed to get buffer2");
-    Stop_Current_Test();
-    return;
-  }
-  log_i("buffer1: %p, buffer2: %p", buffer1, buffer2);
 
   lcd = lcd_screen_factory_create(LCD_ID_UI);
   LCD_TEST_ASSERT_NOT_NULL(lcd);
 
-  if (lcd) {
-    int res = LCD_INIT(lcd);
-    LCD_TEST_ASSERT_EQUAL(0, res);
-
-    // 打开显示
-    LCD_DISPLAY_ON(lcd);
-    log_i("LCD Info: %dx%d, Format: %d", lcd->info.width, lcd->info.height,
-          lcd->info.format);
+  // 1. 获取默认缓冲区 (板级配置好的 buffer1)
+  buffer1 = LCD_GET_ACT_BUFFER(lcd);
+  buffer2 =LCD_GET_BACK_BUFFER(lcd);
+  if(buffer1 == NULL|| buffer2 == NULL){
+	log_e("LCD memory configuration failed");
+	Stop_Current_Test();
   }
+  log_i("Double Buffering: Front=%p, Back=%p", buffer1, buffer2);
+
+  int res = LCD_INIT(lcd);
+  LCD_TEST_ASSERT_EQUAL(0, res);
+
+  LCD_DISPLAY_ON(lcd);
+  log_i("LCD Info: %dx%d, Format: %d", lcd->info.width, lcd->info.height,
+        lcd->info.format);
 }
 
 static void test_lcd_loop(void) {
@@ -71,6 +64,8 @@ static void test_lcd_loop(void) {
   // 注意：0xF800 是 RGB565 的红色
   int res = LCD_FILL(lcd, 0, 0, lcd->info.width, lcd->info.height, 0xF800);
   LCD_TEST_ASSERT_EQUAL(0, res);
+  LCD_SWAP_BUFFER(lcd);
+  LCD_WAIT_SWAP(lcd);
   sys_delay_ms(500);
 
   // 2. 测试读写点
@@ -83,40 +78,48 @@ static void test_lcd_loop(void) {
   // 3. 测试填充蓝色矩形
   res = LCD_FILL(lcd, 200, 200, 100, 100, 0x001F); // Blue
   LCD_TEST_ASSERT_EQUAL(0, res);
+  LCD_SWAP_BUFFER(lcd);
+  LCD_WAIT_SWAP(lcd);
   sys_delay_ms(500);
 
   // Clear screen for animation start
   res = LCD_FILL(lcd, 0, 0, lcd->info.width, lcd->info.height, 0x0000);
+  LCD_SWAP_BUFFER(lcd);
+  LCD_WAIT_SWAP(lcd);
   LCD_TEST_ASSERT_EQUAL(0, res);
 
-  // Bouncing Box Animation Loop - Visual Check
+  // Bouncing Box Animation Loop - Double Buffered
   int16_t x = 0, y = 0;
-  int16_t dx = 10, dy = 10;
-  uint16_t box_w = 100, box_h = 100;
+  int16_t dx = 5, dy = 5;
+  uint16_t box_w = 150, box_h = 100;
   uint32_t color = 0xF800; // Red
-  uint32_t time = sys_get_systick_ms();
-  while (time + 10000 > sys_get_systick_ms()) {
-    LCD_FILL(lcd, 0, 0, lcd->info.width, lcd->info.height, 0x0000); // 清除上一个显示
 
-    LCD_FILL(lcd, x, y, box_w, box_h, color);
+  uint32_t end_time = sys_get_systick_ms() + 10000;
+
+  while (sys_get_systick_ms() < end_time) {
+    LCD_FILL(lcd, 0, 0, lcd->info.width, lcd->info.height, 0x0000); // 清除后台
+    LCD_FILL(lcd, x, y, box_w, box_h, color); // 在后台绘制新帧
+
+    // 2. 申请 VSYNC 同步切换 (会将 back 改为 front)
+    LCD_SWAP_BUFFER(lcd);
+
+    // 3. 等待垂直消隐生效 (切换完成，原来的 front 变成了新的 back)
+    LCD_WAIT_SWAP(lcd);
+
+    // 计算下一帧坐标
     x += dx;
     y += dy;
-    // Collision detection
     if (x < 0 || x + box_w >= lcd->info.width) {
       dx = -dx;
-      x += dx;
-      color = (color == 0xF800) ? 0x07E0 : 0xF800; // Toggle Red/Green
+      color ^= 0xFFFF;
     }
     if (y < 0 || y + box_h >= lcd->info.height) {
       dy = -dy;
-      y += dy;
-      color = (color == 0xF800) ? 0x001F : 0xF800; // Toggle to Blue if red
+      color ^= 0x07E0;
     }
-    sys_delay_ms(50);
   }
 
-  log_i("LCD basic tests passed.");
-  // 停止测试循环
+  log_i("LCD animation test passed.");
   Stop_Current_Test();
 }
 
