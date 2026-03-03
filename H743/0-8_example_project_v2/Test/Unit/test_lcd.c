@@ -26,7 +26,7 @@
     return;                                                                    \
   }
 
-static lcd_driver_t *lcd = NULL;
+lcd_driver_t *lcd = NULL;
 static void *buffer1 = NULL;
 static void *buffer2 = NULL;
 
@@ -117,7 +117,8 @@ static void test_lcd_loop(void) {
       color = (color == 0xF800) ? 0x001F : 0xF800; // Toggle to Blue if red
     }
     // 3. 等待垂直消隐生效 (切换完成，原来的 front 变成了新的 back)
-    LCD_WAIT_SWAP(lcd);
+    // LCD_WAIT_SWAP(lcd);
+    sys_delay_ms(10);
   }
 
   log_i("LCD animation test passed.");

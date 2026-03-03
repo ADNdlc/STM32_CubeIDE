@@ -24,7 +24,7 @@
 /* USER CODE BEGIN Includes */
 
 #define LVGLHandler 0
-#define HAL_DMA2DHandler 0
+#define HAL_DMA2DHandler 1
 #define USE_MY_Handler 1
 
 /* USER CODE END Includes */

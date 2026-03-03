@@ -14,6 +14,9 @@
 /* 前置声明 */
 typedef struct lcd_driver_t lcd_driver_t;
 
+/* 定义异步回调函数类型 */
+typedef void (*lcd_async_cb_t)(void *user_data);
+
 typedef enum { HORIZONTAL = 0, VERTICAL = 1 } disp_direction_t;
 
 typedef enum {
@@ -75,6 +78,10 @@ typedef struct {
   /* 图片绘制 (位图) - 建议使用 GPU外设加速 */
   int (*draw_bitmap)(lcd_driver_t *self, uint16_t x, uint16_t y, uint16_t w,
                      uint16_t h, const void *bitmap);
+
+  /* 异步回调注册接口 */
+  int (*set_swap_cb)(lcd_driver_t *self, lcd_async_cb_t cb, void *user_data);
+  int (*set_fill_cb)(lcd_driver_t *self, lcd_async_cb_t cb, void *user_data);
 } lcd_driver_ops_t;
 
 /**
@@ -83,6 +90,11 @@ typedef struct {
 typedef struct lcd_driver_t {
   const lcd_driver_ops_t *ops;
   lcd_screen_info_t info;
+  /* 异步回调上下文 (由实现层的硬件中断直接调用) */
+  lcd_async_cb_t swap_done_cb;
+  void *swap_cb_data;
+  lcd_async_cb_t fill_done_cb;
+  void *fill_cb_data;
 } lcd_driver_t;
 
 #define LCD_INIT(self) (self)->ops->init(self)
@@ -103,5 +115,7 @@ typedef struct lcd_driver_t {
   (self)->ops->fill_rect(self, x, y, w, h, color)
 #define LCD_DRAW_BITMAP(self, x, y, w, h, bitmap)                              \
   (self)->ops->draw_bitmap(self, x, y, w, h, bitmap)
+#define LCD_SET_SWAP_CB(self, cb, data) (self)->ops->set_swap_cb(self, cb, data)
+#define LCD_SET_FILL_CB(self, cb, data) (self)->ops->set_fill_cb(self, cb, data)
 
 #endif /* DRIVERS_INTERFACE_DEVICE_LCD_SCREEN_DRIVER_H_ */

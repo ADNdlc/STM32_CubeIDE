@@ -137,8 +137,8 @@ static uint16_t draw_buffer[480][800]
     __attribute__((section(".sdram_section"), aligned(16)));
 #define buf1 display_buffer
 // #define buf1 NULL
-#define buf2 draw_buffer
-// #define buf2 NULL
+//#define buf2 draw_buffer
+#define buf2 NULL
 static const lcd_screen_info_t ui_screen_info = {
     .buffer_addr = (void *)buf1,
     .back_buffer = (void *)buf2,

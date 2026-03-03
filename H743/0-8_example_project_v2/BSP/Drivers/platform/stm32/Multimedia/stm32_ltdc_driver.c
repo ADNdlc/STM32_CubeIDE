@@ -19,6 +19,37 @@
   while ((DMA2D->CR & DMA2D_CR_START) != 0) {                                  \
   }
 
+// 供 stm32xx_it.c 中的 DMA2D_IRQHandler 调用
+void stm32_lcd_dma2d_irq_handler(lcd_driver_t *self) {
+  // 检查是否是传输完成中断 (TCIF)
+  if ((DMA2D->ISR & DMA2D_ISR_TCIF) != 0) {
+    // 清除标志位
+    DMA2D->IFCR = DMA2D_IFCR_CTCIF;
+
+    // 触发应用层回调 (通知 LVGL 绘制完成)
+    if (self->fill_done_cb != NULL) {
+      self->fill_done_cb(self->fill_cb_data);
+    }
+  }
+}
+
+// 供 stm32xx_it.c 中的 LTDC_IRQHandler 调用
+void stm32_lcd_ltdc_irq_handler(lcd_driver_t *self) {
+  stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
+
+  // 检查是否是寄存器重载完成中断 (Register Reload / VSYNC 切换完成)
+  if (__HAL_LTDC_GET_FLAG(impl->hltdc, LTDC_FLAG_RR) != RESET) {
+    // 清除标志位并关闭该中断 (按需触发)
+    __HAL_LTDC_CLEAR_FLAG(impl->hltdc, LTDC_FLAG_RR);
+    __HAL_LTDC_DISABLE_IT(impl->hltdc, LTDC_IT_RR);
+
+    // 触发应用层回调 (通知 LVGL 交换完毕，释放旧缓冲区)
+    if (self->swap_done_cb != NULL) {
+      self->swap_done_cb(self->swap_cb_data);
+    }
+  }
+}
+
 /* ================= 接口实现 ================= */
 
 static int stm32_lcd_init(lcd_driver_t *self) {
@@ -151,14 +182,20 @@ static int stm32_lcd_fill_rect(lcd_driver_t *self, uint16_t x, uint16_t y,
   // 高度在用于高16位，像素宽度在低16位
   DMA2D->NLR = (w << 16) | (h & 0xFFFF);
 
-  // 9. 启动传输
-  DMA2D->CR |= DMA2D_CR_START;
-
-  // 10. 等待完成 (如果需要同步)
-  // 对于 LVGL，通常不需要在这里死等，可以交给上层或在下一次调用前等
-  DMA2D_WAIT_IDLE();
-
-  return 0;
+  // 9. 判断是否为异步模式
+  if (self->fill_done_cb != NULL) {
+    // 异步模式：开启 DMA2D 传输完成中断 (TCIE)
+    DMA2D->CR |= DMA2D_CR_TCIE;
+    DMA2D->CR |= DMA2D_CR_START; // 启动
+    // 直接返回，绝不死等
+    return 0;
+  } else {
+    // 阻塞模式：关闭中断，死等
+    DMA2D->CR &= ~DMA2D_CR_TCIE;
+    DMA2D->CR |= DMA2D_CR_START;
+    DMA2D_WAIT_IDLE();
+    return 0;
+  }
 }
 
 /* 使用 DMA2D 进行图片搬运 (高性能) */
@@ -194,12 +231,20 @@ static int stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y,
   // 模式：内存到内存 (M2M = 0x00)
   DMA2D->CR = 0x00000000UL;
 
-  // 启动
-  DMA2D->CR |= DMA2D_CR_START;
-
-  DMA2D_WAIT_IDLE();
-
-  return 0;
+  // 9. 判断是否为异步模式
+  if (self->fill_done_cb != NULL) {
+    // 异步模式：开启 DMA2D 传输完成中断 (TCIE)
+    DMA2D->CR |= DMA2D_CR_TCIE;
+    DMA2D->CR |= DMA2D_CR_START; // 启动
+    // 直接返回
+    return 0;
+  } else {
+    // 阻塞模式：关闭中断，死等
+    DMA2D->CR &= ~DMA2D_CR_TCIE;
+    DMA2D->CR |= DMA2D_CR_START;
+    DMA2D_WAIT_IDLE();
+    return 0;
+  }
 }
 
 static void *stm32_lcd_get_act_buffer(lcd_driver_t *self) {
@@ -215,10 +260,10 @@ static disp_direction_t stm32_lcd_get_act_dir(lcd_driver_t *self) {
 }
 
 static int stm32_lcd_swap_buffer(lcd_driver_t *self) {
-  stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
   if (self->info.buffer_addr == NULL || self->info.back_buffer == NULL) {
     return -1; // 缺少缓冲区
   }
+  stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
 
   // 1. 确保 DMA2D 绘图已完成
   DMA2D_WAIT_IDLE();
@@ -246,13 +291,26 @@ static int stm32_lcd_swap_buffer(lcd_driver_t *self) {
 }
 
 static int stm32_lcd_wait_swap(lcd_driver_t *self) {
-  stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
-
-  // 轮询重载请求寄存器 (SRCR)，当硬件在 VSYNC 载入新配置后，相应位会清零
-  // 这里我们只检测垂直消隐重载位 (VBR)
-  while ((impl->hltdc->Instance->SRCR & LTDC_SRCR_VBR) != 0) {
-    // 等待硬件真正切换完成
+  // 如果已经配置了异步回调，说明无需 CPU 阻塞死等，直接返回
+  if (self->swap_done_cb != NULL) {
+    return 0;
   }
+
+  // 只有未配置回调时，才走传统的 CPU 死等轮询
+  stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
+  while ((impl->hltdc->Instance->SRCR & LTDC_SRCR_VBR) != 0) { }
+  return 0;
+}
+
+static int stm32_lcd_set_swap_cb(lcd_driver_t *self, lcd_async_cb_t cb, void *user_data) {
+  self->swap_done_cb = cb;
+  self->swap_cb_data = user_data;
+  return 0;
+}
+
+static int stm32_lcd_set_fill_cb(lcd_driver_t *self, lcd_async_cb_t cb, void *user_data) {
+  self->fill_done_cb = cb;
+  self->fill_cb_data = user_data;
   return 0;
 }
 
@@ -273,6 +331,8 @@ static const lcd_driver_ops_t stm32_ltdc_ops = {
     .get_act_dir = stm32_lcd_get_act_dir,
     .swap_buffer = stm32_lcd_swap_buffer,
     .wait_swap = stm32_lcd_wait_swap,
+	.set_swap_cb = stm32_lcd_set_swap_cb,
+	.set_fill_cb = stm32_lcd_set_fill_cb,
 };
 
 lcd_driver_t *stm32_ltdc_driver_create(stm32_ltdc_config_t *congfig,

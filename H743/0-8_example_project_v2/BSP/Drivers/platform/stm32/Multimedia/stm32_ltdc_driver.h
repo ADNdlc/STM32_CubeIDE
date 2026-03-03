@@ -37,4 +37,10 @@ typedef struct {
 lcd_driver_t *stm32_ltdc_driver_create(stm32_ltdc_config_t *congfig,
                                        lcd_screen_info_t info);
 
+/**
+ * @brief 必须在 stm32xx_it.c 中对应的中断里调用这两个钩子
+ */
+void stm32_lcd_dma2d_irq_handler(lcd_driver_t *self);
+void stm32_lcd_ltdc_irq_handler(lcd_driver_t *self);
+
 #endif /* BSP_DRIVERS_PLATFORM_STM32_DEVICE_STM32_LTDC_DRIVER_H_ */
