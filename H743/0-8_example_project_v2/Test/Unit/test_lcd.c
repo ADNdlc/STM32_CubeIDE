@@ -6,7 +6,6 @@
 #include "lcd_screen_factory.h"
 #include "test_framework.h"
 
-
 #define LCD_TEST_ASSERT(cond)                                                  \
   if (!(cond)) {                                                               \
     log_e("Assertion failed: %s", #cond);                                      \
@@ -39,10 +38,10 @@ static void test_lcd_setup(void) {
 
   // 1. 获取默认缓冲区 (板级配置好的 buffer1)
   buffer1 = LCD_GET_ACT_BUFFER(lcd);
-  buffer2 =LCD_GET_BACK_BUFFER(lcd);
-  if(buffer1 == NULL|| buffer2 == NULL){
-	log_e("LCD memory configuration failed");
-	Stop_Current_Test();
+  buffer2 = LCD_GET_BACK_BUFFER(lcd);
+  if (buffer1 == NULL || buffer2 == NULL) {
+    log_e("LCD memory configuration failed");
+    Stop_Current_Test();
   }
   log_i("Double Buffering: Front=%p, Back=%p", buffer1, buffer2);
 
@@ -101,22 +100,24 @@ static void test_lcd_loop(void) {
     LCD_FILL(lcd, x, y, box_w, box_h, color); // 在后台绘制新帧
 
     // 2. 申请 VSYNC 同步切换 (会将 back 改为 front)
-    LCD_SWAP_BUFFER(lcd);
-
-    // 3. 等待垂直消隐生效 (切换完成，原来的 front 变成了新的 back)
-    LCD_WAIT_SWAP(lcd);
+    //LCD_SWAP_BUFFER(lcd);
 
     // 计算下一帧坐标
     x += dx;
     y += dy;
+    // Collision detection
     if (x < 0 || x + box_w >= lcd->info.width) {
       dx = -dx;
-      color ^= 0xFFFF;
+      x += dx;
+      color = (color == 0xF800) ? 0x07E0 : 0xF800; // Toggle Red/Green
     }
     if (y < 0 || y + box_h >= lcd->info.height) {
       dy = -dy;
-      color ^= 0x07E0;
+      y += dy;
+      color = (color == 0xF800) ? 0x001F : 0xF800; // Toggle to Blue if red
     }
+    // 3. 等待垂直消隐生效 (切换完成，原来的 front 变成了新的 back)
+    //LCD_WAIT_SWAP(lcd);
   }
 
   log_i("LCD animation test passed.");

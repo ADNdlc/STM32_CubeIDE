@@ -40,17 +40,17 @@ static int stm32_lcd_init(lcd_driver_t *self) {
 
 static int stm32_lcd_set_buffer(lcd_driver_t *self, void *buf1, void *buf2) {
   stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
-  if(buf1 == NULL || buf2 == NULL){
-	buf1? (self->info.buffer_addr = buf1,self->info.back_buffer = buf1)
-		: (self->info.buffer_addr = buf2,self->info.back_buffer = buf2);
-  }else{
-	self->info.buffer_addr = buf1;
-	self->info.back_buffer = buf2;
+  if (buf1 == NULL || buf2 == NULL) {
+    buf1 ? (self->info.buffer_addr = buf1, self->info.back_buffer = buf1)
+         : (self->info.buffer_addr = buf2, self->info.back_buffer = buf2);
+  } else {
+    self->info.buffer_addr = buf1;
+    self->info.back_buffer = buf2;
   }
 
-
   // 立即更新硬件层地址
-  HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)self->info.buffer_addr, impl->layer_index);
+  HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)self->info.buffer_addr,
+                      impl->layer_index);
   return 0;
 }
 
@@ -220,16 +220,26 @@ static int stm32_lcd_swap_buffer(lcd_driver_t *self) {
     return -1; // 缺少缓冲区
   }
 
-  // 1. 交换内部指针
+  // 1. 确保 DMA2D 绘图已完成
+  DMA2D_WAIT_IDLE();
+
+  // 2. 维护 Cache 一致性 (H7 必须将 Cache 数据刷入物理显存)
+  // 如果 SDRAM 区配置为 Non-cacheable，则不需要此步。
+  // uint32_t fb_size =
+  //     self->info.width * self->info.height *
+  //     get_pixel_bytes(self->info.format);
+  // SCB_CleanDCache_by_Addr((uint32_t *)self->info.back_buffer, fb_size);
+
+  // 3. 交换内部指针
   void *tmp = self->info.buffer_addr;
   self->info.buffer_addr = self->info.back_buffer;
   self->info.back_buffer = tmp;
 
-  // 2. 申请硬件地址重载 (使用 NoReload 配合垂直消隐重载)
+  // 4. 申请硬件地址重载 (使用 NoReload 配合垂直消隐重载)
   HAL_LTDC_SetAddress_NoReload(impl->hltdc, (uint32_t)self->info.buffer_addr,
                                impl->layer_index);
 
-  // 3. 配置为垂直消隐期生效 (VSYNC reload)
+  // 5. 配置为垂直消隐期生效 (VSYNC reload)
   HAL_LTDC_Reload(impl->hltdc, LTDC_RELOAD_VERTICAL_BLANKING);
 
   return 0;
@@ -259,7 +269,7 @@ static const lcd_driver_ops_t stm32_ltdc_ops = {
     .fill_rect = stm32_lcd_fill_rect,
     .draw_bitmap = stm32_lcd_draw_bitmap,
     .get_act_buffer = stm32_lcd_get_act_buffer,
-	.get_back_buffer = stm32_lcd_get_back_buffer,
+    .get_back_buffer = stm32_lcd_get_back_buffer,
     .get_act_dir = stm32_lcd_get_act_dir,
     .swap_buffer = stm32_lcd_swap_buffer,
     .wait_swap = stm32_lcd_wait_swap,
@@ -279,7 +289,8 @@ lcd_driver_t *stm32_ltdc_driver_create(stm32_ltdc_config_t *congfig,
 
   // 初始化基本信息 (因为 info 是结构体了，直接赋值拷贝)
   drv->base.info = info;
-  stm32_lcd_set_buffer((lcd_driver_t *)drv, drv->base.info.buffer_addr,drv->base.info.back_buffer);
+  stm32_lcd_set_buffer((lcd_driver_t *)drv, drv->base.info.buffer_addr,
+                       drv->base.info.back_buffer);
 
   // 初始化派生类私有数据
   drv->hltdc = congfig->hltdc;
