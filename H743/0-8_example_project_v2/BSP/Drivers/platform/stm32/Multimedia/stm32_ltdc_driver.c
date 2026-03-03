@@ -6,6 +6,7 @@
  */
 
 #include "stm32_ltdc_driver.h"
+#include "gpio_factory.h" // 背光控制
 #include "MemPool.h"
 #include "Sys.h"
 #include <string.h>
@@ -14,11 +15,12 @@
 
 /* ================= 辅助函数 ================= */
 
-#define DMA2D_WAIT_IDLE()                   \
-  while ((DMA2D->CR & DMA2D_CR_START) != 0){}
+#define DMA2D_WAIT_IDLE()                                                      \
+  while ((DMA2D->CR & DMA2D_CR_START) != 0) {                                  \
+  }
 
 // 获取像素字节数
-static inline uint8_t get_pixel_bytes(pixel_format_t fmt){
+static inline uint8_t get_pixel_bytes(pixel_format_t fmt) {
   if (fmt == LCD_PIXEL_RGB565)
     return 2;
   if (fmt == LCD_PIXEL_ARGB8888)
@@ -28,15 +30,24 @@ static inline uint8_t get_pixel_bytes(pixel_format_t fmt){
 
 /* ================= 接口实现 ================= */
 
-static int stm32_lcd_init(lcd_driver_t *self){
+static int stm32_lcd_init(lcd_driver_t *self) {
   stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
 
   // 配置 LTDC 层地址
-  HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)self->info.buffer_addr, impl->layer_index);
+  HAL_LTDC_SetAddress(impl->hltdc, (uint32_t)self->info.buffer_addr,
+                      impl->layer_index);
+
+  // 初始化背光 GPIO
+  gpio_driver_t *bl = gpio_driver_get(impl->bl_gpio_id);
+  if (bl) {
+    GPIO_SET_MODE(bl, GPIO_PushPullOutput);
+    GPIO_WRITE(bl, 1); // 默认打开
+  }
+
   return 0;
 }
 
-static int stm32_lcd_set_buffer(lcd_driver_t *self, void *buffer){
+static int stm32_lcd_set_buffer(lcd_driver_t *self, void *buffer) {
   stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
   self->info.buffer_addr = buffer;
 
@@ -45,7 +56,7 @@ static int stm32_lcd_set_buffer(lcd_driver_t *self, void *buffer){
   return 0;
 }
 
-static int stm32_lcd_set_dir(lcd_driver_t *self, disp_direction_t direction){
+static int stm32_lcd_set_dir(lcd_driver_t *self, disp_direction_t direction) {
   // 对于 LTDC，硬件旋转通常比较复杂，这里只修改软件逻辑
   // 如果需要硬件旋转，需要 DMA2D 的复杂配置或修改扫描方向
   self->info.dir = direction;
@@ -53,36 +64,46 @@ static int stm32_lcd_set_dir(lcd_driver_t *self, disp_direction_t direction){
   return 0;
 }
 
-static int stm32_lcd_display_on(lcd_driver_t *self){
+static int stm32_lcd_display_on(lcd_driver_t *self) {
   stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
   __HAL_LTDC_ENABLE(impl->hltdc);
+
+  gpio_driver_t *bl = gpio_driver_get(impl->bl_gpio_id);
+  if (bl) {
+    GPIO_WRITE(bl, 1);
+  }
   return 0;
 }
 
-static int stm32_lcd_display_off(lcd_driver_t *self){
+static int stm32_lcd_display_off(lcd_driver_t *self) {
   stm32_ltdc_driver_t *impl = (stm32_ltdc_driver_t *)self;
+
+  gpio_driver_t *bl = gpio_driver_get(impl->bl_gpio_id);
+  if (bl) {
+    GPIO_WRITE(bl, 0);
+  }
+
   __HAL_LTDC_DISABLE(impl->hltdc);
   return 0;
 }
 
-static uint32_t stm32_lcd_read_point(lcd_driver_t *self, uint16_t x, uint16_t y){
+static uint32_t stm32_lcd_read_point(lcd_driver_t *self, uint16_t x,
+                                     uint16_t y) {
   // 简单实现：CPU 直接读取显存
   // 注意：如果是 H7，可能需要处理 Cache 一致性 (SCB_InvalidateDCache_by_Addr)
   uint8_t bytes = get_pixel_bytes(self->info.format);
   uint32_t offset = (y * self->info.width + x) * bytes;
   uint32_t addr = (uint32_t)self->info.buffer_addr + offset;
 
-  if (bytes == 2)
-  {
+  if (bytes == 2) {
     return *(uint16_t *)addr;
-  }
-  else
-  {
+  } else {
     return *(uint32_t *)addr;
   }
 }
 
-static int stm32_lcd_draw_point(lcd_driver_t *self, uint16_t x, uint16_t y, uint32_t color){
+static int stm32_lcd_draw_point(lcd_driver_t *self, uint16_t x, uint16_t y,
+                                uint32_t color) {
   if (x >= self->info.width || y >= self->info.height)
     return -1;
 
@@ -91,22 +112,21 @@ static int stm32_lcd_draw_point(lcd_driver_t *self, uint16_t x, uint16_t y, uint
   uint32_t addr = (uint32_t)self->info.buffer_addr + offset;
 
   // 直接写内存
-  if (bytes == 2)
-  {
+  if (bytes == 2) {
     *(volatile uint16_t *)addr = (uint16_t)color;
-  }
-  else
-  {
+  } else {
     *(volatile uint32_t *)addr = color;
   }
   return 0;
 }
 
 /* 使用 DMA2D 进行纯色填充 (高性能) */
-static int stm32_lcd_fill_rect(lcd_driver_t *self, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t color){
+static int stm32_lcd_fill_rect(lcd_driver_t *self, uint16_t x, uint16_t y,
+                               uint16_t w, uint16_t h, uint32_t color) {
   // 1. 计算目标地址
   uint8_t bytes = (self->info.format == LCD_PIXEL_RGB565) ? 2 : 4;
-  uint32_t dest_addr = (uint32_t)self->info.buffer_addr + (y * self->info.width + x) * bytes;
+  uint32_t dest_addr =
+      (uint32_t)self->info.buffer_addr + (y * self->info.width + x) * bytes;
 
   // 2. 确保上一次传输已完成
   DMA2D_WAIT_IDLE();
@@ -144,9 +164,11 @@ static int stm32_lcd_fill_rect(lcd_driver_t *self, uint16_t x, uint16_t y, uint1
 }
 
 /* 使用 DMA2D 进行图片搬运 (高性能) */
-static int stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y, uint16_t w, uint16_t h, const void *bitmap){
+static int stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y,
+                                 uint16_t w, uint16_t h, const void *bitmap) {
   uint8_t bytes = (self->info.format == LCD_PIXEL_RGB565) ? 2 : 4;
-  uint32_t dest_addr = (uint32_t)self->info.buffer_addr + (y * self->info.width + x) * bytes;
+  uint32_t dest_addr =
+      (uint32_t)self->info.buffer_addr + (y * self->info.width + x) * bytes;
 
   DMA2D_WAIT_IDLE();
 
@@ -182,6 +204,14 @@ static int stm32_lcd_draw_bitmap(lcd_driver_t *self, uint16_t x, uint16_t y, uin
   return 0;
 }
 
+static void* stm32_lcd_get_act_buffer(lcd_driver_t *self) {
+  return self->info.buffer_addr;
+}
+
+static disp_direction_t stm32_lcd_get_act_dir(lcd_driver_t *self) {
+  return self->info.dir;
+}
+
 /* ================= 构造函数 ================= */
 
 static const lcd_driver_ops_t stm32_ltdc_ops = {
@@ -194,11 +224,14 @@ static const lcd_driver_ops_t stm32_ltdc_ops = {
     .draw_point = stm32_lcd_draw_point,
     .fill_rect = stm32_lcd_fill_rect,
     .draw_bitmap = stm32_lcd_draw_bitmap,
+    .get_act_buffer = stm32_lcd_get_act_buffer,
+    .get_act_dir = stm32_lcd_get_act_dir,
 };
 
-lcd_driver_t *stm32_ltdc_driver_create(stm32_ltdc_config_t* congfig,
-                                       lcd_screen_info_t info){
-  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)sys_malloc(LTDC_DRV_MEM_SOURCE, sizeof(stm32_ltdc_driver_t));
+lcd_driver_t *stm32_ltdc_driver_create(stm32_ltdc_config_t *congfig,
+                                       lcd_screen_info_t info) {
+  stm32_ltdc_driver_t *drv = (stm32_ltdc_driver_t *)sys_malloc(
+      LTDC_DRV_MEM_SOURCE, sizeof(stm32_ltdc_driver_t));
   if (!drv)
     return NULL;
 
@@ -214,6 +247,7 @@ lcd_driver_t *stm32_ltdc_driver_create(stm32_ltdc_config_t* congfig,
   drv->hltdc = congfig->hltdc;
   drv->hdma2d = congfig->hdma2d;
   drv->layer_index = congfig->layer;
+  drv->bl_gpio_id = congfig->bl_gpio_id;
 
   return (lcd_driver_t *)drv;
 }

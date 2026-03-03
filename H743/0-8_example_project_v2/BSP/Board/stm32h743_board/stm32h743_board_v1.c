@@ -2,14 +2,14 @@
 #include "dev_map_config.h"
 
 #if (STM32H743_BOARD_V1 == TARGET_BOARD)
+#include "Multimedia/stm32_ltdc_driver.h"
+#include "dma2d.h"
 #include "fmc.h"
 #include "gpio/stm32_gpio_driver.h"
 #include "gt9xxx_touch/gt9xxx_touch_driver.h"
-#include "Multimedia/stm32_ltdc_driver.h"
-#include "ltdc.h"
-#include "dma2d.h"
 #include "i2c/stm32_i2c_driver.h"
 #include "ina219/ina219_driver.h"
+#include "ltdc.h"
 #include "main.h"
 #include "one_wire/stm32_one_wire_driver.h"
 #include "qspi/stm32_qspi_driver.h"
@@ -19,6 +19,7 @@
 #include "spi/stm32_spi_driver.h"
 #include "tim.h"
 #include "usart.h"
+
 
 /*************
  * 总线配置表
@@ -30,6 +31,7 @@ static const stm32_gpio_config_t all_gpio_configs[GPIO_MAX_DEVICES] = {
     [TOUCH_INT] = {.pin = touch_INT_Pin, .port = touch_INT_GPIO_Port},
     [GPIO_ID_LED0] = {.pin = LED0_Pin, .port = LED0_GPIO_Port},
     [GPIO_ID_LED1] = {.pin = LED1_Pin, .port = LED1_GPIO_Port},
+    [LCD_BL] = {.pin = GPIO_PIN_5, .port = GPIOB},
 };
 // GPIO 逻辑号映射表
 const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
@@ -37,6 +39,7 @@ const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
     [TOUCH_INT] = {.resource = (void *)&all_gpio_configs[TOUCH_INT]},
     [GPIO_ID_LED0] = {.resource = (void *)&all_gpio_configs[GPIO_ID_LED0]},
     [GPIO_ID_LED1] = {.resource = (void *)&all_gpio_configs[GPIO_ID_LED1]},
+    [LCD_BL] = {.resource = (void *)&all_gpio_configs[LCD_BL]},
 };
 
 // USART 逻辑号映射表
@@ -130,19 +133,20 @@ const touch_mapping_t touch_mappings[TOUCH_MAX] = {
 };
 
 static const lcd_screen_info_t ui_screen_info = {
-	.buffer_addr = 0x0,
-	.dir = HORIZONTAL,
-	.format = LCD_PIXEL_RGB565,
-	.width = 800,
-	.height = 480,
+    .buffer_addr = (void *)0xC0000000,
+    .dir = HORIZONTAL,
+    .format = LCD_PIXEL_RGB565,
+    .width = 800,
+    .height = 480,
 };
 static const stm32_ltdc_config_t ltdc_config = {
-	.hltdc = &hltdc,
-	.hdma2d = &hdma2d,
-	.layer = 0,
+    .hltdc = &hltdc,
+    .hdma2d = &hdma2d,
+    .layer = 0,
+    .bl_gpio_id = LCD_BL,
 };
 const lcd_mapping_t lcd_mappings[LCD_ID_MAX] = {
-	[LCD_ID_UI] = {.info = ui_screen_info, .resource = (void *)&ltdc_config},
+    [LCD_ID_UI] = {.info = ui_screen_info, .resource = (void *)&ltdc_config},
 };
 
 // "NORflash设备表"

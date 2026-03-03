@@ -11,8 +11,9 @@
 #include <stdint.h>
 
 #include "dev_map_config.h"
-#include "nor_flash_driver.h"
 #include "lcd_screen_driver.h"
+#include "nor_flash_driver.h"
+
 
 /* ----- GPIO ----- */
 typedef enum {
@@ -20,6 +21,7 @@ typedef enum {
   TOUCH_INT = 1,
   GPIO_ID_LED0 = 2,
   GPIO_ID_LED1 = 3,
+  LCD_BL = 4,
   //...
   GPIO_MAX_DEVICES
 } gpio_device_id_t;
