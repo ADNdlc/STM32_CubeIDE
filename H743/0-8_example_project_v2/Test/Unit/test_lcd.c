@@ -26,7 +26,7 @@
     return;                                                                    \
   }
 
-lcd_driver_t *lcd = NULL;
+extern lcd_driver_t *lcd;
 static void *buffer1 = NULL;
 static void *buffer2 = NULL;
 

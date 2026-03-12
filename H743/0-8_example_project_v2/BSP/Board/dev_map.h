@@ -161,6 +161,17 @@ typedef struct {
 } lcd_mapping_t;
 extern const lcd_mapping_t lcd_mappings[LCD_ID_MAX];
 
+/* ----- OLED ----- */
+typedef enum {
+  OLED_ID_MAIN = 0,
+  //...
+  OLED_ID_MAX
+} oled_id_t;
+typedef struct {
+  void *resource;
+} oled_mapping_t;
+extern const oled_mapping_t oled_mappings[OLED_ID_MAX];
+
 /* ----- norflash ----- */
 typedef enum { NOR_FLASH_SYS = 0, NOR_FLASH_MAX } norflash_id_t;
 typedef struct {

@@ -29,7 +29,7 @@ static int ssd1306_init(oled_device_t *dev) {
         0xA1,             // 8. 段重映射 (左右反转，正常显示0xA0)
         0xC8,             // 9. COM 扫描方向 (上下反转，正常显示0xC0)
         0xDA, com_pin_cfg,// 10. 设置 COM 硬件配置 (动态)
-        0x81, 0xCF,       // 11. 设置对比度
+        0x81, 0x7F,       // 11. 设置对比度
         0xD9, 0xF1,       // 12. 设置预充电周期
         0xDB, 0x40,       // 13. 设置 VCOMH
         0xA4,             // 14. 全局显示开启
@@ -43,7 +43,7 @@ static int ssd1306_init(oled_device_t *dev) {
 
 // 2. 设置页寻址游标
 static int ssd1306_set_cursor(oled_device_t *dev, uint8_t page, uint8_t col) {
-    // 加上芯片列偏移 (SSD1306通常为0, 但我们为了架构统一加上)
+    // 加上芯片列偏移 (SSD1306通常为0)
     col += dev->col_offset;
 
     uint8_t cmds[3] = {

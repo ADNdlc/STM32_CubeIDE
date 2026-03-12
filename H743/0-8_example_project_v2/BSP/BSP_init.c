@@ -29,8 +29,9 @@ uart_queue_t *g_debug_queue = NULL;
 static uint8_t debug_tx_buf[4096];
 static uint8_t debug_rx_buf[64];
 
-/* 供 Timer 回调使用的 LVGL 心跳 */
-static void lv_tick_cb(void *ctx) { lv_tick_inc(1); }
+/* LVGL相关 */
+lcd_driver_t *lcd = NULL;
+static void lv_tick_cb(void *ctx) { lv_tick_inc(1); } //供 Timer 回调使用的 LVGL 心跳
 
 void bsp_init(void) {
 #ifndef platform_sys_mem_create
