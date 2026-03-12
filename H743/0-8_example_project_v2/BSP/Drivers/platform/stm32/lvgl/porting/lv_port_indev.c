@@ -38,8 +38,6 @@
 #if Touchpad
 static void touchpad_init(void);
 static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data);
-static bool touchpad_is_pressed(void);
-static void touchpad_get_xy(lv_coord_t *x, lv_coord_t *y);
 #endif
 #if Mouse
 static void mouse_init(void);
@@ -69,6 +67,7 @@ static bool button_is_pressed(uint8_t id);
  **********************/
 #if Touchpad
 lv_indev_t *indev_touchpad;
+static touch_driver_t *touch_drv = NULL;
 #endif
 #if Mouse
 lv_indev_t *indev_mouse;
@@ -207,41 +206,40 @@ void lv_port_indev_init(void) {
  * -----------------*/
 #if Touchpad
 /*Initialize your touchpad*/
-static void touchpad_init(void) { /*Your code comes here*/ }
+static void touchpad_init(void) { 
+  touch_drv = touch_driver_get(TOUCH_ID_UI);
+}
 
 /*Will be called by the library to read the touchpad*/
 static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
   static lv_coord_t last_x = 0;
   static lv_coord_t last_y = 0;
 
-  // 获取触点
-  if (touchpad_is_pressed()) {
-    /* 有触摸，使用第一个触摸点 */
-    touchpad_get_xy(&last_x, &last_y);
-    data->state = LV_INDEV_STATE_PR;
+  if (touch_drv == NULL) {
+    data->state = LV_INDEV_STATE_REL;
+    return;
+  }
+
+  // 扫描触摸屏
+  uint8_t points = TOUCH_SCAN(touch_drv);
+  if (points > 0) {
+    Touch_Data_t *touch_data = TOUCH_GET_DATA(touch_drv);
+    if (touch_data && touch_data->point_count > 0) {
+      /* 有触摸，记录坐标 */
+      last_x = touch_data->points[0].x;
+      last_y = touch_data->points[0].y;
+      data->state = LV_INDEV_STATE_PR;
+    } else {
+      data->state = LV_INDEV_STATE_REL;
+    }
   } else {
     /* 无触摸 */
     data->state = LV_INDEV_STATE_REL;
   }
 
-  /* 设置坐标 */
+  /* 设置坐标 (基于最后一次按下的坐标) */
   data->point.x = last_x;
   data->point.y = last_y;
-}
-
-/*Return true is the touchpad is pressed*/
-static bool touchpad_is_pressed(void) {
-
-  /*Your code comes here*/
-  return false;
-}
-
-/*Get the x and y coordinates if the touchpad is pressed*/
-static void touchpad_get_xy(lv_coord_t *x, lv_coord_t *y) {
-  /*Your code comes here*/
-
-  (*x) = 0;
-  (*y) = 0;
 }
 #endif
 

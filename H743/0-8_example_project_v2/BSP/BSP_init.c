@@ -17,6 +17,7 @@
 #include "humiture_factory.h"
 #include "lvgl.h"
 #include "lvgl/porting/lv_port_disp.h"
+#include "lvgl/porting/lv_port_indev.h"
 #include "sdram_factory.h"
 #include "timer_factory.h"
 #include "uart_queue.h"
@@ -83,6 +84,7 @@ void bsp_init(void) {
   /* ---- LVGL 初始化 ---- */
   lv_init();
   lv_port_disp_init();
+  lv_port_indev_init();
   log_i("LVGL core init success.");
 
   /* ---- LVGL 定时器触发 (时基) ---- */
