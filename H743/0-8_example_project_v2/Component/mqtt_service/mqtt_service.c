@@ -1,4 +1,5 @@
 #include "mqtt_service.h"
+#include "mqtt_factory.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -30,7 +31,7 @@ static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
     self->state = MQTT_SVC_STATE_CONNECTED;
     self->retry_count = 0;
     log_i("Service: MQTT Connected.");
-    svc_event.type = MQTT_SVC_EVENT_STATE_CHANGED;
+    svc_event.type = MQTT_SVC_EVENT_CONNECTED;
     svc_event.state = self->state;
     notify_event(self, &svc_event);
     break;
@@ -38,14 +39,14 @@ static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
   case MQTT_DRV_EVENT_DISCONNECTED:
     self->state = MQTT_SVC_STATE_DISCONNECTED;
     log_w("Service: MQTT Disconnected.");
-    svc_event.type = MQTT_SVC_EVENT_STATE_CHANGED;
+    svc_event.type = MQTT_SVC_EVENT_DISCONNECTED;
     svc_event.state = self->state;
     notify_event(self, &svc_event);
     break;
 
   case MQTT_DRV_EVENT_DATA:
     log_d("Service: Data received on topic %s", event->topic);
-    svc_event.type = MQTT_SVC_EVENT_DATA_RECEIVED;
+    svc_event.type = MQTT_SVC_EVENT_DATA;
     svc_event.topic = event->topic;
     svc_event.payload = event->payload;
     notify_event(self, &svc_event);
@@ -57,10 +58,10 @@ static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
  * Public APIs
  *******************/
 
-void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv,
+void mqtt_svc_init(mqtt_service_t *self, mqtt_id_t id,
                    const mqtt_adapter_t *adapter) {
   memset(self, 0, sizeof(mqtt_service_t));
-  self->drv = drv;
+  self->drv = mqtt_driver_get(id);
   self->adapter = adapter;
   self->state = MQTT_SVC_STATE_DISCONNECTED;
   self->observer_count = 0;

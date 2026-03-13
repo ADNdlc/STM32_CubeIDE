@@ -3,6 +3,7 @@
 
 #include "mqtt_adapter.h"
 #include "mqtt_driver.h"
+#include "service_id.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -17,11 +18,13 @@ typedef enum {
 } mqtt_svc_state_t;
 
 /**
- * @brief MQTT 服务事件类型
+ * @brief MQTT 服务事件类型 (与驱动对齐但保持隔离)
  */
 typedef enum {
-  MQTT_SVC_EVENT_STATE_CHANGED = 0, // 状态变化
-  MQTT_SVC_EVENT_DATA_RECEIVED,     // 收到数据
+  MQTT_SVC_EVENT_CONNECTED = 0,    // 已连接
+  MQTT_SVC_EVENT_DISCONNECTED,     // 已断开
+  MQTT_SVC_EVENT_DATA,             // 收到数据
+  MQTT_SVC_EVENT_STATE_CHANGED = 0, // 兼容旧代码
 } mqtt_svc_event_type_t;
 
 typedef struct mqtt_service_t mqtt_service_t;
@@ -31,9 +34,9 @@ typedef struct mqtt_service_t mqtt_service_t;
  */
 typedef struct {
   mqtt_svc_event_type_t type;
-  mqtt_svc_state_t state; // For STATE_CHANGED
-  const char *topic;      // For DATA_RECEIVED
-  const char *payload;    // For DATA_RECEIVED
+  mqtt_svc_state_t state; // For compatibility
+  const char *topic;
+  const char *payload;
 } mqtt_svc_event_t;
 
 // 通用事件回调原型

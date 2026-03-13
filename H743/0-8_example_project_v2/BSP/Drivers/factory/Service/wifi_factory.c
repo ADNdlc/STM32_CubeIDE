@@ -21,7 +21,7 @@ wifi_driver_t *wifi_driver_get(wifi_id_t id) {
     if (!initialized) {
         // 1. 获取底层硬件资源 (根据 dev_map.h)
         usart_driver_t *u_drv = usart_driver_get(USART_ID_ESP8266);
-        gpio_driver_t *rst_pin = gpio_driver_get(GPIO_ID_ESP_RST); // 假设 ID
+        gpio_driver_t *rst_pin = gpio_driver_get(GPIO_ID_ESP_RST);
         
         if (u_drv) {
             // 2. 初始化 AT 控制器
@@ -37,6 +37,12 @@ wifi_driver_t *wifi_driver_get(wifi_id_t id) {
     }
 
     return (wifi_driver_t *)&esp_wifi_drv;
+}
+
+void wifi_factory_process(void) {
+    if (initialized) {
+        at_controller_process(&at_ctrl);
+    }
 }
 
 // 供其他 Factory 使用 AT 控制器 (Internal)

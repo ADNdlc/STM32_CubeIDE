@@ -7,7 +7,8 @@
 #ifndef COMPONENT_WIFI_SERVICE_WIFI_SERVICE_H_
 #define COMPONENT_WIFI_SERVICE_WIFI_SERVICE_H_
 
-#include "../../Drivers/interface/wifi_driver.h"
+#include "wifi_driver.h"
+#include "service_id.h"
 
 typedef struct wifi_service_t wifi_service_t;
 // wifi状态变化回调原型
@@ -15,13 +16,13 @@ typedef void (*wifi_service_event_cb_t)(wifi_service_t *self,
                                         wifi_status_t status, void *user_data);
 
 struct wifi_service_t {
-  wifi_driver_t *driver; // 依赖
+  wifi_driver_t *driver; // 内部持有的驱动
   wifi_service_event_cb_t event_cb;
   void *user_data;
   wifi_status_t last_status; // 内部状态跟踪
 };
 
-void wifi_service_init(wifi_service_t *self, wifi_driver_t *driver);
+void wifi_svc_init(wifi_service_t *self, wifi_id_t id);
 void wifi_service_register_callback(wifi_service_t *self,
                                     wifi_service_event_cb_t cb,
                                     void *user_data);

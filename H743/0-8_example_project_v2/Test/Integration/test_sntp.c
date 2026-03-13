@@ -2,56 +2,38 @@
 #if ENABLE_TEST_WIFI // sntp tests usually need wifi
 
 #define LOG_TAG "TEST_SNTP"
-#include "elog.h"
 #include "Sys.h"
+#include "elog.h"
 #include "test_framework.h"
 
-// 驱动相关
-#include "esp_8266/at_controller.h"
-#include "esp_8266/esp8266_sntp_driver.h"
-#include "esp_8266/esp8266_wifi_driver.h"
-#include "usart_factory.h"
-#include "gpio_factory.h"
-#include "uart_queue/uart_queue.h"
-#include "usart_hal/usart_hal.h"
+// 抽象服务层
+#include "sntp_service/sntp_service.h"
+#include "wifi_service.h"
+#include "sntp_factory.h"
+#include "wifi_factory.h"
 #include "rtc_driver.h"
 #include "rtc_factory.h"
+#include "gpio_factory.h"
+#include "sys_config.h"
 
 // 交互相关
 #include "gpio_key/gpio_key.h"
 
 // 全局实例
-static at_controller_t at_ctrl;
-static uart_queue_t at_uart_q;
-static esp8266_wifi_driver_t wifi_drv;
-static esp8266_sntp_driver_t sntp_drv;
+static wifi_service_t wifi_svc;
+static sntp_service_t sntp_svc;
 static rtc_driver_t *rtc_drv = NULL;
 
 static gpio_key_t* key_ui;
 static KeyObserver key_observer;
 
-// 缓冲区
-static uint8_t at_tx_buf[256];
-static uint8_t at_rx_buf[512];
-
-#include "sys_config.h"
-
-// SNTP 回调
-static void on_sntp_sync(void *arg, int result, sntp_time_t *time) {
+// SNTP 同步结果回调 (sntp_service 内部逻辑可能需要对齐)
+static void on_sync_done(void *arg, int result) {
     if (result == 0) {
-        log_i("SNTP Sync Success!");
-        log_i("Time: %02d:%02d:%02d, Date: 20%02d-%02d-%02d (Week:%d)", 
-              time->time.hour, time->time.minute, time->time.second,
-              time->date.year, time->date.month, time->date.day, time->date.week);
-        
-        if (rtc_drv) {
-            log_i("Updating RTC...");
-            RTC_SET_TIME(rtc_drv, &time->time);
-            RTC_SET_DATE(rtc_drv, &time->date);
-            log_i("RTC Updated.");
-        }
+        log_i("SNTP Sync Success via Service!");
+        // 时间已由 sntp_service 内部逻辑同步或在此处理
     } else {
-        log_e("SNTP Sync Failed!");
+        log_e("SNTP Sync Failed via Service!");
     }
 }
 
@@ -59,18 +41,18 @@ static void on_key_event(gpio_key_t *key, KeyEvent event) {
     switch (event) {
         case KeyEvent_LongPress:
             log_i("Action: Connecting WiFi for SNTP test...");
-            WIFI_CONNECT((wifi_driver_t*)&wifi_drv, sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
+            wifi_svc_connect(&wifi_svc, sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
             break;
 
-        case KeyEvent_SinglePress: {
-            log_i("Action: Configuring SNTP (NTP Server)...");
-            SNTP_DRV_CONFIG((sntp_driver_t*)&sntp_drv, 8, "ntp.aliyun.com");
+        case KeyEvent_SinglePress:
+            log_i("Action: Configuring SNTP (UTC+8)...");
+            // sntp_service 可能有自己的配置逻辑
+            sntp_svc_set_network_ready(&sntp_svc, true);
             break;
-        }
             
         case KeyEvent_DoublePress:
             log_i("Action: Starting SNTP Sync...");
-            SNTP_DRV_START_SYNC((sntp_driver_t*)&sntp_drv, on_sntp_sync, NULL);
+            sntp_svc_start_sync(&sntp_svc, 8, 0); // 立即同步
             break;
             
         case KeyEvent_TriplePress: {
@@ -91,44 +73,35 @@ static void on_key_event(gpio_key_t *key, KeyEvent event) {
 }
 
 static void test_sntp_setup(void) {
-    log_i("SNTP Integration Test Setup...");
+    log_i("SNTP Integration Test Setup (Service Layer)...");
     
     // 1. 获取硬件资源
-    usart_driver_t *u_drv = usart_driver_get(USART_ID_ESP8266);
-    gpio_driver_t *rst_pin = gpio_driver_get(TOUCH_RST); // 假设复位引脚
-    // Wait, PH3 is KEY0. Use that for interaction.
     gpio_driver_t *key_pin = gpio_driver_get(GPIO_ID_KEY0);
-    
-    // RTC
     rtc_drv = rtc_driver_get(RTC_ID_INTERNAL);
     
-    if (!u_drv || !key_pin) {
-        log_e("Hardware drivers missing!");
+    if (!key_pin) {
+        log_e("Key driver missing!");
         return;
     }
     
-    // 2. 初始化 AT 通信
-    usart_hal_t *hal = usart_hal_create(u_drv);
-    uart_queue_init(&at_uart_q, hal, at_tx_buf, sizeof(at_tx_buf), at_rx_buf, sizeof(at_rx_buf));
-    uart_queue_start_receive(&at_uart_q);
-    at_controller_init(&at_ctrl, &at_uart_q, rst_pin);
+    // 2. 初始化核心服务 (使用工厂)
+    wifi_svc_init(&wifi_svc, WIFI_ID_MAIN);
+    wifi_svc_set_mode(&wifi_svc, WIFI_MODE_STATION);
     
-    // 3. 初始化驱动 (WiFi + SNTP)
-    esp8266_wifi_driver_init(&wifi_drv, &at_ctrl);
-    WIFI_SET_MODE((wifi_driver_t*)&wifi_drv, WIFI_MODE_STATION);
+    sntp_svc_init(&sntp_svc, sntp_driver_get(SNTP_ID_MAIN));
     
-    esp8266_sntp_driver_init(&sntp_drv, &at_ctrl);
-    
-    // 4. 初始化按键
+    // 3. 初始化按键
     key_ui = Key_Create(key_pin, 0);
     key_observer.callback = on_key_event;
     Key_RegisterObserver(key_ui, &key_observer);
     
-    log_i("SNTP Test Ready. Long:WiFiConnect, Single:Config, Double:Sync, Triple:ReadRTC");
+    log_i("SNTP Test Ready. Long:WiFiConnect, Single:NetReady, Double:Sync, Triple:ReadRTC");
 }
 
 static void test_sntp_loop(void) {
-    at_controller_process(&at_ctrl);
+    wifi_factory_process();
+    wifi_svc_process(&wifi_svc);
+    sntp_svc_process(&sntp_svc);
     Key_Update(key_ui);
 }
 
@@ -140,3 +113,4 @@ REGISTER_TEST(SNTP_Integration, "Interactive ESP8266 SNTP Test",
               test_sntp_setup, test_sntp_loop, test_sntp_teardown);
 
 #endif
+

@@ -11,4 +11,10 @@
  */
 wifi_driver_t *wifi_driver_get(wifi_id_t id);
 
+/**
+ * @brief 处理 WiFi 相关的底层 URC 和 AT 状态机
+ *        (应当在 main loop 中持续调用)
+ */
+void wifi_factory_process(void);
+
 #endif /* BSP_FACTORY_SERVICE_WIFI_FACTORY_H_ */

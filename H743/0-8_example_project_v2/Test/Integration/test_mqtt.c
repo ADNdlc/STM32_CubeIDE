@@ -6,43 +6,36 @@
 #include "elog.h"
 #include "test_framework.h"
 
-// 驱动相关
-#include "esp_8266/at_controller.h"
-#include "esp_8266/esp8266_mqtt_driver.h"
-#include "esp_8266/esp8266_wifi_driver.h"
+// 抽象服务层
+#include "mqtt_service.h"
+#include "wifi_service.h"
+#include "mqtt_factory.h"
+#include "wifi_factory.h"
 #include "gpio_factory.h"
-#include "uart_queue/uart_queue.h"
-#include "usart_factory.h"
-#include "usart_hal/usart_hal.h"
+#include "sys_config.h"
 
 // 交互相关
 #include "gpio_key/gpio_key.h"
 
 // 全局实例
-static at_controller_t at_ctrl;
-static uart_queue_t at_uart_q;
-static esp8266_wifi_driver_t wifi_drv;
-static esp8266_mqtt_driver_t mqtt_drv;
+static wifi_service_t wifi_svc;
+static mqtt_service_t mqtt_svc;
 static gpio_key_t *key_ui;
 static KeyObserver key_observer;
 
-// 缓冲区
-static uint8_t at_tx_buf[256];
-static uint8_t at_rx_buf[512];
-
-#include "sys_config.h"
+extern const mqtt_adapter_t g_onenet_adapter;
 
 // MQTT 回调
-static void mqtt_event_callback(void *arg, mqtt_drv_event_t *event) {
+static void mqtt_event_callback(mqtt_service_t *self, const mqtt_svc_event_t *event, void *user_data) {
   switch (event->type) {
   case MQTT_DRV_EVENT_CONNECTED:
-    log_i("MQTT Connected.");
+    log_i("MQTT Connected via Service.");
     break;
   case MQTT_DRV_EVENT_DISCONNECTED:
-    log_w("MQTT Disconnected.");
+    log_w("MQTT Disconnected via Service.");
     break;
   case MQTT_DRV_EVENT_DATA:
-    log_i("MQTT Data Recv on [%s]: %s", event->topic, event->payload);
+    log_i("MQTT Data Recv via Service on [%s]: %s", event->topic, event->payload);
     break;
   }
 }
@@ -51,29 +44,23 @@ static void on_key_event(gpio_key_t *key, KeyEvent event) {
   switch (event) {
   case KeyEvent_LongPress:
     log_i("Action: Connecting WiFi for MQTT test...");
-    WIFI_CONNECT((wifi_driver_t *)&wifi_drv, sys_config_get_wifi_ssid(),
-                 sys_config_get_wifi_password());
+    wifi_svc_connect(&wifi_svc, sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
     break;
 
-  case KeyEvent_SinglePress: {
+  case KeyEvent_SinglePress:
     log_i("Action: Connecting MQTT...");
-    mqtt_driver_conn_params_t params = {0}; // 内容省略
-    params.host = "183.230.40.39";          // OneNet example or placeholder
-    params.port = 6002;
-    params.client_id = "test_client";
-    MQTT_DRV_CONNECT((mqtt_driver_t *)&mqtt_drv, &params);
+    mqtt_svc_connect(&mqtt_svc);
     break;
-  }
 
   case KeyEvent_DoublePress:
     log_i("Action: Subscribing to 'test/topic'...");
-    MQTT_DRV_SUBSCRIBE((mqtt_driver_t *)&mqtt_drv, "test/topic", 0);
+    mqtt_svc_subscribe(&mqtt_svc, "test/topic", 0);
     break;
 
   case KeyEvent_TriplePress:
     log_i("Action: Publishing to 'test/topic'...");
-    MQTT_DRV_PUBLISH((mqtt_driver_t *)&mqtt_drv, "test/topic",
-                     "Hello from STM32!", 0);
+    // 直接发布测试主题
+    MQTT_DRV_PUBLISH(mqtt_svc.drv, "test/topic", "Hello from Abstraction!", 0);
     break;
 
   default:
@@ -82,43 +69,34 @@ static void on_key_event(gpio_key_t *key, KeyEvent event) {
 }
 
 static void test_mqtt_setup(void) {
-  log_i("MQTT Integration Test Setup...");
+  log_i("MQTT Integration Test Setup (Service Layer)...");
 
   // 1. 获取硬件资源
-  usart_driver_t *u_drv = usart_driver_get(USART_ATCMD);
-  gpio_driver_t *rst_pin = gpio_driver_get(GPIO_ESP_RST);
   gpio_driver_t *key_pin = gpio_driver_get(GPIO_ID_KEY0);
-
-  if (!u_drv || !rst_pin || !key_pin) {
-    log_e("Hardware drivers missing!");
+  if (!key_pin) {
+    log_e("Key driver missing!");
     return;
   }
 
-  // 2. 初始化 AT 通信
-  usart_hal_t *hal = usart_hal_create(u_drv);
-  uart_queue_init(&at_uart_q, hal, at_tx_buf, sizeof(at_tx_buf), at_rx_buf,
-                  sizeof(at_rx_buf));
-  uart_queue_start_receive(&at_uart_q);
-  at_controller_init(&at_ctrl, &at_uart_q, rst_pin);
+  // 2. 初始化驱动和服务 (使用工厂)
+  wifi_svc_init(&wifi_svc, WIFI_ID_MAIN);
+  wifi_svc_set_mode(&wifi_svc, WIFI_MODE_STATION);
 
-  // 3. 初始化驱动 (WiFi + MQTT)
-  esp8266_wifi_driver_init(&wifi_drv, &at_ctrl);
-  WIFI_SET_MODE((wifi_driver_t *)&wifi_drv, WIFI_MODE_STATION);
+  mqtt_svc_init(&mqtt_svc, MQTT_ID_MAIN, &g_onenet_adapter);
+  mqtt_svc_register_callback(&mqtt_svc, mqtt_event_callback, NULL);
 
-  esp8266_mqtt_driver_init(&mqtt_drv, &at_ctrl);
-  MQTT_DRV_SET_CB((mqtt_driver_t *)&mqtt_drv, mqtt_event_callback, NULL);
-
-  // 4. 初始化按键
+  // 3. 初始化按键
   key_ui = Key_Create(key_pin, 0);
   key_observer.callback = on_key_event;
   Key_RegisterObserver(key_ui, &key_observer);
 
-  log_i("MQTT Test Ready. Long:WiFiConnect, Single:MQTTConnect, "
-        "Double:Subscribe, Triple:Publish");
+  log_i("MQTT Test Ready. Long:WiFiConnect, Single:MQTTConnect, Double:Sub, Triple:Pub");
 }
 
 static void test_mqtt_loop(void) {
-  at_controller_process(&at_ctrl);
+  wifi_factory_process();
+  wifi_svc_process(&wifi_svc);
+  mqtt_svc_process(&mqtt_svc);
   Key_Update(key_ui);
 }
 
@@ -130,3 +108,4 @@ REGISTER_TEST(MQTT_Integration, "Interactive ESP8266 MQTT Test",
               test_mqtt_setup, test_mqtt_loop, test_mqtt_teardown);
 
 #endif
+

@@ -1,17 +1,12 @@
-/*
- * wifi_service.c
- *
- *  Implementation of the high-level WiFi service.
- */
-
 #include "wifi_service.h"
+#include "wifi_factory.h"
 #include <string.h>
 
-void wifi_service_init(wifi_service_t *self, wifi_driver_t *driver) {
-  if (!self || !driver)
+void wifi_svc_init(wifi_service_t *self, wifi_id_t id) {
+  if (!self)
     return;
   memset(self, 0, sizeof(wifi_service_t));
-  self->driver = driver;
+  self->driver = wifi_driver_get(id);
 }
 
 /**
