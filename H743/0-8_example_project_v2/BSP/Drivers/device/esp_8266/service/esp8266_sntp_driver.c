@@ -5,6 +5,8 @@
  */
 
 #include "esp8266_sntp_driver.h"
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,116 +15,146 @@
 #include "elog.h"
 
 // --- Forward Declarations ---
-static int esp8266_sntp_config(sntp_driver_t *base, int enable, int timezone,
+static int esp8266_sntp_config(sntp_driver_t *base, int timezone,
                                const char *server1);
-static int esp8266_sntp_get_time(sntp_driver_t *base, sntp_get_time_cb_t cb,
-                                 void *user_data);
+static int esp8266_sntp_start_sync(sntp_driver_t *base, sntp_sync_cb_t cb,
+                                  void *user_data);
 static sntp_drv_status_t esp8266_sntp_get_status(sntp_driver_t *base);
 
 static const sntp_driver_ops_t esp8266_sntp_ops = {
     .config = esp8266_sntp_config,
-    .get_time = esp8266_sntp_get_time,
+    .start_sync = esp8266_sntp_start_sync,
     .get_status = esp8266_sntp_get_status,
 };
 
 // --- URC 处理 ---
-// +TIME_UPDATED
 static void handle_time_updated(void *ctx, const char *line) {
   esp8266_sntp_driver_t *self = (esp8266_sntp_driver_t *)ctx;
-  self->status = SNTP_DRV_STATUS_SYNCED;  // 已同步,可获取时间
-  log_i("SNTP Status: Synchronized (URC received)");
+  self->status = SNTP_DRV_STATUS_SUCCESS;
+  log_i("SNTP Status: Synchronized (URC)");
 }
 
-// 解析时间内容: +CIPSNTPTIME:Fri May 30 18:06:18 2025
+// 辅助函数: 解析时间字符串
+static void parse_sntp_to_rtc(const char *str, sntp_time_t *out) {
+  char week[4], month[4];
+  int day, hour, min, sec, year;
+  // Format: "Fri May 30 18:06:18 2025"
+  if (sscanf(str, "%s %s %d %d:%d:%d %d", week, month, &day, &hour, &min, &sec,
+             &year) == 7) {
+    out->date.day = (uint8_t)day;
+    out->date.year = (uint8_t)(year % 100);
+    out->time.hour = (uint8_t)hour;
+    out->time.minute = (uint8_t)min;
+    out->time.second = (uint8_t)sec;
+
+    const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    for (int i = 0; i < 12; i++) {
+      if (strcmp(month, months[i]) == 0) {
+        out->date.month = i + 1;
+        break;
+      }
+    }
+    const char *weeks[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+    for (int i = 0; i < 7; i++) {
+      if (strcmp(week, weeks[i]) == 0) {
+        out->date.week = i + 1;
+        break;
+      }
+    }
+  }
+}
+
 static void parse_sntp_time(void *ctx, const char *line) {
   esp8266_sntp_driver_t *self = (esp8266_sntp_driver_t *)ctx;
   if (strncmp(line, "+CIPSNTPTIME:", 13) == 0) {
-    // 将模块返回数据解析并存入缓冲区
     strncpy(self->time_buf, line + 13, sizeof(self->time_buf) - 1);
     self->time_buf[sizeof(self->time_buf) - 1] = '\0';
   }
 }
 
-// 命令结果回调 (Now with ctx support)
-static void on_get_time_response(void *ctx, AT_CmdResult_t result,
-                                 const char *last_line) {
+static void on_sync_response(void *ctx, AT_CmdResult_t result,
+                             const char *last_line) {
   esp8266_sntp_driver_t *self = (esp8266_sntp_driver_t *)ctx;
-  if (!self)
+  if (!self || !self->pending_cb)
     return;
 
-  if (self->pending_cb) {
-    int res = (result == AT_CMD_OK) ? 0 : -1;
-    // 将时间传给服务层回调
-    self->pending_cb(&self->base, res, self->time_buf, self->pending_user_data);
-    self->pending_cb = NULL;
+  int res = -1;
+  sntp_time_t time_data = {0};
+
+  if (result == AT_CMD_OK && self->time_buf[0] != '\0') {
+    parse_sntp_to_rtc(self->time_buf, &time_data);
+    if (time_data.date.year != 0) { // 简单校验
+      res = 0;
+      self->status = SNTP_DRV_STATUS_SUCCESS;
+    } else {
+      self->status = SNTP_DRV_STATUS_FAIL;
+    }
+  } else {
+    self->status = SNTP_DRV_STATUS_FAIL;
   }
+
+  self->pending_cb(self->pending_user_data, res, &time_data);
+  self->pending_cb = NULL;
 }
 
-static void on_congfig_response(void *ctx, AT_CmdResult_t result,
-                                const char *last_line) {
+static void on_config_response(void *ctx, AT_CmdResult_t result,
+                               const char *last_line) {
   esp8266_sntp_driver_t *self = (esp8266_sntp_driver_t *)ctx;
   if (!self)
     return;
-
   if (result == AT_CMD_OK) {
-    log_i("SNTP Status: Configured");
-    self->status = SNTP_DRV_STATUS_WAITING; //新的服务器设置成功,等待模块同步(+TIME_UPDATED)
+    log_i("SNTP Configured.");
+    self->status = SNTP_DRV_STATUS_PENDING;
+  } else {
+    self->status = SNTP_DRV_STATUS_FAIL;
   }
 }
 
-void esp8266_sntp_driver_init(esp8266_sntp_driver_t *self,
-                              at_controller_t *at) {
+void esp8266_sntp_driver_init(esp8266_sntp_driver_t *self, at_controller_t *at) {
   if (!self || !at)
     return;
   memset(self, 0, sizeof(esp8266_sntp_driver_t));
   self->base.ops = &esp8266_sntp_ops;
   self->at = at;
-  self->status = SNTP_DRV_TATUS_NOCONFIGS;
+  self->status = SNTP_DRV_STATUS_IDLE;
 
-  // 注册 URC
   at_controller_register_handler(at, "+TIME_UPDATED", handle_time_updated, self);
 }
 
-static int esp8266_sntp_config(sntp_driver_t *base, int enable, int timezone,
+static int esp8266_sntp_config(sntp_driver_t *base, int timezone,
                                const char *server1) {
   esp8266_sntp_driver_t *self = (esp8266_sntp_driver_t *)base;
   char cmd[128];
-  // AT+CIPSNTPCFG=<enable>,<timezone>,<"server1">,<"server2">,<"server3">
-  snprintf(cmd, sizeof(cmd), "AT+CIPSNTPCFG=%d,%d,\"%s\"\r\n", enable, timezone,
+  snprintf(cmd, sizeof(cmd), "AT+CIPSNTPCFG=1,%d,\"%s\"\r\n", timezone,
            server1);
 
   AT_Cmd_t at_cmd = {
-      .response_cb = on_congfig_response,
+      .response_cb = on_config_response,
       .cmd_str = cmd,
       .timeout_ms = 2000,
+      .ctx = self,
   };
-  self->status = SNTP_DRV_TATUS_NOCONFIGS;  // 配置新的服务器
-  at_controller_submit_cmd(self->at, &at_cmd);
-  return 0;
+  return at_controller_submit_cmd(self->at, &at_cmd);
 }
 
-static int esp8266_sntp_get_time(sntp_driver_t *base, sntp_get_time_cb_t cb,
-                                 void *user_data) {
+static int esp8266_sntp_start_sync(sntp_driver_t *base, sntp_sync_cb_t cb,
+                                  void *user_data) {
   esp8266_sntp_driver_t *self = (esp8266_sntp_driver_t *)base;
-  if(self->status == SNTP_DRV_TATUS_NOCONFIGS) {
-    log_e("SNTP Status: Not configured");
-    return -1;
-  }
-
-  self->pending_cb = cb;  // 设置本次查询结果的回调
+  self->pending_cb = cb;
   self->pending_user_data = user_data;
-  self->time_buf[0] = '\0'; // Clear previous data
+  self->time_buf[0] = '\0';
 
-  AT_Cmd_t at_cmd = {.cmd_str = "AT+CIPSNTPTIME?\r\n",
-                     .timeout_ms = 2000,
-                     .parser_cb = parse_sntp_time,        // 查询回调:解析时间
-                     .response_cb = on_get_time_response, // 响应回调:处理结果
-                     .ctx = self};
-
+  AT_Cmd_t at_cmd = {
+      .cmd_str = "AT+CIPSNTPTIME?\r\n",
+      .timeout_ms = 3000,
+      .parser_cb = parse_sntp_time,
+      .response_cb = on_sync_response,
+      .ctx = self,
+  };
   return at_controller_submit_cmd(self->at, &at_cmd);
 }
 
 static sntp_drv_status_t esp8266_sntp_get_status(sntp_driver_t *base) {
-  esp8266_sntp_driver_t *self = (esp8266_sntp_driver_t *)base;
-  return self->status;
+  return ((esp8266_sntp_driver_t *)base)->status;
 }

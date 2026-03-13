@@ -16,8 +16,8 @@ typedef struct {
   at_controller_t *at;
   sntp_drv_status_t status;
 
-  // 异步查询回调上下文
-  sntp_get_time_cb_t pending_cb;
+  // 异步任务上下文
+  sntp_sync_cb_t pending_cb;
   void *pending_user_data;
   char time_buf[64];
 } esp8266_sntp_driver_t;

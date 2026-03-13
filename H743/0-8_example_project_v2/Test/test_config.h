@@ -31,6 +31,7 @@
 #define ENABLE_TEST_LVGL 1
 #define ENABLE_TEST_WIFI 1
 #define ENABLE_TEST_MQTT 1
+#define ENABLE_TEST_SNTP 1
 #endif
 
 #endif /* TEST_CONFIG_H_ */
