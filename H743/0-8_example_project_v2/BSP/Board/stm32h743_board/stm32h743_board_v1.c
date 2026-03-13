@@ -31,6 +31,9 @@ static const stm32_gpio_config_t all_gpio_configs[GPIO_MAX_DEVICES] = {
     [GPIO_ID_LED0] = {.pin = LED0_Pin, .port = LED0_GPIO_Port},
     [GPIO_ID_LED1] = {.pin = LED1_Pin, .port = LED1_GPIO_Port},
     [LCD_BL] = {.pin = GPIO_PIN_5, .port = GPIOB},
+    [GPIO_ID_KEY0] = {.pin = GPIO_PIN_3, .port = GPIOH},
+    [GPIO_ID_KEY1] = {.pin = GPIO_PIN_2, .port = GPIOH},
+    [GPIO_ID_KEY2] = {.pin = GPIO_PIN_13, .port = GPIOC},
 };
 // GPIO 逻辑号映射表
 const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
@@ -39,6 +42,9 @@ const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
     [GPIO_ID_LED0] = {.resource = (void *)&all_gpio_configs[GPIO_ID_LED0]},
     [GPIO_ID_LED1] = {.resource = (void *)&all_gpio_configs[GPIO_ID_LED1]},
     [LCD_BL] = {.resource = (void *)&all_gpio_configs[LCD_BL]},
+    [GPIO_ID_KEY0] = {.resource = (void *)&all_gpio_configs[GPIO_ID_KEY0]},
+    [GPIO_ID_KEY1] = {.resource = (void *)&all_gpio_configs[GPIO_ID_KEY1]},
+    [GPIO_ID_KEY2] = {.resource = (void *)&all_gpio_configs[GPIO_ID_KEY2]},
 };
 
 // USART 逻辑号映射表
@@ -137,7 +143,7 @@ static uint16_t draw_buffer[480][800]
     __attribute__((section(".sdram_section"), aligned(16)));
 #define buf1 display_buffer
 // #define buf1 NULL
-//#define buf2 draw_buffer
+// #define buf2 draw_buffer
 #define buf2 NULL
 static const lcd_screen_info_t ui_screen_info = {
     .buffer_addr = (void *)buf1,

@@ -27,6 +27,7 @@
 #define ENABLE_TEST_TIMER 0
 #define ENABLE_TEST_ASSET_MANAGER 0
 #define ENABLE_TEST_LCD 1
+#define ENABLE_TEST_KEY 1
 #define ENABLE_TEST_LVGL 1
 #endif
 
