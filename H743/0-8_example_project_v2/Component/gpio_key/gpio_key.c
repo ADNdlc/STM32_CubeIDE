@@ -9,7 +9,7 @@
 #include "Sys.h"
 #include <stddef.h>
 #include <stdlib.h>
-// #include "MemPool.h"
+#include "MemPool.h"
 #ifdef USE_MEMPOOL
 #define GPIOKEY_MEMSOURCE SYS_MEM_INTERNAL // 从哪里分配
 #endif
@@ -46,9 +46,9 @@ void Key_Init(gpio_key_t *self, gpio_driver_t *port, uint8_t active_level) {
   self->long_press_flag = 0;
 
   // 默认设置
-  self->debounce_ms = 10;
-  self->long_press_ms = 1000;
-  self->click_timeout_ms = 300;
+  self->debounce_ms = 20;
+  self->long_press_ms = 800;
+  self->click_timeout_ms = 400;
 
   self->observer_list = NULL;
 }

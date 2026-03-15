@@ -1,6 +1,6 @@
 #include "sntp_factory.h"
-#include "esp_8266/esp8266_sntp_driver.h"
-#include "esp_8266/at_controller.h"
+#include "esp8266_sntp_driver.h"
+#include "at_controller.h"
 #include <stddef.h>
 
 extern at_controller_t* wifi_factory_get_at_controller(void);

@@ -7,13 +7,12 @@
 #include "test_framework.h"
 
 // 抽象服务层
-#include "wifi_service.h"
+#include "wifi_service/wifi_service.h"
 #include "wifi_factory.h"
 #include "gpio_factory.h"
 
 // 交互相关
 #include "gpio_key/gpio_key.h"
-#include "sys_config.h"
 
 // 全局实例
 static wifi_service_t wifi_svc;
@@ -35,8 +34,8 @@ static void on_key_event(gpio_key_t *key, KeyEvent event) {
             break;
             
         case KeyEvent_DoublePress:
-            log_i("Action: Connecting to WiFi [%s]...", sys_config_get_wifi_ssid());
-            wifi_svc_connect(&wifi_svc, sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
+            log_i("Action: Connecting to WiFi [%s]...", "yu778866");
+            wifi_svc_connect(&wifi_svc, "test2", "yu778866");
             break;
             
         case KeyEvent_TriplePress:

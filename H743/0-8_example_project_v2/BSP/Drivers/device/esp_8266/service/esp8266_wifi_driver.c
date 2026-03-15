@@ -58,7 +58,7 @@ void esp8266_wifi_driver_init(esp8266_wifi_driver_t *self,
   self->at_ctrl = at_ctrl;
   self->status = WIFI_STATUS_DISCONNECTED;
   self->mode = WIFI_MODE_STATION;
-  self->scan_count = 0;
+  self->result_list.count = 0;
 
   // 注册URC处理
   at_controller_register_handler(at_ctrl, "WIFI CONNECTED",
@@ -139,10 +139,11 @@ static void parse_scan_result(void *ctx, const char *line) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)ctx;
   if (strncmp(line, "+CWLAP:", 7) != 0) // 检查前缀
     return;
-  if (self->scan_count >= 10)
+  if (self->result_list.count >= 10)
     return;
+  static wifi_ap_info_t scan_result_info[10];
 
-  wifi_ap_info_t *ap = &self->scan_results[self->scan_count]; // 存储结果
+  wifi_ap_info_t *ap = &scan_result_info[self->result_list.count]; // 存储结果
 
   // +CWLAP:(3,"test1",-20,"f1:f2:f3:f4:f5:67",6,-1,-1,4,4,7,0)
   int ecn, rssi, channel, pw_cipher, gr_cipher, proto, wps;
@@ -238,7 +239,7 @@ static void parse_scan_result(void *ctx, const char *line) {
   ap->protocol = (uint8_t)proto;
   ap->wps = (uint8_t)wps;
 
-  self->scan_count++;
+  self->result_list.count++;
   log_d("Parsed AP: %s (RSSI: %d)", ap->ssid, ap->rssi);
 }
 
@@ -250,7 +251,7 @@ static void scan_finish_cb_t(void *ctx, AT_CmdResult_t result,
 
   if (self->scan_cb) {
     // 从上下文中找到传入的回调,
-    self->scan_cb(self->scan_arg, self->scan_results, self->scan_count);
+    self->scan_cb(self->scan_arg, &(self->result_list));
     // 调用后清除回调，防止重复调用（如果需要的话，通常扫描是一次性的）
     self->scan_cb = NULL;
     self->scan_arg = NULL;
@@ -259,7 +260,7 @@ static void scan_finish_cb_t(void *ctx, AT_CmdResult_t result,
 
 static int esp8266_scan(wifi_driver_t *base, wifi_scan_cb_t cb, void *arg) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)base;
-  self->scan_count = 0; // Reset count
+  self->result_list.count = 0; // Reset count
   self->scan_cb = cb;   // Store callback
   self->scan_arg = arg; // Store argument
 

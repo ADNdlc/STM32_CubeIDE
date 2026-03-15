@@ -2,7 +2,7 @@
 #define BSP_FACTORY_SERVICE_SNTP_FACTORY_H_
 
 #include "service_id.h"
-#include "Service/sntp_driver.h"
+#include "sntp_driver.h"
 
 /**
  * @brief 通过逻辑 ID 获取 SNTP 驱动实例

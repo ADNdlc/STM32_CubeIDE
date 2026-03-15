@@ -8,13 +8,12 @@
 
 // 抽象服务层
 #include "sntp_service/sntp_service.h"
-#include "wifi_service.h"
+#include "wifi_service/wifi_service.h"
 #include "sntp_factory.h"
 #include "wifi_factory.h"
 #include "rtc_driver.h"
 #include "rtc_factory.h"
 #include "gpio_factory.h"
-#include "sys_config.h"
 
 // 交互相关
 #include "gpio_key/gpio_key.h"
@@ -41,7 +40,7 @@ static void on_key_event(gpio_key_t *key, KeyEvent event) {
     switch (event) {
         case KeyEvent_LongPress:
             log_i("Action: Connecting WiFi for SNTP test...");
-            wifi_svc_connect(&wifi_svc, sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
+            wifi_svc_connect(&wifi_svc, "test2", "yu778866");
             break;
 
         case KeyEvent_SinglePress:

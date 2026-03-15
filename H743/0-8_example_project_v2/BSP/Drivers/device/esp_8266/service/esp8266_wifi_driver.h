@@ -17,8 +17,7 @@ typedef struct {
   wifi_mode_t mode;         // 当前模式
 
   // AP扫描结果
-  wifi_ap_info_t scan_results[10];
-  uint16_t scan_count;
+  wifi_ap_list_t result_list;
 
   // 扫描回调
   wifi_scan_cb_t scan_cb;

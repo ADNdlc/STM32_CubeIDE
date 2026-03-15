@@ -14,14 +14,17 @@
 #include "lcd_screen_driver.h"
 #include "nor_flash_driver.h"
 
-
 /* ----- GPIO ----- */
 typedef enum {
   TOUCH_RST = 0,
-  TOUCH_INT = 1,
-  GPIO_ID_LED0 = 2,
-  GPIO_ID_LED1 = 3,
-  LCD_BL = 4,
+  TOUCH_INT,
+  GPIO_ID_LED0,
+  GPIO_ID_LED1,
+  LCD_BL,
+  ESP_RST,
+  GPIO_ID_KEY0,
+  GPIO_ID_KEY1,
+  GPIO_ID_KEY2,
   //...
   GPIO_MAX_DEVICES
 } gpio_device_id_t;

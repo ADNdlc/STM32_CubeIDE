@@ -2,7 +2,7 @@
 #define BSP_FACTORY_SERVICE_WIFI_FACTORY_H_
 
 #include "service_id.h"
-#include "Service/wifi_driver.h"
+#include "wifi_driver.h"
 
 /**
  * @brief 通过逻辑 ID 获取 WiFi 驱动实例
