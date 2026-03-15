@@ -24,7 +24,7 @@ typedef enum {
 } wifi_status_t;
 
 typedef struct {
-  char ssid[30];  // <ssid>
+  char ssid[33];  // <ssid>, Max 32 bytes + NULL
   char mac[18];   // mac地址
   int8_t rssi;    // 信号强度
   uint8_t channel;// 信道号

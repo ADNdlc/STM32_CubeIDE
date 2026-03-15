@@ -16,7 +16,8 @@ typedef struct {
   wifi_status_t status;     // 当前状态
   wifi_mode_t mode;         // 当前模式
 
-  // AP扫描结果
+  // AP扫描结果缓冲区
+  wifi_ap_info_t ap_buffer[10];
   wifi_ap_list_t result_list;
 
   // 扫描回调
