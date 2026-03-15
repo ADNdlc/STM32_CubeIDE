@@ -1,8 +1,8 @@
 #include "test_config.h"
 
 #if ENABLE_TEST_KEY
-#include "gpio_key/gpio_key.h"
 #include "gpio_factory.h"
+#include "gpio_key/gpio_key.h"
 #include "test_framework.h"
 #include "elog.h"
 

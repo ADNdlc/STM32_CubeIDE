@@ -15,6 +15,8 @@ typedef struct gpio_driver_t gpio_driver_t;
 
 typedef enum{
     GPIO_FloatInput,
+    GPIO_InputPullUp,
+    GPIO_InputPullDown,
     GPIO_AnalogInput,
     GPIO_PushPullOutput,
     GPIO_OpenDrainOutput

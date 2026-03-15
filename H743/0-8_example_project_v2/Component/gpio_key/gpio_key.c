@@ -30,18 +30,24 @@ void Key_Init(gpio_key_t *self, gpio_driver_t *port, uint8_t active_level) {
   if (!self || !port)
     return;
 
+  uint32_t now = sys_get_systick_ms();
   self->port = port;
   self->active_level = active_level;
-  // 设置模式
-  GPIO_SET_MODE(port, GPIO_FloatInput);
+  
+  // 根据活跃电平自动设置拉电阻，提高稳定性
+  if (active_level == 0) {
+    GPIO_SET_MODE(port, GPIO_InputPullUp);
+  } else {
+    GPIO_SET_MODE(port, GPIO_InputPullDown);
+  }
 
   // 初始硬件状态
   self->last_state = GPIO_READ(port);
   self->current_state = self->last_state;
 
-  self->last_check_time = 0;
-  self->press_start_time = 0;
-  self->release_time = 0;
+  self->last_check_time = now;
+  self->press_start_time = now;
+  self->release_time = now;
   self->click_count = 0;
   self->long_press_flag = 0;
 
@@ -150,58 +156,50 @@ void Key_Update(gpio_key_t *self) {
   uint32_t now = sys_get_systick_ms();       // 获取当前时间
   uint8_t pin_state = GPIO_READ(self->port); // 读取当前gpio状态
 
-  if (pin_state != self->last_state) { // 发生动作后立刻返回
+  // 1. 软件消抖状态机
+  if (pin_state != self->last_state) {
     self->last_check_time = now;
     self->last_state = pin_state;
-    return;
-  }
-  if ((now - self->last_check_time) < self->debounce_ms) { // 等待稳定
-    return;
   }
 
-  // 确认产生动作
-  if (pin_state != self->current_state) {
-    self->current_state = pin_state; // 更新状态
-    // 判断动作类型
-    if (self->current_state == self->active_level) { // 按下
-      // 记录此次按下时间
-      self->press_start_time = now;
-      self->long_press_flag = 0;
-    } else { // 释放
-      // 记录此次释放时间
-      self->release_time = now;
-      if (!self->long_press_flag) {
-        self->click_count++;
+  if ((now - self->last_check_time) >= self->debounce_ms) {
+    // 确认电平稳定后，再判断逻辑动作
+    if (pin_state != self->current_state) {
+      self->current_state = pin_state; // 更新稳定后的状态
+      
+      if (self->current_state == self->active_level) { // 按下
+        self->press_start_time = now;
+        self->long_press_flag = 0;
+      } else { // 释放
+        self->release_time = now;
+        // 只有非长按后的释放才计入连击
+        if (!self->long_press_flag) {
+          self->click_count++;
+        }
       }
     }
   }
 
-  // 长按检查(如果当前是按下状态,没有长按标注,按下时间超过长按触发时间)
-  if ((self->current_state == self->active_level) && (!self->long_press_flag) &&
-      ((now - self->press_start_time) >= self->long_press_ms)) {
-
-    self->long_press_flag = 1; // 长按置位,防止反复调用
-    Key_Notify(self, KeyEvent_LongPress);
-    self->click_count = 0;
+  // 2. 长按实时检查 (按下期间持续判断)
+  if ((self->current_state == self->active_level) && (!self->long_press_flag)) {
+    if ((now - self->press_start_time) >= self->long_press_ms) {
+      self->long_press_flag = 1; 
+      self->click_count = 0; // 长按清除连击计数
+      Key_Notify(self, KeyEvent_LongPress);
+    }
   }
 
-  // 判断点击次数
-  if ((self->click_count > 0) &&
-      ((now - self->release_time) >= self->click_timeout_ms)) {
-
-    switch (self->click_count) {
-    case 1:
-      Key_Notify(self, KeyEvent_SinglePress);
-      break;
-    case 2:
-      Key_Notify(self, KeyEvent_DoublePress);
-      break;
-    case 3:
-      Key_Notify(self, KeyEvent_TriplePress);
-      break;
-    default:
-      break;
+  // 3. 点击/连击触发检查 (必须在按键释放状态下进行)
+  if (self->click_count > 0 && self->current_state != self->active_level) {
+    if ((now - self->release_time) >= self->click_timeout_ms) {
+      if (self->click_count == 1) {
+        Key_Notify(self, KeyEvent_SinglePress);
+      } else if (self->click_count == 2) {
+        Key_Notify(self, KeyEvent_DoublePress);
+      } else if (self->click_count == 3) {
+        Key_Notify(self, KeyEvent_TriplePress);
+      }
+      self->click_count = 0;
     }
-    self->click_count = 0;
   }
 }

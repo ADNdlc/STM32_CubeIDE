@@ -38,8 +38,17 @@ static void stm32_gpio_set_mode(gpio_driver_t *self, gpio_mode_t mode) {
       init.Mode = GPIO_MODE_INPUT;
       init.Pull = GPIO_NOPULL;
       break;
+    case GPIO_InputPullUp:
+      init.Mode = GPIO_MODE_INPUT;
+      init.Pull = GPIO_PULLUP;
+      break;
+    case GPIO_InputPullDown:
+      init.Mode = GPIO_MODE_INPUT;
+      init.Pull = GPIO_PULLDOWN;
+      break;
     case GPIO_AnalogInput:
       init.Mode = GPIO_MODE_ANALOG;
+      init.Pull = GPIO_NOPULL;
       break;
     case GPIO_PushPullOutput:
       init.Mode = GPIO_MODE_OUTPUT_PP;
