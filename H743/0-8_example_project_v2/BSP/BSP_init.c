@@ -4,6 +4,7 @@
  *  Created on: Feb 7, 2026
  *      Author: 12114
  */
+#include "Project_cfg.h"
 #include "dev_map_config.h"
 #if (TARGET_PLATFORM == PLATFORM_STM32)
 #include "stm32_mem.h"
@@ -31,8 +32,10 @@ static uint8_t debug_tx_buf[4096];
 static uint8_t debug_rx_buf[64];
 
 /* LVGL相关 */
+#if LVGL_ENABLE
 lcd_driver_t *lcd = NULL;
 static void lv_tick_cb(void *ctx) { lv_tick_inc(1); } //供 Timer 回调使用的 LVGL 心跳
+#endif
 
 void bsp_init(void) {
 #ifndef platform_sys_mem_create
@@ -82,6 +85,7 @@ void bsp_init(void) {
   sys_mem_init_external(); // 外部内存池初始化
 
   /* ---- LVGL 初始化 ---- */
+#if LVGL_ENABLE
   lv_init();
   lv_port_disp_init();
   lv_port_indev_init();
@@ -97,4 +101,7 @@ void bsp_init(void) {
   } else {
     log_e("LVGL timer tick init failed!");
   }
+#endif
+
 }
+

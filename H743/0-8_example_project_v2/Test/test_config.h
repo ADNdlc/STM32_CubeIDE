@@ -29,9 +29,9 @@
 #define ENABLE_TEST_LCD 0
 #define ENABLE_TEST_KEY 1
 #define ENABLE_TEST_LVGL 0
-#define ENABLE_TEST_WIFI 1
+#define ENABLE_TEST_WIFI 0
 #define ENABLE_TEST_MQTT 0
-#define ENABLE_TEST_SNTP 1
+#define ENABLE_TEST_SNTP 0
 #endif
 
 #endif /* TEST_CONFIG_H_ */

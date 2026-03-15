@@ -23,11 +23,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "Project_cfg.h"
+#if LVGL_ENABLE
 #include "stm32_ltdc_driver.h"
-
 extern lcd_driver_t *lcd;
-#define LVGLHandler 0
-#define HAL_DMA2DHandler 1
+#endif
 #define USE_MY_Handler 1
 
 /* USER CODE END Includes */
@@ -555,7 +555,9 @@ void FPU_IRQHandler(void) {
  */
 void LTDC_IRQHandler(void) {
   /* USER CODE BEGIN LTDC_IRQn 0 */
+#if LVGL_ENABLE
   stm32_lcd_ltdc_irq_handler(lcd);
+#endif
   /* USER CODE END LTDC_IRQn 0 */
   HAL_LTDC_IRQHandler(&hltdc);
   /* USER CODE BEGIN LTDC_IRQn 1 */
@@ -581,7 +583,9 @@ void LTDC_ER_IRQHandler(void) {
  */
 void DMA2D_IRQHandler(void) {
   /* USER CODE BEGIN DMA2D_IRQn 0 */
+#if LVGL_ENABLE
   stm32_lcd_dma2d_irq_handler(lcd);
+#endif
   /* USER CODE END DMA2D_IRQn 0 */
   HAL_DMA2D_IRQHandler(&hdma2d);
   /* USER CODE BEGIN DMA2D_IRQn 1 */
