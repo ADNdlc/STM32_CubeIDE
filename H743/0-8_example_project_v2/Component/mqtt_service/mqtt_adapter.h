@@ -37,10 +37,6 @@ typedef void (*thing_on_prop_parsed_cb)(const char *prop_id,
  */
 typedef struct {
   /**
-   * @brief 初始化适配器
-   */
-  void (*init)(void *user_data);
-  /**
    * @brief 生成连接参数
    */
   void (*get_conn_params)(mqtt_conn_params_t *out_params);

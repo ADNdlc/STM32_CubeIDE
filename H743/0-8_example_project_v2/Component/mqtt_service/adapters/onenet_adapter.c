@@ -1,47 +1,59 @@
 #include "cJSON.h"
-#include "../mqtt_adapter.h"
+#include "onenet_adapter.h"
 #include <stdio.h>
 #include <string.h>
 
 #define ONENET_SERVER_HOST "mqtts.heclouds.com"
 #define ONENET_SERVER_PORT 1883
 
+static onenet_config_t s_onenet_cfg;
+
+/**
+ * @brief 初始化 OneNet 适配器参数
+ */
+void onenet_adapter_init(const onenet_config_t *config) {
+  if (config) {
+    memcpy(&s_onenet_cfg, config, sizeof(onenet_config_t));
+  }
+}
+
 /**
  * @brief 获取OneNet连接参数
  */
-
 static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
-  const app_settings_t *cfg = sys_config_get();
-
   strcpy(out_params->host, ONENET_SERVER_HOST);
   out_params->port = ONENET_SERVER_PORT;
 
   // 对于 OneNet, client_id是设备id
-  strcpy(out_params->client_id, cfg->configs[CLOUD_DEVICE_ID].string);
+  strcpy(out_params->client_id, s_onenet_cfg.device_id);
   // username是产品id
-  strcpy(out_params->username, cfg->configs[CLOUD_PRODUCT_ID].string);
+  strcpy(out_params->username, s_onenet_cfg.product_id);
   // password
-  strcpy(out_params->password, cfg->configs[CLOUD_DEVICE_SECRET].string);
+  strcpy(out_params->password, s_onenet_cfg.device_secret);
 }
 
 /**
- * @brief 获取OneNet物模型属性发布主题
+ * @brief 获取OneNet物模型属性发布/订阅等主题
  */
-static void onenet_get_post_topic(const char *device_id, char *out_topic,
-                                  size_t size) {
-  const app_settings_t *cfg = sys_config_get();
-  snprintf(out_topic, size, "$sys/%s/%s/thing/property/post",
-           cfg->configs[CLOUD_PRODUCT_ID].string, device_id);
-}
-
-/**
- * @brief 获取OneNet物模型属性订阅主题
- */
-static void onenet_get_cmd_topic(const char *device_id, char *out_topic,
-                                 size_t size) {
-  const app_settings_t *cfg = sys_config_get();
-  snprintf(out_topic, size, "$sys/%s/%s/thing/property/set",
-           cfg->configs[CLOUD_PRODUCT_ID].string, device_id);
+static void onenet_get_topic(const char *device_id, mqtt_topic_type_t topic_type,
+                             char *out_topic, size_t size) {
+  switch (topic_type) {
+    case MQTT_TOPIC_PROPERTY_POST:
+      snprintf(out_topic, size, "$sys/%s/%s/thing/property/post",
+               s_onenet_cfg.product_id, device_id);
+      break;
+    case MQTT_TOPIC_PROPERTY_SET:
+      snprintf(out_topic, size, "$sys/%s/%s/thing/property/set",
+               s_onenet_cfg.product_id, device_id);
+      break;
+    case MQTT_TOPIC_PROPERTY_SET_REPLY:
+      snprintf(out_topic, size, "$sys/%s/%s/thing/property/set_reply",
+               s_onenet_cfg.product_id, device_id);
+      break;
+    default:
+      if (size > 0) out_topic[0] = '\0';
+      break;
+  }
 }
 
 /**
@@ -71,11 +83,9 @@ static int onenet_serialize_post(const thing_device_t *device,
     break;
   }
 
-  // 为属性值添加毫秒级时间戳
-  uint64_t timestamp = rtc_hal_get_unix_ms();
-  if (timestamp > 0) {
-    cJSON_AddNumberToObject(p_val, "time", (double)timestamp);
-  }
+  // TODO: 时间戳可以作为参数或由外部注入，这里简单传入 0 表示不需要，如有需要由应用处理
+  // 或者采用回调方式。为保持独立性去掉对 rtc_hal_get_unix_ms 的直接依赖。
+  // cJSON_AddNumberToObject(p_val, "time", (double)timestamp);
 
   cJSON_AddItemToObject(params, prop->id, p_val);
   cJSON_AddItemToObject(root, "params", params);
@@ -83,6 +93,7 @@ static int onenet_serialize_post(const thing_device_t *device,
   char *json_str = cJSON_PrintUnformatted(root);
   if (json_str) {
     strncpy(out_buf, json_str, size - 1);
+    out_buf[size - 1] = '\0'; // Ensure null termination
     cJSON_free(json_str);
   }
   cJSON_Delete(root);
@@ -98,6 +109,7 @@ static int onenet_parse_command(const char *topic, const char *payload,
   // 1. Extract device ID from topic: $sys/{pid}/{did}/thing/property/set
   char topic_copy[128];
   strncpy(topic_copy, topic, sizeof(topic_copy) - 1);
+  topic_copy[sizeof(topic_copy) - 1] = '\0';
   char *save_ptr;
   char *segment = strtok_r(topic_copy, "/", &save_ptr); // $sys
   segment = strtok_r(NULL, "/", &save_ptr);             // {pid}
@@ -114,7 +126,7 @@ static int onenet_parse_command(const char *topic, const char *payload,
     return -1;
 
   cJSON *id = cJSON_GetObjectItem(root, "id");
-  if (id)
+  if (id && cJSON_IsString(id))
     strcpy(out_msg_id, id->valuestring);
 
   cJSON *params = cJSON_GetObjectItem(root, "params");
@@ -153,18 +165,10 @@ static void onenet_get_reply_payload(const char *msg_id, int code,
            msg_id, code);
 }
 
-static void onenet_get_reply_topic(const char *device_id, char *out_topic,
-                                   size_t size) {
-  const app_settings_t *cfg = sys_config_get();
-  snprintf(out_topic, size, "$sys/%s/%s/thing/property/set_reply",
-           cfg->configs[CLOUD_PRODUCT_ID].string, device_id);
-}
-
 const mqtt_adapter_t g_onenet_adapter = {
     .get_conn_params = onenet_get_conn_params,
-    .get_post_topic = onenet_get_post_topic,
-    .get_cmd_topic = onenet_get_cmd_topic,
+    .get_topic = onenet_get_topic,
     .serialize_post = onenet_serialize_post,
     .parse_command = onenet_parse_command,
     .get_reply_payload = onenet_get_reply_payload,
-    .get_reply_topic = onenet_get_reply_topic};
+};

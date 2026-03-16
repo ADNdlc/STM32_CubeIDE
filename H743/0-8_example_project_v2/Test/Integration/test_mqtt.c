@@ -12,6 +12,7 @@
 #include "mqtt_factory.h"
 #include "wifi_factory.h"
 #include "gpio_factory.h"
+#include "mqtt_service/adapters/onenet_adapter.h"
 
 // 交互相关
 #include "gpio_key/gpio_key.h"
@@ -80,6 +81,13 @@ static void test_mqtt_setup(void) {
   // 2. 初始化驱动和服务 (使用工厂)
   wifi_svc_init(&wifi_svc, WIFI_ID_MAIN);
   wifi_svc_set_mode(&wifi_svc, WIFI_MODE_STATION);
+
+  onenet_config_t config = {
+      .product_id = "test_pid",
+      .device_id = "test_did",
+      .device_secret = "test_secret"
+  };
+  onenet_adapter_init(&config);
 
   mqtt_svc_init(&mqtt_svc, MQTT_ID_MAIN, &g_onenet_adapter);
   mqtt_svc_register_callback(&mqtt_svc, mqtt_event_callback, NULL);

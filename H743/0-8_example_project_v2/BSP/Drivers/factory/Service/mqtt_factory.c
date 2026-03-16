@@ -1,6 +1,6 @@
 #include "mqtt_factory.h"
-#include "esp_8266/esp8266_mqtt_driver.h"
-#include "esp_8266/at_controller.h"
+#include "esp8266_mqtt_driver.h"
+#include "at_controller.h"
 #include <stddef.h>
 
 // 外部引用或共享 AT 控制器
