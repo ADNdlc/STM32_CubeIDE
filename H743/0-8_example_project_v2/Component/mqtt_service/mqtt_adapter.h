@@ -16,6 +16,13 @@ typedef struct {
   char password[256];  // 密码
 } mqtt_conn_params_t;
 
+// 主题类型
+typedef enum {
+  MQTT_TOPIC_PROPERTY_SET = 0,   // 云命令
+  MQTT_TOPIC_PROPERTY_SET_REPLY, // 命令回复
+  MQTT_TOPIC_PROPERTY_POST,      // 本地数据推送
+} mqtt_topic_type_t;
+
 /**
  * @brief  属性解析回调(parse_command每解析出一个属性就调用一次)
  *  @param prop_id 属性ID
@@ -30,28 +37,25 @@ typedef void (*thing_on_prop_parsed_cb)(const char *prop_id,
  */
 typedef struct {
   /**
-   * @brief生成连接参数
+   * @brief 初始化适配器
+   */
+  void (*init)(void *user_data);
+  /**
+   * @brief 生成连接参数
    */
   void (*get_conn_params)(mqtt_conn_params_t *out_params);
 
   /**
-   * @brief 生成发布主题
+   * @brief 生成主题
    * @param device_id 设备ID
    * @param out_topic 输出主题
    * @param size 输出主题缓冲区大小
    */
-  void (*get_post_topic)(const char *device_id, char *out_topic, size_t size);
+  void (*get_topic)(const char *device_id, mqtt_topic_type_t topic_type,
+                    char *out_topic, size_t size);
 
   /**
-   * @brief 生成订阅主题
-   * @param device_id 设备ID
-   * @param out_topic 输出主题
-   * @param size 输出主题缓冲区大小
-   */
-  void (*get_cmd_topic)(const char *device_id, char *out_topic, size_t size);
-
-  /**
-   * @brief 序列化物模型属性
+   * @brief 序列化物模型属性为推送信息
    * @param device 设备信息
    * @param prop 属性信息
    * @param out_buf 输出缓冲区
@@ -75,7 +79,7 @@ typedef struct {
                        thing_on_prop_parsed_cb prop_cb, void *ctx);
 
   /**
-   * @brief 生成命令回复数据
+   * @brief 生成云命令回复数据
    * @param msg_id 消息ID
    * @param code 状态码
    * @param out_buf 输出缓冲区
@@ -83,14 +87,6 @@ typedef struct {
    */
   void (*get_reply_payload)(const char *msg_id, int code, char *out_buf,
                             size_t size);
-
-  /**
-   * @brief 生成回复主题
-   * @param device_id 设备ID
-   * @param out_topic 输出主题
-   * @param size 输出主题缓冲区大小
-   */
-  void (*get_reply_topic)(const char *device_id, char *out_topic, size_t size);
 
 } mqtt_adapter_t;
 

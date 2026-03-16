@@ -2,7 +2,7 @@
 #define COMPONENT_MQTT_SERVICE_MQTT_SERVICE_H_
 
 #include "mqtt_adapter.h"
-#include "mqtt_driver.h"
+#include "mqtt_driver.h"	// 驱动接口
 #include "service_id.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -17,33 +17,20 @@ typedef enum {
   MQTT_SVC_STATE_FAULT             // 错误
 } mqtt_svc_state_t;
 
-/**
- * @brief MQTT 服务事件类型 (与驱动对齐但保持隔离)
- */
-typedef enum {
-  MQTT_SVC_EVENT_CONNECTED = 0,    // 已连接
-  MQTT_SVC_EVENT_DISCONNECTED,     // 已断开
-  MQTT_SVC_EVENT_DATA,             // 收到数据
-  MQTT_SVC_EVENT_STATE_CHANGED = 0, // 兼容旧代码
-} mqtt_svc_event_type_t;
 
 typedef struct mqtt_service_t mqtt_service_t;
 
+
 /**
- * @brief MQTT 服务事件结构体
+ * @brief 事件处理回调原型
+ *
+ * @param self 服务实例
+ * @param event 事件类型
+ * @param user_data 事件回调参数
  */
-typedef struct {
-  mqtt_svc_event_type_t type;
-  mqtt_svc_state_t state; // For compatibility
-  const char *topic;
-  const char *payload;
-} mqtt_svc_event_t;
-
-// 通用事件回调原型
 typedef void (*mqtt_svc_event_cb_t)(mqtt_service_t *self,
-                                    const mqtt_svc_event_t *event,
+                                    const mqtt_drv_event_t *event,
                                     void *user_data);
-
 /**
  * @brief MQTT 服务观察者结构体
  */
@@ -52,7 +39,7 @@ typedef struct {
   void *user_data;
 } mqtt_svc_observer_t;
 
-#define MAX_MQTT_SVC_OBSERVERS 4
+#define MAX_MQTT_SVC_OBSERVERS 4	//定义最大观察者数量
 
 /**
  * @brief mqtt服务结构体
@@ -62,25 +49,23 @@ typedef struct mqtt_service_t {
   const mqtt_adapter_t *adapter; // 适配器(云平台)
   mqtt_svc_state_t state;        // 当前状态
 
-  mqtt_svc_observer_t observers[MAX_MQTT_SVC_OBSERVERS];
-  uint8_t observer_count;
+  mqtt_svc_observer_t observers[MAX_MQTT_SVC_OBSERVERS]; // 观察者列表
+  uint8_t observer_count;	// 已注册的数量
 
   // 内部状态和计数器
-  uint32_t last_reconnect_attempt;
-  uint8_t retry_count;
+  uint32_t last_reconnect_attempt; // 最后连接时间
+  uint8_t retry_count;			   // 重试次数
 } mqtt_service_t;
 
 /**
  * @brief Initialize MQTT Service
  */
-void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv,
-                   const mqtt_adapter_t *adapter);
+void mqtt_svc_init(mqtt_service_t *self, mqtt_driver_t *drv, const mqtt_adapter_t *adapter);
 
 /**
  * @brief 注册一个事件回调 (支持多个观察者)
  */
-int mqtt_svc_register_callback(mqtt_service_t *self, mqtt_svc_event_cb_t cb,
-                               void *user_data);
+int mqtt_svc_register_callback(mqtt_service_t *self, mqtt_svc_event_cb_t cb, void *user_data);
 
 /**
  * @brief 连接mqtt服务器
@@ -98,11 +83,6 @@ int mqtt_svc_disconnect(mqtt_service_t *self);
 int mqtt_svc_subscribe(mqtt_service_t *self, const char *topic, uint8_t qos);
 
 /**
- * @brief mqtt服务处理循环
- */
-void mqtt_svc_process(mqtt_service_t *self);
-
-/**
  * @brief 发布属性到云平台
  * @param self mqtt服务实例
  * @param device 设备信息
@@ -114,7 +94,7 @@ int mqtt_svc_publish_property(mqtt_service_t *self,
                               const thing_property_t *prop);
 
 /**
- * @brief 发送命令回复
+ * @brief 云命令回复
  */
 void mqtt_svc_reply_command(mqtt_service_t *self, const char *device_id,
                             const char *msg_id, int code);
@@ -123,5 +103,12 @@ void mqtt_svc_reply_command(mqtt_service_t *self, const char *device_id,
  * @brief 获取当前服务状态
  */
 mqtt_svc_state_t mqtt_svc_get_state(mqtt_service_t *self);
+
+/**
+ * @brief mqtt服务处理循环
+ */
+void mqtt_svc_process(mqtt_service_t *self);
+
+
 
 #endif /* COMPONENT_MQTT_SERVICE_MQTT_SERVICE_H_ */

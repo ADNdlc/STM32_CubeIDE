@@ -1,7 +1,5 @@
 #include "cJSON.h"
-#include "home/System/sys_config.h"
-#include "mqtt_adapter.h"
-#include "rtc_hal/rtc_hal.h"
+#include "../mqtt_adapter.h"
 #include <stdio.h>
 #include <string.h>
 

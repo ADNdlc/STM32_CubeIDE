@@ -6,6 +6,17 @@
 #include "app_settings.h"
 
 /**
+ * @brief 此模块负责所有动态系统信息的提供存储和配置
+ */
+
+/**
+ * @brief System Config
+ *
+ * 此模块负责为所有"动态系统信息"提供配置,存储,获取
+ *
+ */
+
+/**
  * @brief 云平台类型
  */
 typedef enum {
@@ -19,21 +30,21 @@ typedef enum {
   WIFI_SSID,
   WIFI_PASSWORD,
   // mqtt cloud
-  CLOUD_PLATFORM,
-  CLOUD_PRODUCT_ID,
-  CLOUD_DEVICE_ID,
-  CLOUD_DEVICE_SECRET,
+  CLOUD_PLATFORM,	// 平台类型
+  CLOUD_PRODUCT_ID,	// 产品ID
+  CLOUD_DEVICE_ID,	// 设备ID
+  CLOUD_DEVICE_SECRET, // 密钥
 
   SYS_CONFIG_KEY_MAX
 } sys_config_key_t;
 
 /**
- * @brief 初始化系统配置
+ * @brief 初始化系统配置模块
  * @return 0 on success
  */
 int sys_config_init(void);
 
-void sys_config_set_defaults(void);
+void sys_config_set_defaults(void); // 设置为程序默认参数(调试)
 
 /**
  * @brief 获取系统配置

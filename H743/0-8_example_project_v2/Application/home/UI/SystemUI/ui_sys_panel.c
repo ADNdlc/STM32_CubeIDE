@@ -239,8 +239,7 @@ static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
   if (value)
     lv_obj_add_state(btn_wifi, LV_STATE_CHECKED);
   lv_obj_add_event_cb(btn_wifi, event_wifi_cb, LV_EVENT_VALUE_CHANGED, NULL);
-  lv_obj_add_event_cb(btn_wifi, event_wifi_long_press_cb, LV_EVENT_LONG_PRESSED,
-                      NULL);
+  lv_obj_add_event_cb(btn_wifi, event_wifi_long_press_cb, LV_EVENT_LONG_PRESSED, NULL);
 
   // icon
   lv_obj_t *img_wifi = lv_img_create(btn_wifi);

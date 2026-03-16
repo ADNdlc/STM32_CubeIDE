@@ -36,7 +36,7 @@ typedef struct {
 } mqtt_drv_event_t;
 
 /**
- * @brief 事件处理回调原型
+ * @brief 驱动层事件处理回调原型
  *
  * @param arg 事件回调参数
  * @param event 事件类型
@@ -46,7 +46,7 @@ typedef void (*mqtt_drv_event_cb_t)(void *arg, mqtt_drv_event_t *event);
 typedef struct mqtt_driver_t mqtt_driver_t;
 
 /**
- * @brief MQTT驱动接口
+ * @brief MQTT服务驱动接口
  */
 typedef struct {
   int (*connect)(mqtt_driver_t *self, const mqtt_driver_conn_params_t *params);
