@@ -12,10 +12,6 @@
 
 #if !USE_Simulator
 #include "device_handle.h"
-#include "hal_init.h"
-#include "sys_init.h"
-
-
 #include "home.h"
 #include "home/System/net_mgr.h"
 #include "res_burner.h"

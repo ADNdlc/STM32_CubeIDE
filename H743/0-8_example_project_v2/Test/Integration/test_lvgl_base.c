@@ -1,5 +1,5 @@
 #include "test_config.h"
-#if ENABLE_TEST_LVGL
+#if ENABLE_TEST_LVGL_BASE
 #include "Sys.h"
 #include "lvgl.h"
 #include "test_framework.h"

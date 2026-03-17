@@ -30,7 +30,7 @@ typedef struct {
 
 // 资源表头 TOC Header (32 bytes)
 typedef struct {
-  uint32_t magic;        // 魔数 'AST0'
+  uint32_t magic;        // 校验数 'AST0'
   uint32_t sequence_num; // 序列号，双表择优加载依据
   uint32_t item_count;   // 资源项总数
   uint32_t data_offset;  // 数据区起始物理地址 (绝对地址)
