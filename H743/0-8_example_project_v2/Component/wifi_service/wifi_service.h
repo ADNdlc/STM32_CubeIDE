@@ -22,7 +22,7 @@ struct wifi_service_t {
   wifi_status_t last_status; // 内部状态跟踪
 };
 
-void wifi_svc_init(wifi_service_t *self, wifi_id_t id);
+void wifi_svc_init(wifi_service_t *self, wifi_driver_t* drv);
 void wifi_service_register_callback(wifi_service_t *self,
                                     wifi_service_event_cb_t cb,
                                     void *user_data);

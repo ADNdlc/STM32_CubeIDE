@@ -58,7 +58,7 @@ void esp8266_wifi_driver_init(esp8266_wifi_driver_t *self,
   self->at_ctrl = at_ctrl;
   self->status = WIFI_STATUS_DISCONNECTED;
   self->mode = WIFI_MODE_STATION;
-  
+
   // 初始化AP列表指针
   self->result_list.count = 0;
   self->result_list.ap_info = self->ap_buffer;
@@ -142,11 +142,12 @@ static void parse_scan_result(void *ctx, const char *line) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)ctx;
   if (!self || strncmp(line, "+CWLAP:", 7) != 0) // 检查前缀
     return;
-    
+
   if (self->result_list.count >= 10)
     return;
 
-  wifi_ap_info_t *ap = &self->result_list.ap_info[self->result_list.count]; // 使用实例自带缓冲区
+  wifi_ap_info_t *ap =
+      &self->result_list.ap_info[self->result_list.count]; // 使用实例自带缓冲区
 
   // +CWLAP:(3,"test1",-20,"f1:f2:f3:f4:f5:67",6,-1,-1,4,4,7,0)
   int ecn, rssi, channel, pw_cipher, gr_cipher, proto, wps;
@@ -156,15 +157,17 @@ static void parse_scan_result(void *ctx, const char *line) {
   // <ecn>
   ecn = atoi(p);      // 转换为整数
   p = strchr(p, ','); // 找到下一项(","为分隔符)
-  if (!p) return;
+  if (!p)
+    return;
   p++; // 现在应该指向"SSID"开头的双引号
 
   // <"ssid">
   if (*p == '\"')
     p++;
   const char *ssid_end = strchr(p, '\"'); // 找到"SSID"结束的双引号
-  if (!ssid_end) return;
-  
+  if (!ssid_end)
+    return;
+
   size_t ssid_len = ssid_end - p; // 计算SSID长度
   if (ssid_len >= sizeof(ap->ssid))
     ssid_len = sizeof(ap->ssid) - 1;
@@ -175,15 +178,17 @@ static void parse_scan_result(void *ctx, const char *line) {
   // <rssi>
   rssi = atoi(p);
   p = strchr(p, ',');
-  if (!p) return;
+  if (!p)
+    return;
   p++;
 
   // <"mac">
   if (*p == '\"')
     p++;
   const char *mac_end = strchr(p, '\"');
-  if (!mac_end) return;
-  
+  if (!mac_end)
+    return;
+
   size_t mac_len = mac_end - p;
   if (mac_len >= sizeof(ap->mac))
     mac_len = sizeof(ap->mac) - 1;
@@ -194,33 +199,39 @@ static void parse_scan_result(void *ctx, const char *line) {
   // <channel>
   channel = atoi(p);
   p = strchr(p, ',');
-  if (!p) return;
+  if (!p)
+    return;
   p++;
 
   // skip <freq_offset>, <freqcal_val>
   p = strchr(p, ',');
-  if (!p) return;
+  if (!p)
+    return;
   p++;
   p = strchr(p, ',');
-  if (!p) return;
+  if (!p)
+    return;
   p++; // 应该指向pairwise_cipher值
 
   // <pairwise_cipher>
   pw_cipher = atoi(p);
   p = strchr(p, ',');
-  if (!p) return;
+  if (!p)
+    return;
   p++;
 
   // <group_cipher>
   gr_cipher = atoi(p);
   p = strchr(p, ',');
-  if (!p) return;
+  if (!p)
+    return;
   p++;
 
   // <wifi_protocol>
   proto = atoi(p);
   p = strchr(p, ',');
-  if (!p) return;
+  if (!p)
+    return;
   p++;
 
   // <wps>
@@ -256,8 +267,8 @@ static void scan_finish_cb_t(void *ctx, AT_CmdResult_t result,
 static int esp8266_scan(wifi_driver_t *base, wifi_scan_cb_t cb, void *arg) {
   esp8266_wifi_driver_t *self = (esp8266_wifi_driver_t *)base;
   self->result_list.count = 0; // Reset count
-  self->scan_cb = cb;   // Store callback
-  self->scan_arg = arg; // Store argument
+  self->scan_cb = cb;          // Store callback
+  self->scan_arg = arg;        // Store argument
 
   AT_Cmd_t at_cmd = {
       .cmd_str = "AT+CWLAP\r\n",

@@ -1,12 +1,11 @@
 #include "wifi_service.h"
-#include "wifi_factory.h"
 #include <string.h>
 
-void wifi_svc_init(wifi_service_t *self, wifi_id_t id) {
+void wifi_svc_init(wifi_service_t *self, wifi_driver_t* drv) {
   if (!self)
     return;
   memset(self, 0, sizeof(wifi_service_t));
-  self->driver = wifi_driver_get(id);
+  self->driver = drv;
 }
 
 /**

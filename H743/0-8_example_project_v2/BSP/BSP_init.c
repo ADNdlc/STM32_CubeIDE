@@ -23,6 +23,7 @@
 #include "timer_factory.h"
 #include "uart_queue.h"
 #include "usart_factory.h"
+#include "service_factory.h"
 
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
@@ -84,6 +85,8 @@ void bsp_init(void) {
   }
   sys_mem_init_external(); // 外部内存池初始化
 
+  service_factory_init();
+
   /* ---- LVGL 初始化 ---- */
 #if LVGL_ENABLE
   lv_init();
@@ -105,3 +108,6 @@ void bsp_init(void) {
 
 }
 
+void bsp_process(void){
+	service_factory_process();
+}

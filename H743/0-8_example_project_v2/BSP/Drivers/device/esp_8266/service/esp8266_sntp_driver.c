@@ -18,7 +18,7 @@
 static int esp8266_sntp_config(sntp_driver_t *base, int timezone,
                                const char *server1);
 static int esp8266_sntp_start_sync(sntp_driver_t *base, sntp_sync_cb_t cb,
-                                  void *user_data);
+                                   void *user_data);
 static sntp_drv_status_t esp8266_sntp_get_status(sntp_driver_t *base);
 
 static const sntp_driver_ops_t esp8266_sntp_ops = {
@@ -111,7 +111,8 @@ static void on_config_response(void *ctx, AT_CmdResult_t result,
   }
 }
 
-void esp8266_sntp_driver_init(esp8266_sntp_driver_t *self, at_controller_t *at) {
+void esp8266_sntp_driver_init(esp8266_sntp_driver_t *self,
+                              at_controller_t *at) {
   if (!self || !at)
     return;
   memset(self, 0, sizeof(esp8266_sntp_driver_t));
@@ -119,7 +120,8 @@ void esp8266_sntp_driver_init(esp8266_sntp_driver_t *self, at_controller_t *at) 
   self->at = at;
   self->status = SNTP_DRV_STATUS_IDLE;
 
-  at_controller_register_handler(at, "+TIME_UPDATED", handle_time_updated, self);
+  at_controller_register_handler(at, "+TIME_UPDATED", handle_time_updated,
+                                 self);
 }
 
 static int esp8266_sntp_config(sntp_driver_t *base, int timezone,
@@ -139,8 +141,13 @@ static int esp8266_sntp_config(sntp_driver_t *base, int timezone,
 }
 
 static int esp8266_sntp_start_sync(sntp_driver_t *base, sntp_sync_cb_t cb,
-                                  void *user_data) {
+                                   void *user_data) {
   esp8266_sntp_driver_t *self = (esp8266_sntp_driver_t *)base;
+  if (SNTP_DRV_STATUS_SUCCESS != self->status) {
+    log_e("SNTP not ready");
+    return -1;
+  }
+
   self->pending_cb = cb;
   self->pending_user_data = user_data;
   self->time_buf[0] = '\0';

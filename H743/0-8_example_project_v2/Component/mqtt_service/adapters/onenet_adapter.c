@@ -6,7 +6,7 @@
 #define ONENET_SERVER_HOST "mqtts.heclouds.com"
 #define ONENET_SERVER_PORT 1883
 
-static onenet_config_t s_onenet_cfg;
+static onenet_config_t s_onenet_cfg; // 运行时参数
 
 /**
  * @brief 初始化 OneNet 适配器参数
@@ -18,7 +18,7 @@ void onenet_adapter_init(const onenet_config_t *config) {
 }
 
 /**
- * @brief 获取OneNet连接参数
+ * @brief 获取OneNet平台的MQTT连接参数
  */
 static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
   strcpy(out_params->host, ONENET_SERVER_HOST);

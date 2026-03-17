@@ -12,4 +12,7 @@ extern uart_queue_t *g_debug_queue;
 // BSP 统一初始化接口
 void bsp_init(void);
 
+// BSP 层处理
+void bsp_process(void);
+
 #endif /* BSP_INIT_H_ */

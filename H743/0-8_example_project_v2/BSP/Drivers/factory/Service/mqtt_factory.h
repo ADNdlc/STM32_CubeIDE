@@ -1,8 +1,8 @@
 #ifndef BSP_FACTORY_SERVICE_MQTT_FACTORY_H_
 #define BSP_FACTORY_SERVICE_MQTT_FACTORY_H_
 
-#include "service_id.h"
 #include "mqtt_driver.h"
+#include "service_id.h"
 
 /**
  * @brief 通过逻辑 ID 获取 MQTT 驱动实例
