@@ -29,7 +29,7 @@ static void test_lvgl_res_teardown(void) {
   lv_obj_clean(lv_scr_act());
 }
 
-REGISTER_TEST(LVGL, "Eesource LVGL integration test", test_lvgl_res_setup,
+REGISTER_TEST(LVGL_RES, "Resource LVGL integration test", test_lvgl_res_setup,
               test_lvgl_res_loop, test_lvgl_res_teardown);
 
 #endif

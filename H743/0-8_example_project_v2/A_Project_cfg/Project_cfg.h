@@ -10,8 +10,10 @@
 
 /* ----- 运行配置 ----- */
 #define TEST_ENABLE	1	// 使能测试模式(不进入主程序)
-#define LVGL_ENABLE	0	// 图形库使能
+#define SERVICE_ENABLE 0// 服务组件层
+#define LVGL_ENABLE	1	// 图形库使能
 #define GUI_ENABLE	0	// UI页面使能
+
 
 #define PRINTF_FLOAT_ENABLED
 

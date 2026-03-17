@@ -85,8 +85,9 @@ void bsp_init(void) {
   }
   sys_mem_init_external(); // 外部内存池初始化
 
+#if SERVICE_ENABLE
   service_factory_init();
-
+#endif
   /* ---- LVGL 初始化 ---- */
 #if LVGL_ENABLE
   lv_init();
@@ -109,5 +110,7 @@ void bsp_init(void) {
 }
 
 void bsp_process(void){
+#if SERVICE_ENABLE
 	service_factory_process();
+#endif
 }
