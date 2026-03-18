@@ -24,17 +24,17 @@
 #define ASSET_DATA_A_ADDR 0x00002000
 #define ASSET_DATA_B_ADDR 0x00800000
 
-// XIP 在 H7 上的映射起始地址 (由 QSPI 硬件或 MPU 决定，H7 默认为 0x90000000)
+// XIP 在 H7 上的映射起始地址 (由 QSPI 硬件或 MPU 决定, H7 默认为 0x90000000)
 #define XIP_BASE_ADDRESS 0x90000000
 
-static nor_flash_driver_t *asset_flash = NULL;
+static nor_flash_driver_t *asset_flash = NULL; // 模块依赖的底层驱动
 // 0xFFFFFFFF 代表尚未加载任何有效表
-static uint32_t active_toc_addr = 0xFFFFFFFF;
-static res_header_t active_header = {0};
+static uint32_t active_toc_addr = 0xFFFFFFFF; // 当前活动表地址
+static res_header_t active_header = {0};	// 已加载的表信息
 static res_item_t *active_items = NULL; // 动态分配的 TOC 内存缓存
 
 /**
- * @brief 计算头文件的 TOC CRC，排除 toc_crc 字段本身
+ * @brief 计算头文件的 TOC CRC, 排除 toc_crc 字段本身
  */
 static uint32_t calc_toc_crc(const res_header_t *header,
                              const res_item_t *items) {
@@ -189,12 +189,24 @@ const void *asset_manager_get_res(uint32_t id, uint32_t *size) {
     if (active_items[i].id == id) {
       if (size)
         *size = active_items[i].size;
-      return (const void *)(uintptr_t)(XIP_BASE_ADDRESS +
-                                       active_header.data_offset +
-                                       active_items[i].offset);
+      return (const void *)(uintptr_t)(XIP_BASE_ADDRESS + active_header.data_offset + active_items[i].offset);
     }
   }
   return NULL;
+}
+
+const void *asset_manager_get_res_info(uint32_t id, uint16_t *type, asset_meta_t *meta, uint32_t *size) {
+    if (active_items == NULL || active_header.item_count == 0) return NULL;
+
+    for (uint32_t i = 0; i < active_header.item_count; i++) {
+        if (active_items[i].id == id) {
+            if (type) *type = active_items[i].type;
+            if (meta) *meta = active_items[i].meta;
+            if (size) *size = active_items[i].size;
+            return (const void *)(uintptr_t)(XIP_BASE_ADDRESS + active_header.data_offset + active_items[i].offset);
+        }
+    }
+    return NULL;
 }
 
 // ---------------- 更新逻辑 -------------------
@@ -270,8 +282,7 @@ error:
   return -4;
 }
 
-int asset_manager_write_res(uint32_t id, uint32_t type, const uint8_t *data,
-                            uint32_t size) {
+int asset_manager_write_res(uint32_t id, uint16_t type, asset_meta_t meta, const uint8_t *data, uint32_t size) {
   if (!update_ctx.is_updating ||
       update_ctx.current_item_idx >= update_ctx.new_header.item_count)
     return -1;
@@ -298,12 +309,13 @@ int asset_manager_write_res(uint32_t id, uint32_t type, const uint8_t *data,
   if (NOR_FLASH_WRITE(asset_flash, abs_write_addr, data, size) != 0)
     return -4;
 
-  // 记录 Item
+  // 记录 Item 信息
   res_item_t *item = &update_ctx.new_items[update_ctx.current_item_idx];
   item->id = id;
+  item->type = type;
+  item->meta = meta; // 存储 Union 元数据
   item->offset = update_ctx.current_data_offset;
   item->size = size;
-  item->type = type;
   item->item_crc = utils_crc32_calc(data, size, 0);
 
   log_d("Wrote Resource ID: 0x%08X, Offset: 0x%08X, Size: %d", id, item->offset,
