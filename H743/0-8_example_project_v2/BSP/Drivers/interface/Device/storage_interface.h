@@ -100,7 +100,7 @@ typedef struct {
 struct storage_device_t {
   const storage_ops_t *ops; /* 操作接口 */
   storage_info_t info;      /* 缓存设备信息 */
-  storage_callback_t cb;
+  storage_callback_t drv_cb;
   void *user_data;
 };
 
@@ -116,6 +116,9 @@ struct storage_device_t {
 #define STORAGE_CONTROL(dev, cmd, arg) (dev)->ops->control(dev, cmd, arg)
 
 #define STORAGE_SET_CB(dev, cb, data)                                          \
-  ((dev)->cb = (cb), (dev)->user_data = (data))
+  do {                                                                         \
+    (dev)->drv_cb = (cb);                                                          \
+    (dev)->user_data = (data);                                                 \
+  } while(0)
 
 #endif /* DRIVERS_INTERFACE_DEVICE_STORAGE_INTERFACE_H_ */

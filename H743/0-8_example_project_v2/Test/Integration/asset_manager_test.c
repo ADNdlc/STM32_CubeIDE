@@ -1,16 +1,5 @@
-/*
- * asset_manager_test.c
- *
- *  Created on: Mar 1, 2026
- *      Author: Antigravity
- *
- *  Integration test for Asset Manager Dual TOC and Atomic Update
- */
-
 #include "test_config.h"
-
 #if ENABLE_TEST_ASSET_MANAGER
-
 #define LOG_TAG "TEST_ASSET"
 
 #include <stdbool.h>

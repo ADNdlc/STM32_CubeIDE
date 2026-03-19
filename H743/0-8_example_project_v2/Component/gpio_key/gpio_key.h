@@ -62,7 +62,7 @@ void Key_Init(gpio_key_t *self, gpio_driver_t *port, uint8_t active_level);
 
 // 动态创建
 gpio_key_t *Key_Create(gpio_driver_t *port, uint8_t active_level);
-void Key_Delete(gpio_key_t *self);
+void Key_Destroy(gpio_key_t *self);
 
 // 参数设置
 void Key_SetDebounce(gpio_key_t *self, uint16_t debounce_ms);

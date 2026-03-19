@@ -160,6 +160,17 @@ static int sdmmc_drv_get_info(storage_device_t *self, storage_info_t *info) {
   return -1;
 }
 
+/* ================== 外部通知逻辑 ================== */
+
+void sdmmc_storage_drv_on_interrupt(storage_device_t *self, bool is_inserted) {
+  if (!self) return;
+  
+  dev_event_t event = is_inserted ? DEVICE_EVENT_INSERTED : DEVICE_EVENT_REMOVED;
+  if (self->drv_cb) {
+    self->drv_cb(self, event, self->user_data);
+  }
+}
+
 /* ================== 函数指针表与实例化 ================== */
 
 static const storage_ops_t s_sdmmc_ops = {.init = sdmmc_drv_init,
@@ -171,4 +182,10 @@ static const storage_ops_t s_sdmmc_ops = {.init = sdmmc_drv_init,
                                           .control = sdmmc_drv_control,
                                           .get_info = sdmmc_drv_get_info};
 
-storage_device_t *sdmmc_storage_drv_get(const SD_HandleTypeDef *hsd) {}
+static sdmmc_storage_device_t s_sd_instance;
+
+storage_device_t *sdmmc_storage_drv_get(const SD_HandleTypeDef *hsd) {
+  s_sd_instance.base.ops = &s_sdmmc_ops;
+  s_sd_instance.hsd = (SD_HandleTypeDef *)hsd;
+  return &s_sd_instance.base;
+}

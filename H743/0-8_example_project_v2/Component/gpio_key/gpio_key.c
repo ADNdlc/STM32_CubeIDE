@@ -75,7 +75,7 @@ gpio_key_t *Key_Create(gpio_driver_t *port, uint8_t active_level) {
 }
 
 // 销毁
-void Key_Delete(gpio_key_t *self) {
+void Key_Destroy(gpio_key_t *self) {
   if (self) {
 
 #ifdef USE_MEMPOOL

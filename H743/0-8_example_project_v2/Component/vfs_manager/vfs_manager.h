@@ -1,5 +1,5 @@
-#ifndef COMPONENT_FLASH_HANDLER_FLASH_HANDLER_H_
-#define COMPONENT_FLASH_HANDLER_FLASH_HANDLER_H_
+#ifndef COMPONENT_VFS_MANAGER_VFS_MANAGER_H_
+#define COMPONENT_VFS_MANAGER_VFS_MANAGER_H_
 
 #include "fs_strategy.h"
 #include "storage_interface.h"
@@ -39,4 +39,4 @@ void vfs_set_event_callback(vfs_event_cb_t cb);
 // 挂载设备状态维护(空闲时低频轮询设备状态以提供移动设备的热插拔检查)
 void vfs_storage_monitor_task(void);
 
-#endif /* COMPONENT_FLASH_HANDLER_FLASH_HANDLER_H_ */
+#endif /* COMPONENT_VFS_MANAGER_VFS_MANAGER_H_ */

@@ -25,6 +25,7 @@
 #include "ltdc.h"
 #include "quadspi.h"
 #include "rtc.h"
+#include "sdmmc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -116,6 +117,7 @@ int main(void)
   MX_TIM3_Init();
   MX_SPI1_Init();
   MX_QUADSPI_Init();
+  MX_SDMMC1_SD_Init();
   MX_I2C2_Init();
   MX_I2C3_Init();
   MX_CRC_Init();
@@ -125,7 +127,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   GPIOB->ODR ^= (1 << 0);
   GPIOB->ODR ^= (1 << 1);
-  HAL_Delay(500);
+  HAL_Delay(800);
 
   bsp_init(); // 驱动层初始化
   Test_Framework_Init();
