@@ -117,7 +117,7 @@ struct storage_device_t {
 
 #define STORAGE_SET_CB(dev, cb, data)                                          \
   do {                                                                         \
-    (dev)->drv_cb = (cb);                                                          \
+    (dev)->drv_cb = (cb);                                                      \
     (dev)->user_data = (data);                                                 \
   } while(0)
 
