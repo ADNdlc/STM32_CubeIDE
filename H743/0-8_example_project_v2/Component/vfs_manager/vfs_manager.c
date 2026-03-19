@@ -161,6 +161,15 @@ void vfs_storage_monitor_task(void) {
                 if (VFS_MOUNT(mp->fs_strategy, mp) == 0) {
                     mp->is_mounted = true;
                 }
+            } else if (current == STORAGE_STATUS_NOT_INIT) {
+                // 探测到卡已插入或需要初始化
+                log_i("VFS Monitor: [%s] needs initialization, calling STORAGE_INIT...", mp->name);
+                if (STORAGE_INIT(mp->device) == 0) {
+                    // 初始化成功后，下一次轮询会进入 STORAGE_STATUS_OK 分支进行挂载
+                    log_i("VFS Monitor: [%s] initialized successfully.", mp->name);
+                } else {
+                    log_e("VFS Monitor: [%s] initialization failed.", mp->name);
+                }
             } else if (current == STORAGE_STATUS_OFFLINE && mp->is_mounted) {
                 // 主动探测到了移除
                 VFS_UNMOUNT(mp->fs_strategy, mp);

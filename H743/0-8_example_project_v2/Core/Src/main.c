@@ -25,7 +25,6 @@
 #include "ltdc.h"
 #include "quadspi.h"
 #include "rtc.h"
-#include "sdmmc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -117,10 +116,10 @@ int main(void)
   MX_TIM3_Init();
   MX_SPI1_Init();
   MX_QUADSPI_Init();
-  MX_SDMMC1_SD_Init();
   MX_I2C2_Init();
   MX_I2C3_Init();
   MX_CRC_Init();
+  MX_SDMMC1_SD_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
