@@ -14,7 +14,7 @@ typedef struct {
 } lfs_strategy_config_t;
 
 typedef struct lfs_strategy_t {
-  fs_strategy_t *Base;
+  fs_strategy_t Base;
   lfs_t lfs;            // LittleFS 实例
   struct lfs_config cfg;// LittleFS 配置
 } lfs_strategy_t;

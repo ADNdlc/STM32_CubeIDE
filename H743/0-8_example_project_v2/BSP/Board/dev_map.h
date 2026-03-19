@@ -13,6 +13,7 @@
 #include "dev_map_config.h"
 #include "lcd_screen_driver.h"
 #include "nor_flash_driver.h"
+#include "storage_interface.h"
 
 /* ----- GPIO ----- */
 typedef enum {
@@ -193,6 +194,18 @@ typedef struct {
   void *resource; // 关联的总线资源 (如 i2c_driver_t*)
 } power_monitor_mapping_t;
 extern const power_monitor_mapping_t power_monitor_mappings[POWER_MONITOR_MAX];
+
+/* ----- 存储设备 ----- */
+typedef enum {
+  STORAGE_ID_SD_CARD = 0,
+  //...
+  STORAGE_MAX_DEVICES
+} storage_device_id_t;
+typedef struct {
+  void *resource; 		// 硬件句柄 (如 SD_HandleTypeDef*)
+  storage_type_t type;	// 类型
+} storage_mapping_t;
+extern const storage_mapping_t storage_mappings[STORAGE_MAX_DEVICES];
 
 // 辅助宏
 #define CALL_RESOURE(config, type, res_name)                                   \

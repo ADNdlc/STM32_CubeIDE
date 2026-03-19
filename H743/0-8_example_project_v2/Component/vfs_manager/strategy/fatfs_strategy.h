@@ -6,8 +6,10 @@
 
 
 typedef struct fatfs_strategy_t {
-  fs_strategy_t *Base;
-  FATFS fs;		// fatFS 实例
+    fs_strategy_t base;     // 必须是第一个成员！方便直接指针强转
+    FATFS fs;               // FatFs 实例工作区
+    char drive_num[4];      // 绑定的逻辑盘符，如 "0:" 或 "1:"
+    uint8_t pdrv;           // 传递给 diskio.c 的物理驱动器号
 } fatfs_strategy_t;
 
 fs_strategy_t *fatfs_strategy_create(void);

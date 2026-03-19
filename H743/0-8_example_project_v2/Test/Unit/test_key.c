@@ -106,9 +106,9 @@ static void test_key_loop(void) {
 }
 
 static void test_key_teardown(void) {
-    Key_Delete(key_main);
-    Key_Delete(key_main1);
-    Key_Delete(key_main2);
+	Key_Destroy(key_main);
+	Key_Destroy(key_main1);
+	Key_Destroy(key_main2);
     log_i("Key Test Teardown: Done.");
 }
 

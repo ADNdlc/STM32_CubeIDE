@@ -15,10 +15,12 @@
 #include "qspi/stm32_qspi_driver.h"
 #include "quadspi.h"
 #include "rtc/stm32_rtc_driver.h"
+#include "sdmmc.h"
 #include "spi.h"
 #include "spi/stm32_spi_driver.h"
 #include "tim.h"
 #include "usart.h"
+
 
 /*************
  * 总线配置表
@@ -43,7 +45,7 @@ const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
     [GPIO_ID_LED0] = {.resource = (void *)&all_gpio_configs[GPIO_ID_LED0]},
     [GPIO_ID_LED1] = {.resource = (void *)&all_gpio_configs[GPIO_ID_LED1]},
     [LCD_BL] = {.resource = (void *)&all_gpio_configs[LCD_BL]},
-	[ESP_RST] = {.resource = (void *)&all_gpio_configs[ESP_RST]},
+    [ESP_RST] = {.resource = (void *)&all_gpio_configs[ESP_RST]},
     [GPIO_ID_KEY0] = {.resource = (void *)&all_gpio_configs[GPIO_ID_KEY0]},
     [GPIO_ID_KEY1] = {.resource = (void *)&all_gpio_configs[GPIO_ID_KEY1]},
     [GPIO_ID_KEY2] = {.resource = (void *)&all_gpio_configs[GPIO_ID_KEY2]},
@@ -187,6 +189,12 @@ const ina219_factory_config_t ina219_factory_config = {
 // "电源监测"逻辑号映射表
 const power_monitor_mapping_t power_monitor_mappings[POWER_MONITOR_MAX] = {
     [POWER_MONITOR_ID_MAIN] = {.resource = (void *)&ina219_factory_config},
+};
+
+// "存储设备"逻辑号映射表
+const storage_mapping_t storage_mappings[STORAGE_MAX_DEVICES] = {
+    [STORAGE_ID_SD_CARD] = {.resource = (void *)&hsd1,
+                            .type = STORAGE_TYPE_SD_CARD},
 };
 
 #endif // STM32H743_BOARD_V1
