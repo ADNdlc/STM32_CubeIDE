@@ -15,6 +15,8 @@ typedef void *vfs_lock_t;
 #define VFS_LOCK(lock)   // osMutexWait((osMutexId_t)(lock), osWaitForever)
 #define VFS_UNLOCK(lock) // osMutexRelease((osMutexId_t)(lock))
 
+typedef void (*vfs_op_notify_cb)(const char *path, bool is_start);
+
 // 挂载点对象定义
 typedef struct mount_point_t {
   const char name[16];              // 挂载前缀，如 "/data"
@@ -35,7 +37,8 @@ int vfs_init(void);
 int vfs_mount(const char *path_prefix, storage_device_t *dev,
               fs_strategy_t *strategy);
 int vfs_unmount(const char *path_prefix);
-int vfs_format(const char *path_prefix); // 格式化指定挂载点的文件系统
+int vfs_format(const char *path_prefix,
+               vfs_op_notify_cb notify); // 格式化指定挂载点的文件系统
 
 // 文件操作(POSIX 风格)
 int vfs_open(const char *path, int flags);

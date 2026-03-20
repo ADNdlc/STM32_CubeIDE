@@ -24,6 +24,14 @@ static void vfs_event_handler(const char *prefix, dev_event_t event) {
   log_i("App Notify: Path [%s] event %d", prefix, event);
 }
 
+static void vfs_format_notify(const char *prefix, bool start) {
+  if (start) {
+    log_w("Format started for %s", prefix);
+  } else {
+    log_w("Format finished for %s", prefix);
+  }
+}
+
 static void on_key_event(gpio_key_t *key, KeyEvent event) {
   switch (event) {
   case KeyEvent_SinglePress:
@@ -81,7 +89,7 @@ static void on_key_event(gpio_key_t *key, KeyEvent event) {
   // 进行格式化
   case KeyEvent_TriplePress:
     log_i("Action: User requested Format...");
-    int fmt_res = vfs_format("/sd");
+    int fmt_res = vfs_format("/sd", vfs_format_notify);
     if (fmt_res == VFS_OK) {
       log_i("Format Success! You can now Double-Click to read/write.");
     } else {
