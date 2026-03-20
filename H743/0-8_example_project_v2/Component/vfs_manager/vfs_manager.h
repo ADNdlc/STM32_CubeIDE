@@ -25,6 +25,7 @@ typedef struct mount_point_t {
   bool is_mounted;                  // 已挂载
   vfs_lock_t lock;                  // 单个挂载点的操作保护锁
   int mount_err_code;               // 记录挂载失败的底层错误码
+  uint32_t last_retry_ms;           // 上次尝试恢复的时间戳
 } mount_point_t;
 
 // 初始化

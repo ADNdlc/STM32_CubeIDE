@@ -2,6 +2,7 @@
 #include "elog.h"
 #include <stdbool.h>
 #include <string.h>
+#include "Sys.h" 
 
 #define LOG_TAG "VFS"
 
@@ -28,25 +29,18 @@ static vfs_dir_node_t s_dirs[VFS_MAX_OPEN_DIRS];
 
 /* ------------------ 内部辅助函数 ------------------ */
 
-// 路径匹配路由逻辑
-static mount_point_t *find_mount_point(const char *path,
-                                       const char **rel_path) {
+static mount_point_t *find_mount_point(const char *path, const char **rel_path) {
   const char *p = path;
-  if (p[0] == '/')
-    p++; // 转换 "/lfs/aa.txt" 为 "lfs/aa.txt"
+  if (p[0] == '/') p++;
 
   for (int i = 0; i < VFS_MAX_MOUNT_POINTS; i++) {
     mount_point_t *mp = &s_mount_points[i];
-    if (mp->name[0] == '\0' || !mp->is_mounted)
-      continue;
+    if (mp->name[0] == '\0' || !mp->is_mounted) continue;
 
     size_t len = strlen(mp->name);
-    // 完全匹配前缀且后面跟着 / 或结束符
     if (strncmp(p, mp->name, len) == 0 && (p[len] == '/' || p[len] == '\0')) {
-      if (p[len] == '/')
-        *rel_path = p + len + 1;
-      else
-        *rel_path = ".";
+      if (p[len] == '/') *rel_path = p + len + 1;
+      else *rel_path = "";
       return mp;
     }
   }
@@ -66,30 +60,49 @@ static int alloc_fd(mount_point_t *mp, vfs_file_t fs_file) {
 }
 
 /**
- * @brief 内部底层事件回调 (由底层驱动触发)
+ * @brief 【新增】强制清理文件系统句柄并卸载，但保留挂载点存活
  */
-static void vfs_internal_dev_cb(storage_device_t *self, dev_event_t event,
-                                void *user_data) {
+static void vfs_force_unmount_fs(mount_point_t *mp) {
+  if (!mp || !mp->is_mounted) return;
+
+  // 1. 强制关闭所有关联的文件和目录句柄，防止拔卡导致堆内存泄漏！
+  for (int j = 0; j < VFS_MAX_OPEN_FILES; j++) {
+    if (s_fds[j].in_use && s_fds[j].mp == mp) {
+      mp->fs_strategy->ops->close(s_fds[j].fs_file);
+      s_fds[j].in_use = false;
+    }
+  }
+  for (int j = 0; j < VFS_MAX_OPEN_DIRS; j++) {
+    if (s_dirs[j].in_use && s_dirs[j].mp == mp) {
+      mp->fs_strategy->ops->closedir(s_dirs[j].fs_dir);
+      s_dirs[j].in_use = false;
+    }
+  }
+
+  // 2. 调用底层策略卸载
+  VFS_UNMOUNT(mp->fs_strategy, mp);
+  mp->is_mounted = false;
+}
+
+static void vfs_internal_dev_cb(storage_device_t *self, dev_event_t event, void *user_data) {
   mount_point_t *mp = (mount_point_t *)user_data;
-  if (!mp)
-    return;
+  if (!mp) return;
 
   log_i("VFS Dev Event: [%s] -> %d", mp->name, event);
 
   if (event == DEVICE_EVENT_REMOVED) {
     mp->dev_state = STORAGE_STATUS_OFFLINE;
     if (mp->is_mounted) {
-      log_w("Sudden removal detected for [%s], force unmounting.", mp->name);
-      vfs_unmount(mp->name);
+      log_w("Sudden removal detected for [%s], force unmounting FS.", mp->name);
+      // 【修复】：只卸载 FS，绝对不能调用 vfs_unmount 抹除节点！
+      vfs_force_unmount_fs(mp);
     }
   } else if (event == DEVICE_EVENT_INSERTED) {
     mp->dev_state = STORAGE_STATUS_OK;
     log_i("Device [%s] ready for re-mount.", mp->name);
   }
 
-  if (s_event_cb) {
-    s_event_cb(mp->name, event);
-  }
+  if (s_event_cb) s_event_cb(mp->name, event);
 }
 
 /* ------------------ VFS 管理核心接口 ------------------ */
@@ -102,28 +115,21 @@ int vfs_init(void) {
   return 0;
 }
 
-int vfs_mount(const char *path_prefix, storage_device_t *dev,
-              fs_strategy_t *strategy) {
-  if (!path_prefix || !dev || !strategy)
-    return -1;
+int vfs_mount(const char *path_prefix, storage_device_t *dev, fs_strategy_t *strategy) {
+  if (!path_prefix || !dev || !strategy) return -1;
 
-  // 规范化前缀逻辑 (去掉前导 /)
   const char *prefix = path_prefix;
-  if (prefix[0] == '/')
-    prefix++;
+  if (prefix[0] == '/') prefix++;
 
   int free_idx = -1;
   for (int i = 0; i < VFS_MAX_MOUNT_POINTS; i++) {
     if (s_mount_points[i].name[0] == '\0') {
-      if (free_idx == -1)
-        free_idx = i;
+      if (free_idx == -1) free_idx = i;
     } else if (strcmp(s_mount_points[i].name, prefix) == 0) {
-      log_w("VFS Mount point [%s] busy.", prefix);
       return -2;
     }
   }
-  if (free_idx == -1)
-    return -3;
+  if (free_idx == -1) return -3;
 
   mount_point_t *mp = &s_mount_points[free_idx];
   strncpy((char *)mp->name, prefix, sizeof(mp->name) - 1);
@@ -131,64 +137,48 @@ int vfs_mount(const char *path_prefix, storage_device_t *dev,
   mp->fs_strategy = strategy;
   mp->is_mounted = false;
 
-  // 初始化时探测状态
   mp->dev_state = STORAGE_CHECK_ALIVE(dev);
-  // 未在线可能是底层未初始化，主动触发一次，再检查
   if (mp->dev_state == STORAGE_STATUS_NOT_INIT) {
-    log_i("Attempting initial STORAGE_INIT for [%s]...", mp->name);
-    if (STORAGE_INIT(dev) == 0) {
-      mp->dev_state = STORAGE_CHECK_ALIVE(dev);
-    } else {
-      log_w("Initial STORAGE_INIT for [%s] failed.", mp->name);
-    }
+    if (STORAGE_INIT(dev) == 0) mp->dev_state = STORAGE_CHECK_ALIVE(dev);
   }
 
-  // 绑定事件以便触发异步卸载
   STORAGE_SET_CB(dev, vfs_internal_dev_cb, mp);
 
   if (mp->dev_state == STORAGE_STATUS_OK) {
     int m_ret = VFS_MOUNT(strategy, mp);
     if (m_ret == VFS_OK) {
       mp->is_mounted = true;
-      mp->mount_err_code = VFS_OK; // 清除错误
+      mp->mount_err_code = VFS_OK;
       log_i("Mounted[%s] successfully.", mp->name);
     } else {
       mp->is_mounted = false;
-      mp->mount_err_code = m_ret; // 【关键】记录错误，保留节点
-      log_w("Mount [%s] failed (Err: %d). Waiting for user action.", mp->name,
-            m_ret);
+      mp->mount_err_code = m_ret;
+
+      // 【破除死锁】：如果在初始化时挂载失败（且不是无文件系统），强制降级硬件状态
+      if (m_ret != VFS_ERR_NO_FS) {
+          STORAGE_DEINIT(mp->device);
+          mp->dev_state = STORAGE_STATUS_NOT_INIT;
+      }
     }
-  } else {
-    log_w("Device [%s] offline, waiting for insertion...", mp->name);
   }
-  // 始终返回错误码，让应用层知道发生了什么
   return mp->mount_err_code;
 }
 
-// 系统格式化
 int vfs_format(const char *path_prefix) {
   const char *prefix = path_prefix;
-  if (prefix[0] == '/')
-    prefix++;
+  if (prefix[0] == '/') prefix++;
 
   for (int i = 0; i < VFS_MAX_MOUNT_POINTS; i++) {
     if (strcmp(s_mount_points[i].name, prefix) == 0) {
       mount_point_t *mp = &s_mount_points[i];
 
-      if (!mp->device || mp->dev_state != STORAGE_STATUS_OK)
-        return VFS_ERR_NO_DEV;
+      if (!mp->device || mp->dev_state != STORAGE_STATUS_OK) return VFS_ERR_NO_DEV;
 
-      log_i("Formatting VFS [%s]...", mp->name);
       int res = VFS_FORMAT(mp->fs_strategy, mp);
-
       if (res == VFS_OK) {
-        log_i("Format OK. Attempting remount...");
-        mp->mount_err_code = VFS_OK; // 清除错误状态
+        mp->mount_err_code = VFS_OK;
         if (VFS_MOUNT(mp->fs_strategy, mp) == VFS_OK) {
           mp->is_mounted = true;
-          log_i("Remount successful.");
-        } else {
-          log_e("Remount failed after format.");
         }
       }
       return res;
@@ -199,15 +189,12 @@ int vfs_format(const char *path_prefix) {
 
 int vfs_unmount(const char *path_prefix) {
   const char *prefix = path_prefix;
-  if (prefix[0] == '/')
-    prefix++;
+  if (prefix[0] == '/') prefix++;
 
   for (int i = 0; i < VFS_MAX_MOUNT_POINTS; i++) {
     if (strcmp(s_mount_points[i].name, prefix) == 0) {
-      if (s_mount_points[i].is_mounted) {
-        VFS_UNMOUNT(s_mount_points[i].fs_strategy, &s_mount_points[i]);
-        s_mount_points[i].is_mounted = false;
-      }
+      // 彻底解绑：先卸载 FS，再抹除节点配置
+      vfs_force_unmount_fs(&s_mount_points[i]);
       memset(&s_mount_points[i], 0, sizeof(mount_point_t));
       return 0;
     }
@@ -216,34 +203,58 @@ int vfs_unmount(const char *path_prefix) {
 }
 
 void vfs_storage_monitor_task(void) {
+  uint32_t now = sys_get_systick_ms();
+
   for (int i = 0; i < VFS_MAX_MOUNT_POINTS; i++) {
     mount_point_t *mp = &s_mount_points[i];
-    if (mp->name[0] == '\0' || !mp->device)
-      continue;
+    if (mp->name[0] == '\0' || !mp->device) continue;
 
-    // 对处在挂载列表中但未标识 IO 占用的设备进行存活轮询
     storage_status_t current = STORAGE_CHECK_ALIVE(mp->device);
 
     if (current != mp->dev_state) {
-      if (current == STORAGE_STATUS_OK) {
-        // 【关键】拔插后状态转换到 OK 时，复位错误码并允许挂载一次
+      if (current == STORAGE_STATUS_OFFLINE || current == STORAGE_STATUS_ERROR) {
+        log_w("VFS: Device [%s] removed or error!", mp->name);
+        vfs_force_unmount_fs(mp);
+        STORAGE_DEINIT(mp->device);
+      } else if (current == STORAGE_STATUS_OK) {
+        log_i("VFS: Device [%s] detected!", mp->name);
         mp->mount_err_code = VFS_OK;
+      }
+      mp->dev_state = current;
+    }
 
-        if (!mp->is_mounted) {
+    if (!mp->is_mounted) {
+      if (now - mp->last_retry_ms >= 2000) {
+        mp->last_retry_ms = now;
+
+        if (mp->dev_state == STORAGE_STATUS_OK) {
           int m_ret = VFS_MOUNT(mp->fs_strategy, mp);
           if (m_ret == VFS_OK) {
             mp->is_mounted = true;
-            log_i("Auto-mount [%s] successful.", mp->name);
+            log_i("VFS: Auto-mount [%s] successful.", mp->name);
           } else {
             mp->mount_err_code = m_ret;
-            log_w("Auto-mount [%s] failed (Err: %d).", mp->name, m_ret);
+            // 【破除轮询死锁】
+            if (m_ret == VFS_ERR_NO_FS) {
+              log_w("VFS: [%s] lacks filesystem. Waiting for format.", mp->name);
+            } else {
+              // 挂载遭遇读写等底层错误，硬件必然假死。强制 DeInit 降级！
+              log_e("VFS: Mount [%s] failed (Err:%d). Suspect HW glitch, forcing Re-Init.", mp->name, m_ret);
+              STORAGE_DEINIT(mp->device);
+              mp->dev_state = STORAGE_STATUS_NOT_INIT;
+            }
+          }
+        } else {
+          // 尝试硬件恢复 (状态为 NOT_INIT 时)
+          log_d("VFS: Probing [%s] for hardware init...", mp->name);
+          if (STORAGE_INIT(mp->device) == 0) {
+            log_i("VFS: Device [%s] HW initialized.", mp->name);
+            mp->dev_state = STORAGE_STATUS_OK; // 提速：不用等下一轮，立刻转为 OK
+          } else {
+            mp->dev_state = STORAGE_CHECK_ALIVE(mp->device);
           }
         }
-      } else if (current == STORAGE_STATUS_OFFLINE && mp->is_mounted) {
-        VFS_UNMOUNT(mp->fs_strategy, mp);
-        mp->is_mounted = false;
       }
-      mp->dev_state = current;
     }
   }
 }
