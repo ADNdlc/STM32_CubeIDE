@@ -138,20 +138,18 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff) {
 static int fatfs_vfs_mount(mount_point_t *mp) {
   fatfs_strategy_t *strat = (fatfs_strategy_t *)mp->fs_strategy;
 
-  // 1. 【核心桥接】将底层物理设备 device 注册到 diskio 的指定盘符上
   fatfs_diskio_register(strat->pdrv, mp->device);
-
-  // 2. 调用 FatFs 真正的挂载
-  // 参数 1：立即挂载，如果在这一步因为没插卡导致失败，我们要如实返回
   FRESULT res = f_mount(&strat->fs, strat->drive_num, 1);
 
   if (res == FR_OK) {
-    mp->is_mounted = true;
-    return 0; // 挂载成功
+    // is_mounted 状态由 VFS 统一管理，这里只返回 OK
+    return VFS_OK;
   } else {
-    // 如果挂载失败，注销 diskio 映射以防空指针误用
     fatfs_diskio_register(strat->pdrv, NULL);
-    return -1;
+    if (res == FR_NO_FILESYSTEM) {
+      return VFS_ERR_NO_FS; // 精确向上抛出
+    }
+    return VFS_ERR_GENERAL;
   }
 }
 
@@ -165,9 +163,30 @@ static int fatfs_vfs_unmount(mount_point_t *mp) {
 
 static int fatfs_vfs_format(mount_point_t *mp) {
   fatfs_strategy_t *strat = (fatfs_strategy_t *)mp->fs_strategy;
-  // TODO: 提供 mkfs 参数选项
-  FRESULT res = f_mkfs(strat->drive_num, 0, 0, FF_MAX_SS);
-  return (res == FR_OK) ? VFS_OK : -res;
+
+  // 格式化前必须确保 diskio 已连接，因为 f_mkfs 需要直接写扇区
+  fatfs_diskio_register(strat->pdrv, mp->device);
+
+  // 分配工作区缓存，防止爆栈 (FatFs 版本 >= 0.13 的标准写法)
+#ifdef USE_MEMPOOL
+  void *work = sys_malloc(FATFS_STRATEGY_MEMSOURCE, FF_MAX_SS);
+#else
+  void *work = malloc(FF_MAX_SS);
+#endif
+
+  if (!work)
+    return VFS_ERR_NO_MEM;
+
+  // 调用 FatFs 格式化 (FM_ANY=0, 自动选择 FAT16/32)
+  FRESULT res = f_mkfs(strat->drive_num, 0, work, FF_MAX_SS);
+
+#ifdef USE_MEMPOOL
+  sys_free(FATFS_STRATEGY_MEMSOURCE, work);
+#else
+  free(work);
+#endif
+
+  return (res == FR_OK) ? VFS_OK : VFS_ERR_GENERAL;
 }
 
 static int fatfs_vfs_open(mount_point_t *mp, vfs_file_t *file, const char *path,

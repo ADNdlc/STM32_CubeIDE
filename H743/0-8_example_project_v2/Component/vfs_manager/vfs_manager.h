@@ -10,7 +10,7 @@ typedef void (*vfs_event_cb_t)(const char *prefix, dev_event_t event);
 #define VFS_MAX_MOUNT_POINTS 4
 
 // TODO: 之后在 OS 环境下可替换为相应的 Mutex/Semaphore 类型，如 osMutexId_t
-typedef void* vfs_lock_t; 
+typedef void *vfs_lock_t;
 
 #define VFS_LOCK(lock)   // osMutexWait((osMutexId_t)(lock), osWaitForever)
 #define VFS_UNLOCK(lock) // osMutexRelease((osMutexId_t)(lock))
@@ -24,6 +24,7 @@ typedef struct mount_point_t {
   void *fs_context;                 // 文件系统私有上下文(如 lfs_t* 或 FATFS*)
   bool is_mounted;                  // 已挂载
   vfs_lock_t lock;                  // 单个挂载点的操作保护锁
+  int mount_err_code;               // 记录挂载失败的底层错误码
 } mount_point_t;
 
 // 初始化
@@ -33,6 +34,7 @@ int vfs_init(void);
 int vfs_mount(const char *path_prefix, storage_device_t *dev,
               fs_strategy_t *strategy);
 int vfs_unmount(const char *path_prefix);
+int vfs_format(const char *path_prefix); // 格式化指定挂载点的文件系统
 
 // 文件操作(POSIX 风格)
 int vfs_open(const char *path, int flags);
