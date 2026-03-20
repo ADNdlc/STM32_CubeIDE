@@ -9,6 +9,7 @@ static mount_point_t s_mount_points[VFS_MAX_MOUNT_POINTS];
 static vfs_event_cb_t s_event_cb = NULL;
 
 #define VFS_MAX_OPEN_FILES 8
+#define VFS_MAX_OPEN_DIRS  4
 
 typedef struct {
     mount_point_t *mp;
@@ -16,7 +17,14 @@ typedef struct {
     bool in_use;
 } vfs_fd_node_t;
 
+typedef struct {
+    mount_point_t *mp;
+    vfs_dir_t fs_dir;
+    bool in_use;
+} vfs_dir_node_t;
+
 static vfs_fd_node_t s_fds[VFS_MAX_OPEN_FILES];
+static vfs_dir_node_t s_dirs[VFS_MAX_OPEN_DIRS];
 
 /* ------------------ 内部辅助函数 ------------------ */
 
@@ -82,6 +90,7 @@ static void vfs_internal_dev_cb(storage_device_t *self, dev_event_t event, void 
 int vfs_init(void) {
     memset(s_mount_points, 0, sizeof(s_mount_points));
     memset(s_fds, 0, sizeof(s_fds));
+    memset(s_dirs, 0, sizeof(s_dirs));
     log_i("VFS Manager initialized.");
     return 0;
 }
@@ -224,6 +233,69 @@ int vfs_close(int fd) {
 int vfs_opendir(const char *path, vfs_dir_t *dir) {
     const char *rel_path = NULL;
     mount_point_t *mp = find_mount_point(path, &rel_path);
-    if (!mp) return -1;
-    return mp->fs_strategy->ops->opendir(mp, dir, rel_path);
+    if (!mp) return VFS_ERR_NOENT;
+
+    vfs_dir_t fs_dir = NULL;
+    int res = mp->fs_strategy->ops->opendir(mp, &fs_dir, rel_path);
+    if (res == VFS_OK) {
+        for (int i = 0; i < VFS_MAX_OPEN_DIRS; i++) {
+            if (!s_dirs[i].in_use) {
+                s_dirs[i].mp = mp;
+                s_dirs[i].fs_dir = fs_dir;
+                s_dirs[i].in_use = true;
+                *dir = (vfs_dir_t)(uintptr_t)i;
+                return VFS_OK;
+            }
+        }
+        mp->fs_strategy->ops->closedir(fs_dir);
+        return VFS_ERR_NO_MEM; // 句柄用尽
+    }
+    return res;
+}
+
+int vfs_readdir(vfs_dir_t dir, vfs_dirent_t *dirent) {
+    int id = (int)(uintptr_t)dir;
+    if (id < 0 || id >= VFS_MAX_OPEN_DIRS || !s_dirs[id].in_use) return VFS_ERR_INVAL;
+    return s_dirs[id].mp->fs_strategy->ops->readdir(s_dirs[id].fs_dir, dirent);
+}
+
+int vfs_closedir(vfs_dir_t dir) {
+    int id = (int)(uintptr_t)dir;
+    if (id < 0 || id >= VFS_MAX_OPEN_DIRS || !s_dirs[id].in_use) return VFS_ERR_INVAL;
+    int res = s_dirs[id].mp->fs_strategy->ops->closedir(s_dirs[id].fs_dir);
+    s_dirs[id].in_use = false;
+    return res;
+}
+
+int vfs_mkdir(const char *path) {
+    const char *rel_path = NULL;
+    mount_point_t *mp = find_mount_point(path, &rel_path);
+    if (!mp) return VFS_ERR_NOENT;
+    return mp->fs_strategy->ops->mkdir(mp, rel_path);
+}
+
+int vfs_unlink(const char *path) {
+    const char *rel_path = NULL;
+    mount_point_t *mp = find_mount_point(path, &rel_path);
+    if (!mp) return VFS_ERR_NOENT;
+    return mp->fs_strategy->ops->unlink(mp, rel_path);
+}
+
+int vfs_rename(const char *old_path, const char *new_path) {
+    const char *old_rel = NULL;
+    const char *new_rel = NULL;
+    mount_point_t *mp_old = find_mount_point(old_path, &old_rel);
+    mount_point_t *mp_new = find_mount_point(new_path, &new_rel);
+    
+    // 不支持跨挂载点重命名
+    if (!mp_old || !mp_new || mp_old != mp_new) return VFS_ERR_INVAL;
+    
+    return mp_old->fs_strategy->ops->rename(mp_old, old_rel, new_rel);
+}
+
+int vfs_stat(const char *path, vfs_stat_t *st) {
+    const char *rel_path = NULL;
+    mount_point_t *mp = find_mount_point(path, &rel_path);
+    if (!mp) return VFS_ERR_NOENT;
+    return mp->fs_strategy->ops->stat(mp, rel_path, st);
 }

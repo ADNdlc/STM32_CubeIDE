@@ -5,10 +5,38 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <sys/types.h>
 
 // 前置声明，避免循环包含
 struct mount_point_t;
 typedef struct mount_point_t mount_point_t;
+
+// VFS 统一定义的操作标志 (POSIX-like)
+#define VFS_O_RDONLY    0x0001
+#define VFS_O_WRONLY    0x0002
+#define VFS_O_RDWR      (VFS_O_RDONLY | VFS_O_WRONLY)
+#define VFS_O_CREAT     0x0100
+#define VFS_O_EXCL      0x0200
+#define VFS_O_TRUNC     0x0400
+#define VFS_O_APPEND    0x0800
+
+// VFS 返回值错误码
+typedef enum {
+    VFS_OK = 0,
+    VFS_ERR_GENERAL = -1,
+    VFS_ERR_NO_MEM = -2,
+    VFS_ERR_NO_DEV = -3,
+    VFS_ERR_NOENT = -4,
+    VFS_ERR_EXISTS = -5,
+    VFS_ERR_ISDIR = -6,
+    VFS_ERR_NOTDIR = -7,
+    VFS_ERR_NOTEMPTY = -8,
+    VFS_ERR_BUSY = -9,
+    VFS_ERR_INVAL = -10,
+    VFS_ERR_NOSPC = -11,
+    VFS_ERR_ROFS = -12,
+    VFS_ERR_IO = -13,
+} vfs_err_t;
 
 // 统一文件句柄
 typedef void* vfs_file_t;
@@ -19,6 +47,14 @@ typedef struct vfs_stat_t {
     uint32_t size;
     bool is_dir;
 } vfs_stat_t;
+
+#define VFS_MAX_PATH_LEN 128
+
+// 目录项结构
+typedef struct vfs_dirent_t {
+    char name[VFS_MAX_PATH_LEN];
+    vfs_stat_t info;
+} vfs_dirent_t;
 
 typedef struct fs_strategy_t fs_strategy_t;
 

@@ -119,6 +119,6 @@ struct storage_device_t {
   do {                                                                         \
     (dev)->drv_cb = (cb);                                                      \
     (dev)->user_data = (data);                                                 \
-  } while(0)
+  } while (0)
 
 #endif /* DRIVERS_INTERFACE_DEVICE_STORAGE_INTERFACE_H_ */

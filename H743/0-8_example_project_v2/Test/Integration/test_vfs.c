@@ -2,7 +2,7 @@
 #if ENABLE_TEST_VFS
 #include "vfs_manager.h"
 #include "sdmmc/sdmmc_storage_drv.h"
-#include "strategy/lfs_strategy.h"
+#include "strategy/fatfs_strategy.h"
 #include "elog.h"
 #include "Sys.h"
 #include "test_framework.h"
@@ -14,7 +14,7 @@
 #define LOG_TAG "TEST_VFS"
 
 // 全局实例
-static fs_strategy_t *lfs_strat = NULL;
+static fs_strategy_t *fatfs_strat = NULL;
 static storage_device_t *sd_storage = NULL;
 static gpio_key_t *key_ui;
 static KeyObserver key_observer;
@@ -29,8 +29,8 @@ static void on_key_event(gpio_key_t *key, KeyEvent event) {
         case KeyEvent_SinglePress:
             log_i("Action: Writing to file...");
             
-            // 写入文件
-            int fd = vfs_open("/sd/vfs_test.txt", 0);
+            // 写入文件 - 注意使用统一的 VFS_O_* 宏
+            int fd = vfs_open("/sd/vfs_test.txt", VFS_O_WRONLY | VFS_O_CREAT | VFS_O_APPEND);
             if (fd >= 0) {
                 write_count++;
                 char buffer[128];
@@ -39,26 +39,42 @@ static void on_key_event(gpio_key_t *key, KeyEvent event) {
                 vfs_close(fd);
                 log_i("Write success. Total writes: %lu", write_count);
             } else {
-                log_e("Open failed, maybe SD not inserted?");
+                log_e("Open failed, maybe SD not inserted or unmounted?");
             }
             break;
             
         case KeyEvent_DoublePress:
-            log_i("Action: Reading file...");
+            log_i("Action: Reading file & listing dir...");
             // 读取文件
-            fd = vfs_open("/sd/vfs_test.txt", 0);
+            fd = vfs_open("/sd/vfs_test.txt", VFS_O_RDONLY);
             if (fd >= 0) {
                 char buffer[256];
                 int bytes_read = vfs_read(fd, buffer, sizeof(buffer)-1);
                 if (bytes_read > 0) {
                     buffer[bytes_read] = '\0';
-                    log_i("File content: %s", buffer);
+                    log_i("File content:\n%s", buffer);
                 } else {
                     log_w("File is empty or read error");
                 }
                 vfs_close(fd);
             } else {
                 log_e("Cannot open file for reading");
+            }
+
+            // 测试读取目录
+            vfs_dir_t d;
+            if (vfs_opendir("/sd", &d) == VFS_OK) {
+                log_i("--- Directory Listing of /sd ---");
+                vfs_dirent_t ent;
+                while (vfs_readdir(d, &ent) > 0) {
+                    log_i(" %s  %s  (%lu bytes)", 
+                          ent.info.is_dir ? "<DIR>" : "     ", 
+                          ent.name, ent.info.size);
+                }
+                vfs_closedir(d);
+                log_i("--- End of Directory ---");
+            } else {
+                log_e("Cannot open /sd directory");
             }
             break;
             
@@ -86,16 +102,15 @@ static void test_vfs_setup(void) {
         return;
     }
 
-    // 3. 创建文件系统策略
-    lfs_strategy_config_t lfs_cfg = {0};
-    lfs_strat = lfs_strategy_create(&lfs_cfg);
-    if (lfs_strat == NULL) {
-        log_e("LFS Strategy creation failed");
+    // 3. 创建文件系统策略 (替换 LFS 为 FATFS)
+    fatfs_strat = fatfs_strategy_create();
+    if (fatfs_strat == NULL) {
+        log_e("FATFS Strategy creation failed");
         return;
     }
 
     // 4. 挂载SD卡到/sd
-    int ret = vfs_mount("sd", sd_storage, lfs_strat);
+    int ret = vfs_mount("sd", sd_storage, fatfs_strat);
     if (ret != 0) {
         log_e("VFS Mount failed: %d", ret);
         return;
@@ -129,12 +144,11 @@ static void test_vfs_teardown(void) {
     // 卸载文件系统
     vfs_unmount("sd");
     
-    // 销毁文件系统策略 - 由于lfs_strategy_destroy未实现，暂时跳过
-    // 如果需要释放资源，应该在lfs_strategy.c中实现该函数
-    // if (lfs_strat != NULL) {
-    //     lfs_strategy_destroy(lfs_strat);
-    //     lfs_strat = NULL;
-    // }
+    // 销毁文件系统策略
+    if (fatfs_strat != NULL) {
+        fatfs_strategy_destroy((fatfs_strategy_t *)fatfs_strat);
+        fatfs_strat = NULL;
+    }
     
     // 清理存储设备引用
     sd_storage = NULL;
