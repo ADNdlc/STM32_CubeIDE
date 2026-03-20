@@ -198,13 +198,5 @@ static const fs_ops_t s_lfs_ops = {
 };
 
 fs_strategy_t *lfs_strategy_create(const lfs_strategy_config_t *config) {
-    lfs_strategy_t *strat = malloc(sizeof(lfs_strategy_t));
-    if (!strat) return NULL;
-    memset(strat, 0, sizeof(lfs_strategy_t));
-    
-    strat->Base = malloc(sizeof(fs_strategy_t));
-    strat->Base->ops = &s_lfs_ops;
-    strat->Base->name = "lfs";
-    
-    return strat->Base;
+
 }

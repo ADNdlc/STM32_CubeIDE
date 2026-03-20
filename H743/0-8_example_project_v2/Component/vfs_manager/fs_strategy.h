@@ -55,7 +55,6 @@ typedef struct {
  */
 struct fs_strategy_t {
   const fs_ops_t *ops; // 策略对象
-  const char *name;	   // 前缀
 };
 
 #define VFS_MOUNT(strategy, mp)          (strategy)->ops->mount(mp)

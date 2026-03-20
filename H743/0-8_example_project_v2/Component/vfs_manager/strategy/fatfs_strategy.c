@@ -1,195 +1,199 @@
 #include "fatfs_strategy.h"
 #include "../vfs_manager.h"
+#include "diskio.h"
 #include "ff.h"
+
+
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "MemPool.h"
 #include "elog.h"
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stddef.h>
 
 #define LOG_TAG "FATFS_STRAT"
 #define FATFS_STRATEGY_MEMSOURCE SYS_MEM_INTERNAL
 
-static const TCHAR _fatfs_drive[] = "0:";
+/*--------------------------------*/
+/* diskio相关                 	  */
+/*--------------------------------*/
 
+// 映射表：pdrv 对应 storage_device_t*
+static storage_device_t *g_fatfs_devices[FF_VOLUMES] = {NULL};
+uint8_t register_num = 0;
+
+// 供 fatfs_strategy_mount 调用的注册函数
+void fatfs_diskio_register(BYTE pdrv, storage_device_t *dev) {
+  if (pdrv < FF_VOLUMES && dev != NULL) {
+    g_fatfs_devices[pdrv] = dev;
+    register_num++;
+  }
+}
+
+DSTATUS disk_status(BYTE pdrv) {
+  storage_device_t *dev = g_fatfs_devices[pdrv];
+  if (!dev)
+    return STA_NOINIT;
+
+  storage_status_t status = STORAGE_CHECK_ALIVE(dev);
+  if (status == STORAGE_STATUS_OFFLINE)
+    return STA_NODISK;
+  if (status == STORAGE_STATUS_NOT_INIT || status == STORAGE_STATUS_ERROR)
+    return STA_NOINIT;
+
+  return 0; // OK (0 代表正常)
+}
+
+DSTATUS disk_initialize(BYTE pdrv) {
+  storage_device_t *dev = g_fatfs_devices[pdrv];
+  if (!dev)
+    return STA_NOINIT;
+
+  // 在此架构里，SD卡初始化由 Storage Manager 在挂载前完成了。
+  // 所以这里只要检查状态即可
+  return disk_status(pdrv);
+}
+
+DRESULT disk_read(BYTE pdrv, BYTE *buff, LBA_t sector, UINT count) {
+  storage_device_t *dev = g_fatfs_devices[pdrv];
+  if (!dev)
+    return RES_NOTRDY;
+
+  // 将 扇区数 转换为 字节地址 和 字节长度 (SD卡固定512)
+  uint32_t addr = sector * dev->info.read_size;
+  uint32_t len = count * dev->info.read_size;
+
+  if (STORAGE_READ(dev, addr, buff, len) == 0) {
+    return RES_OK;
+  }
+  return RES_ERROR;
+}
+
+DRESULT disk_write(BYTE pdrv, const BYTE *buff, LBA_t sector, UINT count) {
+  storage_device_t *dev = g_fatfs_devices[pdrv];
+  if (!dev)
+    return RES_NOTRDY;
+
+  uint32_t addr = sector * dev->info.write_size;
+  uint32_t len = count * dev->info.write_size;
+
+  if (STORAGE_WRITE(dev, addr, buff, len) == 0) {
+    return RES_OK;
+  }
+  return RES_ERROR;
+}
+
+DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff) {
+  storage_device_t *dev = g_fatfs_devices[pdrv];
+  if (!dev)
+    return RES_NOTRDY;
+
+  DRESULT res = RES_ERROR;
+  switch (cmd) {
+  case CTRL_SYNC:
+    // 等待设备空闲，SD卡通过轮询内部状态判断，我们的 STORAGE_WRITE
+    // 已经是阻塞同步的了
+    res = RES_OK;
+    break;
+  case GET_SECTOR_COUNT: // 获取扇区总数
+    *(LBA_t *)buff = dev->info.total_size / dev->info.erase_size;
+    res = RES_OK;
+    break;
+  case GET_SECTOR_SIZE: // 获取扇区大小
+    *(WORD *)buff = dev->info.erase_size;
+    res = RES_OK;
+    break;
+  case GET_BLOCK_SIZE:  // 擦除块大小 (以扇区为单位)
+    *(DWORD *)buff = 1; // 简单的写法，告诉 FatFs 每次擦 1 个扇区即可
+    res = RES_OK;
+    break;
+  }
+  return res;
+}
+
+/*--------------------------------*/
+/* ops实现                 	  */
+/*--------------------------------*/
 static int fatfs_vfs_mount(mount_point_t *mp) {
-    // 从 mp->fs_strategy 拿不到 fatfs_strategy_t 的直接指针
-    // 通过 offsetof 转换，或者用单独的指针
-    // 假设挂载成功。真正的 f_mount 需要一个外部挂载点。
-    fatfs_strategy_t *strat = (fatfs_strategy_t *)((uint8_t*)mp->fs_strategy - offsetof(fatfs_strategy_t, Base));
-    
-    FRESULT res = f_mount(&strat->fs, _fatfs_drive, 1);
-    return (res == FR_OK) ? 0 : -1;
-}
+  fatfs_strategy_t *strat = (fatfs_strategy_t *)mp->fs_strategy;
 
-static int fatfs_vfs_unmount(mount_point_t *mp) {
-    FRESULT res = f_mount(NULL, _fatfs_drive, 0);
-    return (res == FR_OK) ? 0 : -1;
-}
+  // 1. 【核心桥接】将底层物理设备 device 注册到 diskio 的指定盘符上
+  fatfs_diskio_register(strat->pdrv, mp->device);
 
-static int fatfs_vfs_format(mount_point_t *mp) {
-//    BYTE work[_MAX_SS];
-//    FRESULT res = f_mkfs(_fatfs_drive, FM_ANY, 0, work, sizeof(work));
-//    return (res == FR_OK) ? 0 : -1;
-}
+  // 2. 调用 FatFs 真正的挂载
+  // 参数 1：立即挂载，如果在这一步因为没插卡导致失败，我们要如实返回
+  FRESULT res = f_mount(&strat->fs, strat->drive_num, 1);
 
-static int fatfs_vfs_open(mount_point_t *mp, vfs_file_t *file, const char *path, int flags) {
-    FIL *fp = malloc(sizeof(FIL));
-    if (!fp) return -1;
-    char full_path[64];
-    snprintf(full_path, sizeof(full_path), "%s/%s", _fatfs_drive, path);
-    // 忽略特定 flags，统一按照读写创建处理
-    BYTE mode = FA_READ | FA_WRITE | FA_OPEN_ALWAYS; 
-    FRESULT res = f_open(fp, full_path, mode);
-    if (res == FR_OK) {
-        *file = (vfs_file_t)fp;
-        return 0;
-    }
-    free(fp);
+  if (res == FR_OK) {
+    return 0; // 挂载成功
+  } else {
+    // 如果挂载失败，注销 diskio 映射以防空指针误用
+    fatfs_diskio_register(strat->pdrv, NULL);
     return -1;
+  }
 }
 
-static int fatfs_vfs_read(vfs_file_t file, void *buf, size_t len) {
-    FIL *fp = (FIL *)file;
-    UINT br;
-    FRESULT res = f_read(fp, buf, len, &br);
-    return (res == FR_OK) ? (int)br : -1;
-}
+static int fatfs_vfs_unmount(mount_point_t *mp) {}
 
-static int fatfs_vfs_write(vfs_file_t file, const void *buf, size_t len) {
-    FIL *fp = (FIL *)file;
-    UINT bw;
-    FRESULT res = f_write(fp, buf, len, &bw);
-    return (res == FR_OK) ? (int)bw : -1;
-}
+static int fatfs_vfs_format(mount_point_t *mp) {}
 
-static int fatfs_vfs_lseek(vfs_file_t file, off_t offset, int whence) {
-    FIL *fp = (FIL *)file;
-    FSIZE_t abs_offset = offset; // SEEK_SET
-    // 在本实现中假设 offset 已经是绝对位置。如果需要完整 POSIX
-    // 需要根据 whence（通常 0=SEEK_SET, 1=SEEK_CUR, 2=SEEK_END）计算。
-    if (whence == 1) abs_offset = f_tell(fp) + offset;
-    else if (whence == 2) abs_offset = f_size(fp) + offset;
-    FRESULT res = f_lseek(fp, abs_offset);
-    return (res == FR_OK) ? 0 : -1;
-}
+static int fatfs_vfs_open(mount_point_t *mp, vfs_file_t *file, const char *path, int flags) {}
 
-static int fatfs_vfs_sync(vfs_file_t file) {
-    FIL *fp = (FIL *)file;
-    return (f_sync(fp) == FR_OK) ? 0 : -1;
-}
+static int fatfs_vfs_read(vfs_file_t file, void *buf, size_t len) {}
 
-static int fatfs_vfs_close(vfs_file_t file) {
-    FIL *fp = (FIL *)file;
-    int res = f_close(fp);
-    free(fp);
-    return (res == FR_OK) ? 0 : -1;
-}
+static int fatfs_vfs_write(vfs_file_t file, const void *buf, size_t len) {}
 
-static int fatfs_vfs_opendir(mount_point_t *mp, vfs_dir_t *dir, const char *path) {
-    DIR *dp = malloc(sizeof(DIR));
-    if (!dp) return -1;
-    char full_path[64];
-    snprintf(full_path, sizeof(full_path), "%s/%s", _fatfs_drive, path);
-    FRESULT res = f_opendir(dp, full_path);
-    if (res == FR_OK) {
-        *dir = (vfs_dir_t)dp;
-        return 0;
-    }
-    free(dp);
-    return -1;
-}
+static int fatfs_vfs_lseek(vfs_file_t file, off_t offset, int whence) {}
 
-static int fatfs_vfs_readdir(vfs_dir_t dir, void *dirent) {
-    DIR *dp = (DIR *)dir;
-    FILINFO *fno = (FILINFO *)dirent;
-    FRESULT res = f_readdir(dp, fno);
-    return (res == FR_OK && fno->fname[0] != 0) ? 1 : 0;
-}
+static int fatfs_vfs_sync(vfs_file_t file) {}
 
-static int fatfs_vfs_closedir(vfs_dir_t dir) {
-    DIR *dp = (DIR *)dir;
-    int res = f_closedir(dp);
-    free(dp);
-    return (res == FR_OK) ? 0 : -1;
-}
+static int fatfs_vfs_close(vfs_file_t file) {}
 
-static int fatfs_vfs_mkdir(mount_point_t *mp, const char *path) {
-    char full_path[64];
-    snprintf(full_path, sizeof(full_path), "%s/%s", _fatfs_drive, path);
-    return (f_mkdir(full_path) == FR_OK) ? 0 : -1;
-}
+static int fatfs_vfs_opendir(mount_point_t *mp, vfs_dir_t *dir, const char *path) {}
 
-static int fatfs_vfs_unlink(mount_point_t *mp, const char *path) {
-    char full_path[64];
-    snprintf(full_path, sizeof(full_path), "%s/%s", _fatfs_drive, path);
-    return (f_unlink(full_path) == FR_OK) ? 0 : -1;
-}
+static int fatfs_vfs_readdir(vfs_dir_t dir, void *dirent) {}
 
-static int fatfs_vfs_rename(mount_point_t *mp, const char *old_path, const char *new_path) {
-    char f_old[64], f_new[64];
-    snprintf(f_old, sizeof(f_old), "%s/%s", _fatfs_drive, old_path);
-    snprintf(f_new, sizeof(f_new), "%s/%s", _fatfs_drive, new_path);
-    return (f_rename(f_old, f_new) == FR_OK) ? 0 : -1;
-}
+static int fatfs_vfs_closedir(vfs_dir_t dir) {}
 
-static int fatfs_vfs_stat(mount_point_t *mp, const char *path, struct vfs_stat_t *st) {
-    char full_path[64];
-    snprintf(full_path, sizeof(full_path), "%s/%s", _fatfs_drive, path);
-    FILINFO fno;
-    FRESULT res = f_stat(full_path, &fno);
-    if (res == FR_OK && st) {
-        st->size = fno.fsize;
-        st->is_dir = (fno.fattrib & AM_DIR) != 0;
-    }
-    return (res == FR_OK) ? 0 : -1;
-}
+static int fatfs_vfs_mkdir(mount_point_t *mp, const char *path) {}
 
-static int fatfs_vfs_ioctl(mount_point_t *mp, int cmd, void *arg) {
-    return -1;
-}
+static int fatfs_vfs_unlink(mount_point_t *mp, const char *path) {}
 
-static const fs_ops_t fatfs_ops = {
-    .mount = fatfs_vfs_mount,
-    .unmount = fatfs_vfs_unmount,
-    .format = fatfs_vfs_format,
-    .open = fatfs_vfs_open,
-    .read = fatfs_vfs_read,
-    .write = fatfs_vfs_write,
-    .lseek = fatfs_vfs_lseek,
-    .sync = fatfs_vfs_sync,
-    .close = fatfs_vfs_close,
-    .opendir = fatfs_vfs_opendir,
-    .readdir = fatfs_vfs_readdir,
-    .closedir = fatfs_vfs_closedir,
-    .mkdir = fatfs_vfs_mkdir,
-    .unlink = fatfs_vfs_unlink,
-    .rename = fatfs_vfs_rename,
-    .stat = fatfs_vfs_stat,
-    .ioctl = fatfs_vfs_ioctl
-};
+static int fatfs_vfs_rename(mount_point_t *mp, const char *old_path, const char *new_path) {}
+
+static int fatfs_vfs_stat(mount_point_t *mp, const char *path, struct vfs_stat_t *st) {}
+
+static int fatfs_vfs_ioctl(mount_point_t *mp, int cmd, void *arg) {}
+
+static const fs_ops_t fatfs_ops = {.mount = fatfs_vfs_mount,
+                                   .unmount = fatfs_vfs_unmount,
+                                   .format = fatfs_vfs_format,
+                                   .open = fatfs_vfs_open,
+                                   .read = fatfs_vfs_read,
+                                   .write = fatfs_vfs_write,
+                                   .lseek = fatfs_vfs_lseek,
+                                   .sync = fatfs_vfs_sync,
+                                   .close = fatfs_vfs_close,
+                                   .opendir = fatfs_vfs_opendir,
+                                   .readdir = fatfs_vfs_readdir,
+                                   .closedir = fatfs_vfs_closedir,
+                                   .mkdir = fatfs_vfs_mkdir,
+                                   .unlink = fatfs_vfs_unlink,
+                                   .rename = fatfs_vfs_rename,
+                                   .stat = fatfs_vfs_stat,
+                                   .ioctl = fatfs_vfs_ioctl};
 
 fs_strategy_t *fatfs_strategy_create(void) {
-    fatfs_strategy_t *strat = malloc(sizeof(fatfs_strategy_t));
-    if (!strat) return NULL;
-    memset(strat, 0, sizeof(fatfs_strategy_t));
-    
-    strat->Base = malloc(sizeof(fs_strategy_t));
-    if (!strat->Base) {
-        free(strat);
-        return NULL;
-    }
-    
-    strat->Base->ops = &fatfs_ops;
-    strat->Base->name = "fatfs";
-    
-    return strat->Base;
+#ifdef USE_MEMPOOL
+  fatfs_strategy_t *fat_str =
+      sys_malloc(FATFS_STRATEGY_MEMSOURCE, sizeof(fatfs_strategy_t));
+#else
+  fatfs_strategy_t *fat_str = malloc(sizeof(fatfs_strategy_t));
+#endif
 }
 
 void fatfs_strategy_destroy(fatfs_strategy_t *strategy) {
-    if (strategy) {
-        if (strategy->Base) free(strategy->Base);
-        free(strategy);
-    }
+  if (strategy) {
+  }
 }
