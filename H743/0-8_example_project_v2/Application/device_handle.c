@@ -9,7 +9,7 @@
 #define LOG_TAG "DEV_HANDLE"
 #include "elog.h"
 
-static app_settings_t *sys_config = NULL;
+// static app_settings_t *sys_config = NULL; // 移除直接对结构的依赖
 static gpio_key_t *key0 = NULL;
 static KeyObserver observer0;
 
@@ -64,10 +64,10 @@ static void key0_event_callback(gpio_key_t *key, KeyEvent event) {
   }
 }
 
-void sys_devices_init(void) {
+void devices_init(void) {
   log_i("Initializing hardware devices for Thing Model...");
-  sys_config = sys_config_get();
-  if (sys_config->configs[CLOUD_PRODUCT_ID].string == NULL) {
+  const char *product_id = sys_config_get_cloud_product_id();
+  if (product_id == NULL) {
     log_e("Cloud product id is NULL");
     return;
   }
@@ -116,14 +116,11 @@ void sys_devices_init(void) {
   observer0.callback = key0_event_callback;
   observer0.next = NULL;
   Key_RegisterObserver(key0, &observer0); // 注册事件回调
-  Key_SetDebounce(key0, 20);              // 20ms去抖动
-  Key_SetLongPress(key0, 800);            // 长按检测
-  Key_SetClickTimeout(key0, 300);         // 300ms点击超时
 
   log_i("Device registration completed.");
 }
 
-void sys_devices_process(void) {
+void devices_process(void) {
   Key_Update(key0); // 更新按键状态
 }
 #endif

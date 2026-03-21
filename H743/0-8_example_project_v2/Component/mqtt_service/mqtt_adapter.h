@@ -18,7 +18,7 @@ typedef struct {
 
 // 主题类型
 typedef enum {
-  MQTT_TOPIC_PROPERTY_SET = 0,   // 云命令
+  MQTT_TOPIC_PROPERTY_SET = 0,   // 云控制
   MQTT_TOPIC_PROPERTY_SET_REPLY, // 命令回复
   MQTT_TOPIC_PROPERTY_POST,      // 本地数据推送
 } mqtt_topic_type_t;
@@ -45,6 +45,7 @@ typedef struct {
    * @brief 生成主题
    * @param device_id 设备ID
    * @param out_topic 输出主题
+   * @param out_topic 输出主题缓冲区
    * @param size 输出主题缓冲区大小
    */
   void (*get_topic)(const char *device_id, mqtt_topic_type_t topic_type,

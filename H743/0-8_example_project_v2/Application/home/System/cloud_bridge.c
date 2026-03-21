@@ -1,16 +1,16 @@
 #include "cloud_bridge.h"
+#include "mqtt_service/mqtt_adapter.h"
+#include "mqtt_service/mqtt_service.h"
 #include "sys.h"
 #include <string.h>
-#include "mqtt_service/mqtt_service.h"
 
 #include "elog.h"
 #define LOG_TAG "CLOUD_BR"
 
-#define CLOUD_SYNC_INTERVAL_MS 1000   // 同步检查周期
+#define CLOUD_SYNC_INTERVAL_MS 1000 // 同步检查周期
 // 内部状态和变量
 static uint32_t g_last_sync_time = 0;
 static mqtt_service_t *g_mqtt_svc = NULL;
-
 
 // --- 解析属性回调 ---
 static void on_prop_parsed(const char *prop_id, thing_value_t value,
@@ -18,34 +18,34 @@ static void on_prop_parsed(const char *prop_id, thing_value_t value,
   const char *device_id = (const char *)ctx;
   log_i("Applying property %s.%s from cloud", device_id, prop_id);
   // 云命令中解析出的属性值会通过此回调函数传递给物模型层
-  thing_model_set_prop(device_id, prop_id, value, THING_SOURCE_CLOUD); //来源：云端
+  thing_model_set_prop(device_id, prop_id, value,
+                       THING_SOURCE_CLOUD); // 来源：云端
 }
 
 /**
  * @brief MQTT服务事件处理函数
- * 
+ *
  * @param svc       MQTT服务实例
  * @param event     MQTT事件
  * @param user_data 用户数据
  */
 static void on_mqtt_svc_event(mqtt_service_t *svc,
-                              const mqtt_svc_event_t *event, void *user_data) {
-  if (event->type == MQTT_SVC_EVENT_STATE_CHANGED) {
-    if (event->state == MQTT_SVC_STATE_CONNECTED) {
-      log_i("MQTT Connected, subscribing to command topics...");
-      // 订阅所有设备的命令控制主题
-      uint8_t count = thing_model_get_count();
-      for (uint8_t i = 0; i < count; i++) {
-        thing_device_t *dev = thing_model_get_device(i);
-        if (dev && svc->adapter) {
-          char topic[128];
-          svc->adapter->get_cmd_topic(dev->device_id, topic, sizeof(topic));
-          mqtt_svc_subscribe(svc, topic, 0);
-          log_i("Subscribed to %s", topic);
-        }
+                              const mqtt_drv_event_t *event, void *user_data) {
+  if (event->type == MQTT_DRV_EVENT_CONNECTED) {
+    log_i("MQTT Connected, subscribing to command topics...");
+    // 订阅所有设备的命令控制主题
+    uint8_t count = thing_model_get_count();
+    for (uint8_t i = 0; i < count; i++) {
+      thing_device_t *dev = thing_model_get_device(i);
+      if (dev && svc->adapter) {
+        char topic[128];
+        svc->adapter->get_topic(dev->device_id, MQTT_TOPIC_PROPERTY_SET, topic,
+                                sizeof(topic));
+        mqtt_svc_subscribe(svc, topic, 0);
+        log_i("Subscribed to %s", topic);
       }
     }
-  } else if (event->type == MQTT_SVC_EVENT_DATA_RECEIVED) {
+  } else if (event->type == MQTT_DRV_EVENT_DATA) {
     if (svc->adapter) {
       char dev_id[64] = {0};
       char msg_id[64] = {0};
@@ -86,8 +86,8 @@ void cloud_bridge_process(void) {
   }
   g_last_sync_time = now;
 
-  //log_v("prop sync...");
-  // 扫描脏属性并同步
+  // log_v("prop sync...");
+  //  扫描脏属性并同步
   uint8_t dev_count = thing_model_get_count();
   // 遍历所有设备
   for (uint8_t i = 0; i < dev_count; i++) {

@@ -13,13 +13,13 @@
 
 /* ----- 运行配置 ----- */
 #define TEST_ENABLE	1		// 使能测试模式(不进入主程序)
-#define SERVICE_ENABLE 0	// 服务组件层初始化(底层使能)
+#define SERVICE_ENABLE 1	// 服务组件层初始化(底层使能)
 
-#define NETWORK_SERVICE_ENABLE 0	// 网络服务使能(wifi相关)
-#define SNTP_SERVICE_ENABLE 0		// 使能SNTP同步RTC
-#define CLOUD_SERVICE_ENABLE 0		// 物模型云端控制对接
+#define NETWORK_SERVICE_ENABLE 1	// 网络服务使能(wifi相关)
+#define SNTP_SERVICE_ENABLE 1		// 使能SNTP同步RTC
+#define CLOUD_SERVICE_ENABLE 1		// 物模型云端控制对接
 
-#define THINGMODEL_ENABLE 0			// 物体模型控制使能
+#define THINGMODEL_ENABLE 1			// 物体模型控制使能
 
 #define LVGL_ENABLE	0		// 图形库使能
 #define GUI_ENABLE	0		// UI页面使能

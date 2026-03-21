@@ -3,7 +3,12 @@
 #include "wifi_factory.h"
 #include "mqtt_factory.h"
 #include "sntp_factory.h"
+#include "wifi_service/wifi_service.h"
 #include "sntp_service/sntp_service.h"
+#include "mqtt_service/mqtt_service.h"
+#include "mqtt_service/adapters/onenet_adapter.h"
+
+#include "sys_config.h"
 
 
 
@@ -42,8 +47,7 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
 
     // 自动启动 SNTP 时间同步 (UTC+8)
     log_i("Starting SNTP Sync...");
-    sntp_svc_set_network_ready(&g_sntp_svc, true);
-    sntp_svc_start_sync(&g_sntp_svc, 8, 24 * 3600 * 1000);
+    sntp_svc_start_sync(&g_sntp_svc);
 
   } else if (status == WIFI_STATUS_DISCONNECTED) { // 断开连接
     log_w("Network Offline");
@@ -57,11 +61,11 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
  * @brief MQTT状态变化回调
  */
 static void mqtt_event_handler(mqtt_service_t *svc,
-                               const mqtt_svc_event_t *event, void *user_data) {
-  if (event->type == MQTT_SVC_EVENT_CONNECTED) {
+                               const mqtt_drv_event_t *event, void *user_data) {
+  if (event->type == MQTT_DRV_EVENT_CONNECTED) {
     log_i("MQTT Connected Event received");
     sys_state_set_mqtt(true);
-  } else if (event->type == MQTT_SVC_EVENT_DISCONNECTED) {
+  } else if (event->type == MQTT_DRV_EVENT_DISCONNECTED) {
     log_w("MQTT Disconnected Event received");
     sys_state_set_mqtt(false);
   }
@@ -82,8 +86,30 @@ void net_mgr_init(void) {
   wifi_svc_init(&g_wifi_svc, WIFI_ID_MAIN);
   wifi_service_register_callback(&g_wifi_svc, wifi_event_handler, NULL);
 #endif
-#if CLOUD_SERVICE_ENABLE // 初始化mqtt服务
-  mqtt_svc_init(&g_mqtt_svc, MQTT_ID_MAIN, &g_onenet_adapter);
+#if CLOUD_SERVICE_ENABLE // 初始化mqtt service
+  const mqtt_adapter_t *adapter = NULL;
+  int platform = sys_config_get_cloud_platform();
+
+  if (platform == CLOUD_PLATFORM_ONENET) {
+    adapter = &g_onenet_adapter;
+    onenet_config_t onenet_cfg;
+    memset(&onenet_cfg, 0, sizeof(onenet_config_t));
+    strncpy(onenet_cfg.product_id, sys_config_get_cloud_product_id(), sizeof(onenet_cfg.product_id) - 1);
+    strncpy(onenet_cfg.device_id, sys_config_get_cloud_device_id(), sizeof(onenet_cfg.device_id) - 1);
+    strncpy(onenet_cfg.device_secret, sys_config_get_cloud_device_secret(), sizeof(onenet_cfg.device_secret) - 1);
+    onenet_adapter_init(&onenet_cfg);
+  } else {
+    log_w("Unsupported cloud platform: %d, defaulting to OneNet", platform);
+    adapter = &g_onenet_adapter;
+    onenet_config_t onenet_cfg;
+    memset(&onenet_cfg, 0, sizeof(onenet_config_t));
+    strncpy(onenet_cfg.product_id, sys_config_get_cloud_product_id(), sizeof(onenet_cfg.product_id) - 1);
+    strncpy(onenet_cfg.device_id, sys_config_get_cloud_device_id(), sizeof(onenet_cfg.device_id) - 1);
+    strncpy(onenet_cfg.device_secret, sys_config_get_cloud_device_secret(), sizeof(onenet_cfg.device_secret) - 1);
+    onenet_adapter_init(&onenet_cfg);
+  }
+
+  mqtt_svc_init(&g_mqtt_svc, MQTT_ID_MAIN, adapter);
   mqtt_svc_register_callback(&g_mqtt_svc, mqtt_event_handler, NULL);
   cloud_bridge_init(&g_mqtt_svc);
 #endif
@@ -155,7 +181,7 @@ int net_mgr_wifi_connect_manual(const char *ssid, const char *pwd) {
 
   // 2. 启用 WiFi 并尝试连接
   g_wifi_target_state = true;
-  //wifi_svc_set_mode(&g_wifi_svc, WIFI_MODE_STATION);
+  sys_config_save(); // 手动连接后保存配置到文件系统
   return wifi_svc_connect(&g_wifi_svc, sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
 }
 #endif

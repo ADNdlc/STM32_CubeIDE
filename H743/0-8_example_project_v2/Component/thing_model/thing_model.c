@@ -104,17 +104,33 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
   if (!dev)
     return NULL;
 
-  // 深拷贝设备模板
+  // 1. 复制基本结构
   memcpy(dev, tmpl, sizeof(thing_device_t));
 
-  // 深拷贝属性
-  if (tmpl->prop_count > 0) {
+  // 2. 深度拷贝关键字符串，防止外部指针失效
+  if (tmpl->device_id) {
+    dev->device_id = strdup(tmpl->device_id);
+  }
+  if (tmpl->name) {
+    dev->name = strdup(tmpl->name);
+  }
+
+  // 3. 深拷贝属性列表
+  if (tmpl->prop_count > 0 && tmpl->properties) {
     dev->properties =
         (thing_property_t *)malloc(sizeof(thing_property_t) * tmpl->prop_count);
     if (dev->properties) {
       memcpy(dev->properties, tmpl->properties,
              sizeof(thing_property_t) * tmpl->prop_count);
+      
+      // 进一步深拷贝属性 ID 和名称
+      for(int i = 0; i < tmpl->prop_count; i++) {
+        if(tmpl->properties[i].id) dev->properties[i].id = strdup(tmpl->properties[i].id);
+        if(tmpl->properties[i].name) dev->properties[i].name = strdup(tmpl->properties[i].name);
+      }
     } else {
+      free((void*)dev->device_id);
+      free((void*)dev->name);
       free(dev);
       return NULL;
     }

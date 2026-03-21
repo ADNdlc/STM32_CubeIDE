@@ -129,7 +129,7 @@
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1560450733.2069010365" name="mqtt_factory.h" rcbsApplicability="disable" resourcePath="BSP/Drivers/factory/Service/mqtt_factory.h" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="A_Project_cfg"/>
-						<entry excluding="device_handle.h|device_handle.c|home/home.h|home/home.c|home/UI" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
+						<entry excluding="home/home.h|home/home.c|home/UI" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
 						<entry excluding="Drivers/abandon|Drivers/old" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry excluding="mqtt_service/adapters/dev_token.c|mqtt_service/adapters/dev_token.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
