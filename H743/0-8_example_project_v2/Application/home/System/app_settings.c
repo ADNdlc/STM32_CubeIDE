@@ -45,7 +45,8 @@ int app_settings_load(const char *app_name, const char *config_file_name) {
   }
 
   char path[256];
-  snprintf(path, sizeof(path), "%s%s.json", APP_SETTINGS_CONFIG_PATH, config_file_name);
+  snprintf(path, sizeof(path), "%s%s.json", APP_SETTINGS_CONFIG_PATH,
+           config_file_name);
 
   char *json_buffer = NULL;
 
@@ -80,7 +81,8 @@ int app_settings_load(const char *app_name, const char *config_file_name) {
   json_buffer[st.size] = '\0'; // 确保字符串结束
 #else
   FILE *fp = fopen(path, "rb");
-  if (!fp) return -1;
+  if (!fp)
+    return -1;
   fseek(fp, 0, SEEK_END);
   long size = ftell(fp);
   fseek(fp, 0, SEEK_SET);
@@ -106,82 +108,84 @@ int app_settings_load(const char *app_name, const char *config_file_name) {
 
   // 检查 hash
   cJSON *hash_item = cJSON_GetObjectItem(root, "hash");
-  if (hash_item && cJSON_IsNumber(hash_item)) {
-    uint32_t loaded_hash = (uint32_t)hash_item->valuedouble;
-    if (loaded_hash != app_def->settings->hash) {
-      log_e("Hash mismatch for %s: loaded=%u, expected=%u", app_name, loaded_hash, app_def->settings->hash);
-      cJSON_Delete(root);
-      return -1;
-    }
-  } else {
-    log_e("Hash invalid in settings for %s", app_name);
+  if (!hash_item || !cJSON_IsNumber(hash_item) ||
+      (uint32_t)hash_item->valuedouble != app_def->settings->hash) {
+    log_e("Hash invalid or mismatch for %s", app_name);
     cJSON_Delete(root);
     return -1;
   }
 
   // 读取配置数组
   cJSON *configs_array = cJSON_GetObjectItem(root, "configs");
-  if (configs_array && cJSON_IsArray(configs_array)) {
-    int config_count = cJSON_GetArraySize(configs_array);
-
-    app_config_t *new_configs = (app_config_t *)sys_malloc(SYS_MEM_INTERNAL, config_count * sizeof(app_config_t));
-    if (!new_configs) {
-      log_e("Failed to allocate configs array");
-      cJSON_Delete(root);
-      return -1;
-    }
-    memset(new_configs, 0, config_count * sizeof(app_config_t));
-
-    // 解析每个配置项
-    for (int i = 0; i < config_count; i++) {
-      cJSON *config_item = cJSON_GetArrayItem(configs_array, i);
-      if (!config_item) continue;
-
-      cJSON *key_item = cJSON_GetObjectItem(config_item, "key");
-      cJSON *type_item = cJSON_GetObjectItem(config_item, "type");
-      cJSON *value_item = cJSON_GetObjectItem(config_item, "value");
-
-      if (key_item && cJSON_IsNumber(key_item) && type_item && cJSON_IsNumber(type_item) && value_item) {
-        new_configs[i].key = (uint16_t)key_item->valueint;
-        new_configs[i].type = (uint8_t)type_item->valueint;
-
-        switch (new_configs[i].type) {
-        case APP_CONFIG_TYPE_INT:
-          new_configs[i].i_val = (int32_t)value_item->valueint;
-          break;
-        case APP_CONFIG_TYPE_STRING:
-          if (cJSON_IsString(value_item)) {
-            size_t str_len = strlen(value_item->valuestring) + 1;
-            new_configs[i].s_val = (char *)sys_malloc(SYS_MEM_INTERNAL, str_len);
-            if (new_configs[i].s_val) {
-              strcpy(new_configs[i].s_val, value_item->valuestring);
-            }
-          }
-          break;
-        case APP_CONFIG_TYPE_BOOL:
-          if (cJSON_IsBool(value_item)) {
-            new_configs[i].b_val = cJSON_IsTrue(value_item);
-          } else {
-            new_configs[i].b_val = (value_item->valueint != 0);
-          }
-          break;
-        case APP_CONFIG_TYPE_DOUBLE:
-          new_configs[i].d_val = value_item->valuedouble;
-          break;
-        default:
-          break;
-        }
-      }
-    }
-
-    // 释放旧内存并挂载新内存
-    free_configs(app_def->settings->configs, app_def->settings->count);
-    app_def->settings->configs = new_configs;
-    app_def->settings->count = config_count;
-    app_def->settings->attr.is_loaded = 1;
+  if (!configs_array || !cJSON_IsArray(configs_array)) {
+    cJSON_Delete(root);
+    return -1;
   }
 
+  int config_count = cJSON_GetArraySize(configs_array);
+  if (config_count == 0) {
+    cJSON_Delete(root);
+    return 0; // 空配置
+  }
+
+  // 分配临时数组
+  app_config_t *new_configs = (app_config_t *)sys_malloc(
+      SYS_MEM_INTERNAL, config_count * sizeof(app_config_t));
+  if (!new_configs) {
+    cJSON_Delete(root);
+    return -1;
+  }
+  memset(new_configs, 0, config_count * sizeof(app_config_t));
+
+  // 解析每个配置项
+  for (int i = 0; i < config_count; i++) {
+    cJSON *config_item = cJSON_GetArrayItem(configs_array, i);
+    if (!config_item)
+      continue;
+
+    cJSON *key_item = cJSON_GetObjectItem(config_item, "key");
+    cJSON *type_item = cJSON_GetObjectItem(config_item, "type");
+    cJSON *value_item = cJSON_GetObjectItem(config_item, "value");
+
+    if (key_item && cJSON_IsNumber(key_item) && type_item &&
+        cJSON_IsNumber(type_item) && value_item) {
+      new_configs[i].key = (uint16_t)key_item->valueint;
+      new_configs[i].type = (uint8_t)type_item->valueint;
+
+      switch (new_configs[i].type) {
+      case APP_CONFIG_TYPE_INT:
+        new_configs[i].i_val = (int32_t)value_item->valuedouble;
+        break;
+      case APP_CONFIG_TYPE_STRING:
+        if (cJSON_IsString(value_item)) {
+          size_t str_len = strlen(value_item->valuestring) + 1;
+          new_configs[i].s_val = (char *)sys_malloc(SYS_MEM_INTERNAL, str_len);
+          if (new_configs[i].s_val) {
+            strcpy(new_configs[i].s_val, value_item->valuestring);
+          }
+        }
+        break;
+      case APP_CONFIG_TYPE_BOOL:
+        new_configs[i].b_val = cJSON_IsTrue(value_item) ||
+                               (cJSON_IsNumber(value_item) &&
+                                value_item->valueint != 0);
+        break;
+      case APP_CONFIG_TYPE_DOUBLE:
+        new_configs[i].d_val = value_item->valuedouble;
+        break;
+      }
+    }
+  }
+
+  // 释放旧内存并挂载新内存 (事务操作)
+  free_configs(app_def->settings->configs, app_def->settings->count);
+  app_def->settings->configs = new_configs;
+  app_def->settings->count = (uint8_t)config_count;
+  app_def->settings->attr.is_loaded = 1;
+  app_def->settings->attr.is_dirty = 0;
+
   cJSON_Delete(root);
+  log_i("Loaded %d configs for %s", config_count, app_name);
   return 0;
 }
 

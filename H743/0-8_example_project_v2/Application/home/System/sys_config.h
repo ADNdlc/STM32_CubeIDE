@@ -34,16 +34,14 @@ typedef enum {
   SYS_CONFIG_KEY_MAX
 } sys_config_key_t;
 
-/**
- * @brief 初始化系统配置模块
- * @return 0 on success
- */
 int sys_config_init(void);
+
+int sys_config_save(void); // 保存系统配置到文件系统
 
 void sys_config_set_defaults(void); // 设置为程序默认参数(调试)
 
 /**
- * @brief 获取系统配置
+ * @brief 获取系统配置(外部调用)
  */
 app_settings_t *sys_config_get(void);
 
