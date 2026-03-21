@@ -20,10 +20,10 @@
 #include "lvgl/porting/lv_port_disp.h"
 #include "lvgl/porting/lv_port_indev.h"
 #include "sdram_factory.h"
+#include "service_factory.h"
 #include "timer_factory.h"
 #include "uart_queue.h"
 #include "usart_factory.h"
-#include "service_factory.h"
 
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
@@ -35,7 +35,9 @@ static uint8_t debug_rx_buf[64];
 /* LVGL相关 */
 #if LVGL_ENABLE
 lcd_driver_t *lcd = NULL;
-static void lv_tick_cb(void *ctx) { lv_tick_inc(1); } //供 Timer 回调使用的 LVGL 心跳
+static void lv_tick_cb(void *ctx) {
+  lv_tick_inc(1);
+} // 供 Timer 回调使用的 LVGL 心跳
 #endif
 
 void bsp_init(void) {
@@ -86,8 +88,9 @@ void bsp_init(void) {
   sys_mem_init_external(); // 外部内存池初始化
 
 #if SERVICE_ENABLE
-  service_factory_init();
+  service_factory_init(); // 初始化服务组件的底层驱动
 #endif
+
   /* ---- LVGL 初始化 ---- */
 #if LVGL_ENABLE
   lv_init();
@@ -95,7 +98,7 @@ void bsp_init(void) {
   lv_port_indev_init();
   log_i("LVGL core init success.");
 
-  /* ---- LVGL 定时器触发 (时基) ---- */
+  /* ---- 定时器任务(LVGL时基) ---- */
   timer_driver_t *timer_lv = timer_driver_get(TIMER_ID_LV);
   if (timer_lv) {
     TIMER_SET_PERIOD(timer_lv, 1);
@@ -106,11 +109,10 @@ void bsp_init(void) {
     log_e("LVGL timer tick init failed!");
   }
 #endif
-
 }
 
-void bsp_process(void){
+void bsp_process(void) {
 #if SERVICE_ENABLE
-	service_factory_process();
+  service_factory_process(); // 服务组件的底层处理
 #endif
 }

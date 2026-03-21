@@ -9,6 +9,7 @@
 static mount_point_t s_mount_points[VFS_MAX_MOUNT_POINTS];
 static vfs_event_cb_t s_event_cb = NULL;
 
+#define MONNITOR_TASK_CYCLE 2000
 #define VFS_MAX_OPEN_FILES 8
 #define VFS_MAX_OPEN_DIRS 4
 
@@ -248,7 +249,7 @@ void vfs_storage_monitor_task(void) {
     }
 
     if (!mp->is_mounted) {
-      if (now - mp->last_retry_ms >= 2000) {
+      if (now - mp->last_retry_ms >= MONNITOR_TASK_CYCLE) {
         mp->last_retry_ms = now;
 
         if (mp->dev_state == STORAGE_STATUS_OK) {
