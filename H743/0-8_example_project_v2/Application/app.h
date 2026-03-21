@@ -12,7 +12,12 @@
 extern "C" {
 #endif
 
-#include "project_cfg.h"
+/**
+ * @brief App
+ *
+ *这里作为所有业务层程序入口
+ *
+ */
 
 int app_init(void);
 void app_run(void);

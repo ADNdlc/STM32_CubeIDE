@@ -1,7 +1,7 @@
 #include "cloud_bridge.h"
 #include "sys.h"
 #include <string.h>
-#include "mqtt_service.h"
+#include "mqtt_service/mqtt_service.h"
 
 #include "elog.h"
 #define LOG_TAG "CLOUD_BR"

@@ -1,7 +1,7 @@
 #ifndef APPLICATION_HOME_SYSTEM_CLOUD_BRIDGE_H_
 #define APPLICATION_HOME_SYSTEM_CLOUD_BRIDGE_H_
 
-#include "mqtt_service.h"
+#include "mqtt_service/mqtt_service.h"
 #include "thing_model/thing_model.h"
 
 /**

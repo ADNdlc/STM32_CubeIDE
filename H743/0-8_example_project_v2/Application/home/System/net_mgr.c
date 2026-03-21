@@ -1,19 +1,14 @@
 #include "net_mgr.h"
 #include "cloud_bridge.h"
-#include "device_mapping.h"
 #include "wifi_factory.h"
 #include "mqtt_factory.h"
 #include "sntp_factory.h"
-#include "mqtt_service.h"
-#include "wifi_service.h"
 #include "sntp_service/sntp_service.h"
-#include "sys_config.h"
-#include "sys_state.h"
-#include <string.h>
-#include <stdbool.h>
 
-#define LOG_TAG "NET_MGR"
+
+
 #include "elog.h"
+#define LOG_TAG "NET_MGR"
 
 static wifi_service_t g_wifi_svc;             // WiFi服务实例
 static mqtt_service_t g_mqtt_svc;             // MQTT服务实例
@@ -24,7 +19,7 @@ extern const mqtt_adapter_t g_onenet_adapter; // OneNet MQTT适配器
  * 内部状态与回调
  *****************/
 static bool g_wifi_target_state = false; // 管理器WiFi目标状态(非实际系统状态)
-
+#if NETWORK_SERVICE_ENABLE // 初始化wifi服务
 /**
  * @brief WiFi状态变化回调
  *
@@ -56,7 +51,8 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
     sntp_svc_set_network_ready(&g_sntp_svc, false);
   }
 }
-
+#endif
+#if CLOUD_SERVICE_ENABLE
 /**
  * @brief MQTT状态变化回调
  */
@@ -70,6 +66,7 @@ static void mqtt_event_handler(mqtt_service_t *svc,
     sys_state_set_mqtt(false);
   }
 }
+#endif
 
 /*****************
  * 外部服务调用
@@ -81,16 +78,18 @@ static void mqtt_event_handler(mqtt_service_t *svc,
 void net_mgr_init(void) {
   log_i("Initializing Network Manager...");
 
-  // 1. 初始化服务 (工厂会自动处理驱动和 AT 控制器)
+#if NETWORK_SERVICE_ENABLE // 初始化wifi服务
   wifi_svc_init(&g_wifi_svc, WIFI_ID_MAIN);
   wifi_service_register_callback(&g_wifi_svc, wifi_event_handler, NULL);
-
+#endif
+#if CLOUD_SERVICE_ENABLE // 初始化mqtt服务
   mqtt_svc_init(&g_mqtt_svc, MQTT_ID_MAIN, &g_onenet_adapter);
   mqtt_svc_register_callback(&g_mqtt_svc, mqtt_event_handler, NULL);
   cloud_bridge_init(&g_mqtt_svc);
-
+#endif
+#if SNTP_SERVICE_ENABLE // 初始化sntp服务
   sntp_svc_init(&g_sntp_svc, sntp_driver_get(SNTP_ID_MAIN));
-
+#endif
   log_i("Network Manager initialized successfully");
 }
 
@@ -99,19 +98,23 @@ void net_mgr_init(void) {
  *
  */
 void net_mgr_process(void) {
-  // 1. 处理底层工厂工作 (AT 控制器等)
-  wifi_factory_process();
-
-  // 2. 处理服务层
+  // 服务层处理
+#if NETWORK_SERVICE_ENABLE // 初始化wifi服务
   wifi_svc_process(&g_wifi_svc);
-  mqtt_svc_process(&g_mqtt_svc);
+#endif
+  #if SNTP_SERVICE_ENABLE // 初始化sntp服务
   sntp_svc_process(&g_sntp_svc);
+#endif
+#if CLOUD_SERVICE_ENABLE // 初始化mqtt服务
+  mqtt_svc_process(&g_mqtt_svc);
   cloud_bridge_process();
+#endif
 }
 
 /****************
  * WiFi服务控制
  ****************/
+#if NETWORK_SERVICE_ENABLE // 初始化wifi服务
 void net_mgr_wifi_enable(bool enable) {
   if (enable == g_wifi_target_state)
     return;
@@ -155,3 +158,4 @@ int net_mgr_wifi_connect_manual(const char *ssid, const char *pwd) {
   //wifi_svc_set_mode(&g_wifi_svc, WIFI_MODE_STATION);
   return wifi_svc_connect(&g_wifi_svc, sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
 }
+#endif

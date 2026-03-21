@@ -4,28 +4,24 @@
  *  Created on: Dec 15, 2025
  *      Author: 12114
  */
-#include "app.h"
-#define LOG_TAG "APP"
-#include "elog.h"
 #include "project_cfg.h"
-#include "sys_config.h"
+#include "app.h"
+#include "elog.h"
+#define LOG_TAG "APP"
 
 #if !USE_Simulator
-#include "device_handle.h"
-#include "home.h"
-#include "home/System/net_mgr.h"
-#include "res_burner.h"
-#include "res_manager.h"
+#include "home/home.h" // UI
+#include "home/System/net_mgr.h" // 网络服务
+#include "home/System/cloud_bridge.h" // MQTT服务
+#include "device_handle.h" // 物模型注册
+#else
+#include "virtual_device.h"
 #endif
 
 #if LVGL_ENABLE
 #include "Colorwheel/colorwheel.h"
 #include "device_control/device_control.h"
 #include "lvgl.h"
-
-#if USE_Simulator
-#include "virtual_device.h"
-#endif
 #endif
 
 int app_init(void) {
@@ -34,25 +30,20 @@ int app_init(void) {
   sys_state_init();
   devices_init(); // 注册模拟设备
 #endif
-#if CONFIG_RES_BURN_ENABLE
-  sys_delay_ms(1000);
-  res_burner_run();
-  log_i("Resource burning completed. Please disable CONFIG_RES_BURN_ENABLE and "
-        "re-flash.");
-  while (1) {
-    sys_delay_ms(1000); // 烧录模式下不进入主循环
-  }
+
+#if SERVICE_ENABLE
+  net_mgr_init();
 #endif
 
-#if LVGL_ENABLE && !CONFIG_RES_BURN_ENABLE
+#if LVGL_ENABLE
   home_init(); // 初始化ui核心功能
 
-  /* 注册各ui模块功能 */
+  /* 注册各ui模块 */
   colorwheel_app_register(0);     // 注册 ColorWheel
   device_control_app_register(0); // 注册 Control
 
   ui_Start(); // 启动 UI 系统
-  log_i("New UI initialized");
+  log_i("UI initialized");
 #endif
 
   log_i("Application initialization completed...");
@@ -60,20 +51,13 @@ int app_init(void) {
 }
 
 void app_run(void) {
-#if !CONFIG_RES_BURN_ENABLE
-#if !USE_Simulator
-#if THING_MODEL_ENABLE
-  sys_devices_process(); // 本地设备处理
-#endif
-#if NET_MGR_ENABLE
-  net_mgr_process(); // 网络服务处理
-#endif
-#if SYS_FLASH_HANDLER_ENABLE
 
-#endif
-#endif
+  sys_devices_process(); // 本地设备处理
+
+  net_mgr_process(); // 网络服务处理
+
 #if LVGL_ENABLE
   lv_timer_handler(); // ui处理
 #endif
-#endif
+
 }

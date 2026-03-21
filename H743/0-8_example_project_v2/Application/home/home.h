@@ -5,11 +5,13 @@
 extern "C" {
 #endif
 
-#include "lvgl.h"
+/**
+ * @brief home
+ *
+ * 这里作为所有UI程序的入口
+ *
+ */
 
-#include "components/ui_comp_app_icon.h"
-#include "screens/ui_screen_home.h"
-#include "ui_events.h"
 
 void home_init(void); // ui功能初始化(初始化后注册)
 void ui_Start(void);  // ui启动
