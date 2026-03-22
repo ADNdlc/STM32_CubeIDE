@@ -47,6 +47,15 @@ int sntp_svc_start_sync(sntp_service_t *self) {
   return 0;
 }
 
+void sntp_svc_process(sntp_service_t *self) {
+  if (self->state == SNTP_SVC_STATE_SYNCING) {
+    // If the driver has successfully synced time behind the scenes, fetch it
+    if (SNTP_DRV_GET_STATUS(self->drv) == SNTP_DRV_STATUS_SUCCESS) {
+      sntp_svc_start_sync(self);
+    }
+  }
+}
+
 sntp_svc_state_t sntp_svc_get_state(sntp_service_t *self) {
   return self->state;
 }

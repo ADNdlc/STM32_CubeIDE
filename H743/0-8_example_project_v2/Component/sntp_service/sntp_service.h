@@ -49,4 +49,9 @@ int sntp_svc_start_sync(sntp_service_t *self);
  */
 sntp_svc_state_t sntp_svc_get_state(sntp_service_t *self);
 
+/**
+ * @brief 非阻塞处理同步逻辑
+ */
+void sntp_svc_process(sntp_service_t *self);
+
 #endif // SNTP_SERVICE_H

@@ -37,9 +37,11 @@ static void mqtt_drv_event_handler(void *arg, mqtt_drv_event_t *event) {
   case MQTT_DRV_EVENT_DATA:
     log_d("Service: Data received on topic %s", event->topic);
     break;
-
-    notify_event(self, event); // 传递事件给各个观察者
+  default:
+    break;
   }
+
+  notify_event(self, event); // 传递事件给各个观察者
 }
 
 /*******************

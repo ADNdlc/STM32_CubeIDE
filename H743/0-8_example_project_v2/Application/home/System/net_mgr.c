@@ -47,9 +47,9 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
     log_i("Starting MQTT Service...");
     mqtt_svc_connect(&g_mqtt_svc);
 
-    // 自动启动 SNTP 时间同步 (UTC+8)
-    log_i("Starting SNTP Sync...");
-    sntp_svc_start_sync(&g_sntp_svc);
+    // SNTP 会在 sntp_svc_process 中无阻塞地等待底层 +TIME_UPDATED 后自动同步
+    log_i("SNTP Sync is armed automatically...");
+    // 移除提前调用的 sntp_svc_start_sync(&g_sntp_svc); 防止报错
 
   } else if (status == WIFI_STATUS_DISCONNECTED) { // 断开连接
     log_w("Network Offline");
@@ -133,6 +133,9 @@ void net_mgr_process(void) {
   // 服务层处理
 #if NETWORK_SERVICE_ENABLE // 初始化wifi服务
   wifi_svc_process(&g_wifi_svc);
+#endif
+#if SNTP_SERVICE_ENABLE 
+  sntp_svc_process(&g_sntp_svc);
 #endif
 #if CLOUD_SERVICE_ENABLE // 初始化mqtt服务
   mqtt_svc_process(&g_mqtt_svc);
