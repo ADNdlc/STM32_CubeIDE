@@ -44,6 +44,7 @@ int sntp_svc_start_sync(sntp_service_t *self) {
     log_e("driver not ready");
     return -1;
   }
+  self->state = SNTP_SVC_STATE_FETCHING;
   return 0;
 }
 

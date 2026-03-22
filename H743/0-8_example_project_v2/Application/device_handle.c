@@ -120,6 +120,9 @@ void devices_init(void) {
   observer0.callback = key0_event_callback;
   observer0.next = NULL;
   Key_RegisterObserver(key0, &observer0); // 注册事件回调
+  Key_SetDebounce(key0, 10);
+  Key_SetLongPress(key0, 500);
+  Key_SetClickTimeout(key0, 200);
 
   log_i("Device registration completed.");
 }
