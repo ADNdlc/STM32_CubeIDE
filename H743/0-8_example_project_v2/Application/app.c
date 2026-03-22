@@ -37,7 +37,7 @@
 
 int app_init(void) {
 #if !USE_Simulator
-  // 1. 初始化 VFS 与挂载存储 (完全对齐 test_settings.c)
+  // 1. 初始化 VFS 与挂载存储
   log_i("Initializing VFS (Parity with test_settings)...");
   vfs_init();
   
@@ -76,13 +76,12 @@ int app_init(void) {
 
 #if LVGL_ENABLE
   home_init(); // 初始化ui核心功能
-...
 
   /* 注册各ui模块 */
-  colorwheel_app_register(0);     // 注册 ColorWheel
-  device_control_app_register(0); // 注册 Control
+  //colorwheel_app_register(0);     // 注册 ColorWheel
+  //device_control_app_register(0); // 注册 Control
 
-  ui_Start(); // 启动 UI 系统
+  UI_Start(); // 启动 UI 系统
   log_i("UI initialized");
 #endif
 

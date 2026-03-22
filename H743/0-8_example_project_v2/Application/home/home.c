@@ -4,11 +4,11 @@
 #endif
 #include "home.h"
 #include "System/app_settings.h"
-#include "SystemUI/ui_sys_bar.h"
-#include "SystemUI/ui_sys_panel.h"
+#include "UI/SystemUI/ui_sys_bar.h"
+#include "UI/SystemUI/ui_sys_panel.h"
 #include "app_manager.h"
 #include "input_manager.h"
-#include "screens/ui_screen_home.h"
+#include "UI/screens/ui_screen_home.h"
 #include "sys_state.h"
 
 #define LOG_TAG "UI"
@@ -73,7 +73,7 @@ void home_init(void) {
                                   app_manager_pop_screen); // 侧滑回调,返回
 }
 
-void ui_Start(void) {
+void UI_Start(void) {
   log_i("UI started");
   // 启动主界面
   app_manager_start_app("HOME");

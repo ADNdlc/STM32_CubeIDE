@@ -8,14 +8,18 @@
 #ifndef LVGL_RESOURCE_LVGL_RESOURCE_C_
 #define LVGL_RESOURCE_LVGL_RESOURCE_C_
 
-#include "lvgl_resource.h"
-#include "asset_manager.h"
-#include "elog.h"
+#include "Project_cfg.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-
+#include "lvgl_resource.h"
+#include "asset_manager.h"
+#include "elog.h"
 #define LOG_TAG "LV_RES"
+
+#if RES_DISPLAY_ENABLE
+
+#endif
 
 // 各种类型的影子描述符表
 static lv_img_dsc_t s_img_dscs[RES_COUNT_MAX];
@@ -26,6 +30,14 @@ static const void *s_audio_ptrs[RES_COUNT_MAX];
 #if RES_BURN_MODE
 // lvgl资源声明
 LV_IMG_DECLARE(test_icon);
+
+LV_IMG_DECLARE(wallpaper);
+LV_IMG_DECLARE(icon_wifi);
+LV_IMG_DECLARE(icon_bright);
+LV_IMG_DECLARE(icon_colorwheel);
+LV_IMG_DECLARE(icon_Contol);
+LV_IMG_DECLARE(default_user);
+LV_IMG_DECLARE(img_light);
 // extern const lv_font_t my_font_20;
 
 typedef struct {
@@ -37,7 +49,7 @@ typedef struct {
 // 片上资源表
 static const burn_map_t g_burn_table[] = {
     {RES_IMG_TEST, ASSET_TYPE_IMAGE, &test_icon},
-    //{RES_ID_FONT_OPENSANS_20, ASSET_TYPE_FONT, &my_font_20},
+
 };
 
 int res_program_all(void) {

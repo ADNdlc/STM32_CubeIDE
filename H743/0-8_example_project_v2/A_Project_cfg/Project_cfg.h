@@ -9,10 +9,13 @@
 #define APPLICATION_PROJECT_CFG_H_
 
 #define PRINTF_FLOAT_ENABLED // 用于测试程序打印方式选择
+
+/* ----- 资源烧录配置 ----- */
 // #define RES_BURN_ENABLE	 // 使能系统资源烧录模式
+#define RES_DISPLAY_ENABLE 1	// 使能烧录后循环显示
 
 /* ----- 运行配置 ----- */
-#define TEST_ENABLE 0    // 使能测试模式(不进入主程序)
+#define TEST_ENABLE 0    		// 使能测试模式(不进入主程序)
 #define SERVICE_ENABLE 1 // 服务组件层初始化(底层使能)
 
 #define NETWORK_SERVICE_ENABLE 1 // 网络服务使能(wifi相关)
@@ -21,8 +24,8 @@
 
 #define THINGMODEL_ENABLE 1 // 物体模型控制使能
 
-#define LVGL_ENABLE 0 // 图形库使能
-#define GUI_ENABLE 0  // UI页面使能
+#define LVGL_ENABLE 1 // 图形库使能
+#define GUI_ENABLE 1  // UI页面使能
 
 /* ----- log配置 ----- */
 
@@ -31,6 +34,9 @@
 #define LVGL_ENABLE 0
 #define SERVICE_ENABLE 0
 #define THINGMODEL_ENABLE 0
+#endif
+#if RES_DISPLAY_ENABLE
+#define LVGL_ENABLE 1
 #endif
 #if !LVGL_ENABLE // 未使能图形库
 #define GUI_ENABLE 0

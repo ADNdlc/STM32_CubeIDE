@@ -1,8 +1,9 @@
 #include "project_cfg.h"
+#include "rtc_factory.h"
 #include "ui_sys_bar.h"
 #include "../../System/sys_state.h"
 #if !USE_Simulator
-#include "rtc_hal/rtc_hal.h"
+#include "rtc_driver.h"
 #endif
 #include "elog.h"
 
@@ -14,6 +15,7 @@ static lv_obj_t *label_time;
 static lv_obj_t *label_bat;
 static lv_obj_t *label_wifi;
 
+
 // DEBUG样式
 #define BAR_OPA LV_OPA_50
 
@@ -22,7 +24,7 @@ static void time_timer_cb(lv_timer_t *timer) {
 #if !USE_Simulator
   rtc_time_t rt;
   // 使用RTC获取时间
-  if (rtc_hal_get_time(&rt) == 0) {
+  if (RTC_GET_TIME(rtc_driver_get(RTC_ID_INTERNAL), &rt) == 0) {
     lv_label_set_text_fmt(label_time, "%02d:%02d", rt.hour, rt.minute);
   }
 #endif

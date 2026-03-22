@@ -2,7 +2,7 @@
 #ifndef _UI_SCREEN_HOME_H
 #define _UI_SCREEN_HOME_H
 
-#include <home.h>
+#include "../../home.h"
 
 #ifdef __cplusplus
 extern "C" {

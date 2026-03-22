@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include "lvgl.h"
+
 /**
  * @brief home
  *
@@ -14,7 +16,7 @@ extern "C" {
 
 
 void home_init(void); // ui功能初始化(初始化后注册)
-void ui_Start(void);  // ui启动
+void UI_Start(void);  // ui启动
 
 // 资源声明 (已迁移至资源管理器)
 

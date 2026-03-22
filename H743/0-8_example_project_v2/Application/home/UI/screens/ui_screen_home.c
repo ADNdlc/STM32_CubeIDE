@@ -1,11 +1,12 @@
 ﻿#include "ui_screen_home.h"
-#include "res_manager.h"
 #include "elog.h"
 #include "app_manager.h"
 #include "lv_util.h"
 #include "core_app.h"
 #include <assert.h>
 #include <stdio.h>
+#include "../ui_events.h"
+#include "lvgl_resource/lvgl_resource.h"
 
 #define NODEBUG
 
@@ -89,7 +90,7 @@ void ui_screen_home_init(void) {
 
   // 设置背景
   lv_obj_t *bg = lv_img_create(ui_screen_home);
-  lv_img_set_src(bg, res_get_src(RES_IMG_WALLPAPER)); // 从资源管理器获取路径
+  lv_img_set_src(bg, res_get_img(RES_IMG_WALLPAPER)); // 从资源管理器获取路径
 
   // 使用TileView作为主体
   ui_home_tileview = lv_tileview_create(ui_screen_home);
@@ -183,8 +184,7 @@ void ui_screen_home_init(void) {
     // 添加事件
     lv_obj_t *img = lv_obj_get_child(icon_comp, 0);
     if (img) {
-      lv_obj_add_event_cb(img, ui_event_app_icon_click, LV_EVENT_CLICKED,
-                          (void *)app);
+      lv_obj_add_event_cb(img, ui_event_app_icon_click, LV_EVENT_CLICKED, (void *)app);
     }
 
     pages[page_idx].current_app_count++;

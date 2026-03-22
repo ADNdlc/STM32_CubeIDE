@@ -6,8 +6,8 @@
 #include "app_manager.h"
 #include "input_manager.h"
 #include "lv_util.h"
-#include "res_manager.h"
 #include "sys_state.h"
+#include "lvgl_resource/lvgl_resource.h"
 
 #define LOG_TAG "UI_SYS_PANEL"
 #include "elog.h"
@@ -150,7 +150,7 @@ static lv_obj_t *brightness_module_create(lv_obj_t *parent, uint8_t value,
   // 图标
   lv_obj_t *brightness_icon =
       lv_img_create(slider_bri); // slider_bri作为父类，因为icon需要在回调中获取
-  lv_img_set_src(brightness_icon, res_get_src(RES_IMG_ICON_BRIGHT));
+  lv_img_set_src(brightness_icon, res_get_img(RES_IMG_ICON_BRIGHT));
   lv_obj_align(brightness_icon, LV_ALIGN_BOTTOM_MID, 0, -20);
   lv_obj_set_style_img_recolor(brightness_icon, lv_color_hex(0x505050), 0);
   lv_opa_t bri_opa = lv_map(value, 0, 100, LV_OPA_COVER, LV_OPA_TRANSP);
@@ -244,7 +244,7 @@ static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
   // icon
   lv_obj_t *img_wifi = lv_img_create(btn_wifi);
 
-  lv_img_set_src(img_wifi, res_get_src(RES_IMG_ICON_WIFI));
+  lv_img_set_src(img_wifi, res_get_img(RES_IMG_ICON_WIFI));
 
   lv_obj_center(img_wifi);
   lv_img_set_zoom(img_wifi, 300);
