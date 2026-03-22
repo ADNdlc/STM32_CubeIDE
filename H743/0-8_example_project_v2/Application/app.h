@@ -18,9 +18,9 @@ extern "C" {
  *这里作为所有业务层程序入口
  *
  */
-
 int app_init(void);
 void app_run(void);
+
 
 #ifdef __cplusplus
 } /*extern "C"*/

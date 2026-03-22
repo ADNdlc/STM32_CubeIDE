@@ -47,7 +47,7 @@ void bsp_init(void) {
   SysMem *mem_temp = NULL;
   mem_temp = platform_sys_mem_create();
   sys_mem_init(mem_temp); // 内存池功能初始化
-  /* 系统初始化 */
+  /* 系统层初始化 */
   sys_init();
   sys_mem_init_internal();
 

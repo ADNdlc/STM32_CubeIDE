@@ -39,7 +39,7 @@ void MX_SDMMC1_SD_Init(void)
   hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
   hsd1.Init.ClockDiv = SDMMC_NSpeed_CLK_DIV;
   /* USER CODE END SDMMC1_Init 0 */
-#define DONOT_INIT
+
   /* USER CODE BEGIN SDMMC1_Init 1 */
 #ifndef DONOT_INIT
   /* USER CODE END SDMMC1_Init 1 */

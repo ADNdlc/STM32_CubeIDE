@@ -27,6 +27,16 @@ static void scan_callback(void *arg, wifi_ap_list_t *ap_list) {
   }
 }
 
+static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
+                               void *user_data) {
+  log_i("WiFi status changed: %d", status);
+  if (status == WIFI_STATUS_GOT_IP) {
+    log_w("WiFi connected successfully");
+  } else if (status == WIFI_STATUS_DISCONNECTED) {
+    log_w("WiFi disconnected");
+  }
+}
+
 static void on_key_event(gpio_key_t *key, KeyEvent event) {
   switch (event) {
   case KeyEvent_SinglePress:
@@ -67,6 +77,7 @@ static void test_wifi_setup(void) {
   // 2. 初始化 WiFi 服务 (工厂会自动处理底层驱动和 AT 通信)
   wifi_svc_init(&wifi_svc, wifi_driver_get(WIFI_ID_MAIN));
   wifi_svc_set_mode(&wifi_svc, WIFI_MODE_STATION);
+  wifi_service_register_callback(&wifi_svc, wifi_event_handler, NULL);
 
   // 3. 初始化按键交互
   key_ui = Key_Create(key_pin, 0);

@@ -34,13 +34,13 @@ static void mqtt_event_callback(mqtt_service_t *self,
                                 void *user_data) {
   switch (event->type) {
   case MQTT_DRV_EVENT_CONNECTED:
-    log_i("MQTT Connected via Service.");
+    log_w("MQTT Connected via Service.");
     break;
   case MQTT_DRV_EVENT_DISCONNECTED:
     log_w("MQTT Disconnected via Service.");
     break;
   case MQTT_DRV_EVENT_DATA:
-    log_i("MQTT Data Recv via Service on [%s]: %s", event->topic,
+    log_w("MQTT Data Recv via Service on [%s]: %s", event->topic,
           event->payload);
     break;
   }

@@ -5,6 +5,7 @@
  *      Author: 12114
  */
 #include "project_cfg.h"
+#if !TEST_ENABLE
 #include "app.h"
 #include "elog.h"
 #define LOG_TAG "APP"
@@ -90,8 +91,9 @@ int app_init(void) {
 }
 
 void app_run(void) {
+  vfs_storage_monitor_task();
 #if THINGMODEL_ENABLE
-  sys_devices_process(); // 本地设备处理
+  devices_process(); // 本地设备处理
 #endif
 #if SERVICE_ENABLE
   net_mgr_process(); // 网络服务处理
@@ -101,3 +103,7 @@ void app_run(void) {
 #endif
 
 }
+#else
+int app_init(void) {(void)0; return 0;}
+void app_run(void) {(void)0;}
+#endif

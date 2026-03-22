@@ -1,10 +1,11 @@
+#include "device_handle.h"
 #include "gpio_factory.h"
 #include "gpio_key/gpio_key.h"
 #include "gpio_led/gpio_led.h"
 #include "sys_config.h"
 #include "thing_model/thing_model.h"
-#include <device_handle.h>
 #include <string.h>
+
 
 #define LOG_TAG "DEV_HANDLE"
 #include "elog.h"
@@ -24,12 +25,14 @@ static bool device_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
     if (strcmp(prop_id, "led0") == 0) {
       log_i("Hardware: led0 set to %d", value.b);
       if (led0_obj)
-        led_hal_set_data((led_hal_t *)led0_obj, value.b);
+        gpio_led_set(led0_obj, value.b);
+
       return true;
     } else if (strcmp(prop_id, "led1") == 0) {
       log_i("Hardware: led1 set to %d", value.b);
       if (led1_obj)
-        led_hal_set_data((led_hal_t *)led1_obj, value.b);
+        gpio_led_set(led1_obj, value.b);
+
       return true;
     }
   }
@@ -40,23 +43,23 @@ static void key0_event_callback(gpio_key_t *key, KeyEvent event) {
   switch (event) {
   case KeyEvent_SinglePress:
     log_d("Hardware: key0 pressed.");
-    thing_model_set_prop(sys_config_get_cloud_device_id(), "led0", (thing_value_t){.b = true},
-                         THING_SOURCE_LOCAL);
+    thing_model_set_prop(sys_config_get_cloud_device_id(), "led0",
+                         (thing_value_t){.b = true}, THING_SOURCE_LOCAL);
     break;
   case KeyEvent_DoublePress:
     log_d("Hardware: key0 double pressed.");
-    thing_model_set_prop(sys_config_get_cloud_device_id(), "led0", (thing_value_t){.b = false},
-                         THING_SOURCE_LOCAL);
+    thing_model_set_prop(sys_config_get_cloud_device_id(), "led0",
+                         (thing_value_t){.b = false}, THING_SOURCE_LOCAL);
     break;
   case KeyEvent_TriplePress:
     log_d("Hardware: key0 triple pressed.");
-    thing_model_set_prop(sys_config_get_cloud_device_id(), "led1", (thing_value_t){.b = true},
-                         THING_SOURCE_LOCAL);
+    thing_model_set_prop(sys_config_get_cloud_device_id(), "led1",
+                         (thing_value_t){.b = true}, THING_SOURCE_LOCAL);
     break;
   case KeyEvent_LongPress:
     log_d("Hardware: key0 long pressed.");
-    thing_model_set_prop(sys_config_get_cloud_device_id(), "led1", (thing_value_t){.b = false},
-                         THING_SOURCE_LOCAL);
+    thing_model_set_prop(sys_config_get_cloud_device_id(), "led1",
+                         (thing_value_t){.b = false}, THING_SOURCE_LOCAL);
 
     break;
   default:
@@ -74,9 +77,9 @@ void devices_init(void) {
 
   // 获取GPIO驱动实例
   gpio_driver_t *led0_driver =
-      gpio_driver_get(GPIO_LED_0); // 获取LED0的GPIO驱动
+      gpio_driver_get(GPIO_ID_LED0); // 获取LED0的GPIO驱动，修正为正确的ID
   gpio_driver_t *led1_driver =
-      gpio_driver_get(GPIO_LED_1); // 获取LED1的GPIO驱动
+      gpio_driver_get(GPIO_ID_LED1); // 获取LED1的GPIO驱动，修正为正确的ID
 
   // 创建LED对象
   if (led0_driver != NULL) {
@@ -111,8 +114,9 @@ void devices_init(void) {
 
   // 其他设备
   // 1. 按键
-  gpio_driver_t *driver0 = gpio_driver_get(GPIO_BUTTON_KEY0); // 获取硬件端口
-  key0 = Key_Create(driver0, 0);                              // 创建按键
+  gpio_driver_t *driver0 =
+      gpio_driver_get(GPIO_ID_KEY0); // 获取硬件端口，同样修正按键ID
+  key0 = Key_Create(driver0, 0);     // 创建按键
   observer0.callback = key0_event_callback;
   observer0.next = NULL;
   Key_RegisterObserver(key0, &observer0); // 注册事件回调

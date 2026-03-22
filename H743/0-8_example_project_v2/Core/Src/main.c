@@ -25,6 +25,7 @@
 #include "ltdc.h"
 #include "quadspi.h"
 #include "rtc.h"
+#include "sdmmc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -34,6 +35,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "BSP_init.h"
+#include "app.h"
 #include "test_framework.h"
 /* USER CODE END Includes */
 
@@ -116,10 +118,10 @@ int main(void)
   MX_TIM3_Init();
   MX_SPI1_Init();
   MX_QUADSPI_Init();
+  MX_SDMMC1_SD_Init();
   MX_I2C2_Init();
   MX_I2C3_Init();
   MX_CRC_Init();
-  MX_SDMMC1_SD_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -129,6 +131,7 @@ int main(void)
   HAL_Delay(800);
 
   bsp_init(); // 驱动层初始化
+  app_init();
   Test_Framework_Init();
 
   /* USER CODE END 2 */
@@ -138,6 +141,8 @@ int main(void)
   while (1) {
     Test_Framework_Run();
     bsp_process();
+    app_run();
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

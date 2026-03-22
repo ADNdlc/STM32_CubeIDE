@@ -9,7 +9,7 @@
 #define APPLICATION_PROJECT_CFG_H_
 
 #define PRINTF_FLOAT_ENABLED //用于测试程序打印方式选择
-//#define RES_BURN_ENABLE		 // 使能系统资源烧录模式
+//#define RES_BURN_ENABLE	 // 使能系统资源烧录模式
 
 /* ----- 运行配置 ----- */
 #define TEST_ENABLE	1		// 使能测试模式(不进入主程序)
@@ -24,6 +24,7 @@
 #define LVGL_ENABLE	0		// 图形库使能
 #define GUI_ENABLE	0		// UI页面使能
 
+/* ----- log配置 ----- */
 
 /* --- 防止配置项冲突 --- */
 #ifdef RES_BURN_ENABLE	// 如果使能烧录模式
