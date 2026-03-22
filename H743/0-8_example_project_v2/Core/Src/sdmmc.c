@@ -21,7 +21,7 @@
 #include "sdmmc.h"
 
 /* USER CODE BEGIN 0 */
-
+#define DONOT_INIT
 /* USER CODE END 0 */
 
 SD_HandleTypeDef hsd1;

@@ -84,7 +84,7 @@ void net_mgr_init(void) {
   log_i("Initializing Network Manager...");
 
 #if NETWORK_SERVICE_ENABLE // 初始化wifi服务
-  wifi_svc_init(&g_wifi_svc, WIFI_ID_MAIN);
+  wifi_svc_init(&g_wifi_svc, wifi_driver_get(WIFI_ID_MAIN));
   wifi_svc_set_mode(&g_wifi_svc, WIFI_MODE_STATION);
   wifi_service_register_callback(&g_wifi_svc, wifi_event_handler, NULL);
 #endif
@@ -117,7 +117,7 @@ void net_mgr_init(void) {
     onenet_adapter_init(&onenet_cfg);
   }
 
-  mqtt_svc_init(&g_mqtt_svc, MQTT_ID_MAIN, adapter);
+  mqtt_svc_init(&g_mqtt_svc, mqtt_driver_get(MQTT_ID_MAIN), adapter);
   mqtt_svc_register_callback(&g_mqtt_svc, mqtt_event_handler, NULL);
   cloud_bridge_init(&g_mqtt_svc);
 #endif
