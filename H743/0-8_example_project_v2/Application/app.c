@@ -5,7 +5,7 @@
  *      Author: 12114
  */
 #include "project_cfg.h"
-#if !TEST_ENABLE
+#if !TEST_ENABLE && !RES_BURN_ENABLE
 #include "app.h"
 #include "elog.h"
 #define LOG_TAG "APP"
@@ -33,6 +33,7 @@
 #include "Colorwheel/colorwheel.h"
 #include "device_control/device_control.h"
 #include "lvgl.h"
+#include "lvgl_resource/lvgl_resource.h"
 #endif
 
 int app_init(void) {
@@ -75,6 +76,7 @@ int app_init(void) {
 #endif
 
 #if LVGL_ENABLE
+  res_init();  // 初始化资源管理及处理烧录/显示测试
   home_init(); // 初始化ui核心功能
 
   /* 注册各ui模块 */

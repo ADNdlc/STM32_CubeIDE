@@ -8,46 +8,63 @@
 #ifndef APPLICATION_PROJECT_CFG_H_
 #define APPLICATION_PROJECT_CFG_H_
 
-#define PRINTF_FLOAT_ENABLED // 用于测试程序打印方式选择
+#define PRINTF_FLOAT_ENABLED
 
-/* ----- 资源烧录配置 ----- */
-// #define RES_BURN_ENABLE	 // 使能系统资源烧录模式
-#define RES_DISPLAY_ENABLE 1	// 使能烧录后循环显示
+/* ======================================================= */
+/* 1. 选择系统当前的大运行模式 (解开你想用的那一个即可)         */
+/* ======================================================= */
 
-/* ----- 运行配置 ----- */
-#define TEST_ENABLE 0    		// 使能测试模式(不进入主程序)
-#define SERVICE_ENABLE 1 // 服务组件层初始化(底层使能)
+// #define SYS_PROFILE_RELEASE      // 正常发布模式 (默认)
+// #define SYS_PROFILE_BURN_RES     // 资源烧录与验证模式
+#define SYS_PROFILE_UNIT_TEST    // 底层单元测试模式
 
-#define NETWORK_SERVICE_ENABLE 1 // 网络服务使能(wifi相关)
-#define SNTP_SERVICE_ENABLE 1    // 使能SNTP同步RTC
-#define CLOUD_SERVICE_ENABLE 1   // 物模型云端控制对接
+/* ======================================================= */
+/* 2. 根据选定的 Profile，自动映射底层功能组件开关               */
+/*    (绝对不再使用 #undef，直接在这里进行逻辑分支)               */
+/* ======================================================= */
 
-#define THINGMODEL_ENABLE 1 // 物体模型控制使能
+#if defined(SYS_PROFILE_BURN_RES)
+    // --- 烧录模式配置 ---
+    #define RES_BURN_ENABLE         1  // 开启烧录逻辑
+    #define RES_DISPLAY_ENABLE      1  // 烧录后死循环显示测试
+    #define RES_USE_INTERNAL        1  // 必须把图片编译进固件用于烧录
+    #define LVGL_ENABLE             1  // 需要 LVGL 验证显示
 
-#define LVGL_ENABLE 1 // 图形库使能
-#define GUI_ENABLE 1  // UI页面使能
+    // 强制关闭无关业务组件，腾出 RAM 和 CPU
+    #define GUI_ENABLE              0
+    #define SERVICE_ENABLE          0
+    #define NETWORK_SERVICE_ENABLE  0
+    #define SNTP_SERVICE_ENABLE     0
+    #define CLOUD_SERVICE_ENABLE    0
+    #define THINGMODEL_ENABLE       0
+    #define TEST_ENABLE             0
 
-/* ----- log配置 ----- */
+#elif defined(SYS_PROFILE_UNIT_TEST)
+    // --- 单元测试模式配置 ---
+    #define TEST_ENABLE             1
+    #define RES_USE_INTERNAL        0  // 测试不用带大图片
+    #define RES_BURN_ENABLE         0
+    #define RES_DISPLAY_ENABLE      0
+    #define LVGL_ENABLE             0
+    #define GUI_ENABLE              0
+    #define SERVICE_ENABLE          0
+    // ... 其他全关
 
-/* --- 防止配置项冲突 --- */
-#ifdef RES_BURN_ENABLE // 如果使能烧录模式
-#define LVGL_ENABLE 0
-#define SERVICE_ENABLE 0
-#define THINGMODEL_ENABLE 0
+#else
+    // --- 正常发布/运行模式配置 (SYS_PROFILE_RELEASE) ---
+    #define RES_BURN_ENABLE         0
+    #define RES_DISPLAY_ENABLE      0
+    // 运行态是否保留内部图片做备份？如果是极限省空间，设为 0
+    #define RES_USE_INTERNAL        0
+
+    // 开启业务系统
+    #define LVGL_ENABLE             1
+    #define GUI_ENABLE              1
+    #define SERVICE_ENABLE          1
+    #define NETWORK_SERVICE_ENABLE  1
+    #define SNTP_SERVICE_ENABLE     1
+    #define THINGMODEL_ENABLE       1
+    #define CLOUD_SERVICE_ENABLE    1
+    #define TEST_ENABLE             0
 #endif
-#if RES_DISPLAY_ENABLE
-#define LVGL_ENABLE 1
-#endif
-#if !LVGL_ENABLE // 未使能图形库
-#define GUI_ENABLE 0
-#endif
-#if !SERVICE_ENABLE // 未使能服务层
-#define NETWORK_SERVICE_ENABLE 0
-#define SNTP_SERVICE_ENABLE 0
-#define CLOUD_SERVICE_ENABLE 0
-#endif
-#if !THINGMODEL_ENABLE // 未使能物模型控制
-#define CLOUD_SERVICE_ENABLE 0
-#endif
-
 #endif /* APPLICATION_PROJECT_CFG_H_ */

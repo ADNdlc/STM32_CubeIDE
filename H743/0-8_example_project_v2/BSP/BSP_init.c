@@ -25,6 +25,8 @@
 #include "uart_queue.h"
 #include "usart_factory.h"
 
+#include "lvgl_resource/lvgl_resource.h"
+
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
 
@@ -109,6 +111,8 @@ void bsp_init(void) {
     log_e("LVGL timer tick init failed!");
   }
 #endif
+
+  res_init();  // 初始化资源管理及处理烧录/显示测试
 }
 
 void bsp_process(void) {

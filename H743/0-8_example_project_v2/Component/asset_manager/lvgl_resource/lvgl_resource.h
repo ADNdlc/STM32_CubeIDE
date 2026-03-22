@@ -14,7 +14,7 @@
 
 // 烧录模式 (编译图像 C 数组用于烧写)
 // 运行模式 (图像数组不编译，零占用，全靠外部 NorFlash 动态读取)
-#ifdef RES_BURN_ENABLE
+#if RES_BURN_ENABLE
 #define RES_BURN_MODE 1
 #endif
 /**
