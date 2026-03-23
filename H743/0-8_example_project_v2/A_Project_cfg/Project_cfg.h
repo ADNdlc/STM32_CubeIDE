@@ -14,9 +14,9 @@
 /* 1. 选择系统当前的大运行模式 (解开你想用的那一个即可)         */
 /* ======================================================= */
 
-// #define SYS_PROFILE_RELEASE      // 正常发布模式 (默认)
-// #define SYS_PROFILE_BURN_RES     // 资源烧录与验证模式
-#define SYS_PROFILE_UNIT_TEST    // 底层单元测试模式
+#define SYS_PROFILE_RELEASE      // 正常发布模式 (默认)
+//#define SYS_PROFILE_BURN_RES     // 资源烧录与验证模式
+//#define SYS_PROFILE_UNIT_TEST    // 底层单元测试模式
 
 /* ======================================================= */
 /* 2. 根据选定的 Profile，自动映射底层功能组件开关               */
@@ -54,7 +54,7 @@
     // --- 正常发布/运行模式配置 (SYS_PROFILE_RELEASE) ---
     #define RES_BURN_ENABLE         0
     #define RES_DISPLAY_ENABLE      0
-    // 运行态是否保留内部图片做备份？如果是极限省空间，设为 0
+    // 运行态是否使用片上flash存储资源
     #define RES_USE_INTERNAL        0
 
     // 开启业务系统

@@ -30,11 +30,14 @@
 static nor_flash_driver_t *asset_flash = NULL; // 模块依赖的底层驱动
 // 0xFFFFFFFF 代表尚未加载任何有效表
 static uint32_t active_toc_addr = 0xFFFFFFFF; // 当前活动表地址
-static res_header_t active_header = {0};	// 已加载的表信息
-static res_item_t *active_items = NULL; // 动态分配的 TOC 内存缓存
+static res_header_t active_header = {0};      // 已加载的表信息
+static res_item_t *active_items = NULL;       // 动态分配的 TOC 内存缓存
 
 /**
  * @brief 计算头文件的 TOC CRC, 排除 toc_crc 字段本身
+ * @param header TOC 头指针
+ * @param items TOC 项指针
+ * @return TOC CRC
  */
 static uint32_t calc_toc_crc(const res_header_t *header,
                              const res_item_t *items) {
@@ -55,23 +58,27 @@ static uint32_t calc_toc_crc(const res_header_t *header,
 }
 
 /**
- * @brief 校验单个 TOC 的完整性
+ * @brief 读取并校验单个 TOC 的完整性
+ * @param toc_addr TOC 地址
+ * @param header_out TOC 头指针
+ * @param items_out TOC 项指针(资源数据)
+ * @return true 如果 TOC 有效
  */
 static bool validate_toc(uint32_t toc_addr, res_header_t *header_out,
                          res_item_t **items_out) {
   res_header_t hdr;
   *items_out = NULL;
-
+  // 读取res_header_t大小的数据
   if (NOR_FLASH_READ(asset_flash, toc_addr, (uint8_t *)&hdr,
                      sizeof(res_header_t)) != 0) {
     return false;
   }
-
+  // 校验magic
   if (hdr.magic != ASSET_MAGIC) {
     log_d("TOC at 0x%08X: Magic incorrect (0x%08X)", toc_addr, hdr.magic);
     return false;
   }
-
+  // 读取item_count
   uint32_t max_items =
       (ASSET_TOC_SIZE - sizeof(res_header_t)) / sizeof(res_item_t);
   if (hdr.item_count > max_items) {
@@ -79,7 +86,7 @@ static bool validate_toc(uint32_t toc_addr, res_header_t *header_out,
           hdr.item_count);
     return false;
   }
-
+  // 分配内存(根据读取的item_count)
   res_item_t *items = NULL;
   if (hdr.item_count > 0) {
     items = (res_item_t *)sys_malloc(SYS_MEM_INTERNAL,
@@ -88,7 +95,7 @@ static bool validate_toc(uint32_t toc_addr, res_header_t *header_out,
       log_e("TOC at 0x%08X: OOM allocating items", toc_addr);
       return false;
     }
-
+    // 读取res_item_t大小的数据
     if (NOR_FLASH_READ(asset_flash, toc_addr + sizeof(res_header_t),
                        (uint8_t *)items,
                        hdr.item_count * sizeof(res_item_t)) != 0) {
@@ -103,10 +110,10 @@ static bool validate_toc(uint32_t toc_addr, res_header_t *header_out,
     log_e("TOC at 0x%08X: CRC mismatch! Expected: 0x%08X, Calc: 0x%08X",
           toc_addr, hdr.toc_crc, calc_crc);
     if (items)
-      sys_free(SYS_MEM_INTERNAL, items);
+      sys_free(SYS_MEM_INTERNAL, items); // 释放内存
     return false;
   }
-
+  // 传递数据的指针
   *header_out = hdr;
   *items_out = items;
   return true;
@@ -127,8 +134,8 @@ int asset_manager_init(void) {
   // 一定要先切回命令模式，以防软重启后仍处于 XIP 模式
   NOR_FLASH_SET_MODE(asset_flash, NOR_FLASH_MODE_COMMAND);
 
-  res_header_t header_a, header_b;
-  res_item_t *items_a = NULL, *items_b = NULL;
+  res_header_t header_a, header_b;             // 缓存TOC头
+  res_item_t *items_a = NULL, *items_b = NULL; // 缓存TOC项
 
   bool a_valid = validate_toc(ASSET_TOC_A_ADDR, &header_a, &items_a);
   bool b_valid = validate_toc(ASSET_TOC_B_ADDR, &header_b, &items_b);
@@ -189,40 +196,61 @@ const void *asset_manager_get_res(uint32_t id, uint32_t *size) {
     if (active_items[i].id == id) {
       if (size)
         *size = active_items[i].size;
-      return (const void *)(uintptr_t)(XIP_BASE_ADDRESS + active_header.data_offset + active_items[i].offset);
+      return (const void *)(uintptr_t)(XIP_BASE_ADDRESS +
+                                       active_header.data_offset +
+                                       active_items[i].offset);
+    }
+  }
+  return NULL;
+}
+/**
+ * @brief 获取资源信息
+ * @param id 资源ID
+ * @param type 资源类型
+ * @param meta 资源元数据
+ * @param size 资源大小
+ * @return 资源指针
+ */
+const void *asset_manager_get_res_info(uint32_t id, uint16_t *type,
+                                       asset_meta_t *meta, uint32_t *size) {
+  if (active_items == NULL || active_header.item_count == 0)
+    return NULL;
+
+  for (uint32_t i = 0; i < active_header.item_count; i++) {
+    if (active_items[i].id == id) {
+      if (type)
+        *type = active_items[i].type;
+      if (meta)
+        *meta = active_items[i].meta;
+      if (size)
+        *size = active_items[i].size;
+      return (const void *)(uintptr_t)(XIP_BASE_ADDRESS +
+                                       active_header.data_offset +
+                                       active_items[i].offset);
     }
   }
   return NULL;
 }
 
-const void *asset_manager_get_res_info(uint32_t id, uint16_t *type, asset_meta_t *meta, uint32_t *size) {
-    if (active_items == NULL || active_header.item_count == 0) return NULL;
-
-    for (uint32_t i = 0; i < active_header.item_count; i++) {
-        if (active_items[i].id == id) {
-            if (type) *type = active_items[i].type;
-            if (meta) *meta = active_items[i].meta;
-            if (size) *size = active_items[i].size;
-            return (const void *)(uintptr_t)(XIP_BASE_ADDRESS + active_header.data_offset + active_items[i].offset);
-        }
-    }
-    return NULL;
-}
-
 // ---------------- 更新逻辑 -------------------
 
-typedef struct {
-  bool is_updating;
-  uint32_t target_toc_addr;
-  res_header_t new_header;
-  res_item_t *new_items;
-  uint32_t current_item_idx;
+typedef struct {                // 更新上下文
+  bool is_updating;             // 是否正在更新
+  uint32_t target_toc_addr;     // 目标 TOC 地址
+  res_header_t new_header;      // 新 TOC 头
+  res_item_t *new_items;        // 新 TOC 项
+  uint32_t current_item_idx;    // 当前项索引
   uint32_t current_data_offset; // 相对于 ASSET_DATA_ADDR
   uint32_t erased_data_offset;  // 已擦除的边界
 } update_ctx_t;
 
 static update_ctx_t update_ctx = {0};
 
+/*
+ * @brief 开始更新资源
+ * @param item_count 资源项数量
+ * @return 0 表示成功，负数表示失败
+ */
 int asset_manager_begin_update(uint32_t item_count) {
   if (asset_flash == NULL || update_ctx.is_updating)
     return -1;
@@ -282,7 +310,8 @@ error:
   return -4;
 }
 
-int asset_manager_write_res(uint32_t id, uint16_t type, asset_meta_t meta, const uint8_t *data, uint32_t size) {
+int asset_manager_write_res(uint32_t id, uint16_t type, asset_meta_t meta,
+                            const uint8_t *data, uint32_t size) {
   if (!update_ctx.is_updating ||
       update_ctx.current_item_idx >= update_ctx.new_header.item_count)
     return -1;

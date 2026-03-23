@@ -1,8 +1,9 @@
 #include "Colorwheel/UI/screens/ui_screen_colorwheel.h"
 #include "app_manager.h"
 #include "core_app.h"
-#include "res_manager.h"
 #include <stddef.h>
+
+#include "lvgl_resource.h"
 
 #define LOG_TAG "ColorWheelApp"
 #include "elog.h"
@@ -26,7 +27,7 @@ static app_def_t colorwheel_app_def = {.name = "ColorWheel",
  * @param page_index 放置页码
  */
 void colorwheel_app_register(int page_index) {
-  colorwheel_app_def.icon = res_get_src(RES_IMG_ICON_COLORWHEEL);
+  colorwheel_app_def.icon = res_get_img(RES_IMG_ICON_COLORWHEEL);
   app_manager_register(&colorwheel_app_def, page_index);
 }
 

@@ -9,8 +9,8 @@
 #define LVGL_RESOURCE_LVGL_RESOURCE_H_
 
 #include "Project_cfg.h"
-#include "lvgl.h"
 #include "asset_manager.h"
+#include "lvgl.h"
 
 // 烧录模式 (编译图像 C 数组用于烧写)
 // 运行模式 (图像数组不编译，零占用，全靠外部 NorFlash 动态读取)
@@ -22,7 +22,6 @@
  */
 typedef enum {
   RES_IMG_TEST = 0,
-
   RES_IMG_WALLPAPER,
   RES_IMG_ICON_WIFI,
   RES_IMG_ICON_BRIGHT,
@@ -30,9 +29,20 @@ typedef enum {
   RES_IMG_ICON_CONTROL,
   RES_IMG_DEFAULT_USER,
   RES_IMG_IMG_LIGHT,
-  //...
+  RES_IMG_MAX,
+
+  RES_FONT_TEST,
+  RES_FONT_MAX,
+
+  RES_AUDIO_TEST,
+  RES_AUDIO_MAX,
+
   RES_COUNT_MAX
 } res_id_t;
+
+#define RES_IMG_COUNT (RES_IMG_MAX - 0)
+#define RES_FONT_COUNT (RES_FONT_MAX - RES_IMG_MAX)
+#define RES_AUDIO_COUNT (RES_AUDIO_MAX - RES_FONT_MAX)
 
 /**
  * @brief 初始化资源管理 (读取内部表并尝试对接外部 Flash)
