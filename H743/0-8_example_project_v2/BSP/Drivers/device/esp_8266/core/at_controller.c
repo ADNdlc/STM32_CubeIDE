@@ -16,8 +16,8 @@
 /****************
  * 常量定义
  ****************/
-#define READY_TIMEOUT_MS 5000     // 等待模块就绪超时时间
-#define RETRY_TIMEOUT_MS 200      // 重试超时时间
+#define READY_TIMEOUT_MS 5000     // 等待模块就绪超时时间(ms)
+#define RETRY_TIMEOUT_MS 500      // 重试超时时间
 #define MAX_BUSY_TIMEOUT_MS 10000 // 模块忙碌超时时间
 
 /****************
@@ -33,40 +33,37 @@ static void at_cmd_cleanup(at_controller_t *self, AT_Cmd_t *cmd);
 // "OK"
 static void handle_final_ok(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
-  if (self->state == AT_CTRL_STATE_WAIT_RSP) {
+  // 【修复】：处于 BUSY 状态时如果收到 OK，也必须承认并结束命令！
+  if (self->state == AT_CTRL_STATE_WAIT_RSP || self->state == AT_CTRL_STATE_BUSY) {
     if (self->current_cmd && self->current_cmd->response_cb) {
-      self->current_cmd->response_cb(self->current_cmd->ctx, AT_CMD_OK,
-                                     line); // 将结果和内容传递给命令的回调
+      self->current_cmd->response_cb(self->current_cmd->ctx, AT_CMD_OK, line);
     }
-    log_d("Cmd OK: %s",
-          self->current_cmd ? self->current_cmd->cmd_str : "NULL");
-    // 清理命令对象和系统状态
+    log_d("Cmd OK: %s", self->current_cmd ? self->current_cmd->cmd_str : "NULL");
     at_cmd_cleanup(self, self->current_cmd);
     self->current_cmd = NULL;
     self->state = AT_CTRL_STATE_IDLE;
     self->busy_count = 0;
     self->consecutive_timeouts = 0;
-  } else if (self->state ==
-             AT_CTRL_STATE_WAIT_DATAIN) { // 如果是长输入命令则忽略中间的OK
+  } else if (self->state == AT_CTRL_STATE_WAIT_DATAIN) {
     log_d("Intermediate OK (ignored in WAIT_DATAIN): %s", line);
   }
 }
-// "ERROR"
+
+// 2. 修复 ERROR 拦截漏洞
 static void handle_final_error(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
-  if (self->state == AT_CTRL_STATE_WAIT_RSP ||
-      self->state == AT_CTRL_STATE_WAIT_DATAIN) {
-    log_e("Cmd Error: %s",
-          self->current_cmd ? self->current_cmd->cmd_str : "NULL");
+  // 【修复】：同上，增加对 BUSY 状态的放行
+  if (self->state == AT_CTRL_STATE_WAIT_RSP || self->state == AT_CTRL_STATE_WAIT_DATAIN || self->state == AT_CTRL_STATE_BUSY) {
+    log_e("Cmd Error: %s", self->current_cmd ? self->current_cmd->cmd_str : "NULL");
     if (self->current_cmd && self->current_cmd->response_cb) {
-      self->current_cmd->response_cb(self->current_cmd->ctx, AT_CMD_ERROR,
-                                     line); // 将结果和内容传递给命令的回调
+      self->current_cmd->response_cb(self->current_cmd->ctx, AT_CMD_ERROR, line);
     }
     at_cmd_cleanup(self, self->current_cmd);
     self->current_cmd = NULL;
     self->state = AT_CTRL_STATE_IDLE;
   }
 }
+
 // "busy p..."
 static void handle_busy(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
@@ -326,26 +323,31 @@ void at_controller_process(at_controller_t *self) {
     break;
 
   case AT_CTRL_STATE_BUSY:
-    if (now - self->wait_sent_time > RETRY_TIMEOUT_MS) {
-      if (self->current_cmd) {
-        uart_queue_send(self->uart, (uint8_t *)self->current_cmd->cmd_str,
-                        strlen(self->current_cmd->cmd_str));
-        self->wait_sent_time = now;
+     if (now - self->wait_sent_time > RETRY_TIMEOUT_MS) {
+       if (self->current_cmd) {
+         uart_queue_send(self->uart, (uint8_t *)self->current_cmd->cmd_str, strlen(self->current_cmd->cmd_str));
+         self->wait_sent_time = now;
 
-        if (self->busy_count * RETRY_TIMEOUT_MS > MAX_BUSY_TIMEOUT_MS) {
-          if (self->current_cmd->response_cb) {
-            self->current_cmd->response_cb(self->current_cmd->ctx,
-                                           AT_CMD_TIMEOUT, "BUSY TIMEOUT");
-          }
-          at_cmd_cleanup(self, self->current_cmd);
-          self->state = AT_CTRL_STATE_IDLE;
-          self->current_cmd = NULL;
-        }
-      } else {
-        self->state = AT_CTRL_STATE_IDLE;
-      }
-    }
-    break;
+         // 【修复】：重发指令后，必须把状态切换回去！
+         if (self->current_cmd->data_to_send != NULL) {
+             self->state = AT_CTRL_STATE_WAIT_DATAIN;
+         } else {
+             self->state = AT_CTRL_STATE_WAIT_RSP;
+         }
+
+         if (self->busy_count * RETRY_TIMEOUT_MS > MAX_BUSY_TIMEOUT_MS) {
+           if (self->current_cmd->response_cb) {
+             self->current_cmd->response_cb(self->current_cmd->ctx, AT_CMD_TIMEOUT, "BUSY TIMEOUT");
+           }
+           at_cmd_cleanup(self, self->current_cmd);
+           self->state = AT_CTRL_STATE_IDLE;
+           self->current_cmd = NULL;
+         }
+       } else {
+         self->state = AT_CTRL_STATE_IDLE;
+       }
+     }
+     break;
 
   case AT_CTRL_STATE_WAIT_READY:
     if (now - self->wait_sent_time > READY_TIMEOUT_MS) {
