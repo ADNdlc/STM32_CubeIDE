@@ -82,10 +82,14 @@ static void update_scan_list(wifi_ap_info_t *results, uint16_t count) {
  * @param ap_list AP列表
  * @param count   数量
  */
-static void wifi_scan_completed_cb(void *arg, wifi_ap_info_t *ap_list,
-                                   uint16_t count) {
-  log_i("Scan completed: %d APs found", count);
-  update_scan_list(ap_list, count); // 更新结果列表
+static void wifi_scan_completed_cb(void *arg, wifi_ap_list_t *ap_list) {
+  if (ap_list == NULL) {
+    log_e("Scan failed: ap_list is NULL");
+    update_scan_list(NULL, 0);
+    return;
+  }
+  log_i("Scan completed: %d APs found", ap_list->count);
+  update_scan_list(ap_list->ap_info, ap_list->count); // 更新结果列表
 }
 
 static void start_scan(lv_event_t *e) {

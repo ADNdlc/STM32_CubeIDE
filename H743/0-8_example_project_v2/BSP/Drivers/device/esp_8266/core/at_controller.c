@@ -146,9 +146,8 @@ void at_controller_init(at_controller_t *self, uart_queue_t *uart,
   // 提交模块初始设置(就绪后发送)
   AT_Cmd_t init_cmds[] = {
 
-//      {.cmd_str = "AT+SYSSTORE=1\r\n",
-//       .timeout_ms = 1000}, // 模块的配置更改将保存在 NVS 分区
-
+      {.cmd_str = "AT+SYSSTORE=1\r\n",
+       .timeout_ms = 1000}, // 模块的配置更改将保存在 NVS 分区
       {.cmd_str = "ATE0\r\n", .timeout_ms = 1000}, // 关闭回显
       {.cmd_str = "AT+CWAUTOCONN=0\r\n",
        .timeout_ms = 1000}, // 关闭上电自动连接 AP
@@ -165,7 +164,7 @@ static void at_controller_reset_hw(at_controller_t *self) {
   log_i("Resetting ESP8266 hardware...");
   if (self->rst_pin) {
     GPIO_WRITE(self->rst_pin, 0); // 低电平复位
-    sys_delay_ms(50);
+    sys_delay_ms(100);
     GPIO_WRITE(self->rst_pin, 1);
   } else { // 若无硬件复位，则软件复位(可能失败或一直收不到read)
     log_w("No RST pin, using Soft Reset");

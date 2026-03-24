@@ -41,7 +41,8 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
 
   // 同步给系统状态
   if (status == WIFI_STATUS_GOT_IP) { // 获得IP地址,网络准备就绪
-    log_i("Network Ready: Obtained IP address");
+    // 同步给系统状态
+    sys_state_set_wifi(true);
 
     // 连接上wifi, 自动启动MQTT服务连接
     log_i("Starting MQTT Service...");
@@ -53,6 +54,7 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
 
   } else if (status == WIFI_STATUS_DISCONNECTED) { // 断开连接
     log_w("Network Offline");
+    sys_state_set_wifi(false);
     mqtt_svc_disconnect(&g_mqtt_svc);
   }
 }
