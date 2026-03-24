@@ -81,6 +81,22 @@ typedef struct {
    */
   int (*sync)(block_device_t *const self);
 
+  /**
+   * @brief 检测设备是否物理存在(用于热插拔支持)
+   * @return 1=存在, 0=不存在, -1=不支持此功能
+   */
+  int (*is_present)(block_device_t *const self);
+
+  /**
+   * @brief 检测设备是否处于忙状态
+   * @return 1=忙, 0=空闲, -1=错误
+   */
+  int (*is_busy)(block_device_t *const self);
+
+  /**
+   * @brief 扩展控制接口
+   */
+  int (*ioctl)(block_device_t *const self, int cmd, void *arg);
 } block_device_ops_t;
 
 /**
@@ -99,5 +115,11 @@ struct block_device_t {
 #define BLOCK_DEV_ERASE(dev, a, s) ((dev)->ops->erase(dev, a, s))
 #define BLOCK_DEV_GET_INFO(dev, i) ((dev)->ops->get_info(dev, i))
 #define BLOCK_DEV_SYNC(dev) ((dev)->ops->sync(dev))
+#define BLOCK_DEV_IS_PRESENT(dev)                                              \
+  ((dev)->ops->is_present ? (dev)->ops->is_present(dev) : -1)
+#define BLOCK_DEV_IS_BUSY(dev)                                                 \
+  ((dev)->ops->is_busy ? (dev)->ops->is_busy(dev) : 0)
+#define BLOCK_DEV_IOCTL(dev, c, a)                                             \
+  ((dev)->ops->ioctl ? (dev)->ops->ioctl(dev, c, a) : -1)
 
 #endif /* DRIVERS_INTERFACE_BLOCK_DEVICE_H_ */

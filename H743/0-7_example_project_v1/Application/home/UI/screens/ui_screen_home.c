@@ -82,7 +82,7 @@ void ui_screen_home_init(void) {
   // 创建屏幕
   ui_screen_home = lv_obj_create(NULL);
   if (!ui_screen_home) {
-    LV_LOG_ERROR("Failed to create ui_screen_home");
+    log_e("Failed to create ui_screen_home");
     return;
   }
   lv_obj_clear_flag(ui_screen_home, LV_OBJ_FLAG_SCROLLABLE);
@@ -94,8 +94,7 @@ void ui_screen_home_init(void) {
   // 使用TileView作为主体
   ui_home_tileview = lv_tileview_create(ui_screen_home);
   lv_obj_set_style_bg_opa(ui_home_tileview, LV_OPA_TRANSP, 0);
-  // lv_obj_remove_style(ui_home_tileview, NULL, LV_PART_SCROLLBAR); //
-  // 移除滚动条
+  lv_obj_remove_style(ui_home_tileview, NULL, LV_PART_SCROLLBAR);// 移除滚动条
 
   // 初始化TileView,添加页面并设置布局
   for (int i = 0; i < PAGE_COUNT; i++) {
@@ -111,16 +110,13 @@ void ui_screen_home_init(void) {
   // 创建图标并布局
   for (int i = 0; i < total_apps; i++) {
     const app_def_t *app = app_manager_get_app_by_index(i);
-
-    // Safety Check 1: App Pointer
     if (app == NULL) {
       continue;
     }
 
-    // Safety Check 2: App Name (Check pointer validity first if possible, but
-    // start with NULL check)
+    // 检查name
     if (app->name == NULL) {
-      LV_LOG_ERROR("App index %d has NULL name! Skipping.", i);
+      log_w("App index %d has NULL name! Skipping.", i);
       continue;
     }
 
@@ -149,7 +145,7 @@ void ui_screen_home_init(void) {
 
     // 如果所有页面都满了
     if (page_idx < 0) {
-      LV_LOG_WARN("Home screen full! Cannot add app: %s", app->name);
+      log_w("Home screen full! Cannot add app: %s", app->name);
       continue;
     }
 
@@ -160,7 +156,7 @@ void ui_screen_home_init(void) {
 
     // 双重检查 row 是否越界
     if (row > PAGE_ROW) {
-      LV_LOG_WARN("App row out of bounds! %s (Row: %d, Max: %d)", app->name,
+      log_w("App row out of bounds! %s (Row: %d, Max: %d)", app->name,
                   row, PAGE_ROW);
       continue;
     }
@@ -170,7 +166,7 @@ void ui_screen_home_init(void) {
         ui_comp_app_icon_create(pages[page_idx].tile, app->icon, app->name);
 
     if (icon_comp == NULL) {
-      LV_LOG_ERROR("Failed to create icon for %s (OOM?)", app->name);
+      log_e("Failed to create icon for %s (OOM?)", app->name);
       continue;
     }
 

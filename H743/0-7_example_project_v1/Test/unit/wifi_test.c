@@ -40,6 +40,19 @@ static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
   log_i("WiFi Status Changed: %d", status);
 }
 
+static bool g_scan_done = false;
+
+static void test_scan_cb(void *arg, wifi_ap_info_t *results, uint16_t count) {
+  log_i("Scan complete. Found %d APs:", count);
+  for (uint16_t i = 0; i < count; i++) {
+    log_i(" [%d] SSID: %-16s, RSSI: %-3d, MAC: %s, CH: %d, ECN: %d, Proto: "
+          "0x%02X",
+          i, results[i].ssid, results[i].rssi, results[i].mac,
+          results[i].channel, results[i].encryption, results[i].protocol);
+  }
+  g_scan_done = true;
+}
+
 void wifi_test_run(void) {
   log_i("Starting WiFi Test...");
 
@@ -90,23 +103,19 @@ void wifi_test_run(void) {
 
   // 6. Perform Scan
   log_i("Scanning for APs...");
-  wifi_svc_scan(&g_wifi_svc, NULL, NULL);
+  g_scan_done = false;
+  wifi_svc_scan(&g_wifi_svc, test_scan_cb, NULL);
 
   start_tick = sys_get_systick_ms();
-  while (sys_get_systick_ms() - start_tick < 10000) {
+  while (sys_get_systick_ms() - start_tick < 15000) { // Wait up to 15s for scan
     at_controller_process(&g_at_ctrl);
+    if (g_scan_done)
+      break;
     sys_delay_ms(1);
   }
 
-  // Display Scan Results
-  uint16_t count = wifi_svc_get_scan_count(&g_wifi_svc);
-  log_i("Scan complete. Found %d APs:", count);
-  wifi_ap_info_t *results = wifi_svc_get_scan_results(&g_wifi_svc);
-  for (uint16_t i = 0; i < count; i++) {
-    log_i(" [%d] SSID: %-16s, RSSI: %-3d, MAC: %s, CH: %d, ECN: %d, Proto: "
-          "0x%02X",
-          i, results[i].ssid, results[i].rssi, results[i].mac,
-          results[i].channel, results[i].encryption, results[i].protocol);
+  if (!g_scan_done) {
+    log_w("Scan timeout or failed.");
   }
 
   // 7. Try Connect (Optional, if user wants to test specific AP)

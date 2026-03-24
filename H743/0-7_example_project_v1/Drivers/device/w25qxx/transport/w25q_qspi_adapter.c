@@ -213,6 +213,19 @@ static int _qspi_wait_busy(w25q_adapter_t *self, uint32_t timeout) {
   return QSPI_AUTO_POLLING(impl->driver, &cmd, &cfg, timeout);
 }
 
+static int _qspi_is_busy(w25q_adapter_t *self) {
+  w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
+  qspi_command_t cmd;
+  uint8_t status = 0;
+  _fill_cmd(impl, &cmd, CMD_READ_STATUS_REG1, 0, QSPI_MODE_1_LINE,
+            QSPI_MODE_NONE, QSPI_MODE_1_LINE, 0, 1);
+  if (QSPI_COMMAND(impl->driver, &cmd, 10) != 0 ||
+      QSPI_RECEIVE(impl->driver, &status, 10) != 0) {
+    return -1;
+  }
+  return (status & 0x01) ? 1 : 0;
+}
+
 static int _qspi_enter_4byte_addr_mode(w25q_adapter_t *self) {
   w25q_qspi_adapter_impl_t *impl = (w25q_qspi_adapter_impl_t *)self;
   qspi_command_t cmd;
@@ -247,6 +260,7 @@ static const w25q_adapter_ops_t w25q_qspi_ops = {
     .erase_block = _qspi_erase_block,
     .erase_chip = _qspi_erase_chip,
     .wait_busy = _qspi_wait_busy,
+    .is_busy = _qspi_is_busy,
     .enter_4byte_addr_mode = _qspi_enter_4byte_addr_mode,
     .exit_4byte_addr_mode = _qspi_exit_4byte_addr_mode,
 };

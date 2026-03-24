@@ -68,6 +68,7 @@ int hal_init(void) {
 #endif
   /* --------------------- */
 
+
   log_i("HAL initialization completed...");
   return 0;
 }

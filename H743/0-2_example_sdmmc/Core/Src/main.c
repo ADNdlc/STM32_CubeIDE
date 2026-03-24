@@ -139,7 +139,7 @@ int main(void)
   SDCard_TestRead_DMA();
 
 
-  while(get_busy()==1){}//防止中断吞掉printf(此处仅做测试，实际工程请勿在中断里打印，极有可能出错甚至误导思考)
+  while(get_busy()==1){}
   printf("SD:%lu\r\n",HAL_SD_GetCardState(&hsd1));
   printf("====================SDtest cplt====================\r\n");
   /* USER CODE END 2 */

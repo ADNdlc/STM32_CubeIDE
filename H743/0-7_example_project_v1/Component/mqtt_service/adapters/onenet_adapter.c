@@ -1,6 +1,7 @@
 #include "cJSON.h"
 #include "home/System/sys_config.h"
 #include "mqtt_adapter.h"
+#include "rtc_hal/rtc_hal.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -12,17 +13,17 @@
  */
 
 static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
-  const sys_config_t *cfg = sys_config_get();
+  const app_settings_t *cfg = sys_config_get();
 
   strcpy(out_params->host, ONENET_SERVER_HOST);
   out_params->port = ONENET_SERVER_PORT;
 
   // 对于 OneNet, client_id是设备id
-  strcpy(out_params->client_id, cfg->cloud.device_id);
+  strcpy(out_params->client_id, cfg->configs[CLOUD_DEVICE_ID].string);
   // username是产品id
-  strcpy(out_params->username, cfg->cloud.product_id);
+  strcpy(out_params->username, cfg->configs[CLOUD_PRODUCT_ID].string);
   // password
-  strcpy(out_params->password, cfg->cloud.device_secret);
+  strcpy(out_params->password, cfg->configs[CLOUD_DEVICE_SECRET].string);
 }
 
 /**
@@ -30,9 +31,9 @@ static void onenet_get_conn_params(mqtt_conn_params_t *out_params) {
  */
 static void onenet_get_post_topic(const char *device_id, char *out_topic,
                                   size_t size) {
-  const sys_config_t *cfg = sys_config_get();
+  const app_settings_t *cfg = sys_config_get();
   snprintf(out_topic, size, "$sys/%s/%s/thing/property/post",
-           cfg->cloud.product_id, device_id);
+           cfg->configs[CLOUD_PRODUCT_ID].string, device_id);
 }
 
 /**
@@ -40,9 +41,9 @@ static void onenet_get_post_topic(const char *device_id, char *out_topic,
  */
 static void onenet_get_cmd_topic(const char *device_id, char *out_topic,
                                  size_t size) {
-  const sys_config_t *cfg = sys_config_get();
+  const app_settings_t *cfg = sys_config_get();
   snprintf(out_topic, size, "$sys/%s/%s/thing/property/set",
-           cfg->cloud.product_id, device_id);
+           cfg->configs[CLOUD_PRODUCT_ID].string, device_id);
 }
 
 /**
@@ -70,6 +71,12 @@ static int onenet_serialize_post(const thing_device_t *device,
     break;
   default:
     break;
+  }
+
+  // 为属性值添加毫秒级时间戳
+  uint64_t timestamp = rtc_hal_get_unix_ms();
+  if (timestamp > 0) {
+    cJSON_AddNumberToObject(p_val, "time", (double)timestamp);
   }
 
   cJSON_AddItemToObject(params, prop->id, p_val);
@@ -114,12 +121,12 @@ static int onenet_parse_command(const char *topic, const char *payload,
 
   cJSON *params = cJSON_GetObjectItem(root, "params");
   if (params && prop_cb) {
-    // Iterate through all children of params
+    // 遍历属性
     cJSON *prop = params->child;
     while (prop) {
       thing_value_t out_value;
       bool valid = false;
-
+      // 检查属性类型
       if (cJSON_IsBool(prop)) {
         out_value.b = cJSON_IsTrue(prop);
         valid = true;
@@ -150,9 +157,9 @@ static void onenet_get_reply_payload(const char *msg_id, int code,
 
 static void onenet_get_reply_topic(const char *device_id, char *out_topic,
                                    size_t size) {
-  const sys_config_t *cfg = sys_config_get();
+  const app_settings_t *cfg = sys_config_get();
   snprintf(out_topic, size, "$sys/%s/%s/thing/property/set_reply",
-           cfg->cloud.product_id, device_id);
+           cfg->configs[CLOUD_PRODUCT_ID].string, device_id);
 }
 
 const mqtt_adapter_t g_onenet_adapter = {

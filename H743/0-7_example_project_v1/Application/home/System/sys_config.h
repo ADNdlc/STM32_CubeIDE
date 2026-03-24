@@ -3,15 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
-/**
- * @brief wifi连接配置
- */
-typedef struct {
-  char ssid[33];
-  char password[64];
-  bool auto_connect;
-} net_config_t;
+#include "app_settings.h"
 
 /**
  * @brief 云平台类型
@@ -22,23 +14,18 @@ typedef enum {
   CLOUD_PLATFORM_CUSTOM
 } cloud_platform_t;
 
-/**
- * @brief 云服务配置
- */
-typedef struct {
-  cloud_platform_t platform;
-  char device_id[65];
-  char product_id[65];
-  char device_secret[256];
-} cloud_config_t;
+typedef enum {
+  // wifi
+  WIFI_SSID,
+  WIFI_PASSWORD,
+  // mqtt cloud
+  CLOUD_PLATFORM,
+  CLOUD_PRODUCT_ID,
+  CLOUD_DEVICE_ID,
+  CLOUD_DEVICE_SECRET,
 
-/**
- * @brief 全局系统配置
- */
-typedef struct {
-  net_config_t net;
-  cloud_config_t cloud;
-} sys_config_t;
+  SYS_CONFIG_KEY_MAX
+} sys_config_key_t;
 
 /**
  * @brief 初始化系统配置
@@ -46,25 +33,22 @@ typedef struct {
  */
 int sys_config_init(void);
 
+void sys_config_set_defaults(void);
+
 /**
  * @brief 获取系统配置
  */
-const sys_config_t *sys_config_get(void);
+app_settings_t *sys_config_get(void);
 
-/**
- * @brief Update network configuration
- */
-void sys_config_set_net(const net_config_t *net);
+char *sys_config_get_wifi_ssid(void);
+char *sys_config_get_wifi_password(void);
+void sys_config_set_wifi_ssid(const char *ssid);
+void sys_config_set_wifi_password(const char *password);
+int sys_config_get_cloud_platform(void);
+char *sys_config_get_cloud_product_id(void);
+char *sys_config_get_cloud_device_id(void);
+char *sys_config_get_cloud_device_secret(void);
 
-/**
- * @brief Update cloud configuration
- */
-void sys_config_set_cloud(const cloud_config_t *cloud);
 
-/**
- * @brief 保存当前配置到flash
- * @return 0 on success
- */
-int sys_config_save(void);
 
 #endif /* APPLICATION_HOME_SYSTEM_SYS_CONFIG_H_ */

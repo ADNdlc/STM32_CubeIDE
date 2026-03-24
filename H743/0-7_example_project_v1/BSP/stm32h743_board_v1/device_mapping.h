@@ -62,12 +62,26 @@ typedef enum {
   I2C_SOFT_MAX_DEVICES
 } i2c_soft_device_id_t;
 
+// One-Wire 软件模拟设备逻辑标识枚举
+typedef enum {
+  ONE_WIRE_SOFT_DHT11 = 0,
+  //...
+  ONE_WIRE_SOFT_MAX_DEVICES
+} one_wire_soft_device_id_t;
+
 // 触摸屏设备逻辑标识枚举
 typedef enum {
   TOUCH_MAIN = 0, // 主触摸屏
   //...
   TOUCH_MAX_DEVICES
 } touch_device_id_t;
+
+// 光照传感器设备逻辑标识枚举
+typedef enum {
+  LS_BH1750 = 0,
+  //...
+  LS_MAX_DEVICES
+} light_sensor_device_id_t;
 
 // RTC 设备逻辑标识枚举
 typedef enum {
@@ -95,7 +109,8 @@ typedef enum {
   FLASH_TYPE_NONE = 0,
   FLASH_TYPE_SPI,
   FLASH_TYPE_QSPI,
-  FLASH_TYPE_NAND  // 新增NAND Flash类型
+  FLASH_TYPE_NAND, // NAND Flash类型
+  FLASH_TYPE_SD    // SD卡类型
 } flash_type_t;
 
 // Flash 设备逻辑标识枚举
@@ -103,6 +118,7 @@ typedef enum {
   FLASH_EXT_SPI = 0, // 外部SPI Flash
   FLASH_EXT_QSPI,    // 外部QSPI Flash
   FLASH_EXT_NAND,    // 外部NAND Flash
+  FLASH_EXT_SDCARD,  // 外部SD卡
   //...
   FLASH_MAX_DEVICES
 } flash_device_id_t;
@@ -147,6 +163,12 @@ typedef struct {
   uint32_t delay_us;      // 延时时间（微秒）
 } i2c_soft_mapping_t;
 
+// One-Wire 软件模拟设备映射结构体
+typedef struct {
+  GPIO_TypeDef *port; // GPIO 端口
+  uint16_t pin;       // GPIO 引脚
+} one_wire_soft_mapping_t;
+
 // 触摸屏设备映射结构体
 typedef struct {
   i2c_soft_device_id_t i2c_id;  // 使用的 I2C 设备 ID
@@ -154,6 +176,12 @@ typedef struct {
   gpio_device_id_t int_gpio_id; // INT 引脚 GPIO ID
   uint8_t i2c_addr_mode;        // I2C 地址模式 (0x14 或 0x5D)
 } touch_mapping_t;
+
+// 光照传感器设备映射结构体
+typedef struct {
+  i2c_soft_device_id_t i2c_id; // 使用的 I2C 设备 ID
+  uint8_t i2c_addr;            // I2C 设备地址
+} bh1750_mapping_t;
 
 // RTC 设备映射结构体
 typedef struct {
@@ -179,6 +207,7 @@ typedef struct {
     spi_device_id_t spi_id;
     qspi_device_id_t qspi_id;
     NAND_HandleTypeDef *hnand;
+    SD_HandleTypeDef *hsd;
   };
 } flash_mapping_t;
 
@@ -189,7 +218,10 @@ extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 extern const lcd_mapping_t lcd_mappings[LCD_MAX_DEVICES];
 extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 extern const i2c_soft_mapping_t i2c_soft_mappings[I2C_SOFT_MAX_DEVICES];
+extern const one_wire_soft_mapping_t
+    one_wire_soft_mappings[ONE_WIRE_SOFT_MAX_DEVICES];
 extern const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES];
+extern const bh1750_mapping_t bh1750_mappings[LS_MAX_DEVICES];
 extern const rtc_mapping_t rtc_mappings[RTC_MAX_DEVICES];
 extern const spi_mapping_t spi_mappings[SPI_MAX_DEVICES];
 extern const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES];

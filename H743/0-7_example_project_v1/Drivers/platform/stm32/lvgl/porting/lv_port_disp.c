@@ -71,6 +71,8 @@ static uint16_t *lvgl_drawbuf = NULL;
 #define BufferConfig 1        // 使用哪一种缓冲配置
 #define Always_Whol_Redrawn 0 // 总是全屏重绘
 
+#define LVGL_BUF_HEIGHT 160
+
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -115,10 +117,10 @@ void lv_port_disp_init(void) {
 #if BufferConfig == 1
   /* Example for 1) */
   static lv_disp_draw_buf_t draw_buf_dsc_1;
-  static lv_color_t buf_1[MY_DISP_HOR_RES * 240]; // 内部缓冲区 = 384K
+  static lv_color_t buf_1[MY_DISP_HOR_RES * LVGL_BUF_HEIGHT]; // 内部缓冲区 = 384K
   lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL,
                         MY_DISP_HOR_RES *
-                            240); /*Initialize the display buffer*/
+						LVGL_BUF_HEIGHT); /*Initialize the display buffer*/
 #endif
 #if BufferConfig == 2
   /* Example for 2) */

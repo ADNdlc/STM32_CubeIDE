@@ -5,6 +5,7 @@
 #include "ltdc.h"
 #include "quadspi.h"
 #include "rtc.h"
+#include "sdmmc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -14,7 +15,7 @@
 // GPIO 设备映射表定义
 const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
     [GPIO_LED_0] = {GPIOB, GPIO_PIN_1},        // 开发板led_0(PB1,act=0)
-	[GPIO_LED_1] = {GPIOB, GPIO_PIN_0},        // 开发板led_1(PB0,act=0)
+    [GPIO_LED_1] = {GPIOB, GPIO_PIN_0},        // 开发板led_1(PB0,act=0)
     [GPIO_BUTTON_KEYUP] = {GPIOA, GPIO_PIN_0}, // 开发板按键KEY_UP(act=1)
     [GPIO_BUTTON_KEY0] = {GPIOH, GPIO_PIN_3},  // 开发板按键KEY_0 (act=0)
     [GPIO_BUTTON_KEY1] = {GPIOH, GPIO_PIN_2},  // 开发板按键KEY_1 (act=0)
@@ -22,13 +23,14 @@ const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
     // 触摸屏控制引脚
     [GPIO_TOUCH_RST] = {GPIOI, GPIO_PIN_8}, // 触摸屏 RST 引脚 (PI8)
     [GPIO_TOUCH_INT] = {GPIOH, GPIO_PIN_7}, // 触摸屏 INT 引脚 (PH7)
-                                            // esp8266硬件复位引脚
-    [GPIO_ESP_RST] = {GPIOC, GPIO_PIN_5},
+
+    [GPIO_ESP_RST] = {GPIOC, GPIO_PIN_5}, // esp8266硬件复位引脚
 };
 
 // PWM 设备映射表定义
 const pwm_mapping_t pwm_mappings[PWM_MAX_DEVICES] = {
-    [RGB_LED_RED] = {&htim4, TIM_CHANNEL_1},   // 外接RGBled_R(PD12,act=1)	// 此引脚已配置为flash引脚
+    [RGB_LED_RED] = {&htim4, TIM_CHANNEL_1},   // 外接RGBled_R(PD12,act=1)
+                                               // // 此引脚已配置为flash引脚
     [RGB_LED_GREEN] = {&htim4, TIM_CHANNEL_2}, // 外接RGBled_G(PD13,act=1)
     [RGB_LED_BLUE] = {&htim4, TIM_CHANNEL_3},  // 外接RGBled_B(PB8,act=1)
     [PWM_LED_1] = {&htim3, TIM_CHANNEL_3},     // 开发板led_0(PB1,act=0)
@@ -58,6 +60,16 @@ const i2c_soft_mapping_t i2c_soft_mappings[I2C_SOFT_MAX_DEVICES] = {
     },
 };
 
+// One-Wire 软件模拟设备映射表定义
+const one_wire_soft_mapping_t
+    one_wire_soft_mappings[ONE_WIRE_SOFT_MAX_DEVICES] = {
+        [ONE_WIRE_SOFT_DHT11] =
+            {
+                .port = GPIOB,
+                .pin = GPIO_PIN_11,
+            },
+};
+
 // 触摸屏设备映射表定义
 const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES] = {
     [TOUCH_MAIN] = // 800x480rgb屏幕
@@ -67,6 +79,15 @@ const touch_mapping_t touch_mappings[TOUCH_MAX_DEVICES] = {
         .int_gpio_id = GPIO_TOUCH_INT,
         .i2c_addr_mode = 0x14, // 使用0x14地址模式 (复位时INT=HIGH)
     },
+};
+
+// BH1750 光照传感器映射表定义
+const bh1750_mapping_t bh1750_mappings[LS_MAX_DEVICES] = {
+    [LS_BH1750] =
+        {
+            .i2c_id = I2C_SOFT_TOUCH, // 假设挂在触摸屏同一个软件I2C上
+            .i2c_addr = 0x23,         // ADDR 引脚接 GND 时的地址
+        },
 };
 
 // RTC 设备映射表定义
@@ -84,5 +105,5 @@ const qspi_mapping_t qspi_mappings[QSPI_MAX_DEVICES] = {
 const flash_mapping_t flash_mappings[FLASH_MAX_DEVICES] = {
     [FLASH_EXT_SPI] = {.type = FLASH_TYPE_SPI, .spi_id = SPI_1},
     [FLASH_EXT_QSPI] = {.type = FLASH_TYPE_QSPI, .qspi_id = QSPI_1},
-    [FLASH_EXT_NAND] = {.type = FLASH_TYPE_NAND, .hnand = &hnand1}  // 更新为NAND_FMC_1
-};
+    [FLASH_EXT_NAND] = {.type = FLASH_TYPE_NAND, .hnand = &hnand1},
+    [FLASH_EXT_SDCARD] = {.type = FLASH_TYPE_SD, .hsd = &hsd1}};

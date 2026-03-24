@@ -17,9 +17,9 @@ typedef struct usart_driver_t usart_driver_t;
 // 事件类型定义
 typedef enum
 {
-  USART_EVENT_RX_COMPLETE,     // 接收到数据
+  USART_EVENT_RX_COMPLETE, // 接收到数据
   USART_EVENT_TX_COMPLETE, // 发送完成
-  USART_EVENT_ERROR,        // 发生错误
+  USART_EVENT_ERROR,       // 发生错误
   USART_EVENT_RX_EVENT,
   //USART_EVENT_2,
   //...

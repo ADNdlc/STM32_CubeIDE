@@ -32,10 +32,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "project_cfg.h"
-#include "hal_init.h"
-#include "sys_init.h"
 #include "app.h"
+#include "hal_init.h"
+#include "project_cfg.h"
+#include "sys_init.h"
+
 
 /* USER CODE END Includes */
 
@@ -121,20 +122,20 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  GPIOB->ODR ^= (1<<0);
-  GPIOB->ODR ^= (1<<1);
+  GPIOB->ODR ^= (1 << 0);
+  GPIOB->ODR ^= (1 << 1);
   HAL_Delay(500);
 
   /* ----- 业务代码 ----- */
-  hal_init(); // HAL层初始化(绑定平台实现)
-  sys_services_init();// 服务和组件初始化
+  hal_init();          // HAL层初始化(绑定平台实现)
+  sys_services_init(); // 服务和组件初始化
 #if !TEST_ENABLE
   app_init(); // 应用初始化
 #endif
   // module testing
   run_all_tests(); // 运行所有开启的单元测试
 
-  //net_mgr_wifi_enable(1);
+  // net_mgr_wifi_enable(1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -144,9 +145,13 @@ int main(void)
     app_run(); // 应用运行
 #endif
 
-#if 0
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
-	  HAL_Delay(500);
+#if TEST_ENABLE
+#if LVGL_ENABLE
+    lv_timer_handler();
+#else
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+    HAL_Delay(500);
+#endif
 #endif
     /* USER CODE END WHILE */
 
@@ -232,7 +237,18 @@ void PeriphCommonClock_Config(void)
 
   /** Initializes the peripherals clock
   */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CKPER;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_QSPI|RCC_PERIPHCLK_SDMMC
+                              |RCC_PERIPHCLK_CKPER;
+  PeriphClkInitStruct.PLL2.PLL2M = 5;
+  PeriphClkInitStruct.PLL2.PLL2N = 160;
+  PeriphClkInitStruct.PLL2.PLL2P = 4;
+  PeriphClkInitStruct.PLL2.PLL2Q = 8;
+  PeriphClkInitStruct.PLL2.PLL2R = 4;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
+  PeriphClkInitStruct.QspiClockSelection = RCC_QSPICLKSOURCE_PLL2;
+  PeriphClkInitStruct.SdmmcClockSelection = RCC_SDMMCCLKSOURCE_PLL2;
   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
@@ -264,11 +280,14 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
+  GPIOB->ODR ^= (1 << 0);
+  GPIOB->ODR ^= (1 << 1);
   while (1) {
-	GPIOB->ODR ^= (1<<0);	// PB0
-	for(__IO int i=0; i<100000; i++){
-		for(__IO int j=0; j<1000; j++){}
-	}
+    GPIOB->ODR ^= (1 << 0); // PB0
+    for (__IO int i = 0; i < 10000; i++) {
+      for (__IO int j = 0; j < 1000; j++) {
+      }
+    }
   }
   /* USER CODE END Error_Handler_Debug */
 }

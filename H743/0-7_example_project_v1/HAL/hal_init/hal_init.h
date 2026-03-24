@@ -13,6 +13,7 @@
 #include "SYSTEM/sys.h"
 #include "all_tests_config.h"
 #include "factory.h"
+
 #include "logger/elog_init.h"
 #if LVGL_ENABLE
 #include "lv_port_disp.h"

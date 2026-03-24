@@ -2,15 +2,14 @@
 #include "gpio_key/gpio_key.h"
 #include "gpio_led/gpio_led.h"
 #include "sys_config.h"
-#include "thing_model.h"
+#include "thing_model/thing_model.h"
 #include <device_handle.h>
 #include <string.h>
-
 
 #define LOG_TAG "DEV_HANDLE"
 #include "elog.h"
 
-static cloud_config_t *config = NULL;
+static app_settings_t *sys_config = NULL;
 static gpio_key_t *key0 = NULL;
 static KeyObserver observer0;
 
@@ -21,16 +20,16 @@ static gpio_led_t *led1_obj = NULL;
 #if 1
 static bool device_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
                                thing_value_t value) {
-  if (strcmp(dev->device_id, config->device_id) == 0) {
+  if (strcmp(dev->device_id, sys_config_get_cloud_device_id()) == 0) {
     if (strcmp(prop_id, "led0") == 0) {
       log_i("Hardware: led0 set to %d", value.b);
       if (led0_obj)
-    	  led_hal_set_data((led_hal_t *)led0_obj, value.b);
+        led_hal_set_data((led_hal_t *)led0_obj, value.b);
       return true;
     } else if (strcmp(prop_id, "led1") == 0) {
       log_i("Hardware: led1 set to %d", value.b);
       if (led1_obj)
-    	  led_hal_set_data((led_hal_t *)led1_obj, value.b);
+        led_hal_set_data((led_hal_t *)led1_obj, value.b);
       return true;
     }
   }
@@ -41,22 +40,22 @@ static void key0_event_callback(gpio_key_t *key, KeyEvent event) {
   switch (event) {
   case KeyEvent_SinglePress:
     log_d("Hardware: key0 pressed.");
-    thing_model_set_prop(config->device_id, "led0", (thing_value_t){.b = true},
+    thing_model_set_prop(sys_config_get_cloud_device_id(), "led0", (thing_value_t){.b = true},
                          THING_SOURCE_LOCAL);
     break;
   case KeyEvent_DoublePress:
     log_d("Hardware: key0 double pressed.");
-    thing_model_set_prop(config->device_id, "led0", (thing_value_t){.b = false},
+    thing_model_set_prop(sys_config_get_cloud_device_id(), "led0", (thing_value_t){.b = false},
                          THING_SOURCE_LOCAL);
     break;
   case KeyEvent_TriplePress:
     log_d("Hardware: key0 triple pressed.");
-    thing_model_set_prop(config->device_id, "led1", (thing_value_t){.b = true},
+    thing_model_set_prop(sys_config_get_cloud_device_id(), "led1", (thing_value_t){.b = true},
                          THING_SOURCE_LOCAL);
     break;
   case KeyEvent_LongPress:
     log_d("Hardware: key0 long pressed.");
-    thing_model_set_prop(config->device_id, "led1", (thing_value_t){.b = false},
+    thing_model_set_prop(sys_config_get_cloud_device_id(), "led1", (thing_value_t){.b = false},
                          THING_SOURCE_LOCAL);
 
     break;
@@ -67,8 +66,11 @@ static void key0_event_callback(gpio_key_t *key, KeyEvent event) {
 
 void sys_devices_init(void) {
   log_i("Initializing hardware devices for Thing Model...");
-  sys_config_t *sys_config = sys_config_get();
-  config = &(sys_config->cloud);
+  sys_config = sys_config_get();
+  if (sys_config->configs[CLOUD_PRODUCT_ID].string == NULL) {
+    log_e("Cloud product id is NULL");
+    return;
+  }
 
   // 获取GPIO驱动实例
   gpio_driver_t *led0_driver =
@@ -98,7 +100,7 @@ void sys_devices_init(void) {
        .cloud_sync = true},
   };
 
-  thing_device_t device_tmpl = {.device_id = config->device_id,
+  thing_device_t device_tmpl = {.device_id = sys_config_get_cloud_device_id(),
                                 .name = "TestDev",
                                 .prop_count = 2,
                                 .properties = device_props,

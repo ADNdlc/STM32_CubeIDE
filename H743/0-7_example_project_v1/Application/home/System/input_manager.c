@@ -18,6 +18,7 @@ static gesture_node_t *gesture_heads[GESTURE_TYPE_MAX] = {0};
 
 static lv_obj_t *top_zone;
 static lv_obj_t *bottom_zone;
+static lv_obj_t *left_zone;
 
 static lv_point_t start_pos;     // 手势开始位置
 static bool is_tracking = false; // 是否正在跟踪手势
@@ -44,16 +45,6 @@ static void fire_gesture(gesture_type_t type) {
   }
 }
 
-/**
- * @brief 全局手势事件回调
- *
- * @param e 触发Event的对象
- */
-/**
- * @brief 全局手势事件回调
- *
- * @param e 触发Event的对象
- */
 static void gesture_event_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e); // 事件代码
   lv_obj_t *target = lv_event_get_target(e);   // 最初触发Event的对象
@@ -76,13 +67,19 @@ static void gesture_event_cb(lv_event_t *e) {
     lv_point_t current;
     lv_indev_get_point(indev, &current);
     lv_coord_t dy = current.y - start_pos.y;
+    lv_coord_t dx = current.x - start_pos.x;
 
     if (target == top_zone &&
         dy > GESTURE_THRESHOLD) { // 最初触发手势的是top_zone ,且dy超过阈值
-      log_d("InputManager: Top swipe down detected (dy=%d)", dy);
+      log_d("Top swipe down detected (dy=%d)", dy);
       fire_gesture(GESTURE_TOP_SWIPE_DOWN); // 顶部下拉(无需松开)
       is_tracking = false;                  // 停止跟踪，避免重复触发
       lv_indev_reset(indev, NULL);          // 移交当前输入给panel_bg(没有松开)
+    } else if (target == left_zone && dx > GESTURE_THRESHOLD) {
+      log_d("Left swipe in detected (dx=%d)", dx);
+      fire_gesture(GESTURE_LEFT_SWIPE_IN); // 侧边右滑
+      is_tracking = false;
+      lv_indev_reset(indev, NULL);
     }
   }
   /* 释放手势 */
@@ -94,7 +91,7 @@ static void gesture_event_cb(lv_event_t *e) {
 
     if (target == bottom_zone &&
         dy < -GESTURE_THRESHOLD) { // 最初触发手势的是bottom_zone ,且dy超过阈值
-      log_d("InputManager: Bottom swipe up detected (dy=%d)", dy);
+      log_d("Bottom swipe up detected (dy=%d)", dy);
       fire_gesture(GESTURE_BOTTOM_SWIPE_UP); // 底部上滑(需要松开)
     }
     is_tracking = false;
@@ -131,6 +128,10 @@ void input_manager_init(void) {
   // 底部手势区
   bottom_zone = create_gesture_zone(parent, LV_PCT(100), EDGE_HEIGHT);
   lv_obj_align(bottom_zone, LV_ALIGN_BOTTOM_MID, 0, 0);
+
+  // 左侧手势区
+  left_zone = create_gesture_zone(parent, 20, LV_PCT(100)); // 20px wide
+  lv_obj_align(left_zone, LV_ALIGN_LEFT_MID, 0, 0);
 }
 
 void input_manager_register_callback(gesture_type_t type, gesture_cb_t cb) {

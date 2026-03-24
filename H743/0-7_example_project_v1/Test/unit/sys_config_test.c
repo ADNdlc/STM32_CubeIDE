@@ -1,8 +1,5 @@
-#include "elog.h"
-/**
- * @brief
- * 测试sys_config是否能成功从外部flash加载配置信息或在失败时保障配置信息不为空
- */
+#include "all_tests_config.h"
+#if _sys_config_test_
 #include "elog.h"
 #include "flash_handler.h"
 #include "home/System/sys_config.h"
@@ -93,3 +90,6 @@ void sys_config_test_run(void) {
 
   log_i("sys_config test completed.");
 }
+#else
+void sys_config_test_run(void){}
+#endif

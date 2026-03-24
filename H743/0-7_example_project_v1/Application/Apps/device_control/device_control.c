@@ -1,3 +1,4 @@
+#include "device_control.h"
 #include "System/Contol_controller.h"
 #include "UI/components/style_util.h"
 #include "UI/screens/Contol_view.h"
@@ -16,10 +17,14 @@ static void destroy_device_control_screen(struct app_t *app);
 static void pause_device_control_screen(struct app_t *app);
 static void resume_device_control_screen(struct app_t *app);
 
+static app_settings_t dvice_control_settings; // 存储配置
+app_settings_t *get_self_settings(void) { return &dvice_control_settings; }
+
 // 定义 Device Control 应用
 static app_def_t dvice_control_app_def = {
     .name = "DevControl",
     .icon = NULL, // Set during registration
+    .settings = &dvice_control_settings,
     .create = create_device_control_screen,
     .destroy = destroy_device_control_screen,
     .pause = pause_device_control_screen,
@@ -42,6 +47,25 @@ void device_control_app_register(int page_index) {
 static lv_obj_t *create_device_control_screen(void) {
   log_i("Creating Device Control screen...");
   style_init();
+  if (dvice_control_settings.attr.is_loaded) {
+    log_i("Device Control screen loaded");
+  } else {
+    // 注册时加载失败，使用默认配置
+    dvice_control_settings.attr.is_loaded = true;
+    dvice_control_settings.attr.is_dirty = true;
+    dvice_control_settings.count = 1;
+    dvice_control_settings.configs =
+        sys_malloc(SYS_MEM_INTERNAL, sizeof(app_config_t));
+    if (dvice_control_settings.configs) {
+      memset(dvice_control_settings.configs, 0, sizeof(app_config_t));
+      // 初始化默认配置
+      dvice_control_settings.configs[0].key = UI_DISPLAY_MODE_KEY;
+      dvice_control_settings.configs[0].type = APP_CONFIG_TYPE_INT;
+      dvice_control_settings.configs[0].Int =
+          UI_FULL_MODE; // or:UI_COMPACT_MODE
+      app_settings_update("DevControl", &dvice_control_settings);
+    }
+  }
 
   lv_obj_t *screen = lv_obj_create(NULL);
   // 创建 Tabview 作为app根容器
@@ -79,5 +103,20 @@ static void pause_device_control_screen(struct app_t *app) {
  */
 static void resume_device_control_screen(struct app_t *app) {
   log_d("Device Control screen resumed.");
+  // 如果配置已更改，刷新主页面布局
+  if (dvice_control_settings.attr.is_dirty) {
+    log_i("Settings changed, refreshing main tab layout...");
+    // 寻找 tabview (在 create_device_control_screen 中创建)
+    lv_obj_t *tabview = lv_obj_get_child(app->screen_stack->obj, 0);
+    if (tabview) {
+      lv_obj_t *content = lv_tabview_get_content(tabview);  // 获取tabview内容对象
+      lv_obj_t *main_tab = lv_obj_get_child(content, 0);    // 获取第一个标签页(main_tab)
+      if (main_tab) {
+        lv_obj_clean(main_tab); // 清空标签页内容
+        controller_init_main_tab(main_tab); // 重新初始化标签页内容
+        // 保存配置并清除 dirty 标志，防止重复重绘
+        app_settings_save("DevControl", "DevControl");
+      }
+    }
+  }
 }
-

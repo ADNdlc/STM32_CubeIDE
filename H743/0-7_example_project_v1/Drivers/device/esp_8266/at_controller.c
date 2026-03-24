@@ -38,7 +38,7 @@ static void handle_final_ok(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
   if (self->state == AT_CTRL_STATE_WAIT_RSP) {
     if (self->current_cmd && self->current_cmd->response_cb) {
-      self->current_cmd->response_cb(AT_CMD_OK,
+      self->current_cmd->response_cb(self->current_cmd->ctx, AT_CMD_OK,
                                      line); // 将结果和内容传递给命令的回调
     }
     log_d("Cmd OK: %s",
@@ -62,7 +62,7 @@ static void handle_final_error(void *ctx, const char *line) {
     log_e("Cmd Error: %s",
           self->current_cmd ? self->current_cmd->cmd_str : "NULL");
     if (self->current_cmd && self->current_cmd->response_cb) {
-      self->current_cmd->response_cb(AT_CMD_ERROR,
+      self->current_cmd->response_cb(self->current_cmd->ctx, AT_CMD_ERROR,
                                      line); // 将结果和内容传递给命令的回调
     }
     at_cmd_cleanup(self, self->current_cmd);
@@ -311,7 +311,8 @@ void at_controller_process(at_controller_t *self) {
       log_e("Cmd Timeout (%d ms): %s", self->current_cmd->timeout_ms,
             self->current_cmd->cmd_str);
       if (self->current_cmd->response_cb) {
-        self->current_cmd->response_cb(AT_CMD_TIMEOUT, "TIMEOUT"); // 超时
+        self->current_cmd->response_cb(self->current_cmd->ctx, AT_CMD_TIMEOUT,
+                                       "TIMEOUT"); // 超时
       }
 
       // 释放当前命令并记录错误
@@ -336,7 +337,8 @@ void at_controller_process(at_controller_t *self) {
 
         if (self->busy_count * RETRY_TIMEOUT_MS > MAX_BUSY_TIMEOUT_MS) {
           if (self->current_cmd->response_cb) {
-            self->current_cmd->response_cb(AT_CMD_TIMEOUT, "BUSY TIMEOUT");
+            self->current_cmd->response_cb(self->current_cmd->ctx,
+                                           AT_CMD_TIMEOUT, "BUSY TIMEOUT");
           }
           at_cmd_cleanup(self, self->current_cmd);
           self->state = AT_CTRL_STATE_IDLE;

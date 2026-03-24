@@ -39,7 +39,8 @@ typedef enum {
 // 数据查询命令回调 (e.g., +IPD, +CWMODE:...)
 typedef void (*at_parser_cb_t)(void *ctx, const char *line);
 // 命令执行结果回调: handle command result (OK/ERROR/TIMEOUT)
-typedef void (*at_response_cb_t)(AT_CmdResult_t result, const char *last_line);
+typedef void (*at_response_cb_t)(void *ctx, AT_CmdResult_t result,
+                                 const char *last_line);
 
 // --- 命令对象 ---
 typedef struct AT_Cmd_t {
@@ -64,7 +65,6 @@ typedef struct at_urc_node_t {
   struct at_urc_node_t *next;
 } at_urc_node_t;
 
-
 // --- AT控制器对象 ---
 typedef struct at_controller_t {
   // 依赖的对象
@@ -82,7 +82,7 @@ typedef struct at_controller_t {
   AT_Cmd_t *current_cmd;    // 正在执行的命令
 
   // URC 处理表
-  at_urc_node_t *urc_list;  // URC处理链表头
+  at_urc_node_t *urc_list; // URC处理链表头
 
   // 错误处理
   uint32_t error_count;          // Error 计数

@@ -11,8 +11,8 @@
 #include <string.h>
 
 // 定义RTC备份寄存器用于存储初始化标志
-#define RTC_INIT_FLAG_REG   0U      // 标志位使用的备份寄存器
-#define RTC_INIT_FLAG_VALUE 0xA4D7  // 标志位的值
+#define RTC_INIT_FLAG_REG 0U       // 标志位使用的备份寄存器
+#define RTC_INIT_FLAG_VALUE 0xA4D7 // 标志位的值
 
 // 函数声明
 static int _stm32_rtc_set_time(rtc_driver_t *base, rtc_time_t *time);
@@ -36,9 +36,10 @@ static const rtc_driver_ops_t _stm32_rtc_driver_ops = {
  * 创建STM32 RTC驱动实例
  * ========================================== */
 rtc_driver_t *stm32_rtc_driver_create(RTC_HandleTypeDef *hrtc) {
-  stm32_rtc_driver_t *driver = (stm32_rtc_driver_t *)malloc(sizeof(stm32_rtc_driver_t));
+  stm32_rtc_driver_t *driver =
+      (stm32_rtc_driver_t *)malloc(sizeof(stm32_rtc_driver_t));
   if (driver) {
-    driver->base.ops = &_stm32_rtc_driver_ops;  // 绑定平台相关操作接口
+    driver->base.ops = &_stm32_rtc_driver_ops; // 绑定平台相关操作接口
     driver->hrtc = hrtc;
   }
   return (rtc_driver_t *)driver;
@@ -49,65 +50,69 @@ rtc_driver_t *stm32_rtc_driver_create(RTC_HandleTypeDef *hrtc) {
  * ========================================== */
 static int _stm32_rtc_set_time(rtc_driver_t *base, rtc_time_t *time) {
   stm32_rtc_driver_t *self = (stm32_rtc_driver_t *)base;
-  
+
   RTC_TimeTypeDef sTime = {0};
   sTime.Hours = time->hour;
   sTime.Minutes = time->minute;
   sTime.Seconds = time->second;
-  
+
   if (HAL_RTC_SetTime(self->hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK) {
     return -1; // 错误
   }
-  
+
   return 0; // 成功
 }
 
 static int _stm32_rtc_get_time(rtc_driver_t *base, rtc_time_t *time) {
   stm32_rtc_driver_t *self = (stm32_rtc_driver_t *)base;
-  
+
   RTC_TimeTypeDef sTime = {0};
-  
+  RTC_DateTypeDef sDate = {0}; // 必须读取日期才能解锁影子寄存器
+
   if (HAL_RTC_GetTime(self->hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK) {
     return -1; // 错误
   }
-  
+
+  // STM32 影子寄存器机制：读取时间后必须读取日期，否则影子寄存器将锁定
+  HAL_RTC_GetDate(self->hrtc, &sDate, RTC_FORMAT_BIN);
+
   time->hour = sTime.Hours;
   time->minute = sTime.Minutes;
   time->second = sTime.Seconds;
-  
+
   return 0; // 成功
 }
 
 static int _stm32_rtc_set_date(rtc_driver_t *base, rtc_date_t *date) {
   stm32_rtc_driver_t *self = (stm32_rtc_driver_t *)base;
-  
+
   RTC_DateTypeDef sDate = {0};
   sDate.Year = date->year;
   sDate.Month = date->month;
   sDate.Date = date->day;
   sDate.WeekDay = date->week;
-  
+
   if (HAL_RTC_SetDate(self->hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK) {
     return -1; // 错误
   }
-  
+
   return 0; // 成功
 }
 
 static int _stm32_rtc_get_date(rtc_driver_t *base, rtc_date_t *date) {
   stm32_rtc_driver_t *self = (stm32_rtc_driver_t *)base;
-  
+
   RTC_DateTypeDef sDate = {0};
-  
+
   if (HAL_RTC_GetDate(self->hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK) {
     return -1; // 错误
   }
-  
+
   date->year = sDate.Year;
   date->month = sDate.Month;
   date->day = sDate.Date;
   date->week = sDate.WeekDay;
-  
+
   return 0; // 成功
 }
 

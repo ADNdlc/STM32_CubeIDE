@@ -8,8 +8,6 @@
 
 #if RES_USE_INTERNAL_FLASH
 #include "lvgl.h"
-
-// Declare internal image resources
 LV_IMG_DECLARE(wallpaper);
 LV_IMG_DECLARE(icon_wifi);
 LV_IMG_DECLARE(icon_bright);

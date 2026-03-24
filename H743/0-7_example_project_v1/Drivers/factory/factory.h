@@ -16,5 +16,6 @@
 #include "sys_factory.h"
 #include "touch_factory.h"
 #include "usart_factory.h"
+#include "rtc_factory.h"
 
 #endif /* FACTORY_FACTORY_H_ */
