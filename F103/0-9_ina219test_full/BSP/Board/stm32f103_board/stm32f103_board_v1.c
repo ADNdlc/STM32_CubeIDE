@@ -1,0 +1,109 @@
+#include "dev_map.h"
+#include "dev_map_config.h"
+
+#if (STM32F103_BOARD_V1 == TARGET_BOARD)
+#include "OLED_factory.h"
+#include "gpio/stm32_gpio_driver.h"
+#include "i2c/stm32_i2c_driver.h"
+#include "ina219/ina219_driver.h"
+#include "main.h"
+#include "oled/chip/oled_drv_ssd1306.h"
+#include "rtc/stm32_rtc_driver.h"
+#include "spi.h"
+#include "spi/stm32_spi_driver.h"
+#include "tim.h"
+#include "usart.h"
+
+
+/*************
+ * 总线配置表
+ *************/
+
+// GPIO 设备配置(所有)
+static const stm32_gpio_config_t all_gpio_configs[GPIO_MAX_DEVICES] = {
+    [GPIO_ID_LED0] = {.pin = GPIO_PIN_13, .port = GPIOC},
+//	[GPIO_ID_OLED_DC] = {.pin = 0, .port = 0},
+//	[GPIO_ID_OLED_RES] = {.pin = 0, .port = 0},
+};
+// GPIO 逻辑号映射表
+const gpio_mapping_t gpio_mappings[GPIO_MAX_DEVICES] = {
+    [GPIO_ID_LED0] = {.resource = (void *)&all_gpio_configs[GPIO_ID_LED0]},
+};
+
+// USART 逻辑号映射表
+const usart_mapping_t usart_mappings[USART_MAX_DEVICES] = {
+    [USART_ID_DEBUG] = {.resource = (void *)&huart1},
+};
+
+static const stm32_i2c_config_t all_i2c_configs[I2C_MAX_DEVICES] = {
+    // 硬件i2c配置
+    [I2C_BUS_OLED] = {.is_soft = 0, .resource.hi2c = &hi2c2},
+    [I2C_BUS_PWR] = {.is_soft = 0, .resource.hi2c = &hi2c1},
+};
+// I2C 逻辑号映射表
+const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES] = {
+    [I2C_BUS_OLED] = {.resource = (void *)&all_i2c_configs[I2C_BUS_OLED]},
+    [I2C_BUS_PWR] = {.resource = (void *)&all_i2c_configs[I2C_BUS_PWR]},
+};
+
+// RTC 逻辑号映射表
+const rtc_mapping_t rtc_mappings[RTC_MAX] = {
+    [RTC_ID_INTERNAL] = {.resource = (void *)&hrtc},
+};
+
+// Timer 逻辑号映射表
+const timer_mapping_t timer_mappings[TIMER_ID_MAX] = {
+    [TIMER_ID_1] = {.resource = (void *)&htim2},
+};
+
+// SPI 逻辑号映射表
+const spi_mapping_t spi_mappings[SPI_MAX_DEVICES] = {
+    [SPI_ID_1] = {.resource = (void *)&hspi1},
+};
+
+/*************
+ * 设备配置表
+ *************/
+// "光照传感器"逻辑号映射表
+const light_sensor_mapping_t light_sensor_mappings[LIGHT_SENSOR_MAX] = {
+    [LIGHT_SENSOR_ID_AMBIENT] = {.resource = (void *)I2C_BUS_PWR},
+};
+
+const ina219_factory_config_t ina219_factory_config = {
+    .i2c_id = I2C_BUS_PWR,
+    .timer_id = TIMER_ID_1,
+    .config =
+        {
+            .dev_addr = INA219_I2C_ADDRESS_CONF_0,
+            .shunt_resistor_ohm = 0.1,
+            .max_current_A = 1.0,
+        },
+};
+
+uint8_t oled_buffer[(64 / 8) * 128];
+// "电源监测"逻辑号映射表
+const power_monitor_mapping_t power_monitor_mappings[POWER_MONITOR_MAX] = {
+    [POWER_MONITOR_ID_MAIN] = {.resource = (void *)&ina219_factory_config},
+};
+
+// "OLED"设备配置表
+oled_config_t oled_config = {
+    .ops = &ssd1306_ops,
+    .bus_type = OLED_BUS_I2C,
+    .oled_i2c_config =
+        {
+            .i2c_id = I2C_BUS_OLED,
+            .dev_addr = 0x78, // SSD1306 常用地址
+        },
+    .width = 128,
+    .height = 64,
+    .col_offset = 0,
+    .buffer = oled_buffer,
+};
+
+// "OLED"逻辑号映射表
+const oled_mapping_t oled_mappings[OLED_ID_MAX] = {
+    [OLED_ID_MAIN] = {.resource = (void *)&oled_config},
+};
+
+#endif // STM32F103_BOARD_V1

@@ -18,9 +18,6 @@ F407/
 *.zip
 *.7z
 
-
-
-
 # Object files
 *.o
 *.ko
