@@ -94,8 +94,8 @@ void sys_config_set_defaults(void) {
 int sys_config_init(void) {
   log_i("Initializing system configuration...");
 
-  // 1. 注册 dummy app 到管理器，以便 app_settings 能通过名字找到它
-  app_manager_register(&sys_app_def, 0);
+  // 1. 确保目录存在
+  vfs_mkdir("/sys/config");
 
   // 2. 分配基础配置内存并加载默认值
   sys_config_settings.configs = sys_malloc(
@@ -106,12 +106,13 @@ int sys_config_init(void) {
   }
   sys_config_set_defaults();
 
-  // 3. 尝试从 VFS 文件系统加载(覆盖默认值)
-  vfs_mkdir("/sys/config"); // 确保目录存在
-  if (app_settings_load("system", "system") == 0) {
-    log_i("System config loaded from VFS successfully.");
+  // 3. 注册 dummy app 到管理器，内部会自动尝试加载，加载失败时会自动保存这些默认值
+  app_manager_register(&sys_app_def, 0);
+
+  if (sys_config_settings.attr.is_loaded) {
+    log_i("System config loaded/created successfully (handled by app_manager).");
   } else {
-    log_w("System config file not found, using defaults.");
+    log_w("System config initialization issue.");
   }
 
   return 0;

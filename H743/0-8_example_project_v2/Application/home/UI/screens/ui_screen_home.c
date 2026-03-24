@@ -95,7 +95,7 @@ void ui_screen_home_init(void) {
   // 使用TileView作为主体
   ui_home_tileview = lv_tileview_create(ui_screen_home);
   lv_obj_set_style_bg_opa(ui_home_tileview, LV_OPA_TRANSP, 0);
-  lv_obj_remove_style(ui_home_tileview, NULL, LV_PART_SCROLLBAR);// 移除滚动条
+  //lv_obj_remove_style(ui_home_tileview, NULL, LV_PART_SCROLLBAR);// 移除滚动条
 
   // 初始化TileView,添加页面并设置布局
   for (int i = 0; i < PAGE_COUNT; i++) {

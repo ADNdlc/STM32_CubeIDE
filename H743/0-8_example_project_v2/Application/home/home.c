@@ -50,14 +50,9 @@ static lv_obj_t *create_home_wrapper(void) {
   if (!ui_screen_home) {
     ui_screen_home_init(); // 初始化主页
   }
-#if !USE_Simulator
-  if (!home_settings.attr.is_loaded) { // 进入页面如果没有加载，说明注册时未加载成功
-    // 设置 HOME 的默认值 (目前为空或预留)
+  if (!home_settings.attr.is_loaded) {
     home_settings.attr.is_loaded = 1;
-    // 配置在app关闭时自动保存，HOME不会关闭，手动保存
-    app_settings_save(home_app_def.name, home_app_def.name);
   }
-#endif
   return ui_screen_home;
 }
 

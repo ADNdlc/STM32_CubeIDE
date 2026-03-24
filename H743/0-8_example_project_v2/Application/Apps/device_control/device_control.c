@@ -38,6 +38,23 @@ static app_def_t dvice_control_app_def = {
 void device_control_app_register(int page_index) {
   log_i("Registering Device Control App at page %d", page_index);
   dvice_control_app_def.icon = res_get_img(RES_IMG_ICON_CONTROL);
+
+  // 在注册前初始化默认配置
+  if (dvice_control_settings.configs == NULL) {
+    dvice_control_settings.attr.is_loaded = false;
+    dvice_control_settings.attr.is_dirty = true;
+    dvice_control_settings.count = 1;
+    dvice_control_settings.configs =
+        sys_malloc(SYS_MEM_INTERNAL, sizeof(app_config_t));
+    if (dvice_control_settings.configs) {
+      memset(dvice_control_settings.configs, 0, sizeof(app_config_t));
+      // 初始化默认配置
+      dvice_control_settings.configs[0].key = UI_DISPLAY_MODE_KEY;
+      dvice_control_settings.configs[0].type = APP_CONFIG_TYPE_INT;
+      dvice_control_settings.configs[0].i_val = UI_FULL_MODE; 
+    }
+  }
+
   app_manager_register(&dvice_control_app_def, page_index);
 }
 
@@ -50,21 +67,8 @@ static lv_obj_t *create_device_control_screen(void) {
   if (dvice_control_settings.attr.is_loaded) {
     log_i("Device Control screen loaded");
   } else {
-    // 注册时加载失败，使用默认配置
+    // 强制设置加载标志，以防万一
     dvice_control_settings.attr.is_loaded = true;
-    dvice_control_settings.attr.is_dirty = true;
-    dvice_control_settings.count = 1;
-    dvice_control_settings.configs =
-        sys_malloc(SYS_MEM_INTERNAL, sizeof(app_config_t));
-    if (dvice_control_settings.configs) {
-      memset(dvice_control_settings.configs, 0, sizeof(app_config_t));
-      // 初始化默认配置
-      dvice_control_settings.configs[0].key = UI_DISPLAY_MODE_KEY;
-      dvice_control_settings.configs[0].type = APP_CONFIG_TYPE_INT;
-      dvice_control_settings.configs[0].i_val =
-          UI_FULL_MODE; // or:UI_COMPACT_MODE
-      app_settings_update("DevControl", &dvice_control_settings);
-    }
   }
 
   lv_obj_t *screen = lv_obj_create(NULL);

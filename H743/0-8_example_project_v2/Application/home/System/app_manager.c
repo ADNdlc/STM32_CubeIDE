@@ -69,8 +69,9 @@ void app_manager_register(app_def_t *app_def, int page_index) {
       if (res == 0) {
         app_def->settings->attr.is_loaded = true;
       } else {
-        app_def->settings->attr.is_loaded = false;
-        log_w("Failed to load settings for app: %s", app_def->name);
+        log_w("Failed to load settings for app: %s, creating with defaults", app_def->name);
+        app_def->settings->attr.is_loaded = true;
+        app_settings_save(app_def->name, app_def->name);
       }
       app_def->settings->attr.is_dirty = 0;
     }

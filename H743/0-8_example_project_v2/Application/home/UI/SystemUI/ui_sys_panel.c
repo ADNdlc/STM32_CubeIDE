@@ -245,12 +245,18 @@ static lv_obj_t *wifi_module_create(lv_obj_t *parent, uint8_t value,
 
   // icon
   lv_obj_t *img_wifi = lv_img_create(btn_wifi);
-
+  const sys_state_t * sys_state = sys_state_get();
+  if (sys_state->wifi_connected){
+	  lv_obj_set_style_img_recolor(img_wifi, lv_color_hex(0xEEEEEE), 0);
+	  lv_obj_add_state(btn_wifi, LV_STATE_CHECKED);
+  }else{
+	  lv_obj_set_style_img_recolor(img_wifi, lv_color_hex(0x333333), 0);
+	  lv_obj_add_state(btn_wifi, LV_STATE_DEFAULT);
+  }
   lv_img_set_src(img_wifi, res_get_img(RES_IMG_ICON_WIFI));
 
   lv_obj_center(img_wifi);
   lv_img_set_zoom(img_wifi, 300);
-  lv_obj_set_style_img_recolor(img_wifi, lv_color_hex(0x333333), 0);
   lv_obj_set_style_img_recolor_opa(img_wifi, LV_OPA_COVER, 0);
 
   return wifi;
@@ -434,6 +440,15 @@ void ui_sys_panel_show(void) {
   // 设置用户数据和事件回调
   lv_obj_set_user_data(panel_bg, panel_content);
   lv_obj_add_event_cb(panel_bg, event_panel_drag_cb, LV_EVENT_ALL, NULL);
+
+  lv_indev_t * indev = lv_indev_get_next(NULL);
+  while (indev && lv_indev_get_type(indev) != LV_INDEV_TYPE_POINTER) {
+	  indev = lv_indev_get_next(indev);
+  }
+  if (indev){
+	  // 中断底层按钮的点击（防误触），并将后续所有的拖动事件全部喂给panel_bg!
+	  lv_indev_reset(indev, panel_bg);
+  }
 }
 
 /**
@@ -450,14 +465,22 @@ static void ui_sys_panel_begin_close(void) {
   // 重新为菜单背景绑定事件处理器，让它能再次响应拖动
   lv_obj_add_event_cb(panel_bg, event_panel_drag_cb, LV_EVENT_ALL, NULL);
 
-  // "吸附"到手指：让菜单的下边沿立刻跟随手指
   lv_coord_t content_h = lv_obj_get_height(panel_content);
+  //稳妥获取输入设备
+  lv_indev_t * indev = lv_indev_get_act();
+  if(!indev){
+  indev = lv_indev_get_next(NULL);
+  while (indev && lv_indev_get_type(indev) != LV_INDEV_TYPE_POINTER) {
+  indev = lv_indev_get_next(indev);
+  }}
+  if (indev){
   lv_point_t p;
-  lv_indev_get_point(lv_indev_get_act(), &p);
-  lv_obj_set_y(panel_content, p.y - content_h); // 下边沿吸附
+  lv_indev_get_point(indev, &p);
+  lv_obj_set_y(panel_content, p.y - content_h); // 下边沿吸附手指
+  //【修复】：将焦点重新锁定到panel_bg，让它跟着手指向上滑动
+  lv_indev_reset(indev, panel_bg);
+  }
 
-  // 添加这一行来重置输入设备，使手势能够继续跟踪
-  lv_indev_reset(lv_indev_get_act(), NULL);
 }
 
 bool ui_sys_panel_is_visible(void) { return is_panel_active; }
