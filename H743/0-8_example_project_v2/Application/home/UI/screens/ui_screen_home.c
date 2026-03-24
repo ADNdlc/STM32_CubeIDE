@@ -1,4 +1,4 @@
-﻿#include "ui_screen_home.h"
+#include "ui_screen_home.h"
 #include "elog.h"
 #include "app_manager.h"
 #include "lv_util.h"
@@ -90,7 +90,7 @@ void ui_screen_home_init(void) {
 
   // 设置背景
   lv_obj_t *bg = lv_img_create(ui_screen_home);
-  lv_img_set_src(bg, res_get_img(RES_IMG_WALLPAPER)); // 从资源管理器获取路径
+  lv_img_set_src(bg, res_get_img(RES_IMG_WALLPAPER_DEFAULT)); // 从资源管理器获取路径
 
   // 使用TileView作为主体
   ui_home_tileview = lv_tileview_create(ui_screen_home);
@@ -121,7 +121,7 @@ void ui_screen_home_init(void) {
       continue;
     }
 
-    if (strcmp(app->name, "HOME") == 0)
+    if (strcmp(app->name, "HOME") == 0 || strcmp(app->name, "system") == 0)
       continue;
 
     // 确定页面 (从 App Manager 获取偏好页码)
@@ -196,6 +196,4 @@ void ui_screen_home_init(void) {
     test_layout_grid(pages[i].tile, PAGE_ROW + 1, PAGE_COL);
 #endif
 
-  // 6. 初始化状态栏 (简略)
-  // StatusBar_init(ui_screen_home);
 }

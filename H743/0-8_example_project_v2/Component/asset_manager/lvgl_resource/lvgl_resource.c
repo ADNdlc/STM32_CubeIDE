@@ -35,13 +35,13 @@ static const void *s_audio_ptrs[RES_AUDIO_COUNT];
 
 #if _COMPILE_INTERNAL_RES
 LV_IMG_DECLARE(test_icon);
-LV_IMG_DECLARE(wallpaper);
+LV_IMG_DECLARE(wallpaper_default);
 LV_IMG_DECLARE(icon_wifi);
 LV_IMG_DECLARE(icon_bright);
 LV_IMG_DECLARE(icon_colorwheel);
-LV_IMG_DECLARE(icon_Contol);
-LV_IMG_DECLARE(default_user);
-LV_IMG_DECLARE(img_light);
+//LV_IMG_DECLARE(icon_Contol);
+//LV_IMG_DECLARE(default_user);
+//LV_IMG_DECLARE(img_light);
 // extern const lv_font_t my_font_20;
 
 typedef struct {
@@ -54,13 +54,13 @@ typedef struct {
 static const burn_map_t g_burn_table[] = {
     // LVGL图片
     {RES_IMG_TEST, ASSET_TYPE_IMAGE, &test_icon},
-    {RES_IMG_WALLPAPER, ASSET_TYPE_IMAGE, &wallpaper},
+	{RES_IMG_WALLPAPER_DEFAULT, ASSET_TYPE_IMAGE, &wallpaper_default},
     {RES_IMG_ICON_WIFI, ASSET_TYPE_IMAGE, &icon_wifi},
     {RES_IMG_ICON_BRIGHT, ASSET_TYPE_IMAGE, &icon_bright},
     {RES_IMG_ICON_COLORWHEEL, ASSET_TYPE_IMAGE, &icon_colorwheel},
-    {RES_IMG_ICON_CONTROL, ASSET_TYPE_IMAGE, &icon_Contol},
-    {RES_IMG_DEFAULT_USER, ASSET_TYPE_IMAGE, &default_user},
-    {RES_IMG_IMG_LIGHT, ASSET_TYPE_IMAGE, &img_light},
+//    {RES_IMG_ICON_CONTROL, ASSET_TYPE_IMAGE, &icon_Contol},
+//    {RES_IMG_DEFAULT_USER, ASSET_TYPE_IMAGE, &default_user},
+//    {RES_IMG_IMG_LIGHT, ASSET_TYPE_IMAGE, &img_light},
 };
 
 // 仅烧录模式编译此函数
@@ -127,17 +127,17 @@ int res_init(void) {
       // 存入影子表
       switch (type) {
       case ASSET_TYPE_IMAGE:
-        memcpy(&s_img_dscs[i - 0].header, &meta.img_header, 4);
-        s_img_dscs[i - 0].data_size = size;
-        s_img_dscs[i - 0].data = ptr;
+        memcpy(&s_img_dscs[i - RES_IMG_START].header, &meta.img_header, 4);
+        s_img_dscs[i - RES_IMG_START].data_size = size;
+        s_img_dscs[i - RES_IMG_START].data = ptr;
         break;
       case ASSET_TYPE_FONT:
-        s_font_dscs[i - RES_IMG_MAX].line_height = meta.font.line_height;
-        s_font_dscs[i - RES_IMG_MAX].base_line = meta.font.base_line;
-        s_font_dscs[i - RES_IMG_MAX].dsc = ptr;
+        s_font_dscs[i - RES_FONT_START].line_height = meta.font.line_height;
+        s_font_dscs[i - RES_FONT_START].base_line = meta.font.base_line;
+        s_font_dscs[i - RES_FONT_START].dsc = ptr;
         break;
       case ASSET_TYPE_AUDIO:
-        s_audio_ptrs[i - RES_FONT_MAX] = ptr;
+        s_audio_ptrs[i - RES_AUDIO_START] = ptr;
         break;
       }
     }
@@ -202,7 +202,7 @@ void res_test_display(void) {
       if (dsc)
         lv_img_set_src(img_obj, dsc);
     }
-    current_idx = (current_idx + 1) % RES_IMG_COUNT;
+    current_idx = (current_idx + 1) % (sizeof(g_burn_table) / sizeof(g_burn_table[0]));
     for (int i = 0; i < 100; i++) {
       lv_timer_handler();
       sys_delay_ms(10);

@@ -59,10 +59,6 @@ int app_init(void) {
   sys_config_init(); // 此时 VFS 已就绪，可以从 /sys 加载配置
   sys_state_init();
   devices_init();
-#else
-  sys_config_init();
-  sys_state_init();
-  devices_init(); // 注册模拟设备
 #endif
 
 #if SERVICE_ENABLE

@@ -147,6 +147,10 @@ void net_mgr_process(void) {
  * WiFi服务控制
  ****************/
 #if NETWORK_SERVICE_ENABLE // 初始化wifi服务
+/**
+ * @brief wifi使能连接
+ *
+ */
 void net_mgr_wifi_enable(bool enable) {
   if (enable == g_wifi_target_state)
     return;
@@ -165,19 +169,10 @@ void net_mgr_wifi_enable(bool enable) {
     wifi_svc_disconnect(&g_wifi_svc); // 断开连接
   }
 }
-
 /**
- * @brief wifi使能状态查询
+ * @brief wifi连接(使用传入参数)
  *
- * @return g_wifi_target_state true:启用,false:禁用
  */
-bool net_mgr_wifi_is_enabled(void) { return g_wifi_target_state; }
-
-int net_mgr_wifi_scan(wifi_scan_cb_t cb, void *arg) {
-  log_i("WiFi Scan requested...");
-  return wifi_svc_scan(&g_wifi_svc, cb, arg);
-}
-
 int net_mgr_wifi_connect_manual(const char *ssid, const char *pwd) {
   log_i("Manual WiFi connect: SSID=%s", ssid);
 
@@ -190,4 +185,21 @@ int net_mgr_wifi_connect_manual(const char *ssid, const char *pwd) {
   sys_config_save(); // 手动连接后保存配置到文件系统
   return wifi_svc_connect(&g_wifi_svc, sys_config_get_wifi_ssid(), sys_config_get_wifi_password());
 }
+
+/**
+ * @brief wifi使能状态查询
+ *
+ * @return g_wifi_target_state true:启用,false:禁用
+ */
+bool net_mgr_wifi_is_enabled(void) { return g_wifi_target_state; }
+
+/**
+ * @brief wifi扫描
+ *
+ */
+int net_mgr_wifi_scan(wifi_scan_cb_t cb, void *arg) {
+  log_i("WiFi Scan requested...");
+  return wifi_svc_scan(&g_wifi_svc, cb, arg);
+}
+
 #endif

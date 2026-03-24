@@ -1,4 +1,4 @@
-#include "project_cfg.h"
+#include "Project_cfg.h"
 #if !USE_Simulator
 #include "../../System/net_mgr.h"
 #else
