@@ -6,8 +6,9 @@
 #include "home/System/sys_config.h"
 #include "thing_model/thing_model.h"
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
-
+#include "lvgl_resource.h"
 
 #define DISPERSE 1
 
@@ -168,7 +169,7 @@ void controller_init_main_tab(lv_obj_t *tab) {
   log_i("Found %d devices in thing model. Generating UI cards...",
         device_count);
 
-  uint32_t dispersed = get_self_settings()->configs[0].Int;
+  uint32_t dispersed = get_self_settings()->configs[0].i_val;
   log_d("Current dispersed mode: %d", dispersed);
 
   uint32_t card_index = 0;

@@ -7,6 +7,7 @@
 #include "elog.h"
 #include "lv_util.h"
 #include "thing_model/thing_model.h"
+#include "lvgl_resource.h"
 
 
 #if 1
@@ -47,7 +48,7 @@ static lv_obj_t *create_card_icon(lv_obj_t *parent, lv_obj_t *img, int img_w,
   if (img) {
     lv_img_set_src(card_img, img);
   } else {
-    lv_img_set_src(card_img, res_get_src(RES_IMG_ICON_CONTROL)); // 使用缺省值
+    lv_img_set_src(card_img, res_get_img(RES_IMG_ICON_CONTROL)); // 使用缺省值
   }
   // 获取图标原始尺寸
   lv_img_header_t header_img;
@@ -145,7 +146,7 @@ void create_user(lv_obj_t *tabview) {
   lv_obj_set_size(user, scr_act_width() / 2, scr_act_height() / 6);
 
   lv_obj_t *img = lv_img_create(user);
-  lv_img_set_src(img, res_get_src(RES_IMG_DEFAULT_USER));
+  lv_img_set_src(img, res_get_img(RES_IMG_DEFAULT_USER));
   lv_img_set_zoom(img, 450);
   lv_obj_align(img, LV_ALIGN_TOP_LEFT, 10, 3);
 

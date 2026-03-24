@@ -1,9 +1,10 @@
 #ifndef APPLICATION_HOME_SYSTEM_SYS_CONFIG_H_
 #define APPLICATION_HOME_SYSTEM_SYS_CONFIG_H_
 
+#include "app_settings.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include "app_settings.h"
+
 
 /**
  * @brief System Config
@@ -26,9 +27,9 @@ typedef enum {
   WIFI_SSID,
   WIFI_PASSWORD,
   // mqtt cloud
-  CLOUD_PLATFORM,	// 平台类型
-  CLOUD_PRODUCT_ID,	// 产品ID
-  CLOUD_DEVICE_ID,	// 设备ID
+  CLOUD_PLATFORM,      // 平台类型
+  CLOUD_PRODUCT_ID,    // 产品ID
+  CLOUD_DEVICE_ID,     // 设备ID
   CLOUD_DEVICE_SECRET, // 密钥
 
   SYS_CONFIG_KEY_MAX
@@ -53,7 +54,5 @@ int sys_config_get_cloud_platform(void);
 char *sys_config_get_cloud_product_id(void);
 char *sys_config_get_cloud_device_id(void);
 char *sys_config_get_cloud_device_secret(void);
-
-
 
 #endif /* APPLICATION_HOME_SYSTEM_SYS_CONFIG_H_ */

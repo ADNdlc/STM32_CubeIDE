@@ -14,7 +14,7 @@ static void mode_selection_event_cb(lv_event_t *e) {
   uint32_t mode = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
   app_settings_t *settings = get_self_settings();
   if (settings && settings->count > 0) {
-    settings->configs[0].Int = mode;
+    settings->configs[0].i_val = mode;
     app_settings_update("DevControl", settings);
     log_i("Display mode changed to: %d", mode);
   }

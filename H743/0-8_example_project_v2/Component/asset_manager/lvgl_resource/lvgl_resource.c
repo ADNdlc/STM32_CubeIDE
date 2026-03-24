@@ -39,10 +39,10 @@ LV_IMG_DECLARE(wallpaper_default);
 LV_IMG_DECLARE(icon_wifi);
 LV_IMG_DECLARE(icon_bright);
 LV_IMG_DECLARE(icon_colorwheel);
-//LV_IMG_DECLARE(icon_Contol);
-//LV_IMG_DECLARE(default_user);
-//LV_IMG_DECLARE(img_light);
-// extern const lv_font_t my_font_20;
+LV_IMG_DECLARE(icon_Contol);
+LV_IMG_DECLARE(default_user);
+LV_IMG_DECLARE(img_light);
+//extern const lv_font_t my_font_20;
 
 typedef struct {
   res_id_t id;
@@ -58,9 +58,9 @@ static const burn_map_t g_burn_table[] = {
     {RES_IMG_ICON_WIFI, ASSET_TYPE_IMAGE, &icon_wifi},
     {RES_IMG_ICON_BRIGHT, ASSET_TYPE_IMAGE, &icon_bright},
     {RES_IMG_ICON_COLORWHEEL, ASSET_TYPE_IMAGE, &icon_colorwheel},
-//    {RES_IMG_ICON_CONTROL, ASSET_TYPE_IMAGE, &icon_Contol},
-//    {RES_IMG_DEFAULT_USER, ASSET_TYPE_IMAGE, &default_user},
-//    {RES_IMG_IMG_LIGHT, ASSET_TYPE_IMAGE, &img_light},
+    {RES_IMG_ICON_CONTROL, ASSET_TYPE_IMAGE, &icon_Contol},
+    {RES_IMG_DEFAULT_USER, ASSET_TYPE_IMAGE, &default_user},
+    {RES_IMG_IMG_LIGHT, ASSET_TYPE_IMAGE, &img_light},
 };
 
 // 仅烧录模式编译此函数

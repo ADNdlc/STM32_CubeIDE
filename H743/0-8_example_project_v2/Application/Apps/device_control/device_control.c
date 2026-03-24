@@ -7,6 +7,7 @@
 #include "elog.h"
 #include "lv_util.h"
 #include <stddef.h>
+#include "lvgl_resource.h"
 
 #define LOG_TAG "DevControl"
 
@@ -36,7 +37,7 @@ static app_def_t dvice_control_app_def = {
  */
 void device_control_app_register(int page_index) {
   log_i("Registering Device Control App at page %d", page_index);
-  dvice_control_app_def.icon = res_get_src(RES_IMG_ICON_CONTROL);
+  dvice_control_app_def.icon = res_get_img(RES_IMG_ICON_CONTROL);
   app_manager_register(&dvice_control_app_def, page_index);
 }
 
@@ -60,7 +61,7 @@ static lv_obj_t *create_device_control_screen(void) {
       // 初始化默认配置
       dvice_control_settings.configs[0].key = UI_DISPLAY_MODE_KEY;
       dvice_control_settings.configs[0].type = APP_CONFIG_TYPE_INT;
-      dvice_control_settings.configs[0].Int =
+      dvice_control_settings.configs[0].i_val =
           UI_FULL_MODE; // or:UI_COMPACT_MODE
       app_settings_update("DevControl", &dvice_control_settings);
     }

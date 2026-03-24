@@ -4,9 +4,10 @@
 #include <string.h>
 
 #if !USE_Simulator
+#include "Sys.h"
 #include "cJSON.h"
 #include "vfs_manager.h"
-#include "Sys.h"
+
 #endif
 #include "app_manager.h"
 
@@ -81,7 +82,8 @@ void sys_config_set_defaults(void) {
          DEFAULT_CLOUD_DEVICE_ID, sizeof(DEFAULT_CLOUD_DEVICE_ID));
   // cloud device secret
   sys_config_settings.configs[CLOUD_DEVICE_SECRET].key = CLOUD_DEVICE_SECRET;
-  sys_config_settings.configs[CLOUD_DEVICE_SECRET].type = APP_CONFIG_TYPE_STRING;
+  sys_config_settings.configs[CLOUD_DEVICE_SECRET].type =
+      APP_CONFIG_TYPE_STRING;
   sys_config_settings.configs[CLOUD_DEVICE_SECRET].s_val =
       sys_malloc(SYS_CONFIG_MEM_SOURCE, sizeof(DEFAULT_CLOUD_DEVICE_SECRET));
   memcpy(sys_config_settings.configs[CLOUD_DEVICE_SECRET].s_val,
