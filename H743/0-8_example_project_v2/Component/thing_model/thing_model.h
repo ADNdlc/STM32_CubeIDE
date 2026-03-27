@@ -33,7 +33,7 @@ typedef struct {
   const char *name;       // 属性显示名称 (e.g., "Main Light", "Temperature")
   thing_prop_type_t type; // 数据类型
   thing_value_t value;    // 当前值
-
+  uint32_t timestamp;     // 时间戳
   // 约束条件 (可选)
   int32_t min;
   int32_t max;
@@ -124,6 +124,9 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl);
  */
 bool thing_model_set_prop(const char *device_id, const char *prop_id,
                           thing_value_t value, thing_source_t source);
+bool thing_model_set_prop_by_name(const char *device_name,
+                                  const char *prop_name, thing_value_t value,
+                                  thing_source_t source);
 
 /**
  * @brief 通过索引获取一个设备

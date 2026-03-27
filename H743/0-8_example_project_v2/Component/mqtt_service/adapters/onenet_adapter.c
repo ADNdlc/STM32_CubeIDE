@@ -84,7 +84,6 @@ static int onenet_serialize_post(const thing_device_t *device,
   }
 
   // TODO: 时间戳可以作为参数或由外部注入，这里简单传入 0 表示不需要，如有需要由应用处理
-  // 或者采用回调方式。为保持独立性去掉对 rtc_hal_get_unix_ms 的直接依赖。
   // cJSON_AddNumberToObject(p_val, "time", (double)timestamp);
 
   cJSON_AddItemToObject(params, prop->id, p_val);

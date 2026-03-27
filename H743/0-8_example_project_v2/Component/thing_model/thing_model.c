@@ -2,9 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "MemPool.h"
 #define LOG_TAG "THING_MODEL"
 #include "elog.h"
-
+#ifdef USE_MEMPOOL
+#define THING_MODEL_MEM_SOURCE SYS_MEM_INTERNAL
+#endif
 #define MAX_THING_DEVICES 16
 #define MAX_THING_OBSERVERS 4
 
@@ -31,7 +34,7 @@ static uint8_t g_observer_count = 0;                      // 已注册的观察�
  * 工具方法
  ****************/
 /**
- * @brief 查找设备
+ * @brief 查找设备(通过设备ID)
  *
  * @param device_id 设备ID
  * @return thing_device_t* 设备
@@ -39,6 +42,20 @@ static uint8_t g_observer_count = 0;                      // 已注册的观察�
 thing_device_t *find_device_by_id(const char *device_id) {
   for (int i = 0; i < g_device_count; i++) {
     if (strcmp(g_devices[i]->device_id, device_id) == 0) {
+      return g_devices[i];
+    }
+  }
+  return NULL;
+}
+/**
+ * @brief 查找设备(通过设备名称)
+ *
+ * @param device_name 设备名称
+ * @return thing_device_t* 设备
+ */
+thing_device_t *find_device_by_name(const char *device_name) {
+  for (int i = 0; i < g_device_count; i++) {
+    if (strcmp(g_devices[i]->name, device_name) == 0) {
       return g_devices[i];
     }
   }
@@ -100,7 +117,13 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
   }
 
   // 分配设备结构体内存
+#ifdef USE_MEMPOOL
   thing_device_t *dev = (thing_device_t *)malloc(sizeof(thing_device_t));
+#else
+  thing_device_t *dev = (thing_device_t *)sys_malloc(THING_MODEL_MEM_SOURCE,
+                                                     sizeof(thing_device_t));
+#endif
+
   if (!dev)
     return NULL;
 
@@ -118,20 +141,32 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
   // 3. 深拷贝属性列表
   if (tmpl->prop_count > 0 && tmpl->properties) {
     dev->properties =
-        (thing_property_t *)malloc(sizeof(thing_property_t) * tmpl->prop_count);
+#ifdef USE_MEMPOOL
+        (thing_property_t *)sys_malloc(THING_MODEL_MEM_SOURCE, sizeof(thing_property_t) * tmpl->prop_count);
+#else
+    	(thing_property_t *)malloc(sizeof(thing_property_t) * tmpl->prop_count);
+#endif
     if (dev->properties) {
       memcpy(dev->properties, tmpl->properties,
              sizeof(thing_property_t) * tmpl->prop_count);
-      
+
       // 进一步深拷贝属性 ID 和名称
-      for(int i = 0; i < tmpl->prop_count; i++) {
-        if(tmpl->properties[i].id) dev->properties[i].id = strdup(tmpl->properties[i].id);
-        if(tmpl->properties[i].name) dev->properties[i].name = strdup(tmpl->properties[i].name);
+      for (int i = 0; i < tmpl->prop_count; i++) {
+        if (tmpl->properties[i].id)
+          dev->properties[i].id = strdup(tmpl->properties[i].id);
+        if (tmpl->properties[i].name)
+          dev->properties[i].name = strdup(tmpl->properties[i].name);
       }
     } else {
-      free((void*)dev->device_id);
-      free((void*)dev->name);
+#ifdef USE_MEMPOOL
+    	sys_free(THING_MODEL_MEM_SOURCE, (void *)dev->device_id);
+    	sys_free(THING_MODEL_MEM_SOURCE, (void *)dev->name);
+    	sys_free(THING_MODEL_MEM_SOURCE, dev);
+#else
+      free((void *)dev->device_id);
+      free((void *)dev->name);
       free(dev);
+#endif
       return NULL;
     }
   }
@@ -143,7 +178,7 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
 }
 
 /**
- * @brief 设置设备属性
+ * @brief 设置设备属性(通过设备id和属性id)
  *
  * @param device_id 设备ID
  * @param prop_id 属性ID
@@ -158,7 +193,7 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
   thing_device_t *target_dev = NULL;
   target_dev = find_device_by_id(device_id);
   if (!target_dev) {
-    log_e("Device not found: %s", device_id);
+    log_e("Device not found by id: %s", device_id);
     return false;
   }
 
@@ -203,6 +238,63 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
   }
 
   log_i("[Event] Prop %s.%s updated by source %d", device_id, prop_id, source);
+
+  return true;
+}
+
+bool thing_model_set_prop_by_name(const char *device_name,
+                                  const char *prop_name, thing_value_t value,
+                                  thing_source_t source) {
+  // 1. 寻找目标设备
+  thing_device_t *target_dev = NULL;
+  target_dev = find_device_by_name(device_name);
+  if (!target_dev) {
+    log_e("Device not found by name: %s", device_name);
+    return false;
+  }
+
+  // 2. 寻找目标属性
+  thing_property_t *target_prop = NULL;
+  target_prop = find_property_by_id(target_dev, prop_name);
+  if (!target_prop) {
+    log_e("Property not found: %s.%s", device_name, prop_name);
+    return false;
+  }
+
+  // 3. 调用目标设备的属性设置回调并传递变更属性值
+  if (source != THING_SOURCE_DRV && target_dev->on_prop_set) {
+    if (!target_dev->on_prop_set(target_dev, prop_name, value)) {
+      log_w("Driver rejected property update: %s.%s", device_name, prop_name);
+      return false;
+    }
+  } else {
+    log_d("%s's prop %s updated to %s by source %d", device_name, prop_name,
+          value, source);
+  }
+
+  // 4. 更新内部属性值和状态
+  target_prop->value = value;
+
+  // 如果来源不是云端（即本地 UI 或硬件上报），则标记为“脏”，待后续同步
+  if (source != THING_SOURCE_CLOUD && target_prop->cloud_sync) {
+    target_prop->is_dirty = true;
+  }
+
+  // 5. 通知观察者
+  thing_model_event_t evt = {.type = THING_EVENT_PROPERTY_CHANGED,
+                             .device_id = device_name,
+                             .prop_id = prop_name,
+                             .value = value,
+                             .source = source};
+
+  for (int k = 0; k < g_observer_count; k++) {
+    if (g_observers[k].cb) {
+      g_observers[k].cb(&evt, g_observers[k].user_data);
+    }
+  }
+
+  log_i("[Event] Prop %s.%s updated by source %d", device_name, prop_name,
+        source);
 
   return true;
 }
