@@ -1,6 +1,8 @@
 #include "device_handle.h"
+#include "Sys.h"
 #include "gpio_factory.h"
 #include "humiture_factory.h"
+#include "illuminance_factory.h"
 #include "gpio_key/gpio_key.h"
 #include "gpio_led/gpio_led.h"
 #include "sys_config.h"
@@ -19,6 +21,18 @@ static KeyObserver observer0, observer1;
 static gpio_led_t *led0_obj = NULL;
 static gpio_led_t *led1_obj = NULL;
 static humiture_driver_t *humiture = NULL;
+// 光照传感器对象指针
+static illuminance_driver_t *illuminance_sensor = NULL;
+// 传感器读数缓存
+static int32_t temperature = 0; // 温度 (0.1°C)
+static int32_t humidity = 0;     // 湿度 (0.1%)
+static int32_t illuminance = 0;   // 照度 (Lux)
+// 光照阈值滤波计数器
+static uint8_t illuminance_low_count = 0;
+#define ILLUMINANCE_THRESHOLD_LOW 70    // 开灯阈值(Lux)
+#define ILLUMINANCE_THRESHOLD_HIGH 100   // 关灯阈值(Lux)
+#define ILLUMINANCE_FILTER_COUNT 3      // 连续检测次数
+
 void dev_register_SWITCH(void);
 void dev_register_INT(void);
 
@@ -130,8 +144,69 @@ void devices_init(void) {
 }
 
 void devices_process(void) {
-  Key_Update(key0); // 更新按键状态
+  // 更新按键状态
+  Key_Update(key0);
   Key_Update(key1);
+
+  // 周期性采集传感器数据
+  static uint32_t last_sample_time = 0;
+  uint32_t current_time = sys_get_systick_ms();
+  if (current_time - last_sample_time >= 2000) { // 每2秒采样一次
+    last_sample_time = current_time;
+
+    // 读取温湿度
+    float temp_f, humi_f;
+    if (humiture != NULL &&
+    	HUMITURE_READ_FLOAT(humiture, &temp_f, &humi_f) == 0) {
+      log_i("Humiture: %.1f°C, %.1f%%", temp_f, humi_f);
+      // 转换为int32 (乘以10保存0.1度/0.1%精度)
+      temperature = (int32_t)(temp_f * 10);
+      humidity = (int32_t)(humi_f * 10);
+
+      // 更新物模型
+      thing_value_t value = {.i = temperature};
+      thing_model_set_prop(sys_config_get_cloud_device_id(), "temperature",
+                           value, THING_SOURCE_DRV);
+
+      value.i = humidity;
+      thing_model_set_prop(sys_config_get_cloud_device_id(), "humidity",
+                           value, THING_SOURCE_DRV);
+
+      log_d("Temp: %d.%dC, Humi: %d.%d%%",
+           temperature/10, abs(temperature%10),
+           humidity/10, abs(humidity%10));
+    }
+
+    // 读取光照
+    float lux_f;
+    if (illuminance_sensor != NULL &&
+    	ILLUMINANCE_READ_LUX(illuminance_sensor, &lux_f) == 0) {
+      log_i("Illuminance: %.1f Lux", lux_f);
+      illuminance = (int32_t)lux_f;
+
+      // 更新物模型
+      thing_value_t value = {.i = illuminance};
+      thing_model_set_prop(sys_config_get_cloud_device_id(), "illuminance",
+                           value, THING_SOURCE_DRV);
+
+      log_d("Illuminance: %d Lux", illuminance);
+
+      // 光照阈值判断与LED控制（带滤波）
+      if (illuminance < ILLUMINANCE_THRESHOLD_LOW) {
+        if (illuminance_low_count < ILLUMINANCE_FILTER_COUNT) {
+          illuminance_low_count++;
+        }
+      } else if (illuminance > ILLUMINANCE_THRESHOLD_HIGH) {
+        illuminance_low_count = 0;
+      }
+
+      // 通过物模型控制LED（符合规范）
+      bool should_turn_on = (illuminance_low_count >= ILLUMINANCE_FILTER_COUNT);
+      thing_value_t led_value = {.b = should_turn_on};
+      thing_model_set_prop(sys_config_get_cloud_device_id(), "led0",
+                           led_value, THING_SOURCE_LOCAL);
+    }
+  }
 }
 #endif
 
@@ -175,6 +250,63 @@ void dev_register_SWITCH(){
 }
 
 void dev_register_INT(){
+  // 初始化温湿度传感器
+  humiture = humiture_driver_get(TH_SENSOR_ID_AMBIENT);
+  if (humiture != NULL && humiture->ops->init(humiture) == 0) {
+    log_i("Humiture sensor initialized");
+  } else {
+    log_e("Failed to initialize humiture sensor");
+  }
 
+  // 初始化光照传感器
+  illuminance_sensor = illuminance_driver_get(LIGHT_SENSOR_ID_AMBIENT);
+  if (illuminance_sensor != NULL && illuminance_sensor->ops->init(illuminance_sensor) == 0) {
+    log_i("Illuminance sensor initialized");
+  } else {
+    log_e("Failed to initialize illuminance sensor");
+  }
 
+  // 定义温湿度属性
+  static thing_property_t sensor_props[] = {
+    {.id = "temperature",
+     .name = "Temperature",
+     .type = THING_PROP_TYPE_INT,
+     .cloud_sync = true,
+     .unit = "0.1C"},
+    {.id = "humidity",
+     .name = "Humidity",
+     .type = THING_PROP_TYPE_INT,
+     .cloud_sync = true,
+     .unit = "0.1%"},
+  };
+
+  // 创建温湿度设备模板
+  thing_device_t sensor_tmpl = {.device_id = sys_config_get_cloud_device_id(),
+                                .name = "SensorDev",
+                                .prop_count = 2,
+                                .properties = sensor_props};
+
+  // 注册温湿度设备
+  thing_model_register(&sensor_tmpl);
+  log_i("Sensor device registered: %s", sensor_tmpl.name);
+
+  // 定义光照属性
+  static thing_property_t light_props[] = {
+    {.id = "illuminance",
+     .name = "Illuminance",
+     .type = THING_PROP_TYPE_INT,
+     .cloud_sync = true,
+     .unit = "Lux"}
+  };
+
+  // 创建光照设备模板
+  thing_device_t light_tmpl = {.device_id = sys_config_get_cloud_device_id(),
+                               .name = "LightSensorDev",
+                               .prop_count = 1,
+                               .properties = light_props};
+
+  // 注册光照设备
+  thing_model_register(&light_tmpl);
+  log_i("Light sensor device registered: %s", light_tmpl.name);
 }
+
