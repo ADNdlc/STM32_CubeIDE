@@ -15,6 +15,7 @@
 #include "home/System/net_mgr.h" // 网络服务
 #include "home/System/cloud_bridge.h" // MQTT服务
 #include "home/System/sys_config.h" // 系统配置
+#include "home/System/data_logger.h" // 本地数据日志
 #include "home/System/sys_state.h" // 系统状态
 #include "device_handle.h" // 物模型注册
 
@@ -59,6 +60,7 @@ int app_init(void) {
   sys_config_init(); // 此时 VFS 已就绪，可以从 /sys 加载配置
   sys_state_init();
   devices_init();
+  data_logger_init(); // 日志模块初始化
 #endif
 
 #if SERVICE_ENABLE
@@ -91,6 +93,7 @@ void app_run(void) {
   vfs_storage_monitor_task();
 #if THINGMODEL_ENABLE
   devices_process(); // 本地设备处理
+  data_logger_process(); // 检查并落盘本地日志
 #endif
 #if SERVICE_ENABLE
   net_mgr_process(); // 网络服务处理

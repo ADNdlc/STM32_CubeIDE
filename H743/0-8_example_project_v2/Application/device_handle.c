@@ -33,7 +33,7 @@ static uint8_t illuminance_low_count = 0;
 #define ILLUMINANCE_FILTER_COUNT 3     // 连续检测次数
 
 void dev_register_SWITCH(void);
-void dev_register_INT(void);
+void dev_register_STRING(void);
 
 #if 1
 static bool device_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
@@ -115,7 +115,7 @@ void devices_init(void) {
   }
   /* 注册各个类型的设备 */
   dev_register_SWITCH();
-  dev_register_INT();
+  dev_register_STRING();
 
   /* 非物模型设备 */
   // 按键
@@ -244,7 +244,7 @@ void dev_register_SWITCH() {
   thing_model_register(&device_tmpl);
 }
 
-void dev_register_INT() {
+void dev_register_STRING() {
   // 初始化温湿度传感器
   humiture = humiture_driver_get(TH_SENSOR_ID_AMBIENT);
   if (humiture != NULL && humiture->ops->init(humiture) == 0) {
@@ -266,12 +266,12 @@ void dev_register_INT() {
   static thing_property_t sensor_props[] = {
       {.id = "temperature",
        .name = "Temperature",
-       .type = THING_PROP_TYPE_INT,
+       .type = THING_PROP_TYPE_STRING,
        .cloud_sync = true,
        .unit = "0.1C"},
       {.id = "humidity",
        .name = "Humidity",
-       .type = THING_PROP_TYPE_INT,
+       .type = THING_PROP_TYPE_STRING,
        .cloud_sync = true,
        .unit = "0.1%"},
   };
@@ -289,7 +289,7 @@ void dev_register_INT() {
   // 定义光照属性
   static thing_property_t light_props[] = {{.id = "illuminance",
                                             .name = "Illuminance",
-                                            .type = THING_PROP_TYPE_INT,
+                                            .type = THING_PROP_TYPE_STRING,
                                             .cloud_sync = true,
                                             .unit = "Lux"}};
 

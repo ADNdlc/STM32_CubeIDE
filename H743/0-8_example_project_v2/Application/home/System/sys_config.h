@@ -31,6 +31,8 @@ typedef enum {
   CLOUD_PRODUCT_ID,    // 产品ID
   CLOUD_DEVICE_ID,     // 设备ID
   CLOUD_DEVICE_SECRET, // 密钥
+  // logging
+  LOCAL_DATA_SAVE,     // 本地日志开关
 
   SYS_CONFIG_KEY_MAX
 } sys_config_key_t;
@@ -54,5 +56,8 @@ int sys_config_get_cloud_platform(void);
 char *sys_config_get_cloud_product_id(void);
 char *sys_config_get_cloud_device_id(void);
 char *sys_config_get_cloud_device_secret(void);
+
+bool sys_config_get_local_data_save(void);
+void sys_config_set_local_data_save(bool enable);
 
 #endif /* APPLICATION_HOME_SYSTEM_SYS_CONFIG_H_ */
