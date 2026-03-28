@@ -29,7 +29,7 @@ static int data_logger_flush(void) {
   }
 
   // 保护：检查 VFS 是否挂载成功
-  if (vfs_point_is_mounted("/sys")) {
+  if (!vfs_point_is_mounted("/sys")) {
     log_w("VFS point /sys is offline or detached. Skip writing logs.");
     return -1;
   }
@@ -89,59 +89,51 @@ static void on_thing_model_event(const thing_model_event_t *event,
     char record[128];
     int len = 0;
 
-    // 我们仅记录一些常用的数值供演示和存盘
-    if (event->value.i || event->value.b || event->value.f || event->value.s) {
-      // Note: union has identical values if it is 0 but we might want to
-      // differentiate properly. Actually, we can get property type from model
-      thing_device_t *dev = find_device_by_id(event->device_id);
-      if (dev) {
-        thing_property_t *prop = find_property_by_id(dev, event->prop_id);
-        if (prop) {
-          switch (prop->type) {
-          case THING_PROP_TYPE_SWITCH:
-            len = snprintf(record, sizeof(record), "[%s] %s.%s = %s\n",
-                           time_str, event->device_id, event->prop_id,
-                           event->value.b ? "true" : "false");
-            break;
-          case THING_PROP_TYPE_INT:
-            len =
-                snprintf(record, sizeof(record), "[%s] %s.%s = %ld\n", time_str,
+    // Chúng tôi chỉ ghi lại những giá trị này theo định dạng của từng property
+    thing_device_t *dev = find_device_by_id(event->device_id);
+    if (dev) {
+      thing_property_t *prop = find_property_by_id(dev, event->prop_id);
+      if (prop) {
+        switch (prop->type) {
+        case THING_PROP_TYPE_SWITCH:
+          len = snprintf(record, sizeof(record), "[%s] %s.%s = %s\n", time_str,
+                         event->device_id, event->prop_id,
+                         event->value.b ? "true" : "false");
+          break;
+        case THING_PROP_TYPE_INT:
+          len = snprintf(record, sizeof(record), "[%s] %s.%s = %ld\n", time_str,
                          event->device_id, event->prop_id, event->value.i);
-            break;
-          case THING_PROP_TYPE_FLOAT:
-            len = snprintf(record, sizeof(record), "[%s] %s.%s = %.2f\n",
-                           time_str, event->device_id, event->prop_id,
-                           event->value.f);
-            break;
-          case THING_PROP_TYPE_STRING:
-            len = snprintf(record, sizeof(record), "[%s] %s.%s = \"%s\"\n",
-                           time_str, event->device_id, event->prop_id,
-                           event->value.s ? event->value.s : "");
-            break;
-          default:
-            len = snprintf(record, sizeof(record),
-                           "[%s] %s.%s = (unknown type)\n", time_str,
-                           event->device_id, event->prop_id);
-            break;
-          }
+          break;
+        case THING_PROP_TYPE_FLOAT:
+          len =
+              snprintf(record, sizeof(record), "[%s] %s.%s = %.2f\n", time_str,
+                       event->device_id, event->prop_id, event->value.f);
+          break;
+        case THING_PROP_TYPE_STRING:
+          len = snprintf(record, sizeof(record), "[%s] %s.%s = \"%s\"\n",
+                         time_str, event->device_id, event->prop_id,
+                         event->value.s ? event->value.s : "");
+          break;
+        default:
+          len =
+              snprintf(record, sizeof(record), "[%s] %s.%s = (unknown type)\n",
+                       time_str, event->device_id, event->prop_id);
+          break;
         }
       }
     }
-
-    if (len > 0) {
-      if (s_log_len + len < LOG_BUFFER_SIZE) {
-        memcpy(s_log_buffer + s_log_len, record, len);
-        s_log_len += len;
+    if (s_log_len + len < LOG_BUFFER_SIZE) {
+      memcpy(s_log_buffer + s_log_len, record, len);
+      s_log_len += len;
+      s_log_buffer[s_log_len] = '\0';
+    } else {
+      // 容量不足，先强制刷写
+      data_logger_flush();
+      // 再存入
+      if (len < LOG_BUFFER_SIZE) {
+        memcpy(s_log_buffer, record, len);
+        s_log_len = len;
         s_log_buffer[s_log_len] = '\0';
-      } else {
-        // 容量不足，先强制刷写
-        data_logger_flush();
-        // 再存入
-        if (len < LOG_BUFFER_SIZE) {
-          memcpy(s_log_buffer, record, len);
-          s_log_len = len;
-          s_log_buffer[s_log_len] = '\0';
-        }
       }
     }
   }

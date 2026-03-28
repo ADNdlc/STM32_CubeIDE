@@ -1,14 +1,15 @@
-﻿#define LOG_TAG "CTRL_CTRL"
+#define LOG_TAG "CTRL_CTRL"
 #include "Contol_controller.h"
 #include "../UI/screens/Contol_view.h"
 #include "../device_control.h"
 #include "elog.h"
 #include "home/System/sys_config.h"
+#include "lvgl_resource.h"
 #include "thing_model/thing_model.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "lvgl_resource.h"
+
 
 #define DISPERSE 1
 
@@ -109,13 +110,23 @@ void ui_state_update_cb(const thing_model_event_t *event, void *user_data) {
     thing_device_t *dev = find_device_by_id(event->device_id);
     thing_property_t *prop = find_property_by_id(dev, event->prop_id);
     if (prop) {
-      char buf[32];
+      char buf[64];
       if (prop->type == THING_PROP_TYPE_FLOAT) {
         snprintf(buf, sizeof(buf), "%.1f %s", event->value.f,
                  prop->unit ? prop->unit : "");
         lv_label_set_text(target_obj, buf);
         log_d("Updated Label [%s/%s]: %s", event->device_id, event->prop_id,
               buf);
+      } else if (prop->type == THING_PROP_TYPE_INT) {
+        snprintf(buf, sizeof(buf), "%ld %s", event->value.i,
+                 prop->unit ? prop->unit : "");
+        lv_label_set_text(target_obj, buf);
+        log_d("Updated Label [%s/%s]: %s", event->device_id, event->prop_id,
+              buf);
+      } else if (prop->type == THING_PROP_TYPE_STRING) {
+        lv_label_set_text(target_obj, event->value.s ? event->value.s : "N/A");
+        log_d("Updated Label [%s/%s]: %s", event->device_id, event->prop_id,
+              event->value.s ? event->value.s : "N/A");
       }
     }
   }

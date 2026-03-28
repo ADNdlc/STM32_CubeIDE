@@ -6,9 +6,8 @@
 #include "app_manager.h"
 #include "elog.h"
 #include "lv_util.h"
-#include "thing_model/thing_model.h"
 #include "lvgl_resource.h"
-
+#include "thing_model/thing_model.h"
 
 #if 1
 
@@ -298,41 +297,77 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
       if (prop->value.b) {
         lv_obj_add_state(sw, LV_STATE_CHECKED);
       }
+      if (!prop->writable) {
+        lv_obj_add_state(sw, LV_STATE_DISABLED);
+      }
       // 添加控件事件处理
       ctx->target_obj = sw;
-      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx); // 值改变事件
-      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE, ctx); // 删除事件
+      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED,
+                          ctx); // 值改变事件
+      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE,
+                          ctx); // 删除事件
 
-      controller_register_ui_control(device->device_id, prop->id, sw); // 注册设备控件
+      controller_register_ui_control(device->device_id, prop->id,
+                                     sw); // 注册设备控件
       break;
     }
     case THING_PROP_TYPE_INT: {
-      log_d("  Adding Slider: %s", prop->id);
+      if (prop->writable) {
+        log_d("  Adding Slider: %s", prop->id);
 
-      // 创建"垂直堆叠"的容器,int类型属性的slider控件
-      lv_obj_t *col_cont = lv_obj_create(prop_cont);
-      lv_obj_set_size(col_cont, LV_PCT(100), 50);
-      lv_obj_set_style_bg_opa(col_cont, LV_OPA_TRANSP, LV_PART_MAIN);
-      lv_obj_set_style_border_width(col_cont, 0, LV_PART_MAIN);
-      lv_obj_clear_flag(col_cont, LV_OBJ_FLAG_SCROLLABLE);
-      lv_obj_update_layout(col_cont); // 更新布局信息
+        // 创建"垂直堆叠"的容器,int类型属性的slider控件
+        lv_obj_t *col_cont = lv_obj_create(prop_cont);
+        lv_obj_set_size(col_cont, LV_PCT(100), 50);
+        lv_obj_set_style_bg_opa(col_cont, LV_OPA_TRANSP, LV_PART_MAIN);
+        lv_obj_set_style_border_width(col_cont, 0, LV_PART_MAIN);
+        lv_obj_clear_flag(col_cont, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_update_layout(col_cont); // 更新布局信息
 
-      lv_obj_t *label_sld = lv_label_create(col_cont);
-      lv_label_set_text(label_sld, prop->name);
-      lv_obj_set_style_text_font(label_sld, &lv_font_montserrat_16, LV_PART_MAIN);
-      lv_obj_align(label_sld, LV_ALIGN_TOP_LEFT, 0, -20);
+        lv_obj_t *label_sld = lv_label_create(col_cont);
+        lv_label_set_text(label_sld, prop->name);
+        lv_obj_set_style_text_font(label_sld, &lv_font_montserrat_16,
+                                   LV_PART_MAIN);
+        lv_obj_align(label_sld, LV_ALIGN_TOP_LEFT, 0, -20);
 
-      lv_obj_t *sld = simple_slider_create(lv_color_hex(0xFFE4B5), col_cont);
-      lv_obj_set_size(sld, LV_PCT(100), 18);
-      lv_obj_align(sld, LV_ALIGN_BOTTOM_MID, 0, 10);
+        lv_obj_t *sld = simple_slider_create(lv_color_hex(0xFFE4B5), col_cont);
+        lv_obj_set_size(sld, LV_PCT(100), 18);
+        lv_obj_align(sld, LV_ALIGN_BOTTOM_MID, 0, 10);
 
-      lv_slider_set_range(sld, prop->min, prop->max);
-      lv_slider_set_value(sld, prop->value.i, LV_ANIM_OFF);
+        lv_slider_set_range(sld, prop->min, prop->max);
+        lv_slider_set_value(sld, prop->value.i, LV_ANIM_OFF);
 
-      ctx->target_obj = sld;
-      lv_obj_add_event_cb(sld, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx);
-      lv_obj_add_event_cb(sld, free_context_event_cb, LV_EVENT_DELETE, ctx);
-      controller_register_ui_control(device->device_id, prop->id, sld);
+        ctx->target_obj = sld;
+        lv_obj_add_event_cb(sld, generic_control_event_cb,
+                            LV_EVENT_VALUE_CHANGED, ctx);
+        lv_obj_add_event_cb(sld, free_context_event_cb, LV_EVENT_DELETE, ctx);
+        controller_register_ui_control(device->device_id, prop->id, sld);
+      } else {
+        log_d("  Adding Readonly Int Label: %s", prop->id);
+
+        lv_obj_t *row_cont = lv_obj_create(prop_cont);
+        lv_obj_set_size(row_cont, LV_PCT(100), 30);
+        lv_obj_set_style_bg_opa(row_cont, LV_OPA_TRANSP, LV_PART_MAIN);
+        lv_obj_set_style_border_width(row_cont, 0, LV_PART_MAIN);
+        lv_obj_clear_flag(row_cont, LV_OBJ_FLAG_SCROLLABLE);
+
+        lv_obj_t *label_name = lv_label_create(row_cont);
+        lv_label_set_text(label_name, prop->name);
+        lv_obj_set_style_text_font(label_name, &lv_font_montserrat_16, 0);
+        lv_obj_align(label_name, LV_ALIGN_LEFT_MID, 0, 0);
+
+        lv_obj_t *label_val = lv_label_create(row_cont);
+        char buf[32];
+        snprintf(buf, sizeof(buf), "%ld %s", prop->value.i,
+                 prop->unit ? prop->unit : "");
+        lv_label_set_text(label_val, buf);
+        lv_obj_set_style_text_font(label_val, &lv_font_montserrat_16, 0);
+        lv_obj_align(label_val, LV_ALIGN_RIGHT_MID, 0, 0);
+
+        ctx->target_obj = label_val;
+        lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE,
+                            ctx);
+        controller_register_ui_control(device->device_id, prop->id, label_val);
+      }
       break;
     }
     case THING_PROP_TYPE_FLOAT: {
@@ -468,14 +503,26 @@ lv_obj_t *view_create_property_card(lv_obj_t *parent,
     lv_obj_center(ctrl);
     if (prop->value.b)
       lv_obj_add_state(ctrl, LV_STATE_CHECKED);
+    if (!prop->writable)
+      lv_obj_add_state(ctrl, LV_STATE_DISABLED);
     break;
 
   case THING_PROP_TYPE_INT:
-    ctrl = simple_slider_create(lv_color_hex(0x00AEEF), card);
-    lv_obj_set_size(ctrl, LV_PCT(95), 30);
-    lv_obj_center(ctrl);
-    lv_slider_set_range(ctrl, prop->min, prop->max);
-    lv_slider_set_value(ctrl, prop->value.i, LV_ANIM_OFF);
+    if (prop->writable) {
+      ctrl = simple_slider_create(lv_color_hex(0x00AEEF), card);
+      lv_obj_set_size(ctrl, LV_PCT(95), 30);
+      lv_obj_center(ctrl);
+      lv_slider_set_range(ctrl, prop->min, prop->max);
+      lv_slider_set_value(ctrl, prop->value.i, LV_ANIM_OFF);
+    } else {
+      ctrl = lv_label_create(card);
+      lv_obj_set_style_text_font(ctrl, &lv_font_montserrat_32, 0);
+      char buf[32];
+      snprintf(buf, sizeof(buf), "%ld %s", prop->value.i,
+               prop->unit ? prop->unit : "");
+      lv_label_set_text(ctrl, buf);
+      lv_obj_center(ctrl);
+    }
     break;
 
   case THING_PROP_TYPE_FLOAT:

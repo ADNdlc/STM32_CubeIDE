@@ -170,7 +170,8 @@ void devices_process(void) {
                                    THING_SOURCE_DRV);
     }
 
-    log_d("Temp: %d.%dC, Humi: %d.%d%%", temperature / 10, abs(temperature % 10), humidity / 10, abs(humidity % 10));
+    log_d("Temp: %d.%dC, Humi: %d.%d%%", temperature / 10,
+          abs(temperature % 10), humidity / 10, abs(humidity % 10));
 
     // 读取光照
     float lux_f;
@@ -224,14 +225,22 @@ void dev_register_SWITCH() {
   }
 
   static thing_property_t device_props[] = {
-      {.id = "led0", // id必须和云平台定义的一样
-       .name = "Switch",
-       .type = THING_PROP_TYPE_SWITCH,
-       .cloud_sync = true},
-      {.id = "led1",
-       .name = "Switch",
-       .type = THING_PROP_TYPE_SWITCH,
-       .cloud_sync = true},
+      {
+          .id = "led0", // id必须和云平台定义的一样
+          .name = "Switch",
+          .type = THING_PROP_TYPE_SWITCH,
+          .cloud_sync = true,
+          .writable = true,
+          .readable = true,
+      },
+      {
+          .id = "led1",
+          .name = "Switch",
+          .type = THING_PROP_TYPE_SWITCH,
+          .cloud_sync = true,
+          .writable = true,
+		  .readable = true,
+      },
   };
 
   thing_device_t device_tmpl = {.device_id = sys_config_get_cloud_device_id(),
@@ -268,13 +277,15 @@ void dev_register_INT() {
        .name = "Temperature",
        .type = THING_PROP_TYPE_INT,
        .cloud_sync = true,
-	   .writable = false,
+       .writable = false,
+       .readable = true,
        .unit = "0.1C"},
       {.id = "humidity",
        .name = "Humidity",
        .type = THING_PROP_TYPE_INT,
        .cloud_sync = true,
-	   .writable = false,
+       .writable = false,
+       .readable = true,
        .unit = "0.1%"},
   };
 
@@ -293,7 +304,8 @@ void dev_register_INT() {
                                             .name = "Illuminance",
                                             .type = THING_PROP_TYPE_INT,
                                             .cloud_sync = true,
-											.writable = false,
+                                            .writable = false,
+                                            .readable = true,
                                             .unit = "Lux"}};
 
   // 创建光照设备模板
