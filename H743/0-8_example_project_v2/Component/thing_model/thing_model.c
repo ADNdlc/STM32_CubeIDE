@@ -244,6 +244,7 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
 
   // 5. 通知观察者
   thing_model_event_t evt = {.type = THING_EVENT_PROPERTY_CHANGED,
+                             .device = target_dev,
                              .device_id = device_id,
                              .prop_id = prop_id,
                              .value = value,
@@ -304,7 +305,8 @@ bool thing_model_set_prop_by_name(const char *device_name,
 
   // 5. 通知观察者
   thing_model_event_t evt = {.type = THING_EVENT_PROPERTY_CHANGED,
-                             .device_id = device_name,
+                             .device = target_dev,
+                             .device_id = target_dev->device_id, // 使用物模型内部ID而非查找名称
                              .prop_id = prop_name,
                              .value = value,
                              .source = source};

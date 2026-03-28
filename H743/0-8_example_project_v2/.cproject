@@ -132,14 +132,14 @@
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1560450733.257977978" name="net_mgr.h" rcbsApplicability="disable" resourcePath="Application/home/System/net_mgr.h" toolsToInvoke=""/>
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1560450733.2069010365" name="mqtt_factory.h" rcbsApplicability="disable" resourcePath="BSP/Drivers/factory/Service/mqtt_factory.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="A_Project_cfg"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application"/>
-						<entry excluding="Drivers/abandon|Drivers/old" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry excluding="mqtt_service/adapters/dev_token.c|mqtt_service/adapters/dev_token.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
+						<entry excluding="Drivers/abandon|Drivers/old" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
+						<entry excluding="LVGL/lvgl-release-v8.3/demos|LVGL/lvgl-release-v8.3/examples|EasyLogger/easylogger/plugins|EasyLogger/easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Lib"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="A_Project_cfg"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="LVGL/lvgl-release-v8.3/demos|LVGL/lvgl-release-v8.3/examples|EasyLogger/easylogger/plugins|EasyLogger/easylogger/port" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Lib"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Test"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -12,7 +12,7 @@
 #if 1
 
 // 主页布局描述
-extern void controller_register_ui_control(const char *deviceID,
+extern void controller_register_ui_control(const char *deviceName,
                                            const char *propID, lv_obj_t *obj);
 extern void generic_control_event_cb(lv_event_t *e);
 
@@ -89,7 +89,7 @@ static void free_context_event_cb(lv_event_t *e) {
   control_event_ctx_t *ctx = (control_event_ctx_t *)lv_event_get_user_data(e);
   if (ctx) {
     // 释放之前为这个控件分配的上下文内存
-    log_d("Freeing context for [%s/%s]", ctx->deviceID, ctx->propID);
+    log_d("Freeing context for [%s/%s]", ctx->deviceName, ctx->propID);
     lv_mem_free(ctx);
   } else {
     log_e("free_context_event_cb: ctx is NULL");
@@ -265,7 +265,7 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
             device->device_id, prop->id);
       continue;
     }
-    snprintf(ctx->deviceID, sizeof(ctx->deviceID), "%s", device->device_id);
+    snprintf(ctx->deviceName, sizeof(ctx->deviceName), "%s", device->name);
     snprintf(ctx->propID, sizeof(ctx->propID), "%s", prop->id);
 
     // 根据属性类型创建控件
@@ -307,7 +307,7 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
       lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE,
                           ctx); // 删除事件
 
-      controller_register_ui_control(device->device_id, prop->id,
+      controller_register_ui_control(device->name, prop->id,
                                      sw); // 注册设备控件
       break;
     }
@@ -340,7 +340,7 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
         lv_obj_add_event_cb(sld, generic_control_event_cb,
                             LV_EVENT_VALUE_CHANGED, ctx);
         lv_obj_add_event_cb(sld, free_context_event_cb, LV_EVENT_DELETE, ctx);
-        controller_register_ui_control(device->device_id, prop->id, sld);
+        controller_register_ui_control(device->name, prop->id, sld);
       } else {
         log_d("  Adding Readonly Int Label: %s", prop->id);
 
@@ -366,7 +366,7 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
         ctx->target_obj = label_val;
         lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE,
                             ctx);
-        controller_register_ui_control(device->device_id, prop->id, label_val);
+        controller_register_ui_control(device->name, prop->id, label_val);
       }
       break;
     }
@@ -395,7 +395,7 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
       ctx->target_obj = label_val; // 绑定到数值标签
       lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE,
                           ctx);
-      controller_register_ui_control(device->device_id, prop->id, label_val);
+      controller_register_ui_control(device->name, prop->id, label_val);
       break;
     }
     case THING_PROP_TYPE_STRING:
@@ -428,7 +428,7 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
       lv_obj_add_event_cb(label_val, free_context_event_cb, LV_EVENT_DELETE,
                           ctx);
 
-      controller_register_ui_control(device->device_id, prop->id, label_val);
+      controller_register_ui_control(device->name, prop->id, label_val);
       break;
     }
     default:
@@ -489,7 +489,7 @@ lv_obj_t *view_create_property_card(lv_obj_t *parent,
   control_event_ctx_t *ctx =
       (control_event_ctx_t *)lv_mem_alloc(sizeof(control_event_ctx_t));
   if (ctx) {
-    snprintf(ctx->deviceID, sizeof(ctx->deviceID), "%s", device->device_id);
+    snprintf(ctx->deviceName, sizeof(ctx->deviceName), "%s", device->name);
     snprintf(ctx->propID, sizeof(ctx->propID), "%s", prop->id);
     lv_obj_add_event_cb(card, free_context_event_cb, LV_EVENT_DELETE, ctx);
   }
@@ -562,7 +562,7 @@ lv_obj_t *view_create_property_card(lv_obj_t *parent,
     ctx->target_obj = ctrl;
     lv_obj_add_event_cb(ctrl, generic_control_event_cb, LV_EVENT_VALUE_CHANGED,
                         ctx);
-    controller_register_ui_control(device->device_id, prop->id, ctrl);
+    controller_register_ui_control(device->name, prop->id, ctrl);
   }
 
   return card;

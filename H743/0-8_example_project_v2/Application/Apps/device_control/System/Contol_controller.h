@@ -1,4 +1,4 @@
-﻿#ifndef __Contol_controller_H__
+#ifndef __Contol_controller_H__
 #define __Contol_controller_H__
 
 #include "lvgl.h"
@@ -14,7 +14,7 @@ extern "C" {
 
 // 控制事件上下文结构体 (用于存储控件与物模型属性的绑定关系)
 typedef struct {
-  char deviceID[MAX_ID_LENGTH];
+  char deviceName[MAX_ID_LENGTH];
   char propID[MAX_ID_LENGTH];
   lv_obj_t *target_obj; // 指向触发事件的控件
 } control_event_ctx_t;

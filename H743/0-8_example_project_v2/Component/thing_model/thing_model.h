@@ -81,20 +81,22 @@ typedef enum {
  * @brief 物模型属性更新来源
  */
 typedef enum {
-  THING_SOURCE_LOCAL = 0, // UI or Local Logic
+  THING_SOURCE_LOCAL = 0, // Other Local Logic
   THING_SOURCE_CLOUD = 1, // Cloud Command
-  THING_SOURCE_DRV = 2    // Hardware Driver Sync
+  THING_SOURCE_DRV = 2,   // Hardware Driver Sync
+  THING_SOURCE_UI = 3     // UI Control
 } thing_source_t;
 
 /**
  * @brief 物模型事件
  */
 typedef struct {
-  thing_event_type_t type; // 事件类型
-  const char *device_id;   // 设备ID
-  const char *prop_id;     // 属性ID
-  thing_value_t value;     // 属性值
-  thing_source_t source;   // 事件来源
+  thing_event_type_t type;     // 事件类型
+  struct thing_device_t *device; // 目标设备指针
+  const char *device_id;       // 设备ID (冗余，方便快速访问)
+  const char *prop_id;         // 属性ID
+  thing_value_t value;         // 属性值
+  thing_source_t source;       // 事件来源
 } thing_model_event_t;
 
 /**

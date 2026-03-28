@@ -89,8 +89,8 @@ static void on_thing_model_event(const thing_model_event_t *event,
     char record[128];
     int len = 0;
 
-    // Chúng tôi chỉ ghi lại những giá trị này theo định dạng của từng property
-    thing_device_t *dev = find_device_by_id(event->device_id);
+    // 使用事件中的设备指针直接查找属性，解决同 ID 冲突问题
+    thing_device_t *dev = event->device;
     if (dev) {
       thing_property_t *prop = find_property_by_id(dev, event->prop_id);
       if (prop) {
