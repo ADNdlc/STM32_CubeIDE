@@ -32,7 +32,12 @@
 /* enable log output. */
 #define ELOG_OUTPUT_ENABLE
 /* setting static output log level. range: from ELOG_LVL_ASSERT to
- * ELOG_LVL_VERBOSE */
+ * ELOG_LVL_VERBOSE
+ * ELOG_LVL_DEBUG
+ * ELOG_LVL_INFO
+ * ELOG_LVL_WARN
+ * ELOG_LVL_ERROR
+ * ELOG_LVL_ASSERT*/
 #define ELOG_OUTPUT_LVL ELOG_LVL_INFO
 /* enable assert check */
 #define ELOG_ASSERT_ENABLE

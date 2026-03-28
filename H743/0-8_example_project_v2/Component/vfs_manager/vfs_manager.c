@@ -115,6 +115,19 @@ static void vfs_internal_dev_cb(storage_device_t *self, dev_event_t event,
     s_event_cb(mp->name, event);
 }
 
+bool vfs_point_is_mounted(const char *path_prefix) {
+  const char *prefix = path_prefix;
+  if (prefix[0] == '/')
+    prefix++;
+
+  for (int i = 0; i < VFS_MAX_MOUNT_POINTS; i++) {
+    if (strcmp(s_mount_points[i].name, prefix) == 0) {
+      return s_mount_points[i].is_mounted;
+    }
+  }
+  return false;
+}
+
 /* ------------------ VFS 管理核心接口 ------------------ */
 
 int vfs_init(void) {

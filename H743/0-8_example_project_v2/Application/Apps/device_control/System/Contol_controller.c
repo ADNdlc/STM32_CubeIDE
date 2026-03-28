@@ -1,14 +1,15 @@
-﻿#define LOG_TAG "CTRL_CTRL"
+#define LOG_TAG "CTRL_CTRL"
 #include "Contol_controller.h"
 #include "../UI/screens/Contol_view.h"
 #include "../device_control.h"
 #include "elog.h"
 #include "home/System/sys_config.h"
+#include "lvgl_resource.h"
 #include "thing_model/thing_model.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "lvgl_resource.h"
+
 
 #define DISPERSE 1
 
@@ -19,7 +20,7 @@ extern thing_property_t *find_property_by_id(thing_device_t *dev,
 // 定义一个映射结构体和数组来存储控件
 #define MAX_UI_CONTROLS 32
 typedef struct {
-  char deviceID[MAX_ID_LENGTH];
+  char deviceName[MAX_ID_LENGTH];
   char propID[MAX_ID_LENGTH];
   lv_obj_t *obj; // 指向对应的LVGL控件
 } ui_control_map_t;
@@ -28,16 +29,16 @@ static ui_control_map_t g_ui_map[MAX_UI_CONTROLS];
 static uint8_t g_ui_map_count = 0;
 
 // 辅助函数，用于在创建UI时注册控件
-void controller_register_ui_control(const char *deviceID, const char *propID,
+void controller_register_ui_control(const char *deviceName, const char *propID,
                                     lv_obj_t *obj) {
   if (g_ui_map_count < MAX_UI_CONTROLS) {
-    strncpy(g_ui_map[g_ui_map_count].deviceID, deviceID, MAX_ID_LENGTH);
+    strncpy(g_ui_map[g_ui_map_count].deviceName, deviceName, MAX_ID_LENGTH);
     strncpy(g_ui_map[g_ui_map_count].propID, propID, MAX_ID_LENGTH);
     g_ui_map[g_ui_map_count].obj = obj;
-    log_d("Registered UI control: [%s/%s] -> %p", deviceID, propID, obj);
+    log_d("Registered UI control: [%s/%s] -> %p", deviceName, propID, obj);
     g_ui_map_count++;
   } else {
-    log_w("UI control map is full! Cannot register [%s/%s]", deviceID, propID);
+    log_w("UI control map is full! Cannot register [%s/%s]", deviceName, propID);
   }
 }
 
@@ -49,9 +50,9 @@ void controller_clear_ui_map(void) {
 }
 
 // 辅助函数，用于在回调中查找控件
-lv_obj_t *controller_find_ui_control(const char *deviceID, const char *propID) {
+lv_obj_t *controller_find_ui_control(const char *deviceName, const char *propID) {
   for (int i = 0; i < g_ui_map_count; i++) {
-    if (strcmp(g_ui_map[i].deviceID, deviceID) == 0 &&
+    if (strcmp(g_ui_map[i].deviceName, deviceName) == 0 &&
         strcmp(g_ui_map[i].propID, propID) == 0) {
       return g_ui_map[i].obj;
     }
@@ -66,19 +67,18 @@ void ui_state_update_cb(const thing_model_event_t *event, void *user_data) {
   if (event->type != THING_EVENT_PROPERTY_CHANGED)
     return;
 
-  // 如果是由本地UI触发的更新（SOURCE_LOCAL），通常不需要再次更新UI显示
-  // 但为了保证状态一致性（例如驱动层可能修正值），这里也可以选择统一更新
-  if (event->source == THING_SOURCE_LOCAL) { // 来源
-    log_v("Ignore local change for [%s/%s]", event->device_id, event->prop_id);
+  // 仅忽略由本 UI 自身发起的更新，允许本地硬件 (LOCAL) 和驱动同步 (DRV) 更新 UI
+  if (event->source == THING_SOURCE_UI) {
+    log_v("Ignore self UI change for [%s/%s]", event->device_id, event->prop_id);
     return;
   }
 
-  log_d("Syncing UI for [%s/%s] from source %d", event->device_id,
+  log_d("Syncing UI for [%s/%s] from source %d", event->device->name,
         event->prop_id, event->source);
-
-  // 查找对应的控件
+  
+  // 查找对应的控件 (通过设备名称查找，解决 ID 相同的问题)
   lv_obj_t *target_obj =
-      controller_find_ui_control(event->device_id, event->prop_id);
+      controller_find_ui_control(event->device->name, event->prop_id);
   if (!target_obj) {
     log_v("No UI mapping for [%s/%s], skipping sync.", event->device_id,
           event->prop_id);
@@ -106,16 +106,26 @@ void ui_state_update_cb(const thing_model_event_t *event, void *user_data) {
     }
   } else if (lv_obj_check_type(target_obj, &lv_label_class)) {
     // 处理只读数值显示 (FLOAT 等)
-    thing_device_t *dev = find_device_by_id(event->device_id);
+    thing_device_t *dev = event->device; // 直接使用事件中的设备指针
     thing_property_t *prop = find_property_by_id(dev, event->prop_id);
     if (prop) {
-      char buf[32];
+      char buf[64];
       if (prop->type == THING_PROP_TYPE_FLOAT) {
         snprintf(buf, sizeof(buf), "%.1f %s", event->value.f,
                  prop->unit ? prop->unit : "");
         lv_label_set_text(target_obj, buf);
         log_d("Updated Label [%s/%s]: %s", event->device_id, event->prop_id,
               buf);
+      } else if (prop->type == THING_PROP_TYPE_INT) {
+        snprintf(buf, sizeof(buf), "%ld %s", event->value.i,
+                 prop->unit ? prop->unit : "");
+        lv_label_set_text(target_obj, buf);
+        log_d("Updated Label [%s/%s]: %s", event->device_id, event->prop_id,
+              buf);
+      } else if (prop->type == THING_PROP_TYPE_STRING) {
+        lv_label_set_text(target_obj, event->value.s ? event->value.s : "N/A");
+        log_d("Updated Label [%s/%s]: %s", event->device_id, event->prop_id,
+              event->value.s ? event->value.s : "N/A");
       }
     }
   }
@@ -133,22 +143,22 @@ void generic_control_event_cb(lv_event_t *e) {
     // 根据控件类型获取新值
     if (lv_obj_check_type(target, &lv_switch_class)) {
       new_value.b = lv_obj_has_state(target, LV_STATE_CHECKED);
-      log_i("UI Event: Switch [%s/%s] -> %s", ctx->deviceID, ctx->propID,
+      log_i("UI Event: Switch [%s/%s] -> %s", ctx->deviceName, ctx->propID,
             new_value.b ? "ON" : "OFF");
     } else if (lv_obj_check_type(target, &lv_slider_class)) {
       new_value.i = lv_slider_get_value(target);
-      log_i("UI Event: Slider [%s/%s] -> %d", ctx->deviceID, ctx->propID,
+      log_i("UI Event: Slider [%s/%s] -> %d", ctx->deviceName, ctx->propID,
             new_value.i);
     } else {
-      log_w("UI Event: Unknown control type for [%s/%s]", ctx->deviceID,
+      log_w("UI Event: Unknown control type for [%s/%s]", ctx->deviceName,
             ctx->propID);
       return;
     }
 
-    // 更新物模型属性 (来源标记为 LOCAL)
-    if (!thing_model_set_prop(ctx->deviceID, ctx->propID, new_value,
-                              THING_SOURCE_LOCAL)) {
-      log_e("Failed to update thing model for [%s/%s]", ctx->deviceID,
+    // 更新物模型属性 (使用名称更新，来源标记为 UI)
+    if (!thing_model_set_prop_by_name(ctx->deviceName, ctx->propID, new_value,
+                                     THING_SOURCE_UI)) {
+      log_e("Failed to update thing model for [%s/%s]", ctx->deviceName,
             ctx->propID);
     }
   }

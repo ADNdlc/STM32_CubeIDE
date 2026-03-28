@@ -215,7 +215,7 @@ void net_mgr_process(void) {
       g_pending_config_save = false;
     }
 
-    // 【修复】：显式进入 RUNNING 状态，杜绝 +1 巧合
+    // 【修复】：显式进入 RUNNING 状态
     net_mgr_set_state(NET_MGR_STATE_RUNNING);
     break;
 

@@ -33,7 +33,7 @@ typedef struct {
   const char *name;       // 属性显示名称 (e.g., "Main Light", "Temperature")
   thing_prop_type_t type; // 数据类型
   thing_value_t value;    // 当前值
-
+  uint32_t timestamp;     // 时间戳
   // 约束条件 (可选)
   int32_t min;
   int32_t max;
@@ -81,20 +81,22 @@ typedef enum {
  * @brief 物模型属性更新来源
  */
 typedef enum {
-  THING_SOURCE_LOCAL = 0, // UI or Local Logic
+  THING_SOURCE_LOCAL = 0, // Other Local Logic
   THING_SOURCE_CLOUD = 1, // Cloud Command
-  THING_SOURCE_DRV = 2    // Hardware Driver Sync
+  THING_SOURCE_DRV = 2,   // Hardware Driver Sync
+  THING_SOURCE_UI = 3     // UI Control
 } thing_source_t;
 
 /**
  * @brief 物模型事件
  */
 typedef struct {
-  thing_event_type_t type; // 事件类型
-  const char *device_id;   // 设备ID
-  const char *prop_id;     // 属性ID
-  thing_value_t value;     // 属性值
-  thing_source_t source;   // 事件来源
+  thing_event_type_t type;     // 事件类型
+  struct thing_device_t *device; // 目标设备指针
+  const char *device_id;       // 设备ID (冗余，方便快速访问)
+  const char *prop_id;         // 属性ID
+  thing_value_t value;         // 属性值
+  thing_source_t source;       // 事件来源
 } thing_model_event_t;
 
 /**
@@ -124,11 +126,29 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl);
  */
 bool thing_model_set_prop(const char *device_id, const char *prop_id,
                           thing_value_t value, thing_source_t source);
+bool thing_model_set_prop_by_name(const char *device_name,
+                                  const char *prop_name, thing_value_t value,
+                                  thing_source_t source);
 
 /**
  * @brief 通过索引获取一个设备
  */
 thing_device_t *thing_model_get_device(uint8_t index);
+
+/**
+ * @brief 通过名称查找设备
+ */
+thing_device_t *find_device_by_name(const char *device_name);
+
+/**
+ * @brief 通过ID查找设备
+ */
+thing_device_t *find_device_by_id(const char *device_id);
+
+/**
+ * @brief 通过名称查找属性
+ */
+thing_property_t *find_property_by_name(const char *device_name, const char *prop_name);
 
 /**
  * @brief 获取设备总数

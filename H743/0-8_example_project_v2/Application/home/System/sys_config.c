@@ -41,6 +41,8 @@ static app_def_t sys_app_def = {
 #define DEFAULT_CLOUD_DEVICE_SECRET                                            \
   "version=2018-10-31&res=products%2FSQKg9n0Ii0%2Fdevices%2Ftest2&et="         \
   "1855499668539&method=md5&sign=%2FHVmg4Xz2RfTRWEu44mApQ%3D%3D"
+// 默认日志开关
+#define DEFAULT_LOCAL_DATA_SAVE 1
 
 /**
  * @brief 将g_sys_config配置为默认值
@@ -88,6 +90,11 @@ void sys_config_set_defaults(void) {
       sys_malloc(SYS_CONFIG_MEM_SOURCE, sizeof(DEFAULT_CLOUD_DEVICE_SECRET));
   memcpy(sys_config_settings.configs[CLOUD_DEVICE_SECRET].s_val,
          DEFAULT_CLOUD_DEVICE_SECRET, sizeof(DEFAULT_CLOUD_DEVICE_SECRET));
+  // local data save
+  sys_config_settings.configs[LOCAL_DATA_SAVE].key = LOCAL_DATA_SAVE;
+  sys_config_settings.configs[LOCAL_DATA_SAVE].type = APP_CONFIG_TYPE_INT;
+  sys_config_settings.configs[LOCAL_DATA_SAVE].i_val = DEFAULT_LOCAL_DATA_SAVE;
+
   sys_config_settings.attr.is_loaded = 1;
 }
 
@@ -202,4 +209,18 @@ char *sys_config_get_cloud_device_secret(void) {
     return NULL;
   }
   return sys_config_settings.configs[CLOUD_DEVICE_SECRET].s_val;
+}
+
+bool sys_config_get_local_data_save(void) {
+  if (!sys_config_settings.attr.is_loaded) {
+    return true; // 默认开启
+  }
+  return sys_config_settings.configs[LOCAL_DATA_SAVE].i_val != 0;
+}
+
+void sys_config_set_local_data_save(bool enable) {
+  if (!sys_config_settings.attr.is_loaded) {
+    return;
+  }
+  sys_config_settings.configs[LOCAL_DATA_SAVE].i_val = enable ? 1 : 0;
 }

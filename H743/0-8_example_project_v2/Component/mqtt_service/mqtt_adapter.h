@@ -53,14 +53,15 @@ typedef struct {
 
   /**
    * @brief 序列化物模型属性为推送信息
-   * @param device 设备信息
-   * @param prop 属性信息
+   * @param device_id 设备ID
+   * @param props 属性信息数组
+   * @param prop_count 属性数量
    * @param out_buf 输出缓冲区
    * @param size 输出缓冲区大小
    */
-  int (*serialize_post)(const thing_device_t *device,
-                        const thing_property_t *prop, char *out_buf,
-                        size_t size);
+  int (*serialize_post)(const char *device_id,
+                        thing_property_t **props, uint8_t prop_count,
+                        char *out_buf, size_t size);
 
   /**
    * @brief 解析云平台命令

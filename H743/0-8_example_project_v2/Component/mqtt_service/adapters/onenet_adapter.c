@@ -59,35 +59,51 @@ static void onenet_get_topic(const char *device_id, mqtt_topic_type_t topic_type
 /**
  * @brief 序列化OneNet物模型属性
  */
-static int onenet_serialize_post(const thing_device_t *device,
-                                 const thing_property_t *prop, char *out_buf,
-                                 size_t size) {
+static int onenet_serialize_post(const char *device_id,
+                                 thing_property_t **props, uint8_t prop_count,
+                                 char *out_buf, size_t size) {
+  if (prop_count == 0) return -1;
+  
   cJSON *root = cJSON_CreateObject();
   cJSON_AddStringToObject(root, "id", "123");
   cJSON_AddStringToObject(root, "version", "1.0");
 
   cJSON *params = cJSON_CreateObject();
-  cJSON *p_val = cJSON_CreateObject();
 
-  switch (prop->type) {
-  case THING_PROP_TYPE_SWITCH:
-    cJSON_AddBoolToObject(p_val, "value", prop->value.b);
-    break;
-  case THING_PROP_TYPE_INT:
-    cJSON_AddNumberToObject(p_val, "value", prop->value.i);
-    break;
-  case THING_PROP_TYPE_FLOAT:
-    cJSON_AddNumberToObject(p_val, "value", prop->value.f);
-    break;
-  default:
-    break;
+  for (uint8_t i = 0; i < prop_count; i++) {
+    thing_property_t *prop = props[i];
+    if (!prop) continue;
+    
+    cJSON *p_val = cJSON_CreateObject();
+
+    switch (prop->type) {
+    case THING_PROP_TYPE_SWITCH:
+      cJSON_AddBoolToObject(p_val, "value", prop->value.b);
+      break;
+    case THING_PROP_TYPE_INT:
+      cJSON_AddNumberToObject(p_val, "value", prop->value.i);
+      break;
+    case THING_PROP_TYPE_FLOAT:
+      cJSON_AddNumberToObject(p_val, "value", prop->value.f);
+      break;
+    case THING_PROP_TYPE_STRING:
+      if (prop->value.s) {
+        cJSON_AddStringToObject(p_val, "value", prop->value.s);
+      } else {
+        cJSON_AddStringToObject(p_val, "value", "");
+      }
+      break;
+    default:
+      break;
+    }
+
+    if (prop->timestamp > 0) {
+      cJSON_AddNumberToObject(p_val, "time", (double)prop->timestamp);
+    }
+
+    cJSON_AddItemToObject(params, prop->id, p_val);
   }
 
-  // TODO: 时间戳可以作为参数或由外部注入，这里简单传入 0 表示不需要，如有需要由应用处理
-  // 或者采用回调方式。为保持独立性去掉对 rtc_hal_get_unix_ms 的直接依赖。
-  // cJSON_AddNumberToObject(p_val, "time", (double)timestamp);
-
-  cJSON_AddItemToObject(params, prop->id, p_val);
   cJSON_AddItemToObject(root, "params", params);
 
   char *json_str = cJSON_PrintUnformatted(root);
@@ -95,7 +111,11 @@ static int onenet_serialize_post(const thing_device_t *device,
     strncpy(out_buf, json_str, size - 1);
     out_buf[size - 1] = '\0'; // Ensure null termination
     cJSON_free(json_str);
+  } else {
+    cJSON_Delete(root);
+    return -1;
   }
+  
   cJSON_Delete(root);
   return 0;
 }

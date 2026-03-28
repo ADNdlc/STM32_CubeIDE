@@ -56,6 +56,8 @@ int vfs_unlink(const char *path);
 int vfs_rename(const char *old_path, const char *new_path);
 int vfs_stat(const char *path, vfs_stat_t *st);
 
+bool vfs_point_is_mounted(const char *path_prefix);
+
 // 设置事件回调(所有挂载点共用)
 void vfs_set_event_callback(vfs_event_cb_t cb);
 // 挂载设备状态维护(空闲时低频轮询设备状态以提供移动设备的热插拔检查)
