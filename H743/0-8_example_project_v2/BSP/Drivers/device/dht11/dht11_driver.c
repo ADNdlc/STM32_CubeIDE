@@ -96,22 +96,22 @@ humiture_driver_t *dht11_driver_create(one_wire_driver_t *ow_drv) {
 static int dht11_check(dht11_driver_t *self) {
   uint8_t retry = 0;
   ONE_WIRE_SET_MODE(self->ow_drv, 0); // 输入模式
-  while (ONE_WIRE_READ(self->ow_drv) && retry < 250) {
+  while (ONE_WIRE_READ(self->ow_drv) && retry < 100) {
     retry++;
     sys_delay_us(1);
   }
 
-  if (retry >= 250){
+  if (retry >= 100){
 	log_e("DHT11 response timeout!");
 	return -1;
   }
 
   retry = 0;
-  while (!ONE_WIRE_READ(self->ow_drv) && retry < 200) {
+  while (!ONE_WIRE_READ(self->ow_drv) && retry < 100) {
     retry++;
     sys_delay_us(1);
   }
-  if (retry >= 200){
+  if (retry >= 100){
     log_e("DHT11 module error!");
     return -2;
   }

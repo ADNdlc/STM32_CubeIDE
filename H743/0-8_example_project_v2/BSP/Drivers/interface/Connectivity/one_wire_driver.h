@@ -15,7 +15,7 @@
 // 前向声明
 typedef struct one_wire_driver_t one_wire_driver_t;
 
-// One-Wire 驱动操作接口 (虚函数表)
+// One-Wire 驱动操作接口
 typedef struct {
   // 初始化 One-Wire
   int (*init)(one_wire_driver_t *self);

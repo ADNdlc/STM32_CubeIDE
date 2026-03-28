@@ -97,19 +97,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(ESP_RST_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED1_Pin LED0_Pin */
-  GPIO_InitStruct.Pin = LED1_Pin|LED0_Pin;
+  /*Configure GPIO pins : LED1_Pin LED0_Pin dht11_D_Pin */
+  GPIO_InitStruct.Pin = LED1_Pin|LED0_Pin|dht11_D_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : dht11_D_Pin */
-  GPIO_InitStruct.Pin = dht11_D_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
-  HAL_GPIO_Init(dht11_D_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : touch_SCL_Pin */
   GPIO_InitStruct.Pin = touch_SCL_Pin;

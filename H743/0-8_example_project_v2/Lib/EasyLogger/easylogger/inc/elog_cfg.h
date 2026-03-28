@@ -38,7 +38,7 @@
  * ELOG_LVL_WARN
  * ELOG_LVL_ERROR
  * ELOG_LVL_ASSERT*/
-#define ELOG_OUTPUT_LVL ELOG_LVL_VERBOSE
+#define ELOG_OUTPUT_LVL ELOG_LVL_INFO
 /* enable assert check */
 #define ELOG_ASSERT_ENABLE
 /* buffer size for every line's log */

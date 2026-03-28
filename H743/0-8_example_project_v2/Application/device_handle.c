@@ -26,7 +26,7 @@ static illuminance_driver_t *illuminance_sensor = NULL;
 static int32_t temperature = 0; // 温度 (0.1°C)
 static int32_t humidity = 0;    // 湿度 (0.1%)
 static int32_t illuminance = 0; // 照度 (Lux)
-// 光照阈值滤波计数器
+// 光照阈值滤波计数器(滞回滤波)
 static uint8_t illuminance_low_count = 0;
 #define ILLUMINANCE_THRESHOLD_LOW 70   // 开灯阈值(Lux)
 #define ILLUMINANCE_THRESHOLD_HIGH 100 // 关灯阈值(Lux)
