@@ -134,6 +134,21 @@ bool thing_model_set_prop_by_name(const char *device_name,
 thing_device_t *thing_model_get_device(uint8_t index);
 
 /**
+ * @brief 通过名称查找设备
+ */
+thing_device_t *find_device_by_name(const char *device_name);
+
+/**
+ * @brief 通过ID查找设备
+ */
+thing_device_t *find_device_by_id(const char *device_id);
+
+/**
+ * @brief 通过名称查找属性
+ */
+thing_property_t *find_property_by_name(const char *device_name, const char *prop_name);
+
+/**
  * @brief 获取设备总数
  */
 uint8_t thing_model_get_count(void);

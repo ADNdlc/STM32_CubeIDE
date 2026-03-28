@@ -83,15 +83,17 @@ int mqtt_svc_disconnect(mqtt_service_t *self);
 int mqtt_svc_subscribe(mqtt_service_t *self, const char *topic, uint8_t qos);
 
 /**
- * @brief 发布属性到云平台
+ * @brief 发布多个属性到云平台
  * @param self mqtt服务实例
- * @param device 设备信息
- * @param prop 属性信息
+ * @param device_id 设备ID
+ * @param props 属性指针数组
+ * @param prop_count 属性数量
  * @return int 0:成功，-1:失败
  */
-int mqtt_svc_publish_property(mqtt_service_t *self,
-                              const thing_device_t *device,
-                              const thing_property_t *prop);
+int mqtt_svc_publish_properties(mqtt_service_t *self,
+                                const char *device_id,
+                                thing_property_t **props,
+                                uint8_t prop_count);
 
 /**
  * @brief 云命令回复

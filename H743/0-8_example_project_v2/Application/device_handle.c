@@ -157,8 +157,8 @@ void devices_process(void) {
         HUMITURE_READ_FLOAT(humiture, &temp_f, &humi_f) == 0) {
       log_i("Humiture: %.1f°C, %.1f%%", temp_f, humi_f);
       // 转换为int32 (乘以10保存0.1度/0.1%精度)
-      temperature = (int32_t)(temp_f * 10);
-      humidity = (int32_t)(humi_f * 10);
+      temperature = (int32_t)(temp_f);
+      humidity = (int32_t)(humi_f);
 
       // 更新物模型
       thing_value_t value = {.i = temperature};
@@ -168,10 +168,9 @@ void devices_process(void) {
       value.i = humidity;
       thing_model_set_prop_by_name("HumitureDev", "humidity", value,
                                    THING_SOURCE_DRV);
-
-      log_d("Temp: %d.%dC, Humi: %d.%d%%", temperature / 10,
-            abs(temperature % 10), humidity / 10, abs(humidity % 10));
     }
+
+    log_d("Temp: %d.%dC, Humi: %d.%d%%", temperature / 10, abs(temperature % 10), humidity / 10, abs(humidity % 10));
 
     // 读取光照
     float lux_f;

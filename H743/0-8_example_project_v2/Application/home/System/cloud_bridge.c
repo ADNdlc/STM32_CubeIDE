@@ -39,8 +39,7 @@ static void on_mqtt_svc_event(mqtt_service_t *svc,
       thing_device_t *dev = thing_model_get_device(i);
       if (dev && svc->adapter) {
         char topic[128];
-        svc->adapter->get_topic(dev->device_id, MQTT_TOPIC_PROPERTY_SET, topic,
-                                sizeof(topic));
+        svc->adapter->get_topic(dev->device_id, MQTT_TOPIC_PROPERTY_SET, topic, sizeof(topic));
         mqtt_svc_subscribe(svc, topic, 0);
         log_i("Subscribed to %s", topic);
       }
@@ -86,21 +85,50 @@ void cloud_bridge_process(void) {
   }
   g_last_sync_time = now;
 
-  // log_v("prop sync...");
-  //  扫描脏属性并同步
+  //  扫描脏属性并批量同步
   uint8_t dev_count = thing_model_get_count();
-  // 遍历所有设备
+  if (dev_count == 0) return;
+  
   for (uint8_t i = 0; i < dev_count; i++) {
-    thing_device_t *dev = thing_model_get_device(i);
-    if (!dev)
-      continue;
-    // 遍历此设备的所有属性
-    for (uint8_t j = 0; j < dev->prop_count; j++) {
-      thing_property_t *prop = &dev->properties[j];
-      if (prop->is_dirty && prop->cloud_sync) { // 是否脏且需要同步
-        log_d("Syncing dirty property %s.%s", dev->device_id, prop->id);
-        if (mqtt_svc_publish_property(g_mqtt_svc, dev, prop) == 0) {
-          prop->is_dirty = false; // 成功同步后，将属性标记为干净
+    thing_device_t *base_dev = thing_model_get_device(i);
+    if (!base_dev || !base_dev->device_id) continue;
+    
+    // 检查此 device_id 是否在之前的循环中已经处理过
+    bool id_already_processed = false;
+    for (uint8_t prev = 0; prev < i; prev++) {
+       thing_device_t *p_dev = thing_model_get_device(prev);
+       if (p_dev && p_dev->device_id && strcmp(p_dev->device_id, base_dev->device_id) == 0) {
+           id_already_processed = true;
+           break;
+       }
+    }
+    if (id_already_processed) continue;
+    
+    // 收集所有相同 device_id 的脏属性
+    thing_property_t *dirty_props[32];
+    uint8_t dirty_count = 0;
+    
+    for (uint8_t k = i; k < dev_count; k++) {
+      thing_device_t *dev = thing_model_get_device(k);
+      if (!dev || !dev->device_id || strcmp(dev->device_id, base_dev->device_id) != 0) continue;
+      
+      for (uint8_t j = 0; j < dev->prop_count; j++) {
+        thing_property_t *prop = &dev->properties[j];
+        if (prop->is_dirty && prop->cloud_sync) {
+          if (dirty_count < sizeof(dirty_props)/sizeof(dirty_props[0])) {
+             dirty_props[dirty_count++] = prop;
+          }
+        }
+      }
+    }
+    
+    // 批量同步
+    if (dirty_count > 0) {
+      log_d("Syncing %d dirty properties for device %s", dirty_count, base_dev->device_id);
+      if (mqtt_svc_publish_properties(g_mqtt_svc, base_dev->device_id, dirty_props, dirty_count) == 0) {
+        // 成功同步后，将属性标记为干净
+        for (uint8_t idx = 0; idx < dirty_count; idx++) {
+          dirty_props[idx]->is_dirty = false;
         }
       }
     }

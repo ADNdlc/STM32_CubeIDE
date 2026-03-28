@@ -113,19 +113,23 @@ int mqtt_svc_subscribe(mqtt_service_t *self, const char *topic, uint8_t qos) {
   return MQTT_DRV_SUBSCRIBE(self->drv, topic, qos);
 }
 
-int mqtt_svc_publish_property(mqtt_service_t *self,
-                              const thing_device_t *device,
-                              const thing_property_t *prop) {
+int mqtt_svc_publish_properties(mqtt_service_t *self,
+                                const char *device_id,
+                                thing_property_t **props,
+                                uint8_t prop_count) {
   if (self->state != MQTT_SVC_STATE_CONNECTED || !self->drv || !self->adapter)
+    return -1;
+  if (!props || prop_count == 0 || !device_id) 
     return -1;
 
   char topic[128];
-  char buf[256];
+  char buf[512]; // Increased buffer size for multiple properties
   // 通过适配器获取发布主题和数据
   if (self->adapter &&
-      self->adapter->serialize_post(device, prop, buf, sizeof(buf)) == 0) {
-    self->adapter->get_topic(device->device_id, MQTT_TOPIC_PROPERTY_POST, topic,
+      self->adapter->serialize_post(device_id, props, prop_count, buf, sizeof(buf)) == 0) {
+    self->adapter->get_topic(device_id, MQTT_TOPIC_PROPERTY_POST, topic,
                              sizeof(topic));
+    log_d("MQTT Client POST %s", buf);
     return MQTT_DRV_PUBLISH(self->drv, topic, buf, 0);
   }
   return -1;

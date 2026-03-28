@@ -142,9 +142,11 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
   if (tmpl->prop_count > 0 && tmpl->properties) {
     dev->properties =
 #ifdef USE_MEMPOOL
-        (thing_property_t *)sys_malloc(THING_MODEL_MEM_SOURCE, sizeof(thing_property_t) * tmpl->prop_count);
+        (thing_property_t *)sys_malloc(THING_MODEL_MEM_SOURCE,
+                                       sizeof(thing_property_t) *
+                                           tmpl->prop_count);
 #else
-    	(thing_property_t *)malloc(sizeof(thing_property_t) * tmpl->prop_count);
+        (thing_property_t *)malloc(sizeof(thing_property_t) * tmpl->prop_count);
 #endif
     if (dev->properties) {
       memcpy(dev->properties, tmpl->properties,
@@ -159,9 +161,9 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
       }
     } else {
 #ifdef USE_MEMPOOL
-    	sys_free(THING_MODEL_MEM_SOURCE, (void *)dev->device_id);
-    	sys_free(THING_MODEL_MEM_SOURCE, (void *)dev->name);
-    	sys_free(THING_MODEL_MEM_SOURCE, dev);
+      sys_free(THING_MODEL_MEM_SOURCE, (void *)dev->device_id);
+      sys_free(THING_MODEL_MEM_SOURCE, (void *)dev->name);
+      sys_free(THING_MODEL_MEM_SOURCE, dev);
 #else
       free((void *)dev->device_id);
       free((void *)dev->name);
@@ -203,6 +205,10 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
   if (!target_prop) {
     log_e("Property not found: %s.%s", device_id, prop_id);
     return false;
+  }
+  if (target_prop->value.i == value.i) {
+    log_d("Update the same value to %s.%s", device_id, prop_id);
+    return true;
   }
 
   // 3. 调用目标设备的属性设置回调并传递变更属性值
@@ -259,6 +265,10 @@ bool thing_model_set_prop_by_name(const char *device_name,
   if (!target_prop) {
     log_e("Property not found: %s.%s", device_name, prop_name);
     return false;
+  }
+  if (target_prop->value.i == value.i) {
+    log_d("Update the same value to %s.%s", device_name, prop_name);
+    return true;
   }
 
   // 3. 调用目标设备的属性设置回调并传递变更属性值
