@@ -1,8 +1,8 @@
 #include "data_logger.h"
-#include "sys_config.h"
-#include "thing_model/thing_model.h"
 #include "Sys.h"
 #include "rtc_factory.h"
+#include "sys_config.h"
+#include "thing_model/thing_model.h"
 #include "vfs_manager.h"
 #include <stdio.h>
 #include <string.h>
@@ -15,6 +15,7 @@
 
 // 定时刷写参数
 #define FLUSH_INTERVAL_MS 10000 // 10秒刷写一次
+
 #define FLUSH_THRESHOLD_BYTES 512 // 满 512 字节强制刷写
 
 static char s_log_buffer[LOG_BUFFER_SIZE];
@@ -22,13 +23,21 @@ static size_t s_log_len = 0;
 static uint32_t s_last_flush_time = 0;
 static rtc_driver_t *s_rtc_drv = NULL;
 
-static void data_logger_flush(void) {
+static int data_logger_flush(void) {
   if (s_log_len == 0) {
-    return;
+    return 0;
   }
+
+  // 保护：检查 VFS 是否挂载成功
+  if (vfs_point_is_mounted("/sys")) {
+    log_w("VFS point /sys is offline or detached. Skip writing logs.");
+    return -1;
+  }
+
   log_i("data logger flush");
   // 写入 VFS 文件系统
-  // 注意：此处 "/sys" 为挂载点，确保事先挂载正确。由于目标可能有目录，先尝试创建目录
+  // 注意：此处 "/sys"
+  // 为挂载点，确保事先挂载正确。由于目标可能有目录，先尝试创建目录
   vfs_mkdir("/sys/log");
 
   int fd = vfs_open(LOG_FILE_PATH, VFS_O_WRONLY | VFS_O_CREAT | VFS_O_APPEND);
@@ -38,18 +47,23 @@ static void data_logger_flush(void) {
       log_d("Flushed %d bytes to %s", res, LOG_FILE_PATH);
     } else {
       log_e("Failed to write to %s", LOG_FILE_PATH);
+      vfs_close(fd);
+      return -1;
     }
     vfs_close(fd);
   } else {
     log_e("Failed to open %s for write", LOG_FILE_PATH);
+    return -1;
   }
 
   // 清空缓冲
   s_log_len = 0;
   s_last_flush_time = sys_get_systick_ms();
+  return 0;
 }
 
-static void on_thing_model_event(const thing_model_event_t *event, void *user_data) {
+static void on_thing_model_event(const thing_model_event_t *event,
+                                 void *user_data) {
   if (!sys_config_get_local_data_save()) {
     return;
   }
@@ -74,34 +88,44 @@ static void on_thing_model_event(const thing_model_event_t *event, void *user_da
 
     char record[128];
     int len = 0;
-    
+
     // 我们仅记录一些常用的数值供演示和存盘
-    if (event->value.i || event->value.b || event->value.f || event->value.s) { 
-        // Note: union has identical values if it is 0 but we might want to differentiate properly.
-        // Actually, we can get property type from model
-        thing_device_t *dev = find_device_by_id(event->device_id);
-        if (dev) {
-          thing_property_t *prop = find_property_by_id(dev, event->prop_id);
-          if (prop) {
-            switch(prop->type) {
-              case THING_PROP_TYPE_SWITCH:
-                 len = snprintf(record, sizeof(record), "[%s] %s.%s = %s\n", time_str, event->device_id, event->prop_id, event->value.b ? "true" : "false");
-                 break;
-              case THING_PROP_TYPE_INT:
-                 len = snprintf(record, sizeof(record), "[%s] %s.%s = %ld\n", time_str, event->device_id, event->prop_id, event->value.i);
-                 break;
-              case THING_PROP_TYPE_FLOAT:
-                 len = snprintf(record, sizeof(record), "[%s] %s.%s = %.2f\n", time_str, event->device_id, event->prop_id, event->value.f);
-                 break;
-              case THING_PROP_TYPE_STRING:
-                 len = snprintf(record, sizeof(record), "[%s] %s.%s = \"%s\"\n", time_str, event->device_id, event->prop_id, event->value.s ? event->value.s : "");
-                 break;
-              default:
-                 len = snprintf(record, sizeof(record), "[%s] %s.%s = (unknown type)\n", time_str, event->device_id, event->prop_id);
-                 break;
-            }
+    if (event->value.i || event->value.b || event->value.f || event->value.s) {
+      // Note: union has identical values if it is 0 but we might want to
+      // differentiate properly. Actually, we can get property type from model
+      thing_device_t *dev = find_device_by_id(event->device_id);
+      if (dev) {
+        thing_property_t *prop = find_property_by_id(dev, event->prop_id);
+        if (prop) {
+          switch (prop->type) {
+          case THING_PROP_TYPE_SWITCH:
+            len = snprintf(record, sizeof(record), "[%s] %s.%s = %s\n",
+                           time_str, event->device_id, event->prop_id,
+                           event->value.b ? "true" : "false");
+            break;
+          case THING_PROP_TYPE_INT:
+            len =
+                snprintf(record, sizeof(record), "[%s] %s.%s = %ld\n", time_str,
+                         event->device_id, event->prop_id, event->value.i);
+            break;
+          case THING_PROP_TYPE_FLOAT:
+            len = snprintf(record, sizeof(record), "[%s] %s.%s = %.2f\n",
+                           time_str, event->device_id, event->prop_id,
+                           event->value.f);
+            break;
+          case THING_PROP_TYPE_STRING:
+            len = snprintf(record, sizeof(record), "[%s] %s.%s = \"%s\"\n",
+                           time_str, event->device_id, event->prop_id,
+                           event->value.s ? event->value.s : "");
+            break;
+          default:
+            len = snprintf(record, sizeof(record),
+                           "[%s] %s.%s = (unknown type)\n", time_str,
+                           event->device_id, event->prop_id);
+            break;
           }
         }
+      }
     }
 
     if (len > 0) {
@@ -134,7 +158,8 @@ void data_logger_init(void) {
     log_w("RTC driver not found, falling back to systick for data logger.");
   } else {
     if (!RTC_GET_INITFLAG(s_rtc_drv)) {
-        log_w("RTC not initialized, data logger timestamps will be invalid until set.");
+      log_w("RTC not initialized, data logger timestamps will be invalid until "
+            "set.");
     }
   }
 
@@ -160,6 +185,8 @@ void data_logger_process(void) {
   bool size_to_flush = (s_log_len >= FLUSH_THRESHOLD_BYTES);
 
   if (time_to_flush || size_to_flush) {
-    data_logger_flush();
+    if (data_logger_flush() != 0) {
+      s_last_flush_time = now;
+    }
   }
 }

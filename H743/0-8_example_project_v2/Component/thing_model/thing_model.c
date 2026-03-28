@@ -179,6 +179,18 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
   return dev;
 }
 
+static bool _is_value_equal(thing_prop_type_t type, thing_value_t a, thing_value_t b) {
+  switch (type) {
+    case THING_PROP_TYPE_SWITCH: return a.b == b.b;
+    case THING_PROP_TYPE_INT: return a.i == b.i;
+    case THING_PROP_TYPE_FLOAT: return a.f == b.f;
+    case THING_PROP_TYPE_STRING: 
+      if (a.s && b.s) return strcmp(a.s, b.s) == 0;
+      return a.s == b.s;
+    default: return false;
+  }
+}
+
 /**
  * @brief 设置设备属性(通过设备id和属性id)
  *
@@ -206,7 +218,7 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
     log_e("Property not found: %s.%s", device_id, prop_id);
     return false;
   }
-  if (target_prop->value.i == value.i) {
+  if (_is_value_equal(target_prop->type, target_prop->value, value)) {
     log_d("Update the same value to %s.%s", device_id, prop_id);
     return true;
   }
@@ -266,7 +278,7 @@ bool thing_model_set_prop_by_name(const char *device_name,
     log_e("Property not found: %s.%s", device_name, prop_name);
     return false;
   }
-  if (target_prop->value.i == value.i) {
+  if (_is_value_equal(target_prop->type, target_prop->value, value)) {
     log_d("Update the same value to %s.%s", device_name, prop_name);
     return true;
   }

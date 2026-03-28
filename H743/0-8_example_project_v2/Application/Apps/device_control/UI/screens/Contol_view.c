@@ -300,13 +300,10 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
       }
       // 添加控件事件处理
       ctx->target_obj = sw;
-      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED,
-                          ctx); // 值改变事件
-      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE,
-                          ctx); // 删除事件
+      lv_obj_add_event_cb(sw, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx); // 值改变事件
+      lv_obj_add_event_cb(sw, free_context_event_cb, LV_EVENT_DELETE, ctx); // 删除事件
 
-      controller_register_ui_control(device->device_id, prop->id,
-                                     sw); // 注册设备控件
+      controller_register_ui_control(device->device_id, prop->id, sw); // 注册设备控件
       break;
     }
     case THING_PROP_TYPE_INT: {
@@ -322,8 +319,7 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
 
       lv_obj_t *label_sld = lv_label_create(col_cont);
       lv_label_set_text(label_sld, prop->name);
-      lv_obj_set_style_text_font(label_sld, &lv_font_montserrat_16,
-                                 LV_PART_MAIN);
+      lv_obj_set_style_text_font(label_sld, &lv_font_montserrat_16, LV_PART_MAIN);
       lv_obj_align(label_sld, LV_ALIGN_TOP_LEFT, 0, -20);
 
       lv_obj_t *sld = simple_slider_create(lv_color_hex(0xFFE4B5), col_cont);
@@ -334,8 +330,7 @@ lv_obj_t *view_create_device_card(lv_obj_t *parent,
       lv_slider_set_value(sld, prop->value.i, LV_ANIM_OFF);
 
       ctx->target_obj = sld;
-      lv_obj_add_event_cb(sld, generic_control_event_cb, LV_EVENT_VALUE_CHANGED,
-                          ctx);
+      lv_obj_add_event_cb(sld, generic_control_event_cb, LV_EVENT_VALUE_CHANGED, ctx);
       lv_obj_add_event_cb(sld, free_context_event_cb, LV_EVENT_DELETE, ctx);
       controller_register_ui_control(device->device_id, prop->id, sld);
       break;
