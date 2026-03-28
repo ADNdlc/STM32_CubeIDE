@@ -268,9 +268,9 @@ void app_manager_push_screen(lv_obj_t *obj) {
  * @brief 将页面从当前app实例的屏幕栈弹出
  *
  */
-void app_manager_pop_screen(void) {
+bool app_manager_pop_screen(void) {
   if (!app_stack || !app_stack->screen_stack)
-    return;
+    return false;
 
   // 如果内部栈还有超过一个页面
   if (app_stack->screen_stack->next != NULL) {
@@ -289,9 +289,10 @@ void app_manager_pop_screen(void) {
     // Note: lv_scr_load_anim with auto_del=true will delete the old screen
     // (popped->obj)
     lv_mem_free(popped);
+    return true;
   } else {
     // 只有一个页面，执行应用级返回
-    app_manager_go_back();
+    return app_manager_go_back();
   }
 }
 
@@ -299,9 +300,9 @@ void app_manager_pop_screen(void) {
  * @brief 返回到上一个app实例
  *
  */
-void app_manager_go_back(void) {
+bool app_manager_go_back(void) {
   if (!app_stack || !app_stack->prev)
-    return;
+    return false;
 
   app_t *current = app_stack;
   app_stack = current->prev;
@@ -322,22 +323,23 @@ void app_manager_go_back(void) {
 
   // 销毁当前应用及其所有内部屏幕，包含自动保存设置
   free_app_instance(current, act_scr);
+  return true;
 }
 
 /**
  * @brief 返回到主app实例(弹出除主页的所有app实例)
  *
  */
-void app_manager_go_home(void) {
+bool app_manager_go_home(void) {
   if (!app_stack)
-    return;
+    return false;
 
   app_t *home = app_stack;
   while (home->prev)
     home = home->prev;
 
   if (app_stack == home)
-    return;
+    return false;
 
   lv_obj_t *act_scr = lv_scr_act();
 
@@ -370,4 +372,6 @@ void app_manager_go_home(void) {
 
   if (home->def->resume)
     home->def->resume(home);
+  
+  return true;
 }

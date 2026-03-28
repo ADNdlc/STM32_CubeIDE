@@ -654,22 +654,35 @@ static void event_wifi_long_press_cb(lv_event_t *e) {
 
 // --- Gesture Callbacks ---
 
-static void on_pulldown_gesture(void) {
+static bool on_pulldown_gesture(void) {
   log_d("UiSysPanel: Pulldown gesture received. Panel visible: %d",
         ui_sys_panel_is_visible());
   // 只有在面板不可见时才显示
   if (!ui_sys_panel_is_visible()) {
     ui_sys_panel_show();
+    return true; // 消费手势
   }
+  return false;
 }
 
-static void on_close_gesture(void) {
+static bool on_close_gesture(void) {
   log_d("UiSysPanel: Close gesture received. Panel visible: %d",
         ui_sys_panel_is_visible());
   // 只有在面板可见时才处理关闭
   if (ui_sys_panel_is_visible()) {
     ui_sys_panel_begin_close();
+    return true; // 消费手势
   }
+  return false;
+}
+
+// 拦截上滑手势：如果下拉菜单可见，则不让底层应用收倒上滑事件（防止同时关闭应用）
+static bool on_bottom_swipe_up_intercept(void) {
+  if (ui_sys_panel_is_visible()) {
+    log_d("UiSysPanel: Intercepted bottom swipe up while visible");
+    return true; // 直接消费掉
+  }
+  return false;
 }
 
 void ui_sys_panel_init(void) {
@@ -678,4 +691,8 @@ void ui_sys_panel_init(void) {
 
   // 注册关闭手势 (底部按下)
   input_manager_register_callback(GESTURE_BOTTOM_PRESS, on_close_gesture);
+
+  // 注册上滑拦截 (底部上滑)
+  // 当菜单打开时，阻止上滑事件传递给 home 应用（防止同时关闭当前应用）
+  input_manager_register_callback(GESTURE_BOTTOM_SWIPE_UP, on_bottom_swipe_up_intercept);
 }

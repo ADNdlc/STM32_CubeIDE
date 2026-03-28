@@ -25,7 +25,12 @@ static void fire_gesture(gesture_type_t type) {
   if (type >= GESTURE_TYPE_MAX) return;
   gesture_node_t *node = gesture_heads[type];
   while (node) {
-    if (node->cb) node->cb();
+    if (node->cb) {
+      if (node->cb()) {
+        log_d("Gesture %d consumed by callback", type);
+        break; // 只要有一个回调返回 true，就停止向后分发
+      }
+    }
     node = node->next;
   }
 }

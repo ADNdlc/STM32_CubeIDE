@@ -40,9 +40,10 @@ static app_def_t home_app_def = {
 };
 
 // --- Bridge Functions ---
-static void on_gesture_home(void) {
+static bool on_gesture_home(void) {
   log_d("Home gesture triggered at ui.c level");
   app_manager_go_home();
+  return false; // 作为基础手势，不强制拦截，除非上方层明确要求拦截
 }
 
 // --- Home App Wrapper ---
@@ -72,15 +73,15 @@ void home_init(void) {
   colorwheel_app_register(0);
   device_control_app_register(0);
 
-  // 初始化系统UI
-  ui_sys_bar_init();   // 系统顶部状态栏
-  ui_sys_panel_init(); // 系统下拉面板
-
-  // 绑定主页面输入事件
+  // 1. 先绑定主页面基础输入事件 (低优先级，在列表后端)
   input_manager_register_callback(GESTURE_BOTTOM_SWIPE_UP,
                                   on_gesture_home); // 上滑回调,返回home
   input_manager_register_callback(GESTURE_LEFT_SWIPE_IN,
                                   app_manager_pop_screen); // 侧滑回调,返回
+
+  // 2. 初始化系统UI组件 (这些组件通常位于顶层，后注册的回调会在链表前半段，优先触发)
+  ui_sys_bar_init();   // 系统顶部状态栏
+  ui_sys_panel_init(); // 系统下拉面板 (内部会注册上滑拦截，优先级高于 on_gesture_home)
 }
 
 void UI_Start(void) {

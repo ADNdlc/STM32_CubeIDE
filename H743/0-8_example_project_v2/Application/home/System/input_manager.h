@@ -1,4 +1,4 @@
-﻿#ifndef _INPUT_MANAGER_H
+#ifndef _INPUT_MANAGER_H
 #define _INPUT_MANAGER_H
 
 #include "lvgl.h"
@@ -17,8 +17,8 @@ typedef enum {
   GESTURE_TYPE_MAX
 } gesture_type_t;
 
-// 手势回调函数类型
-typedef void (*gesture_cb_t)(void);
+// 手势回调函数类型 (返回 true 表示消费掉该手势，不再向下传递)
+typedef bool (*gesture_cb_t)(void);
 
 /**
  * @brief Input Manager
@@ -31,7 +31,7 @@ typedef void (*gesture_cb_t)(void);
 void input_manager_init(void);
 
 /**
- * @brief 注册全局手势回调
+ * @brief 注册全局手势回调(后注册的优先级更高)
  *
  * @param type 手势类型
  * @param cb 回调函数
