@@ -109,10 +109,10 @@ extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 
 /* ----- PWM ----- */
 typedef enum {
-	PWM_ID_0 = 0,
-	PWM_ID_1 = 0,
-	PWM_ID_2 = 0,
-	PWM_ID_MAX
+  PWM_ID_R = 0,
+  PWM_ID_G = 1,
+  PWM_ID_B = 2,
+  PWM_ID_MAX
 } pwm_device_id_t;
 typedef struct {
   void *resource;

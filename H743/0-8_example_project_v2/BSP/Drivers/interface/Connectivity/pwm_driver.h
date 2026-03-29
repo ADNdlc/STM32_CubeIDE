@@ -17,10 +17,10 @@ typedef struct pwm_driver_t pwm_driver_t;
 typedef struct {
   void (*start)(pwm_driver_t *self);
   void (*stop)(pwm_driver_t *self);
-  void (*set_duty_cycle)(pwm_driver_t *self, uint32_t duty);
-  void (*set_frequency)(pwm_driver_t *self, uint32_t freq);
-  uint32_t (*get_frequency)(pwm_driver_t *self);
-  uint32_t (*get_duty_cycle_max)(pwm_driver_t *self);
+  void (*set_duty)(pwm_driver_t *self, uint32_t duty);
+  void (*set_freq)(pwm_driver_t *self, uint32_t freq);
+  uint32_t (*get_freq)(pwm_driver_t *self);
+  uint32_t (*get_duty_max)(pwm_driver_t *self);
 } pwm_driver_ops_t;
 
 // PWM 驱动基类

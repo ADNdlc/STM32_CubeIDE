@@ -141,10 +141,10 @@ static uint32_t _stm32_pwm_get_freq(pwm_driver_t *base) {
 static const pwm_driver_ops_t stm32_pwm_ops = {
     .start = _stm32_pwm_start,
     .stop = _stm32_pwm_stop,
-    .set_duty_cycle = _stm32_pwm_set_duty,
-    .set_frequency = _stm32_pwm_set_freq,
-    .get_frequency = _stm32_pwm_get_freq,
-    .get_duty_cycle_max = _stm32_pwm_get_duty_max};
+    .set_duty = _stm32_pwm_set_duty,
+    .set_freq = _stm32_pwm_set_freq,
+    .get_freq = _stm32_pwm_get_freq,
+    .get_duty_max = _stm32_pwm_get_duty_max};
 
 stm32_pwm_driver_t *stm32_pwm_driver_create(stm32_pwm_config_t *config) {
 #ifdef USE_MEMPOOL
