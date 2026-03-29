@@ -43,6 +43,7 @@ typedef struct {
   bool readable;
   bool writable;
   bool cloud_sync; // 是否同步到云端
+  bool local_log;  // 是否记录到本地日志
   bool is_dirty;   // 是否需要同步
 } thing_property_t;
 

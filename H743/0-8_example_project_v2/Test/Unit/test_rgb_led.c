@@ -66,7 +66,7 @@ static void test_rgb_led_loop(void) {
   else {
     if (now - last_tick >= 20) {
       last_tick = now;
-      rgb_led_set_hsv(rgb_led, hue, 100, 50); // 50% 亮度彩虹
+      rgb_led_set_hsv(rgb_led, hue, 100, 100);
       hue = (hue + 1) % 360;
       if (hue == 0) {
         log_d("RGB HSV Cycle Completed");

@@ -24,9 +24,9 @@
 /* 1. 选择系统当前的大运行模式 (解开一个即可)         */
 /* ======================================================= */
 
-//#define SYS_PROFILE_RELEASE      // 正常发布模式 (默认)
+#define SYS_PROFILE_RELEASE      // 正常发布模式 (默认)
 //#define SYS_PROFILE_BURN_RES // 资源烧录与验证模式
-#define SYS_PROFILE_UNIT_TEST    // 底层单元测试模式
+//#define SYS_PROFILE_UNIT_TEST    // 底层单元测试模式
 
 /* ======================================================= */
 /* 2. 根据选定的 Profile，自动映射底层功能组件开关               */

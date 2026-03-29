@@ -5,6 +5,10 @@
 #include "gpio_led/gpio_led.h"
 #include "humiture_factory.h"
 #include "illuminance_factory.h"
+#include "pwm_driver.h"
+#include "pwm_factory.h"
+#include "pwm_led/pwm_led.h"
+#include "rgb_led/rgb_led.h"
 #include "sys_config.h"
 #include "thing_model/thing_model.h"
 #include <string.h>
@@ -22,36 +26,62 @@ static gpio_led_t *led1_obj = NULL;
 static humiture_driver_t *humiture = NULL;
 // 光照传感器对象指针
 static illuminance_driver_t *illuminance_sensor = NULL;
+#define ILLUMINANCE_THRESHOLD_LOW 70   // 开灯阈值(Lux)
+#define ILLUMINANCE_THRESHOLD_HIGH 100 // 关灯阈值(Lux)
+#define ILLUMINANCE_FILTER_COUNT 3     // 连续检测次数
+
 // 传感器读数缓存
 static int32_t temperature = 0; // 温度 (0.1°C)
 static int32_t humidity = 0;    // 湿度 (0.1%)
 static int32_t illuminance = 0; // 照度 (Lux)
 // 光照阈值滤波计数器(滞回滤波)
 static uint8_t illuminance_low_count = 0;
-#define ILLUMINANCE_THRESHOLD_LOW 70   // 开灯阈值(Lux)
-#define ILLUMINANCE_THRESHOLD_HIGH 100 // 关灯阈值(Lux)
-#define ILLUMINANCE_FILTER_COUNT 3     // 连续检测次数
+// RGB LED 对象指针 (分色 PWM 和组合组件)
+static pwm_led_t *led_r = NULL, *led_g = NULL, *led_b = NULL;
+static rgb_led_t *rgb_led_obj = NULL;
+// RGB 属性缓存 (HSV 模式)
+static int32_t rgb_hue = 0;        // 0-359
+static int32_t rgb_brightness = 0; // 0-100
 
 void dev_register_SWITCH(void);
 void dev_register_INT(void);
+void dev_register_RGB(void); // 新增 RGB 注册流程
 
 #if 1
-static bool device_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
-                               thing_value_t value) {
-  if (strcmp(dev->device_id, sys_config_get_cloud_device_id()) == 0) {
-    if (strcmp(prop_id, "led0") == 0) {
-      log_i("Hardware: led0 set to %d", value.b);
-      if (led0_obj)
-        gpio_led_set(led0_obj, value.b);
+static bool led_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
+                            thing_value_t value) {
+  if (strcmp(prop_id, "led0") == 0) {
+    log_i("Hardware: led0 set to %d", value.b);
+    if (led0_obj)
+      gpio_led_set(led0_obj, value.b);
+    return true;
+  } else if (strcmp(prop_id, "led1") == 0) {
+    log_i("Hardware: led1 set to %d", value.b);
+    if (led1_obj)
+      gpio_led_set(led1_obj, value.b);
+    return true;
+  }
+  return false;
+}
 
-      return true;
-    } else if (strcmp(prop_id, "led1") == 0) {
-      log_i("Hardware: led1 set to %d", value.b);
-      if (led1_obj)
-        gpio_led_set(led1_obj, value.b);
-
-      return true;
+static bool rgb_led_prop_set_cb(struct thing_device_t *dev, const char *prop_id,
+                                thing_value_t value) {
+  if (strcmp(prop_id, "colour") == 0) {
+    log_i("Hardware: RGB colour set to %d", value.i);
+    rgb_hue = value.i;
+    if (rgb_led_obj) {
+      rgb_led_set_hsv(rgb_led_obj, (uint16_t)rgb_hue, 100,
+                      (uint8_t)rgb_brightness);
     }
+    return true;
+  } else if (strcmp(prop_id, "brightness") == 0) {
+    log_i("Hardware: RGB brightness set to %d", value.i);
+    rgb_brightness = value.i;
+    if (rgb_led_obj) {
+      rgb_led_set_hsv(rgb_led_obj, (uint16_t)rgb_hue, 100,
+                      (uint8_t)rgb_brightness);
+    }
+    return true;
   }
   return false;
 }
@@ -116,6 +146,7 @@ void devices_init(void) {
   /* 注册各个类型的设备 */
   dev_register_SWITCH();
   dev_register_INT();
+  dev_register_RGB(); // 初始化并注册 RGB LED
 
   /* 非物模型设备 */
   // 按键
@@ -230,6 +261,7 @@ void dev_register_SWITCH() {
           .name = "Switch",
           .type = THING_PROP_TYPE_SWITCH,
           .cloud_sync = true,
+          .local_log = true,
           .writable = true,
           .readable = true,
       },
@@ -238,8 +270,9 @@ void dev_register_SWITCH() {
           .name = "Switch",
           .type = THING_PROP_TYPE_SWITCH,
           .cloud_sync = true,
+          .local_log = true,
           .writable = true,
-		  .readable = true,
+          .readable = true,
       },
   };
 
@@ -247,7 +280,7 @@ void dev_register_SWITCH() {
                                 .name = "LEDDev",
                                 .prop_count = 2,
                                 .properties = device_props,
-                                .on_prop_set = device_prop_set_cb};
+                                .on_prop_set = led_prop_set_cb};
 
   // 3. 注册物模型
   thing_model_register(&device_tmpl);
@@ -277,6 +310,7 @@ void dev_register_INT() {
        .name = "Temperature",
        .type = THING_PROP_TYPE_INT,
        .cloud_sync = true,
+       .local_log = true,
        .writable = false,
        .readable = true,
        .unit = "0.1C"},
@@ -284,6 +318,7 @@ void dev_register_INT() {
        .name = "Humidity",
        .type = THING_PROP_TYPE_INT,
        .cloud_sync = true,
+       .local_log = true,
        .writable = false,
        .readable = true,
        .unit = "0.1%"},
@@ -304,6 +339,7 @@ void dev_register_INT() {
                                             .name = "Illuminance",
                                             .type = THING_PROP_TYPE_INT,
                                             .cloud_sync = true,
+                                            .local_log = true,
                                             .writable = false,
                                             .readable = true,
                                             .unit = "Lux"}};
@@ -317,4 +353,62 @@ void dev_register_INT() {
   // 注册光照设备
   thing_model_register(&light_tmpl);
   log_i("Light sensor device registered: %s", light_tmpl.name);
+}
+
+void dev_register_RGB() {
+  // 1. 获取硬件驱动 (R, G, B 三路 PWM)
+  pwm_driver_t *dr = pwm_driver_get(PWM_ID_R);
+  pwm_driver_t *dg = pwm_driver_get(PWM_ID_G);
+  pwm_driver_t *db = pwm_driver_get(PWM_ID_B);
+
+  if (!dr || !dg || !db) {
+    log_e("PWM drivers for RGB not found (R:%p, G:%p, B:%p)", dr, dg, db);
+    return;
+  }
+
+  // 2. 创建 PWM LED 对象 (频率 1000Hz, 高电平有效)
+  led_r = pwm_led_create(1000, dr, 1);
+  led_g = pwm_led_create(1000, dg, 1);
+  led_b = pwm_led_create(1000, db, 1);
+
+  // 3. 创建 RGB LED 聚合对象
+  rgb_led_obj = rgb_led_create(led_r, led_g, led_b);
+
+  if (!rgb_led_obj) {
+    log_e("Failed to create RGB LED object");
+    return;
+  }
+
+  // 4. 定义物模型属性 (colour: 色相 0-359, brightness: 明度 0-100)
+  static thing_property_t rgb_props[] = {
+      {.id = "colour",
+       .name = "Color",
+       .type = THING_PROP_TYPE_INT,
+       .cloud_sync = true,
+       .local_log = false, // 高频属性，不记录本地日志
+       .writable = true,
+       .readable = true,
+       .min = 0,
+       .max = 359},
+      {.id = "brightness",
+       .name = "Brightness",
+       .type = THING_PROP_TYPE_INT,
+       .cloud_sync = true,
+       .local_log = false, // 高频属性，不记录本地日志
+       .writable = true,
+       .readable = true,
+       .min = 0,
+       .max = 100,
+       .unit = "%"},
+  };
+
+  // 5. 创建并注册设备模板
+  thing_device_t rgb_tmpl = {.device_id = sys_config_get_cloud_device_id(),
+                             .name = "RGBDev",
+                             .prop_count = 2,
+                             .properties = rgb_props,
+                             .on_prop_set = rgb_led_prop_set_cb};
+
+  thing_model_register(&rgb_tmpl);
+  log_i("RGB LED device registered: %s", rgb_tmpl.name);
 }

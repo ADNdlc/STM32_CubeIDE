@@ -203,23 +203,29 @@ static bool _is_value_equal(thing_prop_type_t type, thing_value_t a, thing_value
  */
 bool thing_model_set_prop(const char *device_id, const char *prop_id,
                           thing_value_t value, thing_source_t source) {
-  // 1. 寻找目标设备
+  // 1. 寻找同时满足 ID 且含有该属性的目标设备
   thing_device_t *target_dev = NULL;
-  target_dev = find_device_by_id(device_id);
-  if (!target_dev) {
-    log_e("Device not found by id: %s", device_id);
+  thing_property_t *target_prop = NULL;
+
+  for (int i = 0; i < g_device_count; i++) {
+    if (strcmp(g_devices[i]->device_id, device_id) == 0) {
+      // 在此设备中查找属性
+      thing_property_t *prop = find_property_by_id(g_devices[i], prop_id);
+      if (prop) {
+        target_dev = g_devices[i];
+        target_prop = prop;
+        break; // 找到了
+      }
+    }
+  }
+
+  if (!target_dev || !target_prop) {
+    log_e("Property %s not found on any device with ID: %s", prop_id, device_id);
     return false;
   }
 
-  // 2. 寻找目标属性
-  thing_property_t *target_prop = NULL;
-  target_prop = find_property_by_id(target_dev, prop_id);
-  if (!target_prop) {
-    log_e("Property not found: %s.%s", device_id, prop_id);
-    return false;
-  }
   if (_is_value_equal(target_prop->type, target_prop->value, value)) {
-    log_d("Update the same value to %s.%s", device_id, prop_id);
+    log_d("Update the same value to %s.%s", target_dev->name, prop_id);
     return true;
   }
 

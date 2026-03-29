@@ -11,7 +11,7 @@
 #include "elog.h"
 
 #define LOG_BUFFER_SIZE 1024
-#define LOG_FILE_PATH "/sys/log/data.log"
+// 动态生成文件名
 
 // 定时刷写参数
 #define FLUSH_INTERVAL_MS 10000 // 10秒刷写一次
@@ -22,6 +22,19 @@ static char s_log_buffer[LOG_BUFFER_SIZE];
 static size_t s_log_len = 0;
 static uint32_t s_last_flush_time = 0;
 static rtc_driver_t *s_rtc_drv = NULL;
+
+static void get_current_log_path(char *path, size_t size) {
+  if (s_rtc_drv) {
+    rtc_date_t date;
+    if (RTC_GET_DATE(s_rtc_drv, &date) == 0) {
+      snprintf(path, size, "/sys/log/data_20%02d%02d%02d.log", date.year,
+               date.month, date.day);
+      return;
+    }
+  }
+  // 如果 RTC 不可用，回退到默认文件名
+  snprintf(path, size, "/sys/log/data.log");
+}
 
 static int data_logger_flush(void) {
   if (s_log_len == 0) {
@@ -34,25 +47,25 @@ static int data_logger_flush(void) {
     return -1;
   }
 
-  log_i("data logger flush");
+  char current_path[64];
+  get_current_log_path(current_path, sizeof(current_path));
+
   // 写入 VFS 文件系统
-  // 注意：此处 "/sys"
-  // 为挂载点，确保事先挂载正确。由于目标可能有目录，先尝试创建目录
   vfs_mkdir("/sys/log");
 
-  int fd = vfs_open(LOG_FILE_PATH, VFS_O_WRONLY | VFS_O_CREAT | VFS_O_APPEND);
+  int fd = vfs_open(current_path, VFS_O_WRONLY | VFS_O_CREAT | VFS_O_APPEND);
   if (fd >= 0) {
     int res = vfs_write(fd, s_log_buffer, s_log_len);
     if (res > 0) {
-      log_d("Flushed %d bytes to %s", res, LOG_FILE_PATH);
+      log_d("Flushed %d bytes to %s", res, current_path);
     } else {
-      log_e("Failed to write to %s", LOG_FILE_PATH);
+      log_e("Failed to write to %s", current_path);
       vfs_close(fd);
       return -1;
     }
     vfs_close(fd);
   } else {
-    log_e("Failed to open %s for write", LOG_FILE_PATH);
+    log_e("Failed to open %s for write", current_path);
     return -1;
   }
 
@@ -93,7 +106,7 @@ static void on_thing_model_event(const thing_model_event_t *event,
     thing_device_t *dev = event->device;
     if (dev) {
       thing_property_t *prop = find_property_by_id(dev, event->prop_id);
-      if (prop) {
+      if (prop && prop->local_log) { // 仅记录 local_log 为真的属性
         switch (prop->type) {
         case THING_PROP_TYPE_SWITCH:
           len = snprintf(record, sizeof(record), "[%s] %s.%s = %s\n", time_str,
