@@ -22,18 +22,46 @@ static char s_log_buffer[LOG_BUFFER_SIZE];
 static size_t s_log_len = 0;
 static uint32_t s_last_flush_time = 0;
 static rtc_driver_t *s_rtc_drv = NULL;
+static bool s_force_new_file = false; // 记录是否因为写入失败而强制需要新文件
 
 static void get_current_log_path(char *path, size_t size) {
+  uint32_t year = 0, month = 0, day = 0;
   if (s_rtc_drv) {
     rtc_date_t date;
     if (RTC_GET_DATE(s_rtc_drv, &date) == 0) {
-      snprintf(path, size, "/sys/log/data_20%02d%02d%02d.log", date.year,
-               date.month, date.day);
+      year = 2000 + date.year;
+      month = date.month;
+      day = date.day;
+    }
+  }
+
+  for (int suffix = 0; suffix < 100; suffix++) {
+    if (year != 0) {
+      if (suffix == 0) {
+        snprintf(path, size, "/sys/log/data_%04lu%02lu%02lu.log", year, month,
+                 day);
+      } else {
+        snprintf(path, size, "/sys/log/data_%04lu%02lu%02lu_%d.log", year,
+                 month, day, suffix);
+      }
+    } else {
+      if (suffix == 0) {
+        snprintf(path, size, "/sys/log/data.log");
+      } else {
+        snprintf(path, size, "/sys/log/data_%d.log", suffix);
+      }
+    }
+
+    vfs_stat_t st;
+    if (vfs_stat(path, &st) == 0) {
+      if (!s_force_new_file && st.size < 10240) {
+        return;
+      }
+    } else {
+      s_force_new_file = false;
       return;
     }
   }
-  // 如果 RTC 不可用，回退到默认文件名
-  snprintf(path, size, "/sys/log/data.log");
 }
 
 static int data_logger_flush(void) {
@@ -58,14 +86,18 @@ static int data_logger_flush(void) {
     int res = vfs_write(fd, s_log_buffer, s_log_len);
     if (res > 0) {
       log_d("Flushed %d bytes to %s", res, current_path);
+      s_force_new_file = false; // 写入成功，确保标志恢复
     } else {
-      log_e("Failed to write to %s", current_path);
+      log_e("Failed to write to %s, force new file next time", current_path);
+      s_force_new_file = true;
       vfs_close(fd);
       return -1;
     }
     vfs_close(fd);
   } else {
-    log_e("Failed to open %s for write", current_path);
+    log_e("Failed to open %s for write, force new file next time",
+          current_path);
+    s_force_new_file = true;
     return -1;
   }
 

@@ -264,6 +264,7 @@ void dev_register_SWITCH() {
           .local_log = true,
           .writable = true,
           .readable = true,
+          .is_dirty = true,
       },
       {
           .id = "led1",
@@ -273,6 +274,7 @@ void dev_register_SWITCH() {
           .local_log = true,
           .writable = true,
           .readable = true,
+          .is_dirty = true,
       },
   };
 
@@ -306,22 +308,28 @@ void dev_register_INT() {
 
   // 定义温湿度属性
   static thing_property_t sensor_props[] = {
-      {.id = "temperature",
-       .name = "Temperature",
-       .type = THING_PROP_TYPE_INT,
-       .cloud_sync = true,
-       .local_log = true,
-       .writable = false,
-       .readable = true,
-       .unit = "0.1C"},
-      {.id = "humidity",
-       .name = "Humidity",
-       .type = THING_PROP_TYPE_INT,
-       .cloud_sync = true,
-       .local_log = true,
-       .writable = false,
-       .readable = true,
-       .unit = "0.1%"},
+      {
+          .id = "temperature",
+          .name = "Temperature",
+          .type = THING_PROP_TYPE_INT,
+          .cloud_sync = true,
+          .local_log = true,
+          .writable = false,
+          .readable = true,
+          .unit = "0.1C",
+          .is_dirty = true,
+      },
+      {
+          .id = "humidity",
+          .name = "Humidity",
+          .type = THING_PROP_TYPE_INT,
+          .cloud_sync = true,
+          .local_log = true,
+          .writable = false,
+          .readable = true,
+          .unit = "0.1%",
+          .is_dirty = true,
+      },
   };
 
   // 创建温湿度设备模板
@@ -335,14 +343,17 @@ void dev_register_INT() {
   log_i("Sensor device registered: %s", sensor_tmpl.name);
 
   // 定义光照属性
-  static thing_property_t light_props[] = {{.id = "illuminance",
-                                            .name = "Illuminance",
-                                            .type = THING_PROP_TYPE_INT,
-                                            .cloud_sync = true,
-                                            .local_log = true,
-                                            .writable = false,
-                                            .readable = true,
-                                            .unit = "Lux"}};
+  static thing_property_t light_props[] = {{
+      .id = "illuminance",
+      .name = "Illuminance",
+      .type = THING_PROP_TYPE_INT,
+      .cloud_sync = true,
+      .local_log = true,
+      .writable = false,
+      .readable = true,
+      .unit = "Lux",
+      .is_dirty = true,
+  }};
 
   // 创建光照设备模板
   thing_device_t light_tmpl = {.device_id = sys_config_get_cloud_device_id(),
@@ -381,25 +392,31 @@ void dev_register_RGB() {
 
   // 4. 定义物模型属性 (colour: 色相 0-359, brightness: 明度 0-100)
   static thing_property_t rgb_props[] = {
-      {.id = "colour",
-       .name = "Color",
-       .type = THING_PROP_TYPE_INT,
-       .cloud_sync = true,
-       .local_log = false, // 高频属性，不记录本地日志
-       .writable = true,
-       .readable = true,
-       .min = 0,
-       .max = 359},
-      {.id = "brightness",
-       .name = "Brightness",
-       .type = THING_PROP_TYPE_INT,
-       .cloud_sync = true,
-       .local_log = false, // 高频属性，不记录本地日志
-       .writable = true,
-       .readable = true,
-       .min = 0,
-       .max = 100,
-       .unit = "%"},
+      {
+          .id = "colour",
+          .name = "Color",
+          .type = THING_PROP_TYPE_INT,
+          .cloud_sync = true,
+          .local_log = false, // 高频属性，不记录本地日志
+          .writable = true,
+          .readable = true,
+          .min = 0,
+          .max = 359,
+          .is_dirty = true,
+      },
+      {
+          .id = "brightness",
+          .name = "Brightness",
+          .type = THING_PROP_TYPE_INT,
+          .cloud_sync = true,
+          .local_log = false, // 高频属性，不记录本地日志
+          .writable = true,
+          .readable = true,
+          .min = 0,
+          .max = 100,
+          .unit = "%",
+          .is_dirty = true,
+      },
   };
 
   // 5. 创建并注册设备模板

@@ -179,15 +179,21 @@ thing_device_t *thing_model_register(const thing_device_t *tmpl) {
   return dev;
 }
 
-static bool _is_value_equal(thing_prop_type_t type, thing_value_t a, thing_value_t b) {
+static bool _is_value_equal(thing_prop_type_t type, thing_value_t a,
+                            thing_value_t b) {
   switch (type) {
-    case THING_PROP_TYPE_SWITCH: return a.b == b.b;
-    case THING_PROP_TYPE_INT: return a.i == b.i;
-    case THING_PROP_TYPE_FLOAT: return a.f == b.f;
-    case THING_PROP_TYPE_STRING: 
-      if (a.s && b.s) return strcmp(a.s, b.s) == 0;
-      return a.s == b.s;
-    default: return false;
+  case THING_PROP_TYPE_SWITCH:
+    return a.b == b.b;
+  case THING_PROP_TYPE_INT:
+    return a.i == b.i;
+  case THING_PROP_TYPE_FLOAT:
+    return a.f == b.f;
+  case THING_PROP_TYPE_STRING:
+    if (a.s && b.s)
+      return strcmp(a.s, b.s) == 0;
+    return a.s == b.s;
+  default:
+    return false;
   }
 }
 
@@ -220,7 +226,8 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
   }
 
   if (!target_dev || !target_prop) {
-    log_e("Property %s not found on any device with ID: %s", prop_id, device_id);
+    log_e("Property %s not found on any device with ID: %s", prop_id,
+          device_id);
     return false;
   }
 
@@ -244,7 +251,8 @@ bool thing_model_set_prop(const char *device_id, const char *prop_id,
   target_prop->value = value;
 
   // 如果来源不是云端（即本地 UI 或硬件上报），则标记为“脏”，待后续同步
-  if (source != THING_SOURCE_CLOUD && target_prop->cloud_sync) {
+  // if (source != THING_SOURCE_CLOUD && target_prop->cloud_sync) {
+  if (target_prop->cloud_sync) {
     target_prop->is_dirty = true;
   }
 
@@ -310,12 +318,13 @@ bool thing_model_set_prop_by_name(const char *device_name,
   }
 
   // 5. 通知观察者
-  thing_model_event_t evt = {.type = THING_EVENT_PROPERTY_CHANGED,
-                             .device = target_dev,
-                             .device_id = target_dev->device_id, // 使用物模型内部ID而非查找名称
-                             .prop_id = prop_name,
-                             .value = value,
-                             .source = source};
+  thing_model_event_t evt = {
+      .type = THING_EVENT_PROPERTY_CHANGED,
+      .device = target_dev,
+      .device_id = target_dev->device_id, // 使用物模型内部ID而非查找名称
+      .prop_id = prop_name,
+      .value = value,
+      .source = source};
 
   for (int k = 0; k < g_observer_count; k++) {
     if (g_observers[k].cb) {

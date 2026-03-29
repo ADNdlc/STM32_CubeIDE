@@ -15,16 +15,19 @@
 #include "elog.h"
 #define LOG_TAG "NET_MGR"
 
+#define MQTT_RECONNECT_WAIT_TIME 5000
+
 // 内部状态机定义
 typedef enum {
-  NET_MGR_STATE_IDLE = 0,      // 0: 空闲/WiFi禁用
-  NET_MGR_STATE_INIT_MODE,     // 1: 正在初始化模式
-  NET_MGR_STATE_CONNECTING,    // 2: 准备连接 AP
-  NET_MGR_STATE_WAIT_IP,       // 3: 挂起等待获取 IP
-  NET_MGR_STATE_WAIT_STABLE,   // 4: 已获取 IP，等待网络稳定期
-  NET_MGR_STATE_READY,         // 5: 网络就绪，启动服务
-  NET_MGR_STATE_RUNNING,       // 6: 【新增】正常运行中挂起态
-  NET_MGR_STATE_RECONNECT_WAIT // 7: 断开连接，等待重试冷却
+  NET_MGR_STATE_IDLE = 0,            // 0: 空闲/WiFi禁用
+  NET_MGR_STATE_INIT_MODE,           // 1: 正在初始化模式
+  NET_MGR_STATE_CONNECTING,          // 2: 准备连接 AP
+  NET_MGR_STATE_WAIT_IP,             // 3: 挂起等待获取 IP
+  NET_MGR_STATE_WAIT_STABLE,         // 4: 已获取 IP，等待网络稳定期
+  NET_MGR_STATE_READY,               // 5: 网络就绪，启动服务
+  NET_MGR_STATE_RUNNING,             // 6: 正常运行中挂起态
+  NET_MGR_STATE_MQTT_RECONNECT_WAIT, // 7: 等待重试连接MQTT
+  NET_MGR_STATE_RECONNECT_WAIT       // 8: 断开连接，等待重试冷却
 } net_mgr_internal_state_t;
 
 static wifi_service_t g_wifi_svc;             // WiFi服务实例
@@ -36,8 +39,9 @@ extern const mqtt_adapter_t g_onenet_adapter; // OneNet MQTT适配器
 
 static bool g_wifi_target_enabled = false; // 用户期望的使能状态
 static net_mgr_internal_state_t g_state = NET_MGR_STATE_IDLE;
-static uint32_t g_state_timer = 0; // 状态计时器
-static uint32_t g_retry_count = 0; // 重试计数
+static uint32_t g_state_timer = 0;         // 状态计时器
+static uint32_t g_retry_count = 0;         // 重试计数
+static uint32_t g_mqtt_retry_count = 0;    // MQTT 特定重试计数库
 static bool g_pending_config_save = false; // 是否需要持久化配置
 
 /*****************
@@ -81,9 +85,22 @@ static void mqtt_event_handler(mqtt_service_t *svc,
                                const mqtt_drv_event_t *event, void *user_data) {
   if (event->type == MQTT_DRV_EVENT_CONNECTED) {
     log_i("MQTT Connected Event received");
-
+    g_mqtt_retry_count = 0; // 重置计数器
   } else if (event->type == MQTT_DRV_EVENT_DISCONNECTED) {
     log_w("MQTT Disconnected Event received");
+    if (g_state == NET_MGR_STATE_RUNNING) {
+      g_mqtt_retry_count++;
+      if (g_mqtt_retry_count <= 3) {
+        log_w("MQTT retrying %lu/3...", g_mqtt_retry_count);
+        net_mgr_set_state(NET_MGR_STATE_MQTT_RECONNECT_WAIT);
+      } else {
+        log_e("MQTT retry failed 3 times, resetting WiFi!");
+        g_mqtt_retry_count = 0;
+        sys_state_set_wifi(false);
+        wifi_svc_disconnect(&g_wifi_svc);
+        net_mgr_set_state(NET_MGR_STATE_RECONNECT_WAIT);
+      }
+    }
   }
 }
 
@@ -222,6 +239,14 @@ void net_mgr_process(void) {
   case NET_MGR_STATE_RUNNING:
     // 网络正常运行中，这里完全挂起，不需要做任何事情。
     // 顶部的 mqtt_svc_process() 会自动维持心跳和数据收发。
+    break;
+
+  case NET_MGR_STATE_MQTT_RECONNECT_WAIT:
+    if (now - g_state_timer > MQTT_RECONNECT_WAIT_TIME) {
+      log_i("Attempting MQTT reconnect (%lu/3)...", g_mqtt_retry_count);
+      mqtt_svc_connect(&g_mqtt_svc);
+      net_mgr_set_state(NET_MGR_STATE_RUNNING); // 触发连接后挂起等待回调
+    }
     break;
 
   case NET_MGR_STATE_RECONNECT_WAIT:

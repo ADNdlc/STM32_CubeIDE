@@ -15,8 +15,8 @@
 
 
 // 内部宏定义
-#define DHT11_RST_TIME_MS 20
-#define DHT11_WAIT_TIME_US 30
+#define DHT11_RST_TIME_MS 25
+#define DHT11_WAIT_TIME_US 35
 
 #define DHT11_MEMSOURCE SYS_MEM_INTERNAL
 
