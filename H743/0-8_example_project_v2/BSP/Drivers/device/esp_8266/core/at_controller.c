@@ -143,9 +143,8 @@ void at_controller_init(at_controller_t *self, uart_queue_t *uart,
   // 提交模块初始设置(就绪后发送)
   AT_Cmd_t init_cmds[] = {
 
-      {.cmd_str = "AT+SYSSTORE=1\r\n",
-       .timeout_ms = 1000}, // 模块的配置更改将保存在 NVS 分区
       {.cmd_str = "ATE0\r\n", .timeout_ms = 1000}, // 关闭回显
+      //{.cmd_str = "AT+SYSSTORE=1\r\n", .timeout_ms = 1000}, // 模块的配置更改将保存在 NVS 分区
       {.cmd_str = "AT+CWAUTOCONN=0\r\n",
        .timeout_ms = 1000}, // 关闭上电自动连接 AP
   };

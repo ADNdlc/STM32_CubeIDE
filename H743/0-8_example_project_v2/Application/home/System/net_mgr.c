@@ -17,18 +17,24 @@
 
 #define MQTT_RECONNECT_WAIT_TIME 5000
 
-// 内部状态机定义
+// WiFi 内部状态机定义
 typedef enum {
-  NET_MGR_STATE_IDLE = 0,            // 0: 空闲/WiFi禁用
-  NET_MGR_STATE_INIT_MODE,           // 1: 正在初始化模式
-  NET_MGR_STATE_CONNECTING,          // 2: 准备连接 AP
-  NET_MGR_STATE_WAIT_IP,             // 3: 挂起等待获取 IP
-  NET_MGR_STATE_WAIT_STABLE,         // 4: 已获取 IP，等待网络稳定期
-  NET_MGR_STATE_READY,               // 5: 网络就绪，启动服务
-  NET_MGR_STATE_RUNNING,             // 6: 正常运行中挂起态
-  NET_MGR_STATE_MQTT_RECONNECT_WAIT, // 7: 等待重试连接MQTT
-  NET_MGR_STATE_RECONNECT_WAIT       // 8: 断开连接，等待重试冷却
-} net_mgr_internal_state_t;
+  NET_MGR_WIFI_STATE_IDLE = 0,
+  NET_MGR_WIFI_STATE_INIT_MODE,
+  NET_MGR_WIFI_STATE_CONNECTING,
+  NET_MGR_WIFI_STATE_WAIT_IP,
+  NET_MGR_WIFI_STATE_WAIT_STABLE,
+  NET_MGR_WIFI_STATE_CONNECTED,
+  NET_MGR_WIFI_STATE_RECONNECT_WAIT
+} net_mgr_wifi_state_t;
+
+// MQTT 内部状态机定义
+typedef enum {
+  NET_MGR_MQTT_STATE_IDLE = 0,
+  NET_MGR_MQTT_STATE_STARTING,
+  NET_MGR_MQTT_STATE_RUNNING,
+  NET_MGR_MQTT_STATE_RECONNECT_WAIT
+} net_mgr_mqtt_state_t;
 
 static wifi_service_t g_wifi_svc;             // WiFi服务实例
 static mqtt_service_t g_mqtt_svc;             // MQTT服务实例
@@ -38,8 +44,10 @@ extern const mqtt_adapter_t g_onenet_adapter; // OneNet MQTT适配器
 #define SNTP_SERVER_DOMAIN "ntp.aliyun.com"
 
 static bool g_wifi_target_enabled = false; // 用户期望的使能状态
-static net_mgr_internal_state_t g_state = NET_MGR_STATE_IDLE;
-static uint32_t g_state_timer = 0;         // 状态计时器
+static net_mgr_wifi_state_t g_wifi_state = NET_MGR_WIFI_STATE_IDLE;
+static net_mgr_mqtt_state_t g_mqtt_state = NET_MGR_MQTT_STATE_IDLE;
+static uint32_t g_wifi_state_timer = 0;         // WiFi状态计时器
+static uint32_t g_mqtt_state_timer = 0;         // MQTT状态计时器
 static uint32_t g_retry_count = 0;         // 重试计数
 static uint32_t g_mqtt_retry_count = 0;    // MQTT 特定重试计数库
 static bool g_pending_config_save = false; // 是否需要持久化配置
@@ -47,11 +55,19 @@ static bool g_pending_config_save = false; // 是否需要持久化配置
 /*****************
  * 内部辅助函数
  *****************/
-static void net_mgr_set_state(net_mgr_internal_state_t new_state) {
-  if (g_state != new_state) {
-    log_i("State: %d -> %d", g_state, new_state);
-    g_state = new_state;
-    g_state_timer = sys_get_systick_ms();
+static void net_mgr_set_wifi_state(net_mgr_wifi_state_t new_state) {
+  if (g_wifi_state != new_state) {
+    log_i("WiFi State: %d -> %d", g_wifi_state, new_state);
+    g_wifi_state = new_state;
+    g_wifi_state_timer = sys_get_systick_ms();
+  }
+}
+
+static void net_mgr_set_mqtt_state(net_mgr_mqtt_state_t new_state) {
+  if (g_mqtt_state != new_state) {
+    log_i("MQTT State: %d -> %d", g_mqtt_state, new_state);
+    g_mqtt_state = new_state;
+    g_mqtt_state_timer = sys_get_systick_ms();
   }
 }
 
@@ -61,44 +77,47 @@ static void net_mgr_set_state(net_mgr_internal_state_t new_state) {
 #if NETWORK_SERVICE_ENABLE
 static void wifi_event_handler(wifi_service_t *svc, wifi_status_t status,
                                void *user_data) {
-  log_i("WiFi raw status: %d (cur_mgr_state: %d)", status, g_state);
+  log_i("WiFi raw status: %d (cur_mgr_state: %d)", status, g_wifi_state);
 
   if (status == WIFI_STATUS_GOT_IP) {
-    if (g_state == NET_MGR_STATE_WAIT_IP ||
-        g_state == NET_MGR_STATE_RECONNECT_WAIT) {
-      net_mgr_set_state(NET_MGR_STATE_WAIT_STABLE);
+    if (g_wifi_state == NET_MGR_WIFI_STATE_WAIT_IP ||
+        g_wifi_state == NET_MGR_WIFI_STATE_RECONNECT_WAIT) {
+      net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_WAIT_STABLE);
     }
   } else if (status == WIFI_STATUS_DISCONNECTED) {
-    // 【精准判定】：只在稳定、就绪、运行这三个状态下遭遇断开，才算意外掉线
-    if (g_state == NET_MGR_STATE_WAIT_STABLE ||
-        g_state == NET_MGR_STATE_READY || g_state == NET_MGR_STATE_RUNNING) {
+    if (g_wifi_state == NET_MGR_WIFI_STATE_WAIT_STABLE ||
+        g_wifi_state == NET_MGR_WIFI_STATE_CONNECTED) {
 
       log_w("WiFi dropped unexpectedly!");
       sys_state_set_wifi(false);
-      mqtt_svc_disconnect(&g_mqtt_svc);
-      net_mgr_set_state(NET_MGR_STATE_RECONNECT_WAIT);
+      net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_RECONNECT_WAIT);
     }
   }
 }
 
 static void mqtt_event_handler(mqtt_service_t *svc,
                                const mqtt_drv_event_t *event, void *user_data) {
+  if (g_wifi_state != NET_MGR_WIFI_STATE_CONNECTED) {
+    return; // 忽略 WiFi 未好时的 MQTT 回调
+  }
+
   if (event->type == MQTT_DRV_EVENT_CONNECTED) {
     log_i("MQTT Connected Event received");
     g_mqtt_retry_count = 0; // 重置计数器
+    net_mgr_set_mqtt_state(NET_MGR_MQTT_STATE_RUNNING);
   } else if (event->type == MQTT_DRV_EVENT_DISCONNECTED) {
     log_w("MQTT Disconnected Event received");
-    if (g_state == NET_MGR_STATE_RUNNING) {
+    if (g_mqtt_state == NET_MGR_MQTT_STATE_RUNNING || g_mqtt_state == NET_MGR_MQTT_STATE_STARTING) {
       g_mqtt_retry_count++;
       if (g_mqtt_retry_count <= 3) {
         log_w("MQTT retrying %lu/3...", g_mqtt_retry_count);
-        net_mgr_set_state(NET_MGR_STATE_MQTT_RECONNECT_WAIT);
+        net_mgr_set_mqtt_state(NET_MGR_MQTT_STATE_RECONNECT_WAIT);
       } else {
         log_e("MQTT retry failed 3 times, resetting WiFi!");
         g_mqtt_retry_count = 0;
         sys_state_set_wifi(false);
         wifi_svc_disconnect(&g_wifi_svc);
-        net_mgr_set_state(NET_MGR_STATE_RECONNECT_WAIT);
+        net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_RECONNECT_WAIT);
       }
     }
   }
@@ -140,7 +159,8 @@ void net_mgr_init(void) {
   cloud_bridge_init(&g_mqtt_svc);
 #endif
 
-  g_state = NET_MGR_STATE_IDLE;
+  g_wifi_state = NET_MGR_WIFI_STATE_IDLE;
+  g_mqtt_state = NET_MGR_MQTT_STATE_IDLE;
   log_i("Network Manager initialized (IDLE)");
 }
 
@@ -159,108 +179,113 @@ void net_mgr_process(void) {
   cloud_bridge_process();
 #endif
 
-  // 2. 状态机逻辑处理
+  // 2. WiFi 状态机处理
   if (!g_wifi_target_enabled) {
-    if (g_state != NET_MGR_STATE_IDLE) {
+    if (g_wifi_state != NET_MGR_WIFI_STATE_IDLE) {
       wifi_svc_disconnect(&g_wifi_svc);
       sys_state_set_wifi(false);
       mqtt_svc_disconnect(&g_mqtt_svc);
-      net_mgr_set_state(NET_MGR_STATE_IDLE);
+      net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_IDLE);
+      net_mgr_set_mqtt_state(NET_MGR_MQTT_STATE_IDLE);
     }
     return;
   }
 
-  switch (g_state) {
-  case NET_MGR_STATE_IDLE:
-    net_mgr_set_state(NET_MGR_STATE_INIT_MODE);
+  switch (g_wifi_state) {
+  case NET_MGR_WIFI_STATE_IDLE:
+    net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_INIT_MODE);
     break;
 
-  case NET_MGR_STATE_INIT_MODE:
-    if (now - g_state_timer > 500) {
+  case NET_MGR_WIFI_STATE_INIT_MODE:
+    if (now - g_wifi_state_timer > 500) {
       log_i("Setting WiFi Mode: Station");
       wifi_svc_set_mode(&g_wifi_svc, WIFI_MODE_STATION);
-      // 发送完立即进入下一状态，底层 AT 队列会自动排队，不会冲突
-      net_mgr_set_state(NET_MGR_STATE_CONNECTING);
+      net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_CONNECTING);
     }
     break;
 
-  case NET_MGR_STATE_CONNECTING:
-    if (now - g_state_timer > 500) {
+  case NET_MGR_WIFI_STATE_CONNECTING:
+    if (now - g_wifi_state_timer > 500) {
       const char *ssid = sys_config_get_wifi_ssid();
       const char *pwd = sys_config_get_wifi_password();
 
-      // 【保护】：如果没有配置SSID，阻止其发送非法空指令
       if (ssid == NULL || strlen(ssid) == 0) {
         log_w("No WiFi SSID configured. Waiting...");
-        net_mgr_set_state(NET_MGR_STATE_RECONNECT_WAIT); // 进入等待重试
+        net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_RECONNECT_WAIT);
         break;
       }
 
       log_i("Connecting to AP: %s", ssid);
       wifi_svc_connect(&g_wifi_svc, ssid, pwd);
-
-      // 【修复】：指令已下发给 AT 队列，立即进入挂起态等待回调，禁止再发！
-      net_mgr_set_state(NET_MGR_STATE_WAIT_IP);
+      net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_WAIT_IP);
     }
     break;
 
-  case NET_MGR_STATE_WAIT_IP:
-    // 在此状态什么都不做，完全由 wifi_event_handler (回调) 驱动状态机
-    // 如果 30 秒都拿不到 IP，强制重试防死锁
-    if (now - g_state_timer > 30000) {
+  case NET_MGR_WIFI_STATE_WAIT_IP:
+    if (now - g_wifi_state_timer > 30000) {
       log_e("Timeout waiting for IP. Retrying...");
-      net_mgr_set_state(NET_MGR_STATE_RECONNECT_WAIT);
+      net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_RECONNECT_WAIT);
     }
     break;
 
-  case NET_MGR_STATE_WAIT_STABLE:
-    if (now - g_state_timer > 2000) {
+  case NET_MGR_WIFI_STATE_WAIT_STABLE:
+    if (now - g_wifi_state_timer > 2000) {
       log_i("Network stable. Ready to start services.");
-      net_mgr_set_state(NET_MGR_STATE_READY);
+      sys_state_set_wifi(true);
+
+      if (g_pending_config_save) {
+        log_i("WiFi connection successful, persisting credentials...");
+        sys_config_save();
+        g_pending_config_save = false;
+      }
+
+      net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_CONNECTED);
     }
     break;
 
-  case NET_MGR_STATE_READY:
-    log_i("Starting MQTT & SNTP...");
-    sys_state_set_wifi(true);
-    mqtt_svc_connect(&g_mqtt_svc);
-
-    // 【新增】：如果是手动连接成功，此时持久化配置到 VFS
-    if (g_pending_config_save) {
-      log_i("WiFi connection successful, persisting credentials...");
-      sys_config_save();
-      g_pending_config_save = false;
-    }
-
-    // 【修复】：显式进入 RUNNING 状态
-    net_mgr_set_state(NET_MGR_STATE_RUNNING);
+  case NET_MGR_WIFI_STATE_CONNECTED:
+    // WiFi正常运行，挂起由 MQTT 接管
     break;
 
-  case NET_MGR_STATE_RUNNING:
-    // 网络正常运行中，这里完全挂起，不需要做任何事情。
-    // 顶部的 mqtt_svc_process() 会自动维持心跳和数据收发。
-    break;
-
-  case NET_MGR_STATE_MQTT_RECONNECT_WAIT:
-    if (now - g_state_timer > MQTT_RECONNECT_WAIT_TIME) {
-      log_i("Attempting MQTT reconnect (%lu/3)...", g_mqtt_retry_count);
-      mqtt_svc_connect(&g_mqtt_svc);
-      net_mgr_set_state(NET_MGR_STATE_RUNNING); // 触发连接后挂起等待回调
-    }
-    break;
-
-  case NET_MGR_STATE_RECONNECT_WAIT:
-    // 断开后等待 5 秒重试
-    if (now - g_state_timer > 5000) {
+  case NET_MGR_WIFI_STATE_RECONNECT_WAIT:
+    if (now - g_wifi_state_timer > 5000) {
       log_i("Retry cooldown finished. Attempting reconnect...");
-      net_mgr_set_state(NET_MGR_STATE_INIT_MODE);
+      net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_INIT_MODE);
       g_retry_count++;
     }
     break;
+  }
 
-  default:
-    // 已就绪，监控网络状态
-    break;
+  // 3. MQTT 状态机处理 (依赖 WiFi 状态)
+  if (g_wifi_state != NET_MGR_WIFI_STATE_CONNECTED) {
+    if (g_mqtt_state != NET_MGR_MQTT_STATE_IDLE) {
+      mqtt_svc_disconnect(&g_mqtt_svc);
+      net_mgr_set_mqtt_state(NET_MGR_MQTT_STATE_IDLE);
+    }
+  } else {
+    switch (g_mqtt_state) {
+    case NET_MGR_MQTT_STATE_IDLE:
+      log_i("WiFi is connected, starting MQTT...");
+      mqtt_svc_connect(&g_mqtt_svc);
+      net_mgr_set_mqtt_state(NET_MGR_MQTT_STATE_STARTING);
+      break;
+
+    case NET_MGR_MQTT_STATE_STARTING:
+      // 等待 MQTT EVENT CONNECTED 触发转变为 RUNNING
+      break;
+
+    case NET_MGR_MQTT_STATE_RUNNING:
+      // MQTT 正常运行中，由服务侧自动维持心跳
+      break;
+
+    case NET_MGR_MQTT_STATE_RECONNECT_WAIT:
+      if (now - g_mqtt_state_timer > MQTT_RECONNECT_WAIT_TIME) {
+        log_i("Attempting MQTT reconnect (%lu/3)...", g_mqtt_retry_count);
+        mqtt_svc_connect(&g_mqtt_svc);
+        net_mgr_set_mqtt_state(NET_MGR_MQTT_STATE_STARTING);
+      }
+      break;
+    }
   }
 }
 
@@ -280,7 +305,7 @@ int net_mgr_wifi_connect_manual(const char *ssid, const char *pwd) {
 
   // 强制重置状态机以应用新配置
   g_wifi_target_enabled = true;
-  net_mgr_set_state(NET_MGR_STATE_INIT_MODE);
+  net_mgr_set_wifi_state(NET_MGR_WIFI_STATE_INIT_MODE);
   return 0;
 }
 
