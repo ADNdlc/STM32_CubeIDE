@@ -1,4 +1,14 @@
 #include "rgb_led.h"
+#include "Sys.h"
+#include "MemPool.h"
+#include <stdlib.h>
+#include <stdint.h>
+
+#ifdef USE_MEMPOOL
+#define RGBLED_MEMSOURCE SYS_MEM_INTERNAL
+#else
+#define RGBLED_MEMSOURCE 0
+#endif
 
 /**
  * @brief HSV转RGB颜色空间转换
@@ -72,5 +82,65 @@ static uint32_t _hsv_to_rgb(uint16_t h, uint8_t s, uint8_t v) {
   }
 
   return (r << 16) | (g << 8) | b;
+}
+
+void rgb_led_init(rgb_led_t *self, pwm_led_t *red, pwm_led_t *green, pwm_led_t *blue) {
+  if (!self)
+    return;
+  self->red = red;
+  self->green = green;
+  self->blue = blue;
+  self->current_color = 0;
+  rgb_led_set_color(self, 0); // 初始关闭
+}
+
+rgb_led_t *rgb_led_create(pwm_led_t *red, pwm_led_t *green, pwm_led_t *blue) {
+  rgb_led_t *self;
+#ifdef USE_MEMPOOL
+  self = (rgb_led_t *)sys_malloc(RGBLED_MEMSOURCE, sizeof(rgb_led_t));
+#else
+  self = (rgb_led_t *)malloc(sizeof(rgb_led_t));
+#endif
+
+  if (self) {
+    rgb_led_init(self, red, green, blue);
+  }
+  return self;
+}
+
+void rgb_led_destroy(rgb_led_t *self) {
+  if (self) {
+#ifdef USE_MEMPOOL
+    sys_free(RGBLED_MEMSOURCE, self);
+#else
+    free(self);
+#endif
+  }
+}
+
+void rgb_led_set_color(rgb_led_t *self, uint32_t color) {
+  if (!self)
+    return;
+
+  self->current_color = color;
+
+  uint8_t r = (color >> 16) & 0xFF;
+  uint8_t g = (color >> 8) & 0xFF;
+  uint8_t b = color & 0xFF;
+
+  // 将 0-255 映射到 pwm_led 的 0-100 亮度
+  if (self->red)
+    pwm_led_set_brightness(self->red, (r * 100) / 255);
+  if (self->green)
+    pwm_led_set_brightness(self->green, (g * 100) / 255);
+  if (self->blue)
+    pwm_led_set_brightness(self->blue, (b * 100) / 255);
+}
+
+void rgb_led_set_hsv(rgb_led_t *self, uint16_t h, uint8_t s, uint8_t v) {
+  if (!self)
+    return;
+  uint32_t color = _hsv_to_rgb(h, s, v);
+  rgb_led_set_color(self, color);
 }
 

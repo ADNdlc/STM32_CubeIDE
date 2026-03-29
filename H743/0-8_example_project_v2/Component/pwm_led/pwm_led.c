@@ -12,6 +12,8 @@
 #include "MemPool.h"
 #ifdef USE_MEMPOOL
 #define PWMLED_MEMSOURCE SYS_MEM_INTERNAL
+#else
+#define PWMLED_MEMSOURCE 0 // 标记不使用内存池
 #endif
 
 /* ==========================================
@@ -35,7 +37,13 @@ pwm_led_t *pwm_led_create(uint32_t freq, pwm_driver_t *pwm_driver, uint8_t activ
   if (!pwm_driver)
     return NULL;
 
-  pwm_led_t *self = (pwm_led_t *)sys_malloc(PWMLED_MEMSOURCE, sizeof(pwm_led_t));
+  pwm_led_t *self;
+#ifdef USE_MEMPOOL
+  self = (pwm_led_t *)sys_malloc(PWMLED_MEMSOURCE, sizeof(pwm_led_t));
+#else
+  self = (pwm_led_t *)malloc(sizeof(pwm_led_t));
+#endif
+
   if (self) {
     // 先设置频率
     PWM_SET_FREQ(pwm_driver, freq);
@@ -51,7 +59,11 @@ void pwm_led_destroy(pwm_led_t *self) {
     if (self->pwm_driver) {
       PWM_STOP(self->pwm_driver);
     }
+#ifdef USE_MEMPOOL
     sys_free(PWMLED_MEMSOURCE, self);
+#else
+    free(self);
+#endif
   }
 }
 
