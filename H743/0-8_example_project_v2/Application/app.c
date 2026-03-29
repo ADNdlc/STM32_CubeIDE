@@ -7,8 +7,8 @@
 #include "project_cfg.h"
 #if !TEST_ENABLE && !RES_BURN_ENABLE
 #include "app.h"
-#include "elog.h"
 #define LOG_TAG "APP"
+#include "elog.h"
 
 #if !USE_Simulator
 #include "home/home.h" // UI
@@ -75,12 +75,8 @@ int app_init(void) {
 
 #if LVGL_ENABLE
   res_init();  // 初始化资源管理及处理烧录/显示测试
+
   home_init(); // 初始化ui核心功能
-
-  /* 注册各ui模块 */
-  //colorwheel_app_register(0);     // 注册 ColorWheel
-  //device_control_app_register(0); // 注册 Control
-
   UI_Start(); // 启动 UI 系统
   log_i("UI initialized");
 #endif

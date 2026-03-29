@@ -2,10 +2,12 @@
 #include "dev_map_config.h"
 
 #if (STM32H743_BOARD_V1 == TARGET_BOARD)
+
 #include "Multimedia/stm32_ltdc_driver.h"
 #include "dma2d.h"
 #include "fmc.h"
 #include "gpio/stm32_gpio_driver.h"
+#include "pwm/stm32_pwm_driver.h"
 #include "gt9xxx_touch/gt9xxx_touch_driver.h"
 #include "i2c/stm32_i2c_driver.h"
 #include "ina219/ina219_driver.h"
@@ -85,6 +87,19 @@ const i2c_mapping_t i2c_mappings[I2C_MAX_DEVICES] = {
 const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES] = {
     [SDRAM_MAIN] = {.resource = (void *)&hsdram1}};
 
+
+// PWM 逻辑号映射
+static const stm32_pwm_config_t pwm_configs[PWM_ID_MAX] = {
+	[PWM_ID_0] = {&htim4, TIM_CHANNEL_2},
+	[PWM_ID_1] = {&htim4, TIM_CHANNEL_3},
+	[PWM_ID_2] = {&htim4, TIM_CHANNEL_4},
+};
+const pwm_mapping_t pwm_mappings[PWM_ID_MAX] = {
+    [PWM_ID_0] = {.resource = (void *)&pwm_configs[PWM_ID_0]},
+    [PWM_ID_1] = {.resource = (void *)&pwm_configs[PWM_ID_1]},
+    [PWM_ID_2] = {.resource = (void *)&pwm_configs[PWM_ID_2]},
+};
+
 // RTC 逻辑号映射表
 const rtc_mapping_t rtc_mappings[RTC_MAX] = {
     [RTC_ID_INTERNAL] = {.resource = (void *)&hrtc},
@@ -147,8 +162,8 @@ static uint16_t draw_buffer[480][800]
     __attribute__((section(".sdram_section"), aligned(16)));
 #define buf1 display_buffer
 // #define buf1 NULL
-// #define buf2 draw_buffer
-#define buf2 NULL
+#define buf2 draw_buffer
+//#define buf2 NULL
 static const lcd_screen_info_t ui_screen_info = {
     .buffer_addr = (void *)buf1,
     .back_buffer = (void *)buf2,

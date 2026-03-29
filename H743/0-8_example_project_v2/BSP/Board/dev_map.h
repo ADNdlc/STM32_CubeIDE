@@ -107,6 +107,18 @@ typedef struct {
 } sdram_mapping_t;
 extern const sdram_mapping_t sdram_mappings[SDRAM_MAX_DEVICES];
 
+/* ----- PWM ----- */
+typedef enum {
+	PWM_ID_0 = 0,
+	PWM_ID_1 = 0,
+	PWM_ID_2 = 0,
+	PWM_ID_MAX
+} pwm_device_id_t;
+typedef struct {
+  void *resource;
+} pwm_mapping_t;
+extern const pwm_mapping_t pwm_mappings[PWM_ID_MAX];
+
 /* ----- RTC ----- */
 typedef enum { RTC_ID_INTERNAL = 0, RTC_MAX } rtc_device_id_t;
 typedef struct {
@@ -121,6 +133,7 @@ typedef enum {
 
   TIMER_ID_MAX
 } timer_device_id_t;
+
 typedef struct {
   void *resource;
 } timer_mapping_t;

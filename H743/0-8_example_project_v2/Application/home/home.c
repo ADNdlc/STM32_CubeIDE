@@ -70,6 +70,7 @@ void home_init(void) {
   // home_app_def.settings 已在定义时静态绑定到 &home_settings
   // 注册home
   app_manager_register(&home_app_def, 0); // 注册时会尝试从文件系统加载 HOME.json
+  /* 注册其他UI功能 */
   colorwheel_app_register(0);
   device_control_app_register(0);
 

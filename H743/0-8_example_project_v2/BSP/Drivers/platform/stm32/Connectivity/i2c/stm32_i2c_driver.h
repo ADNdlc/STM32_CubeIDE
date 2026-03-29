@@ -33,6 +33,7 @@ typedef struct {
 // STM32 I2C 驱动结构体
 typedef struct {
   i2c_driver_t base; // 基类
+
   stm32_i2c_config_t config;
   i2c_callback_t callback;
   void *callback_context;
