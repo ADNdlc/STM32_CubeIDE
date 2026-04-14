@@ -1,10 +1,11 @@
 #include "input_manager.h"
+#include "sys_power.h"
 #include <stdlib.h>
 
 #define LOG_TAG "INPUT_MGR"
 #include "elog.h"
 
-#define EDGE_HEIGHT 30       // 手势区域高度 (由于不遮挡UI，可适当调宽提高灵敏度)
+#define EDGE_HEIGHT 30       // 手势区域高度
 #define GESTURE_THRESHOLD 35 // 触发手势的最小位移
 
 typedef struct gesture_node {
@@ -43,6 +44,11 @@ static void custom_indev_read_cb(lv_indev_drv_t * drv, lv_indev_data_t * data) {
     // 1. 先调用原始的驱动读取函数，获取真实的物理坐标(data->point)和状态(data->state)
     if (original_read_cb) {
         original_read_cb(drv, data);
+    }
+
+    // 活跃检测：只要有按压动作（无论在哪，即使在暂停渲染期间）就刷新电源管理
+    if (data->state == LV_INDEV_STATE_PRESSED) {
+        input_manager_handle_activity();
     }
 
     static lv_indev_state_t last_state = LV_INDEV_STATE_RELEASED;
@@ -132,4 +138,8 @@ void input_manager_register_callback(gesture_type_t type, gesture_cb_t cb) {
   node->cb = cb;
   node->next = gesture_heads[type];
   gesture_heads[type] = node;
+}
+
+void input_manager_handle_activity(void) {
+    sys_power_refresh();
 }

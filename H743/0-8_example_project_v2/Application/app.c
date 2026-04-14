@@ -17,6 +17,7 @@
 #include "home/System/sys_config.h" // 系统配置
 #include "home/System/data_logger.h" // 本地数据日志
 #include "home/System/sys_state.h" // 系统状态
+#include "home/System/sys_power.h" // 电源管理
 #include "device_handle.h" // 物模型注册
 
 // VFS & Storage
@@ -59,6 +60,7 @@ int app_init(void) {
   // 2. 初始化核心系统
   sys_config_init(); // 此时 VFS 已就绪，可以从 /sys 加载配置
   sys_state_init();
+  sys_power_init();
   devices_init();
   data_logger_init(); // 日志模块初始化
 #endif
@@ -93,6 +95,7 @@ void app_run(void) {
 #endif
 #if SERVICE_ENABLE
   net_mgr_process(); // 网络服务处理
+  sys_power_process(); // 电源管理处理
 #endif
 #if LVGL_ENABLE
   lv_timer_handler(); // ui处理

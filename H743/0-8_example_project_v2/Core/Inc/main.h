@@ -79,6 +79,8 @@ void Error_Handler(void);
 #define touch_INT_GPIO_Port GPIOH
 #define touch_SDA_Pin GPIO_PIN_3
 #define touch_SDA_GPIO_Port GPIOI
+#define LCD_BL_Pin GPIO_PIN_5
+#define LCD_BL_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

@@ -38,6 +38,11 @@ void input_manager_init(void);
  */
 void input_manager_register_callback(gesture_type_t type, gesture_cb_t cb);
 
+/**
+ * @brief 处理用户活跃信号 (用于刷新屏幕超时)
+ */
+void input_manager_handle_activity(void);
+
 #ifdef __cplusplus
 }
 #endif
