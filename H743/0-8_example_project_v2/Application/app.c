@@ -97,10 +97,6 @@ void app_run(void) {
   net_mgr_process(); // 网络服务处理
   sys_power_process(); // 电源管理处理
 #endif
-#if LVGL_ENABLE
-  lv_timer_handler(); // ui处理
-#endif
-
 }
 #else
 int app_init(void) {(void)0; return 0;}

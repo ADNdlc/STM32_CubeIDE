@@ -1,7 +1,6 @@
 #include "sys_power.h"
 #include "Sys.h"
 #include "lcd_screen_driver.h"
-#include "lv_port_disp.h"
 #include "Project_cfg.h"
 
 #define LOG_TAG "SYS_POWER"
@@ -10,6 +9,10 @@
 #ifndef SCREEN_AUTO_OFF_TIMEOUT
 #define SCREEN_AUTO_OFF_TIMEOUT 30000 // 30 seconds
 #endif
+
+// 在lv_port_disp.h中
+extern void disp_enable_update(void);
+extern void disp_disable_update(void);
 
 extern lcd_driver_t *lcd;
 

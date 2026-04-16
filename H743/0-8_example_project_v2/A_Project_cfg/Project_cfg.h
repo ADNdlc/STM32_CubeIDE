@@ -30,7 +30,7 @@
 
 /* ======================================================= */
 /* 2. 根据选定的 Profile，自动映射底层功能组件开关               */
-/*    (绝对不再使用 #undef，直接在这里进行逻辑分支)               */
+/*    (绝对不再使用 #undef，直接在这里进行逻辑分支)              */
 /* ======================================================= */
 
 #if defined(SYS_PROFILE_BURN_RES)
@@ -55,7 +55,7 @@
 #define RES_USE_INTERNAL 0 // 测试不用带大图片
 #define RES_BURN_ENABLE 0
 #define RES_DISPLAY_ENABLE 0
-#define LVGL_ENABLE 0
+#define LVGL_ENABLE 1
 #define GUI_ENABLE 0
 #define SERVICE_ENABLE 0
 // ... 其他全关

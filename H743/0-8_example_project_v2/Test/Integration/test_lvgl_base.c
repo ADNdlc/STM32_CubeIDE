@@ -8,6 +8,12 @@
 static void test_lvgl_setup(void) {
   log_i("LVGL Integration Test Setup");
 
+  // 检查LVGL是否已初始化
+  if (!lv_is_initialized()) {
+      log_e("LVGL is not initialized!");
+      return;
+  }
+
   /* 创建一个简单的界面 */
   lv_obj_t *label = lv_label_create(lv_scr_act());
   lv_label_set_text(label, "Hello LVGL! - STM32H743");

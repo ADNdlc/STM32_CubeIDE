@@ -116,6 +116,9 @@ void bsp_init(void) {
 }
 
 void bsp_process(void) {
+#if LVGL_ENABLE
+  lv_timer_handler(); // ui处理
+#endif
 #if SERVICE_ENABLE
   service_factory_process(); // 服务组件的底层处理
 #endif
