@@ -3,6 +3,7 @@
 "2-1_freertos_test1\main.o"
 "2-1_freertos_test1\gpio.o"
 "2-1_freertos_test1\freertos.o"
+"2-1_freertos_test1\tim.o"
 "2-1_freertos_test1\usart.o"
 "2-1_freertos_test1\stm32f1xx_it.o"
 "2-1_freertos_test1\stm32f1xx_hal_msp.o"

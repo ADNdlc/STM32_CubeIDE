@@ -19,13 +19,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "User_task.h"
-
 
 /* USER CODE END Includes */
 
@@ -91,9 +91,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+  HAL_TIM_Base_Start_IT(&htim1);
 
   /* USER CODE END 2 */
 
@@ -110,9 +112,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//    printf("Hello World\r\n");
-//    HAL_Delay(500);
+    //    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    //    printf("Hello World\r\n");
+    //    HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -1,1 +1,9 @@
-#include "stm32f1xx_hal.h"
+#include "main.h"
+
+void User_Task_1(void);
+
+void User_Task_2(void);
+
+void vButtonScan(void);
+
+void vLEDTask(void);
