@@ -8,6 +8,9 @@ static gpio_driver_t *led0;
 static gpio_driver_t *led1;
 #endif
 
+// 添加静态变量来跟踪上次翻转时间
+static uint32_t led_last_toggle_time = 0;
+
 void test_led_on(void) { GPIO_WRITE(led0, 0); }
 
 void test_led_off(void) { GPIO_WRITE(led0, 1); }
@@ -37,18 +40,23 @@ static void test_led_setup(void) {
   }
   GPIO_SET_MODE(led1, GPIO_PushPullOutput);
 #endif
+  
+  // 初始化上次翻转时间为当前时间
+  led_last_toggle_time = sys_get_systick_ms();
+  
   log_i("LED Test Setup: Ensuring GPIOs are ready.");
 }
 
 static void test_led_loop(void) {
-  static uint32_t last_tick = 0;
-  if (sys_get_systick_ms() - last_tick >= 1000) {
-    last_tick = sys_get_systick_ms();
+  uint32_t current_time = sys_get_systick_ms();
+	log_d("LED0 loop at %lu ms", current_time);
+  if ((current_time - led_last_toggle_time) >= 1000) {
+    led_last_toggle_time = current_time;
 #ifdef STM32H743xx
     GPIO_TOGGLE(led1);
 #endif
     GPIO_TOGGLE(led0);
-    log_d("LED0 Toggled");
+	log_d("LED0 Toggled at %lu ms", current_time);
   }
 }
 

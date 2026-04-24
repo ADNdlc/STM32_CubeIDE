@@ -67,9 +67,9 @@ void Test_Select_And_Run(int index) {
 }
 
 void Test_Framework_HandleInput(uint8_t cmd) {
-  // 调试：输出接收到的实际值
-  log_i("Received cmd: 0x%02X (%d), '0'=0x%02X, '9'=0x%02X", 
-        cmd, cmd, (uint8_t)'0', (uint8_t)'9');
+// 调试：输出接收到的实际值
+//  log_d("Received cmd: 0x%02X (%d), '0'=0x%02X, '9'=0x%02X", 
+//        cmd, cmd, (uint8_t)'0', (uint8_t)'9');
   
   // 忽略回车符和换行符
   if (cmd == '\r' || cmd == '\n') {
