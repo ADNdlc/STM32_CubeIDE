@@ -3,11 +3,11 @@
 <title>Static Call Graph - [2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image 2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Fri Apr 24 21:06:12 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Fri Apr 24 21:18:57 2026
 <BR><P>
-<H3>Maximum Stack Usage =        424 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        440 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-__rt_entry_main &rArr; main &rArr; bsp_init &rArr; elog_init_and_config &rArr; elog_start &rArr; elog_set_output_enabled &rArr; elog_output &rArr;  elog_output (Cycle)
+StartDefaultTask &rArr; Test_Framework_Run &rArr; Test_Framework_HandleInput &rArr; Test_Select_And_Run &rArr; Stop_Current_Test &rArr; elog_output &rArr;  elog_output (Cycle)
 <P>
 <H3>
 Functions with no stack information
@@ -1975,7 +1975,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f103xb.o(RESET)
 </UL>
 <P><STRONG><a name="[49]"></a>StartDefaultTask</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, freertos.o(i.StartDefaultTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 416 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 440 + Unknown Stack Size
 <LI>Call Chain = StartDefaultTask &rArr; Test_Framework_Run &rArr; Test_Framework_HandleInput &rArr; Test_Select_And_Run &rArr; Stop_Current_Test &rArr; elog_output &rArr;  elog_output (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
@@ -2048,11 +2048,12 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_ConfigChannel
 </UL>
 
-<P><STRONG><a name="[160]"></a>Test_Framework_HandleInput</STRONG> (Thumb, 42 bytes, Stack size 8 bytes, test_framework.o(i.Test_Framework_HandleInput))
-<BR><BR>[Stack]<UL><LI>Max Depth = 408 + Unknown Stack Size
+<P><STRONG><a name="[160]"></a>Test_Framework_HandleInput</STRONG> (Thumb, 116 bytes, Stack size 32 bytes, test_framework.o(i.Test_Framework_HandleInput))
+<BR><BR>[Stack]<UL><LI>Max Depth = 432 + Unknown Stack Size
 <LI>Call Chain = Test_Framework_HandleInput &rArr; Test_Select_And_Run &rArr; Stop_Current_Test &rArr; elog_output &rArr;  elog_output (Cycle)
 </UL>
-<BR>[Calls]<UL><LI><a href="#[162]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Test_Select_And_Run
+<BR>[Calls]<UL><LI><a href="#[15c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;elog_output
+<LI><a href="#[162]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Test_Select_And_Run
 <LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Test_List_All
 <LI><a href="#[15b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Stop_Current_Test
 </UL>
@@ -2070,7 +2071,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[15a]"></a>Test_Framework_Run</STRONG> (Thumb, 58 bytes, Stack size 8 bytes, test_framework.o(i.Test_Framework_Run))
-<BR><BR>[Stack]<UL><LI>Max Depth = 416 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 440 + Unknown Stack Size
 <LI>Call Chain = Test_Framework_Run &rArr; Test_Framework_HandleInput &rArr; Test_Select_And_Run &rArr; Stop_Current_Test &rArr; elog_output &rArr;  elog_output (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[164]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_queue_getdata
@@ -2251,6 +2252,7 @@ Global Symbols
 <LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;test_led_loop
 <LI><a href="#[162]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Test_Select_And_Run
 <LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Test_List_All
+<LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Test_Framework_HandleInput
 <LI><a href="#[15b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Stop_Current_Test
 </UL>
 
