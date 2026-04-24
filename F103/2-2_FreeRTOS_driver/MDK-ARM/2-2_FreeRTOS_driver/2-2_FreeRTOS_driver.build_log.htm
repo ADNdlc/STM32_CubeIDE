@@ -1,0 +1,93 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: ¦ÌVision V5.39.0.0
+Copyright (C) 2023 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: A ADMdlc, A, LIC=EXJT4-F9CVR-30BNC-7UE6F-NP01M-RZZ9J
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Plus  Version: 5.39.0.0
+Toolchain Path:  D:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 5 (build 528)
+Assembler:       Armasm.exe V5.06 update 5 (build 528)
+Linker/Locator:  ArmLink.exe V5.06 update 5 (build 528)
+Library Manager: ArmAr.exe V5.06 update 5 (build 528)
+Hex Converter:   FromElf.exe V5.06 update 5 (build 528)
+CPU DLL:         SARMCM3.DLL V5.39.0.0
+Dialog DLL:      DCM.DLL V1.17.5.0
+Target DLL:      CMSIS_AGDI.dll V1.33.16.0
+Dialog DLL:      TCM.DLL V1.56.4.0
+ 
+<h2>Project:</h2>
+C:\Users\12114\Desktop\STM32HEL\clone\IDE\F103\2-2_FreeRTOS_driver\MDK-ARM\2-2_FreeRTOS_driver.uvprojx
+Project File Date:  04/23/2026
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
+Build target '2-2_FreeRTOS_driver'
+Note: source file '..\Lib\EasyLogger\easylogger\port\elog_port.c' - object file renamed from '2-2_FreeRTOS_driver\elog_port.o' to '2-2_FreeRTOS_driver\elog_port_1.o'.
+compiling oled_i2c_bus.c...
+..\BSP\Drivers\device\oled\bus\oled_i2c_bus.c(28): error:  #167: argument of type "const uint8_t *" is incompatible with parameter of type "uint8_t *"
+    return 
+..\BSP\Drivers\device\oled\bus\oled_i2c_bus.c(41): warning:  #223-D: function "malloc" declared implicitly
+        (oled_i2c_bus_t *)malloc(sizeof(oled_i2c_bus_t));
+..\BSP\Drivers\device\oled\bus\oled_i2c_bus.c: 1 warning, 1 error
+compiling OLED_factory.c...
+../BSP/Drivers/factory/device/inc/OLED_factory.h(28): error:  #3092: anonymous unions are only supported in --gnu mode, or when enabled with #pragma anon_unions
+    };
+..\BSP\Drivers\factory\device\src\OLED_factory.c(54): warning:  #223-D: function "sys_malloc" declared implicitly
+          (oled_device_t *)sys_malloc(SYS_MEM_INTERNAL, sizeof(oled_device_t));
+..\BSP\Drivers\factory\device\src\OLED_factory.c(54): error:  #20: identifier "SYS_MEM_INTERNAL" is undefined
+          (oled_device_t *)sys_malloc(SYS_MEM_INTERNAL, sizeof(oled_device_t));
+..\BSP\Drivers\factory\device\src\OLED_factory.c: 1 warning, 2 errors
+compiling stm32_i2c_driver.c...
+../BSP/Drivers/interface/Connectivity/i2c_driver.h(20): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity/i2c_driver.h(21): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.c(10): error:  #5: cannot open source input file "MemPool.h": No such file or directory
+  #include "MemPool.h"
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.c: 2 warnings, 1 error
+compiling stm32f103_board_v1.c...
+../BSP/Drivers/factory/device/inc/OLED_factory.h(28): error:  #3092: anonymous unions are only supported in --gnu mode, or when enabled with #pragma anon_unions
+    };
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(334): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 20 of "../BSP/Drivers/interface/Connectivity/i2c_driver.h")
+  #define I2C_MEMADD_SIZE_8BIT            0x00000001U
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(335): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 21 of "../BSP/Drivers/interface/Connectivity/i2c_driver.h")
+  #define I2C_MEMADD_SIZE_16BIT           0x00000010U
+../BSP/Drivers/interface/Timer/rtc_driver.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif /* INTERFACE_RTC_DRIVER_H_ */
+../BSP/Drivers/platform/stm32/Connectivity/rtc/stm32_rtc_driver.h(14): error:  #5: cannot open source input file "rtc.h": No such file or directory
+  #include "rtc.h" // HAL RTC handle hrtc
+..\BSP\Board\stm32f103_board\stm32f103_board_v1.c: 3 warnings, 2 errors
+"2-2_FreeRTOS_driver\2-2_FreeRTOS_driver.axf" - 6 Error(s), 7 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.5.9.0.pack
+                ARM::CMSIS@5.9.0
+                CMSIS (Common Microcontroller Software Interface Standard)
+   * Component: CORE Version: 5.6.0
+
+Package Vendor: Keil
+                http://www.keil.com/pack/Keil.STM32F1xx_DFP.2.2.0.pack
+                Keil::STM32F1xx_DFP@2.2.0
+                STMicroelectronics STM32F1 Series Device Support, Drivers and Examples
+
+<h2>Collection of Component include folders:</h2>
+  ./RTE/_2-2_FreeRTOS_driver
+  D:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include
+  D:/Keil_v5/ARM/PACK/Keil/STM32F1xx_DFP/2.2.0/Device/Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE@5.6.0
+      Include file:  CMSIS/Core/Include/tz_context.h
+Target not created.
+Build Time Elapsed:  00:00:01
+</pre>
+</body>
+</html>
