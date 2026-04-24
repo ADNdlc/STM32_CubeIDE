@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "test_framework.h"
+#include "elog.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -129,7 +130,7 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
 	Test_Framework_Run();
-    osDelay(1);
+    osDelay(2);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -147,7 +148,9 @@ void LEDFunc(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    log_i("LED Toggle");
+    //HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
+    vTaskDelay(pdMS_TO_TICKS(500)); // 500ms延时
   }
   /* USER CODE END LEDFunc */
 }

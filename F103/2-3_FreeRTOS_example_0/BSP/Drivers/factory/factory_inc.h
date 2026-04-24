@@ -5,6 +5,7 @@
 #include "connectivity\inc\spi_factory.h"
 #include "connectivity\inc\usart_factory.h"
 #include "connectivity\inc\i2c_factory.h"
+#include "connectivity\inc\pwm_factory.h"
 
 #include "device\inc\OLED_factory.h"
 

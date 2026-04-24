@@ -7,6 +7,7 @@
 #include "Connectivity\i2c_driver.h"
 #include "Connectivity\spi_driver.h"
 #include "Connectivity\usart_driver.h"
+#include "Connectivity\pwm_driver.h"
 
 #include "Device\oled_driver.h"
 

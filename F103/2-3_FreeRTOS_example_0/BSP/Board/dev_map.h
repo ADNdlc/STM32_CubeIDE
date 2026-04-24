@@ -70,6 +70,19 @@ typedef struct {
 } timer_mapping_t;
 extern const timer_mapping_t timer_mappings[TIMER_ID_MAX];
 
+
+/* ----- PWM ----- */
+typedef enum {
+  PWM_ID_R = 0,
+  PWM_ID_G = 1,
+  PWM_ID_B = 2,
+  PWM_ID_MAX
+} pwm_device_id_t;
+typedef struct {
+  void *resource;
+} pwm_mapping_t;
+extern const pwm_mapping_t pwm_mappings[PWM_ID_MAX];
+
 /* ----- OLED ----- */
 typedef enum {
   OLED_ID_MAIN = 0,

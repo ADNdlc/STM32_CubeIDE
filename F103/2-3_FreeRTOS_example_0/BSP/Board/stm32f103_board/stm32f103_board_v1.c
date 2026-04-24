@@ -46,6 +46,18 @@ const timer_mapping_t timer_mappings[TIMER_ID_MAX] = {
     [TIMER_ID_1] = {.resource = (void *)&htim1},
 };
 
+// PWM 逻辑号映射
+static const stm32_pwm_config_t pwm_configs[PWM_ID_MAX] = {
+	[PWM_ID_R] = {&htim2, TIM_CHANNEL_1},
+	[PWM_ID_G] = {&htim2, TIM_CHANNEL_2},
+	[PWM_ID_B] = {&htim2, TIM_CHANNEL_3},
+};
+const pwm_mapping_t pwm_mappings[PWM_ID_MAX] = {
+    [PWM_ID_R] = {.resource = (void *)&pwm_configs[PWM_ID_R]},
+    [PWM_ID_G] = {.resource = (void *)&pwm_configs[PWM_ID_G]},
+    [PWM_ID_B] = {.resource = (void *)&pwm_configs[PWM_ID_B]},
+};
+
 // SPI 逻辑号映射表
 const spi_mapping_t spi_mappings[SPI_MAX_DEVICES] = {
     [SPI_ID_1] = {.resource = (void *)&hspi2},
