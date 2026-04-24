@@ -6,7 +6,6 @@ LR_IROM1 0x08000000 0x00010000  {    ; 加载区
   ER_IROM1 0x08000000 0x00010000  {  ; 代码/只读数据区
    *.o (RESET, +First)
    *(InRoot$$Sections)
-   *(.test_registry)               ; 把测试用例先放进来保证连续（可选）
    .ANY (+RO)
    .ANY (+XO)
   }

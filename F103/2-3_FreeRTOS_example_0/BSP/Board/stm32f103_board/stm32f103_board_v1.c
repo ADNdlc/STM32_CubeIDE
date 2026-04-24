@@ -18,7 +18,7 @@
 
 // GPIO 设备配置
 static const stm32_gpio_config_t all_gpio_configs[GPIO_MAX_DEVICES] = {
-    [GPIO_ID_LED0] = {.pin = GPIO_PIN_13, .port = GPIOC},
+    [GPIO_ID_LED0] = {.pin = LED_0_Pin, .port = LED_0_GPIO_Port},
 };
 
 // GPIO 逻辑号映射表

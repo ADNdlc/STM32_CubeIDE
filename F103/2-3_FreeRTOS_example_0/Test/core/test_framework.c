@@ -5,16 +5,16 @@
 
 #if TEST_ENABLE
 
-// 引用链接脚本中的符号
-extern const TestCase_t _test_start;
-extern const TestCase_t _test_end;
+// 使用链接器自动生成的符号
+extern const TestCase_t Image$$ER_TEST_REGISTRY$$Base;
+extern const TestCase_t Image$$ER_TEST_REGISTRY$$Limit;
 
 // 当前活动的测试用例
 static TestCase_t *current_test = NULL;
 
 void Test_List_All(void) {
-  const TestCase_t *iter = &_test_start;
-  const TestCase_t *end = &_test_end;
+  const TestCase_t *iter = &Image$$ER_TEST_REGISTRY$$Base;
+  const TestCase_t *end = &Image$$ER_TEST_REGISTRY$$Limit;
   int idx = 0;
 
   log_i("========================================");
@@ -44,8 +44,8 @@ void Stop_Current_Test(void) {
 
 // 根据索引查找并运行测试
 void Test_Select_And_Run(int index) {
-  const TestCase_t *iter = &_test_start;
-  const TestCase_t *end = &_test_end;
+  const TestCase_t *iter = &Image$$ER_TEST_REGISTRY$$Base;
+  const TestCase_t *end = &Image$$ER_TEST_REGISTRY$$Limit;
   int total_tests = end - iter;
 
   if (index < 0 || index >= total_tests) {
