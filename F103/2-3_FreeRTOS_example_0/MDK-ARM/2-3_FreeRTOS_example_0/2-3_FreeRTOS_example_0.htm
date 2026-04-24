@@ -3,7 +3,7 @@
 <title>Static Call Graph - [2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image 2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Fri Apr 24 21:55:11 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Fri Apr 24 22:06:15 2026
 <BR><P>
 <H3>Maximum Stack Usage =        432 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1302,6 +1302,7 @@ Global Symbols
 <LI><a href="#[13a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
 <LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive
+<LI><a href="#[18c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;platform_get_systick_ms
 </UL>
 
 <P><STRONG><a name="[13f]"></a>HAL_I2C_AbortCpltCallback</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f1xx_hal_i2c.o(i.HAL_I2C_AbortCpltCallback))
@@ -2468,10 +2469,12 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[168]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;bsp_init
 </UL>
 
-<P><STRONG><a name="[18c]"></a>platform_get_systick_ms</STRONG> (Thumb, 8 bytes, Stack size 8 bytes, stm32_sys.o(i.platform_get_systick_ms))
+<P><STRONG><a name="[18c]"></a>platform_get_systick_ms</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, stm32_sys.o(i.platform_get_systick_ms))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = platform_get_systick_ms
 </UL>
-<BR>[Calls]<UL><LI><a href="#[19a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskGetTickCount
+<BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
+<LI><a href="#[15d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskGetSchedulerState
+<LI><a href="#[19a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskGetTickCount
 </UL>
 <BR>[Called By]<UL><LI><a href="#[184]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;elog_port_get_time
 <LI><a href="#[18d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_queue_send
@@ -2944,6 +2947,7 @@ Global Symbols
 <LI><a href="#[1e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[13]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Handler
 <LI><a href="#[1b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTimerGenericCommand
+<LI><a href="#[18c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;platform_get_systick_ms
 </UL>
 
 <P><STRONG><a name="[19a]"></a>xTaskGetTickCount</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, tasks.o(i.xTaskGetTickCount))
@@ -3822,7 +3826,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[15c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;elog_output
 </UL>
 
-<P><STRONG><a name="[60]"></a>test_led_loop</STRONG> (Thumb, 84 bytes, Stack size 24 bytes, test_led.o(i.test_led_loop))
+<P><STRONG><a name="[60]"></a>test_led_loop</STRONG> (Thumb, 62 bytes, Stack size 24 bytes, test_led.o(i.test_led_loop))
 <BR><BR>[Stack]<UL><LI>Max Depth = 368 + Unknown Stack Size
 <LI>Call Chain = test_led_loop &rArr; elog_output &rArr;  elog_output (Cycle)
 </UL>

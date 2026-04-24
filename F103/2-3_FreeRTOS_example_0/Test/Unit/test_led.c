@@ -49,7 +49,7 @@ static void test_led_setup(void) {
 
 static void test_led_loop(void) {
   uint32_t current_time = sys_get_systick_ms();
-	log_d("LED0 loop at %lu ms", current_time);
+//log_d("LED0 loop at %lu ms", current_time);
   if ((current_time - led_last_toggle_time) >= 1000) {
     led_last_toggle_time = current_time;
 #ifdef STM32H743xx
