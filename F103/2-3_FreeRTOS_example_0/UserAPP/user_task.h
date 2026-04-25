@@ -4,6 +4,3 @@ void User_Task_1(void);
 
 void User_Task_2(void);
 
-void vButtonScan(void);
-
-void vLEDTask(void);

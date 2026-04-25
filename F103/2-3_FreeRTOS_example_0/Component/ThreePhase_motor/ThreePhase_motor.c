@@ -20,9 +20,9 @@ void motor_init(threephase_motor_t *self, pwm_driver_t *phase_u, pwm_driver_t *p
   self->voltage_limit = 0.5f * bus_voltage;
 }
 
-threephase_motor_t *pwm_led_create(threephase_motor_t *self, pwm_driver_t *phase_u, pwm_driver_t *phase_v, pwm_driver_t *phase_w, float bus_voltage)
+threephase_motor_t *threephase_motor_create(pwm_driver_t *phase_u, pwm_driver_t *phase_v, pwm_driver_t *phase_w, float bus_voltage)
 {
-  if (!self || !phase_u || !phase_v || !phase_w)
+  if (!phase_u || !phase_v || !phase_w)
     return NULL;
 #ifdef USE_MEMPOOL
   threephase_motor_t *motor =
@@ -40,9 +40,9 @@ threephase_motor_t *pwm_led_create(threephase_motor_t *self, pwm_driver_t *phase
   PWM_STOP(phase_w);
 
   motor_init(motor, phase_u, phase_v, phase_w, bus_voltage);
-  uint32_t max_duty_u = PWM_GET_DUTY_MAX(self->phase_u);
-  uint32_t max_duty_v = PWM_GET_DUTY_MAX(self->phase_v);
-  uint32_t max_duty_w = PWM_GET_DUTY_MAX(self->phase_w);
+  uint32_t max_duty_u = PWM_GET_DUTY_MAX(motor->phase_u);
+  uint32_t max_duty_v = PWM_GET_DUTY_MAX(motor->phase_v);
+  uint32_t max_duty_w = PWM_GET_DUTY_MAX(motor->phase_w);
   if (!(max_duty_u == max_duty_v && max_duty_u == max_duty_w))
   {
     motor_destroy(motor);
@@ -62,7 +62,7 @@ void motor_destroy(threephase_motor_t *self)
     PWM_STOP(self->phase_w);
 
 #ifdef USE_MEMPOOL
-    sys_free(PWMLED_MEMSOURCE, self);
+    sys_free(TP_MOTOR_MEMSOURCE, self);
 #else
     free(self);
 #endif
@@ -90,27 +90,30 @@ int motor_set_phase_voltage(threephase_motor_t *self, float Vu, float Vv, float 
   return 0;
 }
 
-void motor_set_bus_voltage(threephase_motor_t *self, float bus_voltage)
+float motor_get_electricalAngle(threephase_motor_t *self, float shaft_angle)
+{
+  if (!self)
+    return -1;
+  return (shaft_angle * self->pole_pairs);
+}
+
+void motor_set_voltage(threephase_motor_t *self, float bus_voltage, float voltage_limit)
 {
   if (!self)
     return;
   motor_set_phase_voltage(self, 0.0f, 0.0f, 0.0f);
   self->bus_voltage = bus_voltage;
-  self->voltage_limit = 0.5f * bus_voltage;
-}
-/**
- * @brief 获取母线电压值
- */
-float motor_get_bus_voltage(threephase_motor_t *self)
-{
-  if (!self)
-    return 0.0f;
-  return self->bus_voltage;
+  self->voltage_limit = voltage_limit;
 }
 
-/**
- * @brief 停止电机
- */
+void motor_get_bus_voltage(threephase_motor_t *self, float *bus_voltage, float *voltage_limit)
+{
+  if (!self)
+    return;
+  *bus_voltage = (self->bus_voltage);
+  *voltage_limit = (self->voltage_limit);
+}
+
 void motor_stop(threephase_motor_t *self)
 {
   if (!self)

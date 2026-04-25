@@ -71,6 +71,8 @@
 "2-3_freertos_example_0\elog_init.o"
 "2-3_freertos_example_0\elog_port.o"
 "2-3_freertos_example_0\pwm_led.o"
+"2-3_freertos_example_0\threephase_motor.o"
+"2-3_freertos_example_0\motor_control.o"
 "2-3_freertos_example_0\elog.o"
 "2-3_freertos_example_0\elog_async.o"
 "2-3_freertos_example_0\elog_buf.o"

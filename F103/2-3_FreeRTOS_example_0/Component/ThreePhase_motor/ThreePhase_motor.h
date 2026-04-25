@@ -13,13 +13,14 @@ struct threephase_motor_t
   pwm_driver_t *phase_v; // v相
   pwm_driver_t *phase_w; // w相
 
-  float bus_voltage; // 母线电压(电机驱动电压)
-  float voltage_limit;
+  float bus_voltage;   // 母线电压(电机驱动电压)
+  float voltage_limit; // 电机电压限制
+  uint8_t pole_pairs;        // 极对数
 };
 
 // 公共 API
 void motor_init(threephase_motor_t *self, pwm_driver_t *phase_u, pwm_driver_t *phase_v, pwm_driver_t *phase_w, float bus_voltage);
-threephase_motor_t *pwm_led_create(threephase_motor_t *self, pwm_driver_t *phase_u, pwm_driver_t *phase_v, pwm_driver_t *phase_w, float bus_voltage);
+threephase_motor_t *threephase_motor_create(pwm_driver_t *phase_u, pwm_driver_t *phase_v, pwm_driver_t *phase_w, float bus_voltage);
 void motor_destroy(threephase_motor_t *self);
 
 /**
@@ -29,17 +30,26 @@ void motor_destroy(threephase_motor_t *self);
  * @param Vv   V 相电压 (V)
  * @param Vw   W 相电压 (V)
  * @return 0: 成功, -1: 失败
- * @note  如果任一相电压超出 单相voltage_limit(bus_voltage/2), 将自动进行等比例缩放 (clamp)
+ * @note  如果任一相电压超出单相(voltage_limit/2)限制, 将自动进行等比例缩放 (clamp)
  */
 int motor_set_phase_voltage(threephase_motor_t *self, float Vu, float Vv, float Vw);
+
 /**
- * @brief 更新母线电压值
+ * @brief 根据机械角度获取对应电角度
+ * @param self motor_t 实例
+ * @param shaft_angle 机械角度
+ * @return 电机电角度
  */
-void motor_set_bus_voltage(threephase_motor_t *self, float bus_voltage);
+float motor_get_electricalAngle(threephase_motor_t *self , float shaft_angle);
+
 /**
- * @brief 获取母线电压值
+ * @brief 更新电压参数
  */
-float motor_get_bus_voltage(threephase_motor_t *self);
+void motor_set_voltage(threephase_motor_t *self, float bus_voltage, float voltage_limit);
+/**
+ * @brief 获取电压参数
+ */
+void motor_get_bus_voltage(threephase_motor_t *self, float *bus_voltage, float *voltage_limit);
 
 /**
  * @brief 停止电机
