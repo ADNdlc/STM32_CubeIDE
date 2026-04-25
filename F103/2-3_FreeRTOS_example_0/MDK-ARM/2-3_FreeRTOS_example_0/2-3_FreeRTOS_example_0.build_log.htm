@@ -22,78 +22,137 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 C:\Users\12114\Desktop\STM32HEL\clone\IDE\F103\2-3_FreeRTOS_example_0\MDK-ARM\2-3_FreeRTOS_example_0.uvprojx
-Project File Date:  04/24/2026
+Project File Date:  04/25/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target '2-3_FreeRTOS_example_0'
-compiling OLED_factory.c...
-compiling oled_spi_bus.c...
-compiling pwm_factory.c...
-..\BSP\Drivers\factory\connectivity\src\pwm_factory.c(12): error:  #5: cannot open source input file "pwm/stm32_pwm_driver.h": No such file or directory
-  #include "pwm/stm32_pwm_driver.h"
-..\BSP\Drivers\factory\connectivity\src\pwm_factory.c: 0 warnings, 1 error
-compiling oled_i2c_bus.c...
-..\BSP\Drivers\device\oled\bus\oled_i2c_bus.c(39): warning:  #223-D: function "malloc" declared implicitly
-        (oled_i2c_bus_t *)malloc(sizeof(oled_i2c_bus_t));
-..\BSP\Drivers\device\oled\bus\oled_i2c_bus.c: 1 warning, 0 errors
-compiling test_framework.c...
-compiling test_led.c...
-compiling stm32f103_board_v1.c...
-../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(334): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 12 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
-  #define I2C_MEMADD_SIZE_8BIT            0x00000001U
-../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(335): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 13 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
-  #define I2C_MEMADD_SIZE_16BIT           0x00000010U
-..\BSP\Board\stm32f103_board\stm32f103_board_v1.c: 2 warnings, 0 errors
-compiling stm32_pwm_driver.c...
+assembling startup_stm32f103xb.s...
+compiling stm32f1xx_it.c...
+compiling gpio.c...
+compiling main.c...
 ../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
   #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
 ../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
   #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
-..\BSP\Drivers\platform\stm32\Connectivity\pwm\stm32_pwm_driver.c(16): error:  #5: cannot open source input file "stm32h7xx_ll_bus.h": No such file or directory
-  #include "stm32h7xx_ll_bus.h"
-..\BSP\Drivers\platform\stm32\Connectivity\pwm\stm32_pwm_driver.c: 2 warnings, 1 error
-compiling gpio_factory.c...
-../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(334): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 12 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
-  #define I2C_MEMADD_SIZE_8BIT            0x00000001U
-../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(335): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 13 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
-  #define I2C_MEMADD_SIZE_16BIT           0x00000010U
-..\BSP\Drivers\factory\connectivity\src\gpio_factory.c: 2 warnings, 0 errors
+../Core/Src/main.c: 2 warnings, 0 errors
+compiling stm32f1xx_hal_msp.c...
+compiling dma.c...
+compiling can.c...
+compiling spi.c...
+compiling usb.c...
+compiling tim.c...
+compiling usart.c...
+compiling i2c.c...
+compiling freertos.c...
 compiling i2c_factory.c...
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(334): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 12 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
   #define I2C_MEMADD_SIZE_8BIT            0x00000001U
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(335): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 13 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
   #define I2C_MEMADD_SIZE_16BIT           0x00000010U
 ..\BSP\Drivers\factory\connectivity\src\i2c_factory.c: 2 warnings, 0 errors
-compiling BSP_init.c...
-../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
-  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
-../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
-  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
-../Component/logger\elog_init.h(32): warning:  #1-D: last line of file ends without a newline
-  #endif /* __ELOG_INIT_H__ */
-..\BSP\BSP_init.c(30): warning:  #1215-D: #warning directive: "bsp_init: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
-  #warning "bsp_init: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
-..\BSP\BSP_init.c: 4 warnings, 0 errors
-compiling usart_factory.c...
-../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
-  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
-../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
-  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
-..\BSP\Drivers\factory\connectivity\src\usart_factory.c: 2 warnings, 0 errors
+compiling gpio_factory.c...
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(334): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 12 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
+  #define I2C_MEMADD_SIZE_8BIT            0x00000001U
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(335): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 13 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
+  #define I2C_MEMADD_SIZE_16BIT           0x00000010U
+..\BSP\Drivers\factory\connectivity\src\gpio_factory.c: 2 warnings, 0 errors
 compiling spi_factory.c...
 ../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
   #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
 ../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
   #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
 ..\BSP\Drivers\factory\connectivity\src\spi_factory.c: 2 warnings, 0 errors
+compiling stm32f103_board_v1.c...
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(334): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 12 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
+  #define I2C_MEMADD_SIZE_8BIT            0x00000001U
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(335): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 13 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
+  #define I2C_MEMADD_SIZE_16BIT           0x00000010U
+..\BSP\Board\stm32f103_board\stm32f103_board_v1.c: 2 warnings, 0 errors
 compiling timer_factory.c...
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(334): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 12 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
   #define I2C_MEMADD_SIZE_8BIT            0x00000001U
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(335): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 13 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
   #define I2C_MEMADD_SIZE_16BIT           0x00000010U
 ..\BSP\Drivers\factory\timer\src\timer_factory.c: 2 warnings, 0 errors
-"2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf" - 2 Error(s), 19 Warning(s).
+compiling stm32_gpio_driver.c...
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\BSP\Drivers\platform\stm32\Connectivity\gpio\stm32_gpio_driver.c: 2 warnings, 0 errors
+compiling pwm_factory.c...
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(334): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 12 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
+  #define I2C_MEMADD_SIZE_8BIT            0x00000001U
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h(335): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 13 of "../BSP/Drivers/interface/Connectivity\i2c_driver.h")
+  #define I2C_MEMADD_SIZE_16BIT           0x00000010U
+..\BSP\Drivers\factory\connectivity\src\pwm_factory.c: 2 warnings, 0 errors
+compiling usart_factory.c...
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\BSP\Drivers\factory\connectivity\src\usart_factory.c: 2 warnings, 0 errors
+compiling stm32_sys.c...
+..\BSP\Drivers\platform\stm32\System\Sys\stm32_sys.c(161): warning:  #1-D: last line of file ends without a newline
+  }
+..\BSP\Drivers\platform\stm32\System\Sys\stm32_sys.c: 1 warning, 0 errors
+compiling stm32_i2c_driver.c...
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.c(102): warning:  #144-D: a value of type "int (*)(i2c_driver_t *, uint16_t, uint8_t *, uint16_t, uint32_t)" cannot be used to initialize an entity of type "int (*)(i2c_driver_t *, uint16_t, const uint8_t *, uint16_t, uint32_t)"
+      .master_receive = stm32_i2c_master_receive,
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.c(104): warning:  #144-D: a value of type "int (*)(i2c_driver_t *, uint16_t, uint8_t *, uint16_t)" cannot be used to initialize an entity of type "int (*)(i2c_driver_t *, uint16_t, const uint8_t *, uint16_t)"
+      .master_receive_asyn = stm32_i2c_master_receive_asyn,
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.c(107): warning:  #144-D: a value of type "int (*)(i2c_driver_t *, uint16_t, uint16_t, uint16_t, uint8_t *, uint16_t, uint32_t)" cannot be used to initialize an entity of type "int (*)(i2c_driver_t *, uint16_t, uint16_t, uint16_t, const uint8_t *, uint16_t, uint32_t)"
+      .mem_write = stm32_i2c_mem_write,
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.c(108): warning:  #144-D: a value of type "int (*)(i2c_driver_t *, uint16_t, uint16_t, uint16_t, uint8_t *, uint16_t, uint32_t)" cannot be used to initialize an entity of type "int (*)(i2c_driver_t *, uint16_t, uint16_t, uint16_t, const uint8_t *, uint16_t, uint32_t)"
+      .mem_read = stm32_i2c_mem_read,
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.c: 6 warnings, 0 errors
+compiling stm32_i2c_soft_driver.c...
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_soft_driver.c(346): warning:  #144-D: a value of type "int (*)(i2c_driver_t *, uint16_t, uint8_t *, uint16_t, uint32_t)" cannot be used to initialize an entity of type "int (*)(i2c_driver_t *, uint16_t, const uint8_t *, uint16_t, uint32_t)"
+      .master_receive = stm32_soft_i2c_master_receive,
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_soft_driver.c(351): warning:  #144-D: a value of type "int (*)(i2c_driver_t *, uint16_t, uint16_t, uint16_t, uint8_t *, uint16_t, uint32_t)" cannot be used to initialize an entity of type "int (*)(i2c_driver_t *, uint16_t, uint16_t, uint16_t, const uint8_t *, uint16_t, uint32_t)"
+      .mem_write = stm32_soft_i2c_mem_write,
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_soft_driver.c(352): warning:  #144-D: a value of type "int (*)(i2c_driver_t *, uint16_t, uint16_t, uint16_t, uint8_t *, uint16_t, uint32_t)" cannot be used to initialize an entity of type "int (*)(i2c_driver_t *, uint16_t, uint16_t, uint16_t, const uint8_t *, uint16_t, uint32_t)"
+      .mem_read = stm32_soft_i2c_mem_read,
+..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_soft_driver.c: 5 warnings, 0 errors
+compiling stm32_spi_driver.c...
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\BSP\Drivers\platform\stm32\Connectivity\spi\stm32_spi_driver.c: 2 warnings, 0 errors
+compiling stm32_usart_driver.c...
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\BSP\Drivers\platform\stm32\Connectivity\usart\stm32_usart_driver.c: 2 warnings, 0 errors
+compiling stm32_timer_driver.c...
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\BSP\Drivers\platform\stm32\Connectivity\timer\stm32_timer_driver.c: 2 warnings, 0 errors
+compiling elog_init.c...
+compiling user_task.c...
+compiling stm32_pwm_driver.c...
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\BSP\Drivers\platform\stm32\Connectivity\pwm\stm32_pwm_driver.c: 2 warnings, 0 errors
+linking...
+Program Size: Code=42356 RO-data=1664 RW-data=260 ZI-data=13988  
+FromELF: creating hex file...
+"2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf" - 0 Error(s), 38 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -117,8 +176,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@5.6.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Target not created.
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:07
 </pre>
 </body>
 </html>

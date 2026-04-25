@@ -73,9 +73,13 @@ extern const timer_mapping_t timer_mappings[TIMER_ID_MAX];
 
 /* ----- PWM ----- */
 typedef enum {
-  PWM_ID_R = 0,
-  PWM_ID_G = 1,
-  PWM_ID_B = 2,
+  M0_IN_1,
+  M0_IN_2,
+  M0_IN_3,
+  M1_IN_1,
+  M1_IN_2,
+  M1_IN_3,
+	
   PWM_ID_MAX
 } pwm_device_id_t;
 typedef struct {

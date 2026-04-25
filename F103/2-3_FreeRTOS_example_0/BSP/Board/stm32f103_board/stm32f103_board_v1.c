@@ -48,14 +48,20 @@ const timer_mapping_t timer_mappings[TIMER_ID_MAX] = {
 
 // PWM 逻辑号映射
 static const stm32_pwm_config_t pwm_configs[PWM_ID_MAX] = {
-	[PWM_ID_R] = {&htim2, TIM_CHANNEL_1},
-	[PWM_ID_G] = {&htim2, TIM_CHANNEL_2},
-	[PWM_ID_B] = {&htim2, TIM_CHANNEL_3},
+	[M0_IN_1] = {&htim2, TIM_CHANNEL_1},
+	[M0_IN_2] = {&htim2, TIM_CHANNEL_2},
+	[M0_IN_3] = {&htim2, TIM_CHANNEL_3},
+	[M1_IN_1] = {&htim2, TIM_CHANNEL_4},
+	[M1_IN_2] = {&htim3, TIM_CHANNEL_1},
+	[M1_IN_3] = {&htim3, TIM_CHANNEL_1},
 };
 const pwm_mapping_t pwm_mappings[PWM_ID_MAX] = {
-    [PWM_ID_R] = {.resource = (void *)&pwm_configs[PWM_ID_R]},
-    [PWM_ID_G] = {.resource = (void *)&pwm_configs[PWM_ID_G]},
-    [PWM_ID_B] = {.resource = (void *)&pwm_configs[PWM_ID_B]},
+    [M0_IN_1] = {.resource = (void *)&pwm_configs[M0_IN_1]},
+    [M0_IN_2] = {.resource = (void *)&pwm_configs[M0_IN_2]},
+    [M0_IN_3] = {.resource = (void *)&pwm_configs[M0_IN_3]},
+	[M1_IN_1] = {.resource = (void *)&pwm_configs[M1_IN_1]},
+    [M1_IN_2] = {.resource = (void *)&pwm_configs[M1_IN_2]},
+    [M1_IN_3] = {.resource = (void *)&pwm_configs[M1_IN_3]},
 };
 
 // SPI 逻辑号映射表

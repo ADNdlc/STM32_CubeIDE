@@ -1216,6 +1216,11 @@
               <FileType>5</FileType>
               <FilePath>..\Component\Component_inc.h</FilePath>
             </File>
+            <File>
+              <FileName>pwm_led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Component\pwm_led\pwm_led.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1275,6 +1280,26 @@
               <FileName>test_led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Test\Unit\test_led.c</FilePath>
+            </File>
+            <File>
+              <FileName>test_pwm_led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Test\Unit\test_pwm_led.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>UserAPP</GroupName>
+          <Files>
+            <File>
+              <FileName>user_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UserAPP\user_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_task.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\UserAPP\user_task.h</FilePath>
             </File>
           </Files>
         </Group>
