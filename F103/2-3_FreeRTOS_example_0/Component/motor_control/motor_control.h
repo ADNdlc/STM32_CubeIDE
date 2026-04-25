@@ -10,7 +10,6 @@ struct motor_control_t
 {
   threephase_motor_t *motor;
   float shaft_angle;         // 机械角度
-  float electric_angle;      // 电角度
   float zero_electric_angle; // 电角度零点
   uint32_t loop_timestamp;
 };

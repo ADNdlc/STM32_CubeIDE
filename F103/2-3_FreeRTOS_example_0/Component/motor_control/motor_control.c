@@ -65,9 +65,8 @@ motor_control_t *motor_control_create(threephase_motor_t *motor, uint8_t pole_pa
     return NULL;
 
   motor_ctrl->motor = motor;
-  motor_ctrl->pole_pairs = pole_pairs;
+  // pole_pairs 现在存储在 threephase_motor_t 结构体中，不需要在这里存储
   motor_ctrl->shaft_angle = 0.0f;
-  motor_ctrl->electric_angle = 0.0f;
   motor_ctrl->zero_electric_angle = 0.0f;
   motor_ctrl->loop_timestamp = 0;
 
