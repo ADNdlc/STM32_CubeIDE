@@ -1,64 +1,66 @@
-/*
- * pwm_led.c
- *
- *  Created on: Nov 26, 2025
- *      Author: 12114
- */
-
-#include "pwm_led.h"
+#include "ThreePhase_motor.h"
 #include "sys.h"
 #include <stdint.h>
 #include <stdlib.h>
-//#include "MemPool.h"
+// #include "MemPool.h"
 #ifdef USE_MEMPOOL
-#define PWMLED_MEMSOURCE SYS_MEM_INTERNAL
-#else
-#define PWMLED_MEMSOURCE 0 // 标记不使用内存池
+#define TP_MOTOR_MEMSOURCE SYS_MEM_INTERNAL
 #endif
 
-/* ==========================================
- * 构造与初始化
- * ========================================== */
+#define _constrain(amt, low, high) ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
 
-void pwm_led_init(pwm_led_t *self, pwm_driver_t *pwm_driver, uint8_t active_level) {
-  if (!self || !pwm_driver)
+void motor_init(threephase_motor_t *self, pwm_driver_t *phase_u, pwm_driver_t *phase_v, pwm_driver_t *phase_w, float bus_voltage)
+{
+  if (!self || !phase_u || !phase_v || !phase_w)
     return;
-  self->pwm_driver = pwm_driver;
-  self->active_level = active_level;
-  self->current_duty = 0;
-
-  // 默认启动 PWM (频率可能已由驱动层或工厂层预设)
-  PWM_START(self->pwm_driver);
-  // 初始状态为关闭 (亮度0)
-  pwm_led_set_brightness(self, 0);
+  self->phase_u = phase_u;
+  self->phase_v = phase_v;
+  self->phase_w = phase_w;
+  self->bus_voltage = bus_voltage;
+  self->voltage_limit = 0.5f * bus_voltage;
 }
 
-pwm_led_t *pwm_led_create(uint32_t freq, pwm_driver_t *pwm_driver, uint8_t active_level) {
-  if (!pwm_driver)
+threephase_motor_t *pwm_led_create(threephase_motor_t *self, pwm_driver_t *phase_u, pwm_driver_t *phase_v, pwm_driver_t *phase_w, float bus_voltage)
+{
+  if (!self || !phase_u || !phase_v || !phase_w)
     return NULL;
-
-  pwm_led_t *self;
 #ifdef USE_MEMPOOL
-  self = (pwm_led_t *)sys_malloc(PWMLED_MEMSOURCE, sizeof(pwm_led_t));
+  threephase_motor_t *motor =
+      (threephase_motor_t *)sys_malloc(TP_MOTOR_MEMSOURCE, sizeof(threephase_motor_t));
 #else
-  self = (pwm_led_t *)malloc(sizeof(pwm_led_t));
+  threephase_motor_t *motor =
+      (threephase_motor_t *)malloc(sizeof(threephase_motor_t));
 #endif
-
-  if (self) {
-    // 先设置频率
-    PWM_SET_FREQ(pwm_driver, freq);
-    // 初始化组件
-    pwm_led_init(self, pwm_driver, active_level);
+  if (!motor)
+  {
+    return NULL;
   }
-  return self;
+  PWM_STOP(phase_u);
+  PWM_STOP(phase_v);
+  PWM_STOP(phase_w);
+
+  motor_init(motor, phase_u, phase_v, phase_w, bus_voltage);
+  uint32_t max_duty_u = PWM_GET_DUTY_MAX(self->phase_u);
+  uint32_t max_duty_v = PWM_GET_DUTY_MAX(self->phase_v);
+  uint32_t max_duty_w = PWM_GET_DUTY_MAX(self->phase_w);
+  if (!(max_duty_u == max_duty_v && max_duty_u == max_duty_w))
+  {
+    motor_destroy(motor);
+    return NULL;
+  }
+
+  return motor;
 }
 
-void pwm_led_destroy(pwm_led_t *self) {
-  if (self) {
+void motor_destroy(threephase_motor_t *self)
+{
+  if (self)
+  {
     // 停止PWM
-    if (self->pwm_driver) {
-      PWM_STOP(self->pwm_driver);
-    }
+    PWM_STOP(self->phase_u);
+    PWM_STOP(self->phase_v);
+    PWM_STOP(self->phase_w);
+
 #ifdef USE_MEMPOOL
     sys_free(PWMLED_MEMSOURCE, self);
 #else
@@ -67,46 +69,53 @@ void pwm_led_destroy(pwm_led_t *self) {
   }
 }
 
-void pwm_led_set_state(pwm_led_t *self, uint8_t state) {
+int motor_set_phase_voltage(threephase_motor_t *self, float Vu, float Vv, float Vw)
+{
+  if (!self)
+    return -1;
+
+  float dc_u = _constrain(Vu / self->voltage_limit, 0.0f, 1.0f);
+  float dc_v = _constrain(Vv / self->voltage_limit, 0.0f, 1.0f);
+  float dc_w = _constrain(Vw / self->voltage_limit, 0.0f, 1.0f);
+
+  uint32_t max_duty = PWM_GET_DUTY_MAX(self->phase_u);
+
+  PWM_SET_DUTY(self->phase_u, max_duty * dc_u);
+  PWM_SET_DUTY(self->phase_v, max_duty * dc_v);
+  PWM_SET_DUTY(self->phase_w, max_duty * dc_w);
+
+  PWM_START(self->phase_u);
+  PWM_START(self->phase_v);
+  PWM_START(self->phase_w);
+  return 0;
+}
+
+void motor_set_bus_voltage(threephase_motor_t *self, float bus_voltage)
+{
   if (!self)
     return;
-  // 这里的 state：1=ON (100% 亮度), 0=OFF (0% 亮度)
-  pwm_led_set_brightness(self, state ? 100 : 0);
+  motor_set_phase_voltage(self, 0.0f, 0.0f, 0.0f);
+  self->bus_voltage = bus_voltage;
+  self->voltage_limit = 0.5f * bus_voltage;
 }
-
-uint8_t pwm_led_get_state(pwm_led_t *self) {
+/**
+ * @brief 获取母线电压值
+ */
+float motor_get_bus_voltage(threephase_motor_t *self)
+{
   if (!self)
-    return 0;
-  return self->current_duty > 0 ? 1 : 0;
+    return 0.0f;
+  return self->bus_voltage;
 }
 
-void pwm_led_set_brightness(pwm_led_t *self, uint32_t brightness) {
-  if (!self || !self->pwm_driver)
+/**
+ * @brief 停止电机
+ */
+void motor_stop(threephase_motor_t *self)
+{
+  if (!self)
     return;
-
-  if (brightness > 100)
-    brightness = 100;
-
-  self->current_duty = brightness;
-
-  // 获取驱动层的最大占空比 (ARR值)
-  uint32_t max_duty = PWM_GET_DUTY_MAX(self->pwm_driver);
-
-  // 计算实际写入寄存器的对比值
-  // 亮度 0-100 映射到 0-max_duty
-  // 如果 active_level 为 0 (低电平有效)，则需要反转占空比
-  uint32_t target_duty;
-  if (self->active_level) { // 高电平有效
-    target_duty = (brightness * max_duty) / 100;
-  } else { // 低电平有效
-    target_duty = max_duty - ((brightness * max_duty) / 100);
-  }
-
-  PWM_SET_DUTY(self->pwm_driver, target_duty);
-}
-
-uint32_t pwm_led_get_brightness(pwm_led_t *self) {
-  if (!self)
-    return 0;
-  return self->current_duty;
+  PWM_STOP(self->phase_u);
+  PWM_STOP(self->phase_v);
+  PWM_STOP(self->phase_w);
 }

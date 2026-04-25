@@ -10,9 +10,10 @@ typedef struct pwm_driver_t pwm_driver_t;
 typedef struct {
   void (*start)(pwm_driver_t *self);
   void (*stop)(pwm_driver_t *self);
-  void (*set_duty)(pwm_driver_t *self, uint32_t duty);
+  int (*set_duty)(pwm_driver_t *self, uint32_t duty);
   void (*set_freq)(pwm_driver_t *self, uint32_t freq);
   uint32_t (*get_freq)(pwm_driver_t *self);
+  int (*set_duty_max)(pwm_driver_t *self, uint32_t duty_max);
   uint32_t (*get_duty_max)(pwm_driver_t *self);
 } pwm_driver_ops_t;
 
@@ -27,6 +28,7 @@ struct pwm_driver_t {
 #define PWM_SET_DUTY(driver, duty) (driver)->ops->set_duty(driver, duty)
 #define PWM_SET_FREQ(driver, freq) (driver)->ops->set_freq(driver, freq)
 #define PWM_GET_FREQ(driver) (driver)->ops->get_freq(driver)
+#define PWM_SET_DUTY_MAX(driver, duty_max) (driver)->ops->set_duty_max(driver, duty_max)
 #define PWM_GET_DUTY_MAX(driver) (driver)->ops->get_duty_max(driver)
 
 #endif /* BSP_DEVICE_DRIVER_PWM_LED_PWM_DRIVER_H_ */

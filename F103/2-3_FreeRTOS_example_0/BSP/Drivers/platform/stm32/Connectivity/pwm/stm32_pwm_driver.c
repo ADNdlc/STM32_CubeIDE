@@ -90,10 +90,16 @@ static void _stm32_pwm_stop(pwm_driver_t *base) {
   HAL_TIM_PWM_Stop(self->config.htim, self->config.channel);
 }
 
-static void _stm32_pwm_set_duty(pwm_driver_t *base, uint32_t duty) {
+static int _stm32_pwm_set_duty(pwm_driver_t *base, uint32_t duty) {
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
   // 直接设置 CCR 寄存器
   __HAL_TIM_SET_COMPARE(self->config.htim, self->config.channel, duty);
+  return 0;
+}
+
+static int _stm32_pwm_set_duty_max(pwm_driver_t *base, uint32_t duty_max){
+  stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
+  __HAL_TIM_SET_AUTORELOAD(self->config.htim, duty_max);
 }
 
 static uint32_t _stm32_pwm_get_duty_max(pwm_driver_t *base) {
@@ -166,6 +172,7 @@ static const pwm_driver_ops_t stm32_pwm_ops = {
     .set_duty = _stm32_pwm_set_duty,
     .set_freq = _stm32_pwm_set_freq,
     .get_freq = _stm32_pwm_get_freq,
+    .set_duty_max = _stm32_pwm_set_duty_max,
     .get_duty_max = _stm32_pwm_get_duty_max};
 
 stm32_pwm_driver_t *stm32_pwm_driver_create(stm32_pwm_config_t *config) {

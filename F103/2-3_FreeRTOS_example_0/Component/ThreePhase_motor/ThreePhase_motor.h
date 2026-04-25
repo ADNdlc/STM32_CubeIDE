@@ -1,37 +1,49 @@
-/*
- * pwm_led.h
- *
- *  Created on: Nov 26, 2025
- *      Author: 12114
- */
-
-#ifndef BSP_DEVICE_DRIVER_PWM_LED_PWM_LED_H_
-#define BSP_DEVICE_DRIVER_PWM_LED_PWM_LED_H_
+#ifndef BSP_DEVICE_DRIVER_THREEPHASE_MOTOR_H_
+#define BSP_DEVICE_DRIVER_THREEPHASE_MOTOR_H_
 
 #include "interface_inc.h"
 #include <stdint.h>
 
-typedef struct motor_t motor_t;
+typedef struct threephase_motor_t threephase_motor_t;
 
 // Motor_t 结构体
-struct motor_t {
-  pwm_driver_t *phase_a;
-  pwm_driver_t *phase_b;
-  pwm_driver_t *phase_c;
-	
-  float voltage_limit;    // 电压(力矩)限制
+struct threephase_motor_t
+{
+  pwm_driver_t *phase_u; // u相PWM通道
+  pwm_driver_t *phase_v; // v相
+  pwm_driver_t *phase_w; // w相
+
+  float bus_voltage; // 母线电压(电机驱动电压)
+  float voltage_limit;
 };
 
 // 公共 API
-void motor_init(motor_t *self,   pwm_driver_t *phase_a, pwm_driver_t *phase_b, pwm_driver_t *phase_c, float voltage_limit);
-motor_t *pwm_led_create(motor_t *self,   pwm_driver_t *phase_a, pwm_driver_t *phase_b, pwm_driver_t *phase_c, float voltage_limit);
-void motor_destroy(motor_t *self);
+void motor_init(threephase_motor_t *self, pwm_driver_t *phase_u, pwm_driver_t *phase_v, pwm_driver_t *phase_w, float bus_voltage);
+threephase_motor_t *pwm_led_create(threephase_motor_t *self, pwm_driver_t *phase_u, pwm_driver_t *phase_v, pwm_driver_t *phase_w, float bus_voltage);
+void motor_destroy(threephase_motor_t *self);
 
 /**
- * @brief 设置motor三相电压
+ * @brief 设置三相相电压(静止坐标系，对电机中性点)
  * @param self motor_t 实例
+ * @param Vu   U 相电压 (V)
+ * @param Vv   V 相电压 (V)
+ * @param Vw   W 相电压 (V)
+ * @return 0: 成功, -1: 失败
+ * @note  如果任一相电压超出 单相voltage_limit(bus_voltage/2), 将自动进行等比例缩放 (clamp)
  */
-void motor_phase_voltage_set(motor_t *self, float Va, float Vb, float Vc);
+int motor_set_phase_voltage(threephase_motor_t *self, float Vu, float Vv, float Vw);
+/**
+ * @brief 更新母线电压值
+ */
+void motor_set_bus_voltage(threephase_motor_t *self, float bus_voltage);
+/**
+ * @brief 获取母线电压值
+ */
+float motor_get_bus_voltage(threephase_motor_t *self);
 
+/**
+ * @brief 停止电机
+ */
+void motor_stop(threephase_motor_t *self);
 
-#endif /* BSP_DEVICE_DRIVER_PWM_LED_PWM_LED_H_ */
+#endif /* BSP_DEVICE_DRIVER_THREEPHASE_MOTOR_H_ */
