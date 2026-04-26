@@ -11,6 +11,9 @@
 #include "motor_control/motor_control.h"
 #include "BSP_init.h" // 包含以获取Motor_1_control和g_debug_queue的外部声明
 #include "uart_queue/uart_queue.h" // 包含uart_queue相关函数
+#include "dev_map.h"
+#include "factory_inc.h"
+#include "pwm_led/pwm_led.h"
 
 // 手动定义PI常量（与motor_control.c保持一致）
 #define M_PI_F 3.14159265358979323846f
@@ -60,11 +63,13 @@ void User_Task_HandleInput(uint8_t cmd)
     
     // 处理速度设置命令
     if (cmd >= '0' && cmd <= '9') {
+        HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
         // 将字符转换为速度值 (0-9 rad/s)
         float new_velocity = (float)(cmd - '0');
         target_velocity = new_velocity;
         log_i("Target velocity set to: %.1f rad/s", target_velocity);
     } else if (cmd == '+') {
+        HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
         // 增加速度
         target_velocity += 1.0f;
         if (target_velocity > 20.0f) target_velocity = 20.0f; // 限制最大速度
@@ -75,6 +80,7 @@ void User_Task_HandleInput(uint8_t cmd)
         if (target_velocity < 0.0f) target_velocity = 0.0f; // 限制最小速度
         log_i("Target velocity decreased to: %.1f rad/s", target_velocity);
     } else if (cmd == 's') {
+        HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
         // 停止电机
         target_velocity = 0.0f;
         motor_stop(Motor_1_control->motor);
@@ -112,7 +118,54 @@ void User_Task_1(void)
 
 void User_Task_2(void)
 {
-    vTaskDelay(500);
+    static pwm_led_t *pwm_m0_in_1 = NULL;
+    static uint32_t pwm_update_tick = 0;    // 用于PWM更新的时间跟踪
+    static uint32_t log_print_tick = 0;     // 用于日志打印的时间跟踪
+    static int8_t direction = 1;
+    static uint8_t brightness = 0;
+    
+    // 初始化 PWM LED（只执行一次）
+    if (pwm_m0_in_1 == NULL) {
+        pwm_driver_t *driver = pwm_driver_get(M0_IN_1);
+        
+        if (driver == NULL) {
+            log_e("M0_IN_1 PWM driver not found");
+            vTaskDelay(500);
+            return;
+        }
+        
+        // 创建 PWM LED，频率 1kHz，高电平有效
+        pwm_m0_in_1 = pwm_led_create(1000, driver, 1);
+        
+        if (pwm_m0_in_1 == NULL) {
+            log_e("Failed to create PWM LED for M0_IN_1");
+            vTaskDelay(500);
+            return;
+        }
+        
+        log_i("M0_IN_1 PWM initialized at 1kHz");
+    }
+
+    // 每 500ms 打印一次亮度
+    if (sys_get_systick_ms() - log_print_tick >= 500) {
+        log_print_tick = sys_get_systick_ms();
+        log_i("M0_IN_1 PWM brightness: %d", brightness);
+    }
+
+    // 每 20ms 更新一次亮度，实现呼吸灯效果
+    if (sys_get_systick_ms() - pwm_update_tick >= 20) {
+        pwm_update_tick = sys_get_systick_ms();
+        
+        pwm_led_set_brightness(pwm_m0_in_1, brightness);
+        
+        brightness += direction;
+        if (brightness >= 100 || brightness <= 0) {
+            direction = -direction;
+        }
+    } 
+    
+    // 短暂延时，避免占用过多CPU
+    vTaskDelay(1);
 }
 
 int fputc(int ch, FILE *f)

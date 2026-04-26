@@ -100,6 +100,7 @@ static int _stm32_pwm_set_duty(pwm_driver_t *base, uint32_t duty) {
 static int _stm32_pwm_set_duty_max(pwm_driver_t *base, uint32_t duty_max){
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
   __HAL_TIM_SET_AUTORELOAD(self->config.htim, duty_max);
+  return 0;
 }
 
 static uint32_t _stm32_pwm_get_duty_max(pwm_driver_t *base) {

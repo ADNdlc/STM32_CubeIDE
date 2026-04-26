@@ -81,6 +81,8 @@ void Error_Handler(void);
 #define I2C0_SCL_GPIO_Port GPIOB
 #define I2C0_SDA_Pin GPIO_PIN_11
 #define I2C0_SDA_GPIO_Port GPIOB
+#define MOTOR_EN_Pin GPIO_PIN_8
+#define MOTOR_EN_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 
