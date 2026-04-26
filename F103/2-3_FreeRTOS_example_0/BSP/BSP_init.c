@@ -22,7 +22,9 @@
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
 motor_control_t *Motor_1_control = NULL;
+motor_control_t *Motor_2_control = NULL;
 absolute_encoder_driver_t *g_encoder_m0 = NULL;
+absolute_encoder_driver_t *g_encoder_m1 = NULL;
 
 /* 调试串口队列用的缓冲区 */
 static uint8_t debug_tx_buf[2048];
@@ -73,14 +75,25 @@ void bsp_init(void)
   pwm_driver_t *M_IN_2 = pwm_driver_get(M0_IN_2);
   pwm_driver_t *M_IN_3 = pwm_driver_get(M0_IN_3);
 
+  pwm_driver_t *M1_IN_1_drv = pwm_driver_get(M1_IN_1);
+  pwm_driver_t *M1_IN_2_drv = pwm_driver_get(M1_IN_2);
+  pwm_driver_t *M1_IN_3_drv = pwm_driver_get(M1_IN_3);
+
   PWM_SET_FREQ(M_IN_1, 30000);
   PWM_SET_FREQ(M_IN_2, 30000);
   PWM_SET_FREQ(M_IN_3, 30000);
 
+  PWM_SET_FREQ(M1_IN_1_drv, 30000);
+  PWM_SET_FREQ(M1_IN_2_drv, 30000);
+  PWM_SET_FREQ(M1_IN_3_drv, 30000);
+
   threephase_motor_t *Motor_1 = threephase_motor_create(M_IN_1, M_IN_2, M_IN_3, 12.0f);
   motor_set_voltage(Motor_1, 12.0f, 12.0f);
-
   Motor_1_control = motor_control_create(Motor_1, 7);
+
+  threephase_motor_t *Motor_2 = threephase_motor_create(M1_IN_1_drv, M1_IN_2_drv, M1_IN_3_drv, 12.0f);
+  motor_set_voltage(Motor_2, 12.0f, 12.0f);
+  Motor_2_control = motor_control_create(Motor_2, 7);
 
   /* 4. 创建编码器驱动 */
   g_encoder_m0 = absolute_encoder_driver_get(ENCODER_ID_M0);
@@ -88,6 +101,13 @@ void bsp_init(void)
       log_i("Encoder M0 initialized.");
   } else {
       log_w("Encoder M0 initialization failed!");
+  }
+
+  g_encoder_m1 = absolute_encoder_driver_get(ENCODER_ID_M1);
+  if (g_encoder_m1) {
+      log_i("Encoder M1 initialized.");
+  } else {
+      log_w("Encoder M1 initialization failed!");
   }
 }
 

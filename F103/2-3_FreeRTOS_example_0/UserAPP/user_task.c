@@ -119,6 +119,11 @@ void User_Task_HandleInput(uint8_t cmd)
     }
 }
 
+extern motor_control_t *Motor_1_control;
+extern motor_control_t *Motor_2_control;
+extern absolute_encoder_driver_t *g_encoder_m0;
+extern absolute_encoder_driver_t *g_encoder_m1;
+
 void User_Task_1(void)
 {
     // 检查串口输入并处理
@@ -129,18 +134,48 @@ void User_Task_1(void)
         }
     }
     
-    // 执行开环速度控制
-    velocityOpenloop(target_velocity);
-
-    // 读取编码器角度并在变化时打印
-    if (g_encoder_m0) {
-        static float last_logged_angle = -10.0f;
-        float current_angle = ENCODER_GET_ANGLE(g_encoder_m0);
+    // 执行双电机开环速度控制 (同步)
+    velocityOpenloop(target_velocity); // 注意：目前的 velocityOpenloop 内部硬编码了 Motor_1_control
+    
+    // 为了同步控制 Motor 2，我们需要修改 velocityOpenloop 或者手动调用
+    // 这里简单起见，我先手动同步 Motor 2 的逻辑
+    if (Motor_2_control) {
+        uint32_t now_us = sys_get_systick_us();
+        static uint32_t last_timestamp_m2 = 0;
+        if (last_timestamp_m2 == 0) last_timestamp_m2 = now_us - 1000;
+        uint32_t Ts = now_us - last_timestamp_m2;
+        if (Ts == 0 || Ts > 100000) Ts = 1000;
         
-        // 当角度变化超过 0.05 rad (~3度) 时打印
-        if (fabs(current_angle - last_logged_angle) > 0.05f) {
-            log_d("Encoder Angle: %.2f rad", current_angle);
-            last_logged_angle = current_angle;
+        Motor_2_control->shaft_angle = _normalizeAngle(Motor_2_control->shaft_angle + target_velocity * (float)Ts * 1e-6f);
+        float Uq = 1.5f + fabs(target_velocity) * 0.4f;
+        if (Uq > Motor_2_control->motor->voltage_limit) Uq = Motor_2_control->motor->voltage_limit;
+        
+        float electrical_angle = motor_get_electricalAngle(Motor_2_control->motor, Motor_2_control->shaft_angle);
+        setPhaseVoltage(Motor_2_control, Uq, 0, electrical_angle);
+        last_timestamp_m2 = now_us;
+    }
+
+    // 降低编码器采样频率，避免 I2C 阻塞导致控制循环抖动
+    static uint32_t last_encoder_tick = 0;
+    if (sys_get_systick_ms() - last_encoder_tick >= 50) {
+        last_encoder_tick = sys_get_systick_ms();
+        
+        if (g_encoder_m0) {
+            static float last_logged_angle_m0 = -10.0f;
+            float current_angle = ENCODER_GET_ANGLE(g_encoder_m0);
+            if (fabs(current_angle - last_logged_angle_m0) > 0.05f) {
+                log_d("M0 Angle: %.2f rad", current_angle);
+                last_logged_angle_m0 = current_angle;
+            }
+        }
+        
+        if (g_encoder_m1) {
+            static float last_logged_angle_m1 = -10.0f;
+            float current_angle = ENCODER_GET_ANGLE(g_encoder_m1);
+            if (fabs(current_angle - last_logged_angle_m1) > 0.05f) {
+                log_d("M1 Angle: %.2f rad", current_angle);
+                last_logged_angle_m1 = current_angle;
+            }
         }
     }
 }

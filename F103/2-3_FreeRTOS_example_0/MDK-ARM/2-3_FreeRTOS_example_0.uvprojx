@@ -1286,6 +1286,11 @@
               <FileType>1</FileType>
               <FilePath>..\Test\Unit\test_pwm_led.c</FilePath>
             </File>
+            <File>
+              <FileName>test_encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Test\Unit\test_encoder.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

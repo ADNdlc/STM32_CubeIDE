@@ -27,15 +27,16 @@ Project File Date:  04/26/2026
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target '2-3_FreeRTOS_example_0'
-compiling absolute_encoder_factory.c...
-..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c(7): warning:  #47-D: incompatible redefinition of macro "LOG_TAG"  (declared at line 238 of "../Lib/EasyLogger/easylogger/inc/elog.h")
-  #define LOG_TAG "ABSOLUTE_ENCODER_FACTORY"
-..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c(20): warning:  #767-D: conversion from pointer to smaller integer
-          i2c_driver_t *i2c_drv = i2c_driver_get((i2c_device_id_t)mapping->resource);
-..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c: 2 warnings, 0 errors
+compiling i2c.c...
+compiling user_task.c...
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
+../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
+  #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
+..\UserAPP\user_task.c: 2 warnings, 0 errors
 linking...
 .\2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.sct(14): warning: L6314W: No section matches pattern *(.test_registry).
-Program Size: Code=54848 RO-data=2004 RW-data=280 ZI-data=12992  
+Program Size: Code=56140 RO-data=2128 RW-data=300 ZI-data=12988  
 Finished: 0 information, 1 warning and 0 error messages.
 FromELF: creating hex file...
 "2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf" - 0 Error(s), 3 Warning(s).
@@ -62,7 +63,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@5.6.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

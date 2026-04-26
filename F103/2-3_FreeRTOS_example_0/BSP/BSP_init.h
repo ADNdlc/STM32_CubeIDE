@@ -7,7 +7,9 @@
 extern usart_driver_t *g_debug_uart;
 extern uart_queue_t *g_debug_queue;
 extern motor_control_t *Motor_1_control;
+extern motor_control_t *Motor_2_control;
 extern absolute_encoder_driver_t *g_encoder_m0;
+extern absolute_encoder_driver_t *g_encoder_m1;
 
 // BSP 统一初始化接口
 void bsp_init(void);

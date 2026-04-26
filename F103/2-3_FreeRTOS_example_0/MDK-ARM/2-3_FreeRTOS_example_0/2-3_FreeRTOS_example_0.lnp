@@ -76,6 +76,7 @@
 "2-3_freertos_example_0\test_framework.o"
 "2-3_freertos_example_0\test_led.o"
 "2-3_freertos_example_0\test_pwm_led.o"
+"2-3_freertos_example_0\test_encoder.o"
 "2-3_freertos_example_0\user_task.o"
 --strict --scatter ".\2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols

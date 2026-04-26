@@ -38,7 +38,7 @@ static int stm32_i2c_master_transmit(i2c_driver_t *self, uint16_t dev_addr,
   stm32_i2c_driver_t *driver = (stm32_i2c_driver_t *)self;
   HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(
       driver->config.resource.hi2c, dev_addr, (uint8_t *)data, size, timeout);
-  return (status == HAL_OK) ? 0 : -1;
+  return (int)status;
 }
 
 static int stm32_i2c_master_receive(i2c_driver_t *self, uint16_t dev_addr,
@@ -47,7 +47,7 @@ static int stm32_i2c_master_receive(i2c_driver_t *self, uint16_t dev_addr,
   stm32_i2c_driver_t *driver = (stm32_i2c_driver_t *)self;
   HAL_StatusTypeDef status = HAL_I2C_Master_Receive(
       driver->config.resource.hi2c, dev_addr, buffer, size, timeout);
-  return (status == HAL_OK) ? 0 : -1;
+  return (int)status;
 }
 
 static int stm32_i2c_master_transmit_asyn(i2c_driver_t *self, uint16_t dev_addr,
@@ -55,7 +55,7 @@ static int stm32_i2c_master_transmit_asyn(i2c_driver_t *self, uint16_t dev_addr,
   stm32_i2c_driver_t *driver = (stm32_i2c_driver_t *)self;
   HAL_StatusTypeDef status = HAL_I2C_Master_Transmit_DMA(
       driver->config.resource.hi2c, dev_addr, (uint8_t *)data, size);
-  return (status == HAL_OK) ? 0 : -1;
+  return (int)status;
 }
 
 static int stm32_i2c_master_receive_asyn(i2c_driver_t *self, uint16_t dev_addr,
@@ -63,7 +63,7 @@ static int stm32_i2c_master_receive_asyn(i2c_driver_t *self, uint16_t dev_addr,
   stm32_i2c_driver_t *driver = (stm32_i2c_driver_t *)self;
   HAL_StatusTypeDef status = HAL_I2C_Master_Receive_DMA(
       driver->config.resource.hi2c, dev_addr, buffer, size);
-  return (status == HAL_OK) ? 0 : -1;
+  return (int)status;
 }
 
 static int stm32_i2c_set_callback(i2c_driver_t *self, i2c_callback_t cb,
@@ -82,7 +82,7 @@ static int stm32_i2c_mem_write(i2c_driver_t *self, uint16_t dev_addr,
   HAL_StatusTypeDef status =
       HAL_I2C_Mem_Write(driver->config.resource.hi2c, dev_addr, mem_addr,
                         mem_addr_size, data, size, timeout);
-  return (status == HAL_OK) ? 0 : -1;
+  return (int)status;
 }
 
 static int stm32_i2c_mem_read(i2c_driver_t *self, uint16_t dev_addr,
@@ -93,7 +93,7 @@ static int stm32_i2c_mem_read(i2c_driver_t *self, uint16_t dev_addr,
   HAL_StatusTypeDef status =
       HAL_I2C_Mem_Read(driver->config.resource.hi2c, dev_addr, mem_addr,
                        mem_addr_size, buffer, size, timeout);
-  return (status == HAL_OK) ? 0 : -1;
+  return (int)status;
 }
 #endif
 
