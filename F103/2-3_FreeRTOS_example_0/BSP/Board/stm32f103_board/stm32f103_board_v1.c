@@ -2,15 +2,17 @@
 #include "dev_map_config.h"
 
 #if (STM32F103_BOARD_V1 == TARGET_BOARD)
+#include "device_inc.h"
 #include "factory_inc.h"
 #include "interface_inc.h"
-#include "device_inc.h"
 #include "stm32_inc.h"
 
-#include "usart.h"
+
 #include "i2c.h"
 #include "spi.h"
 #include "tim.h"
+#include "usart.h"
+
 
 /*************
  * 总线配置表
@@ -48,18 +50,15 @@ const timer_mapping_t timer_mappings[TIMER_ID_MAX] = {
 
 // PWM 逻辑号映射
 static const stm32_pwm_config_t pwm_configs[PWM_ID_MAX] = {
-	[M0_IN_1] = {&htim2, TIM_CHANNEL_1},
-	[M0_IN_2] = {&htim2, TIM_CHANNEL_2},
-	[M0_IN_3] = {&htim2, TIM_CHANNEL_3},
-	[M1_IN_1] = {&htim2, TIM_CHANNEL_4},
-	[M1_IN_2] = {&htim3, TIM_CHANNEL_1},
-	[M1_IN_3] = {&htim3, TIM_CHANNEL_1},
+    [M0_IN_1] = {&htim2, TIM_CHANNEL_1}, [M0_IN_2] = {&htim2, TIM_CHANNEL_2},
+    [M0_IN_3] = {&htim2, TIM_CHANNEL_3}, [M1_IN_1] = {&htim2, TIM_CHANNEL_4},
+    [M1_IN_2] = {&htim3, TIM_CHANNEL_1}, [M1_IN_3] = {&htim3, TIM_CHANNEL_2},
 };
 const pwm_mapping_t pwm_mappings[PWM_ID_MAX] = {
     [M0_IN_1] = {.resource = (void *)&pwm_configs[M0_IN_1]},
     [M0_IN_2] = {.resource = (void *)&pwm_configs[M0_IN_2]},
     [M0_IN_3] = {.resource = (void *)&pwm_configs[M0_IN_3]},
-	[M1_IN_1] = {.resource = (void *)&pwm_configs[M1_IN_1]},
+    [M1_IN_1] = {.resource = (void *)&pwm_configs[M1_IN_1]},
     [M1_IN_2] = {.resource = (void *)&pwm_configs[M1_IN_2]},
     [M1_IN_3] = {.resource = (void *)&pwm_configs[M1_IN_3]},
 };
@@ -77,7 +76,8 @@ uint8_t oled_buffer[(64 / 8) * 128];
 oled_config_t oled_config = {
     .ops = &ssd1306_ops,
     .bus_type = OLED_BUS_I2C,
-    .oled_i2c_config ={
+    .oled_i2c_config =
+        {
             .i2c_id = I2C_BUS_OLED,
             .dev_addr = 0x78, // SSD1306 常用地址
         },

@@ -74,15 +74,23 @@ int motor_set_phase_voltage(threephase_motor_t *self, float Vu, float Vv, float 
   if (!self)
     return -1;
 
-  float dc_u = _constrain(Vu / self->voltage_limit, 0.0f, 1.0f);
-  float dc_v = _constrain(Vv / self->voltage_limit, 0.0f, 1.0f);
-  float dc_w = _constrain(Vw / self->voltage_limit, 0.0f, 1.0f);
+  // 1. 严格限幅：单相相对于中性点的电压不能超过母线电压的一半
+  float limit = self->bus_voltage / 2.0f;
+  Vu = _constrain(Vu, -limit, limit);
+  Vv = _constrain(Vv, -limit, limit);
+  Vw = _constrain(Vw, -limit, limit);
+
+  // 2. 映射到占空比：将 [-Vbus/2, Vbus/2] 映射到 [0, 1]
+  // 占空比 = (V + Vbus/2) / Vbus
+  float dc_u = (Vu + limit) / self->bus_voltage;
+  float dc_v = (Vv + limit) / self->bus_voltage;
+  float dc_w = (Vw + limit) / self->bus_voltage;
 
   uint32_t max_duty = PWM_GET_DUTY_MAX(self->phase_u);
 
-  PWM_SET_DUTY(self->phase_u, max_duty * dc_u);
-  PWM_SET_DUTY(self->phase_v, max_duty * dc_v);
-  PWM_SET_DUTY(self->phase_w, max_duty * dc_w);
+  PWM_SET_DUTY(self->phase_u, (uint32_t)(max_duty * dc_u));
+  PWM_SET_DUTY(self->phase_v, (uint32_t)(max_duty * dc_v));
+  PWM_SET_DUTY(self->phase_w, (uint32_t)(max_duty * dc_w));
 
   PWM_START(self->phase_u);
   PWM_START(self->phase_v);

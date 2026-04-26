@@ -179,6 +179,7 @@ void myFunc02(void *argument)
   /* Infinite loop */
   for (;;)
   {
+    User_Task_2();
     osDelay(1);
   }
   /* USER CODE END myFunc02 */

@@ -41,9 +41,9 @@ void setPhaseVoltage(motor_control_t *motor_ctrl, float Uq, float Ud, float angl
   float Ubeta = Uq * cos(angle_el);
 
   // 克拉克逆变换
-  float Ua = Ualpha + motor_ctrl->motor->voltage_limit / 2;
-  float Ub = (sqrt(3) * Ubeta - Ualpha) / 2 + motor_ctrl->motor->voltage_limit / 2;
-  float Uc = (-Ualpha - sqrt(3) * Ubeta) / 2 + motor_ctrl->motor->voltage_limit / 2;
+  float Ua = Ualpha;
+  float Ub = (sqrt(3) * Ubeta - Ualpha) / 2;
+  float Uc = (-Ualpha - sqrt(3) * Ubeta) / 2;
 
   motor_set_phase_voltage(motor_ctrl->motor, Ua, Ub, Uc);
 }
