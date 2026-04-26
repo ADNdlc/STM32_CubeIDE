@@ -7,6 +7,7 @@
 #include "cmsis_os.h"
 
 #include "sys.h"
+#include "elog.h"
 #include "motor_control/motor_control.h"
 #include "BSP_init.h" // 包含以获取Motor_1_control和g_debug_queue的外部声明
 #include "uart_queue/uart_queue.h" // 包含uart_queue相关函数
@@ -15,7 +16,7 @@
 #define M_PI_F 3.14159265358979323846f
 
 // 全局目标速度变量，可通过串口命令动态调整
-static float target_velocity = 5.0f; // 默认目标速度 5 rad/s
+static float target_velocity = 1.0f; // 默认目标速度 5 rad/s
 
 // 归一化角度到 [0,2PI]
 static float _normalizeAngle(float angle)
@@ -62,36 +63,36 @@ void User_Task_HandleInput(uint8_t cmd)
         // 将字符转换为速度值 (0-9 rad/s)
         float new_velocity = (float)(cmd - '0');
         target_velocity = new_velocity;
-        printf("Target velocity set to: %.1f rad/s\r\n", target_velocity);
+        log_i("Target velocity set to: %.1f rad/s", target_velocity);
     } else if (cmd == '+') {
         // 增加速度
         target_velocity += 1.0f;
         if (target_velocity > 20.0f) target_velocity = 20.0f; // 限制最大速度
-        printf("Target velocity increased to: %.1f rad/s\r\n", target_velocity);
+        log_i("Target velocity increased to: %.1f rad/s", target_velocity);
     } else if (cmd == '-') {
         // 减少速度
         target_velocity -= 1.0f;
         if (target_velocity < 0.0f) target_velocity = 0.0f; // 限制最小速度
-        printf("Target velocity decreased to: %.1f rad/s\r\n", target_velocity);
+        log_i("Target velocity decreased to: %.1f rad/s", target_velocity);
     } else if (cmd == 's') {
         // 停止电机
         target_velocity = 0.0f;
         motor_stop(Motor_1_control->motor);
-        printf("Motor stopped\r\n");
+        log_i("Motor stopped");
     } else if (cmd == 'm') {
         // 显示菜单
-        printf("========================================\r\n");
-        printf("       Motor Control Menu               \r\n");
-        printf("========================================\r\n");
-        printf("[0-9] Set speed (0-9 rad/s)\r\n");
-        printf("[+]   Increase speed by 1 rad/s\r\n");
-        printf("[-]   Decrease speed by 1 rad/s\r\n");
-        printf("[s]   Stop motor\r\n");
-        printf("[m]   Show this menu\r\n");
-        printf("========================================\r\n");
-        printf("Current target velocity: %.1f rad/s\r\n", target_velocity);
-    } else {
-        printf("Unknown command: '%c' (0x%02X)\r\n", cmd, cmd);
+        log_i("========================================");
+        log_i("       Motor Control Menu               ");
+        log_i("========================================");
+        log_i("[0-9] Set speed (0-9 rad/s)");
+        log_i("[+]   Increase speed by 1 rad/s");
+        log_i("[-]   Decrease speed by 1 rad/s");
+        log_i("[s]   Stop motor");
+        log_i("[m]   Show this menu");
+        log_i("========================================");
+        log_i("Current target velocity: %.1f rad/s", target_velocity);
+    } else if (cmd >= 32 && cmd <= 126) {
+        log_i("Unknown command: '%c' (0x%02X)", cmd, cmd);
     }
 }
 
@@ -116,6 +117,13 @@ void User_Task_2(void)
 
 int fputc(int ch, FILE *f)
 {
-    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 10);
+    uint8_t data = (uint8_t)ch;
+    if (g_debug_queue) {
+        // 使用异步队列发送，解决与 DMA 的冲突并防止阻塞任务
+        uart_queue_send(g_debug_queue, &data, 1);
+    } else {
+        // 队列未就绪时降级使用阻塞发送
+        HAL_UART_Transmit(&huart1, &data, 1, 10);
+    }
     return ch;
 }

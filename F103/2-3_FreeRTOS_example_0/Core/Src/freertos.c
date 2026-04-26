@@ -53,14 +53,14 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for myTask01 */
 osThreadId_t myTask01Handle;
 const osThreadAttr_t myTask01_attributes = {
   .name = "myTask01",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for myTask02 */
@@ -142,7 +142,7 @@ void StartDefaultTask(void *argument)
   for (;;)
   {
     Test_Framework_Run();
-    osDelay(5);
+    osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
 }

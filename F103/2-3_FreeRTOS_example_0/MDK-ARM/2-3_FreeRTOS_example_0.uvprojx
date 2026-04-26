@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../A_Project_cfg;../BSP;../BSP/Board;../BSP/Board/stm32f103_board;../BSP/Drivers/device;../BSP/Drivers/factory;../BSP/Drivers/interface;../BSP/Drivers/platform/stm32;../Component;../Component/logger;../BSP/Drivers/interface/System/Sys;../Component/utils;../Lib/EasyLogger/easylogger/inc;../Lib/EasyLogger/easylogger/src;../BSP/Drivers/interface/Device;../Test/core;../Test;..\Component;..\UserAPP</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../A_Project_cfg;../BSP;../BSP/Board;../BSP/Board/stm32f103_board;../BSP/Drivers/device;../BSP/Drivers/factory;../BSP/Drivers/interface;../BSP/Drivers/platform/stm32;../Component;../Component/logger;../BSP/Drivers/interface/System/Sys;../Component/utils;../Lib/EasyLogger/easylogger/inc;../Lib/EasyLogger/easylogger/src;../BSP/Drivers/interface/Device;../Test/core;../Test;../UserAPP</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
