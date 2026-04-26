@@ -78,7 +78,7 @@ const spi_mapping_t spi_mappings[SPI_MAX_DEVICES] = {
 // 绝对值编码器逻辑号映射表
 const absolute_encoder_mapping_t absolute_encoder_mappings[ENCODER_ID_MAX] = {
     [ENCODER_ID_M0] = {.resource = (void *)I2C_M0_OUT},
-    [ENCODER_ID_M1] = {.resource = (void *)I2C_M1_OUT},
+    [ENCODER_ID_M0] = {.resource = (void *)I2C_M1_OUT},
 };
 
 #endif // STM32F103_BOARD_V1

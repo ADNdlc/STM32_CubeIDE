@@ -3,7 +3,7 @@
 <title>Static Call Graph - [2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image 2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Apr 26 16:30:27 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Apr 26 16:39:32 2026
 <BR><P>
 <H3>Maximum Stack Usage =        440 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2275,11 +2275,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[208]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPhaseVoltage
 </UL>
 
-<P><STRONG><a name="[18d]"></a>absolute_encoder_driver_get</STRONG> (Thumb, 68 bytes, Stack size 16 bytes, absolute_encoder_factory.o(i.absolute_encoder_driver_get))
-<BR><BR>[Stack]<UL><LI>Max Depth = 108<LI>Call Chain = absolute_encoder_driver_get &rArr; i2c_driver_get &rArr; stm32_i2c_soft_driver_create &rArr; stm32_i2c_soft_init &rArr; HAL_GPIO_Init
+<P><STRONG><a name="[18d]"></a>absolute_encoder_driver_get</STRONG> (Thumb, 86 bytes, Stack size 24 bytes, absolute_encoder_factory.o(i.absolute_encoder_driver_get))
+<BR><BR>[Stack]<UL><LI>Max Depth = 368 + Unknown Stack Size
+<LI>Call Chain = absolute_encoder_driver_get &rArr; elog_output &rArr;  elog_output (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[18e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_driver_get
 <LI><a href="#[18f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;as5600_driver_create
+<LI><a href="#[171]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;elog_output
 </UL>
 <BR>[Called By]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;bsp_init
 </UL>
@@ -2398,6 +2400,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;User_Task_1
 <LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;bsp_init
 <LI><a href="#[171]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;elog_output
+<LI><a href="#[18d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;absolute_encoder_driver_get
 <LI><a href="#[1ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;elog_start
 <LI><a href="#[1a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;elog_set_fmt
 <LI><a href="#[1a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;elog_set_filter_lvl

@@ -28,15 +28,17 @@ Project File Date:  04/26/2026
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target '2-3_FreeRTOS_example_0'
 compiling absolute_encoder_factory.c...
-..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c(19): warning:  #767-D: conversion from pointer to smaller integer
+..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c(7): warning:  #47-D: incompatible redefinition of macro "LOG_TAG"  (declared at line 238 of "../Lib/EasyLogger/easylogger/inc/elog.h")
+  #define LOG_TAG "ABSOLUTE_ENCODER_FACTORY"
+..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c(20): warning:  #767-D: conversion from pointer to smaller integer
           i2c_driver_t *i2c_drv = i2c_driver_get((i2c_device_id_t)mapping->resource);
-..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c: 1 warning, 0 errors
+..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c: 2 warnings, 0 errors
 linking...
 .\2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.sct(14): warning: L6314W: No section matches pattern *(.test_registry).
-Program Size: Code=54708 RO-data=1976 RW-data=280 ZI-data=12992  
+Program Size: Code=54848 RO-data=2004 RW-data=280 ZI-data=12992  
 Finished: 0 information, 1 warning and 0 error messages.
 FromELF: creating hex file...
-"2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf" - 0 Error(s), 2 Warning(s).
+"2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
