@@ -9,7 +9,8 @@
 #include "Connectivity\usart_driver.h"
 #include "Connectivity\pwm_driver.h"
 
-#include "Device\oled_driver.h"
+#include "Device/absolute_encoder_driver.h"
+#include "Device/illuminance_driver.h"
 
 #include "Timer\timer_driver.h"
 

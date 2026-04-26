@@ -111,8 +111,8 @@
         <DllOption>
           <SimDllName>SARMCM3.DLL</SimDllName>
           <SimDllArguments>-REMAP</SimDllArguments>
-          <SimDlgDll>DCM.DLL</SimDlgDll>
-          <SimDlgDllArguments>-pCM3</SimDlgDllArguments>
+          <SimDlgDll>DARMSTM.DLL</SimDlgDll>
+          <SimDlgDllArguments>-pSTM32F103C8</SimDlgDllArguments>
           <TargetDllName>SARMCM3.DLL</TargetDllName>
           <TargetDllArguments></TargetDllArguments>
           <TargetDlgDll>TCM.DLL</TargetDlgDll>
@@ -1042,29 +1042,9 @@
               <FilePath>..\BSP\Drivers\device\device_inc.h</FilePath>
             </File>
             <File>
-              <FileName>oled_drv_ssd1306.c</FileName>
+              <FileName>as5600.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\BSP\Drivers\device\oled\chip\oled_drv_ssd1306.c</FilePath>
-            </File>
-            <File>
-              <FileName>oled_driver.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\Drivers\device\oled\oled_driver.c</FilePath>
-            </File>
-            <File>
-              <FileName>oled_font.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\Drivers\device\oled\oled_font.c</FilePath>
-            </File>
-            <File>
-              <FileName>oled_i2c_bus.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\Drivers\device\oled\bus\oled_i2c_bus.c</FilePath>
-            </File>
-            <File>
-              <FileName>oled_spi_bus.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\Drivers\device\oled\bus\oled_spi_bus.c</FilePath>
+              <FilePath>..\BSP\Drivers\device\as5600\as5600.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1097,11 +1077,6 @@
               <FilePath>..\BSP\Drivers\factory\connectivity\src\usart_factory.c</FilePath>
             </File>
             <File>
-              <FileName>OLED_factory.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\Drivers\factory\device\src\OLED_factory.c</FilePath>
-            </File>
-            <File>
               <FileName>timer_factory.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\Drivers\factory\timer\src\timer_factory.c</FilePath>
@@ -1110,6 +1085,11 @@
               <FileName>pwm_factory.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\Drivers\factory\connectivity\src\pwm_factory.c</FilePath>
+            </File>
+            <File>
+              <FileName>absolute_encoder_factory.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c</FilePath>
             </File>
           </Files>
         </Group>

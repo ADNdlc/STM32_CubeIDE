@@ -14,42 +14,59 @@
 #include "dev_map.h"
 #include "factory_inc.h"
 #include "pwm_led/pwm_led.h"
+#include <math.h>
 
 // 手动定义PI常量（与motor_control.c保持一致）
 #define M_PI_F 3.14159265358979323846f
 
 // 全局目标速度变量，可通过串口命令动态调整
-static float target_velocity = 1.0f; // 默认目标速度 5 rad/s
+static float target_velocity = 5.0f; // 默认目标速度 5 rad/s
 
 // 归一化角度到 [0,2PI]
 static float _normalizeAngle(float angle)
 {
-  float a = fmod(angle, 2 * M_PI_F);
-  return a >= 0 ? a : (a + 2 * M_PI_F);
+  float _2PI = 2.0f * M_PI_F;
+  if (angle >= 0) {
+    while (angle >= _2PI) angle -= _2PI;
+  } else {
+    while (angle < 0) angle += _2PI;
+  }
+  return angle;
 }
 
 // 开环速度函数
 float velocityOpenloop(float target_velocity)
 {
     uint32_t now_us = sys_get_systick_us();
+    static uint32_t last_timestamp = 0;
+    
+    if (last_timestamp == 0) last_timestamp = now_us - 1000;
 
     // 计算当前每个Loop的运行时间间隔
-    uint32_t Ts = now_us - Motor_1_control->loop_timestamp;
+    uint32_t Ts = now_us - last_timestamp;
+    
+    // 保护：如果微秒计时器失效(Ts=0)，则强制使用1ms步长，确保电机能转动
+    if (Ts == 0) Ts = 1000;
+    // 过滤异常大的 Ts (例如断点调试后恢复)
+    if (Ts > 100000) Ts = 1000; 
 
-    // 通过乘以时间间隔和目标速度来计算需要转动的机械角度，存储在 shaft_angle 变量中。在此之前，还需要对轴角度进行归一化，以确保其值在 0 到 2π 之间。
-    Motor_1_control->shaft_angle = _normalizeAngle(Motor_1_control->shaft_angle + target_velocity * Ts * 1e-6f); // Ts是微秒，转换为秒
-    // 以目标速度为 10 rad/s 为例，如果时间间隔是 1 秒，则在每个循环中需要增加 10 * 1 = 10 弧度的角度变化量，才能使电机转动到目标速度。
-    // 如果时间间隔是 0.1 秒，那么在每个循环中需要增加的角度变化量就是 10 * 0.1 = 1 弧度，才能实现相同的目标速度。因此，电机轴的转动角度取决于目标速度和时间间隔的乘积。
+    // 累加机械角度
+    Motor_1_control->shaft_angle = _normalizeAngle(Motor_1_control->shaft_angle + target_velocity * (float)Ts * 1e-6f);
 
-    // 使用早前设置的voltage_power_supply的1/3作为Uq值，这个值会直接影响输出力矩
-    // 最大只能设置为Uq = voltage_power_supply/2，否则ua,ub,uc会超出供电电压限幅
-    float Uq = Motor_1_control->motor->voltage_limit / 3;
+    // 使用 V/f 控制：电压随速度增加，以克服反电动势
+    // 基础电压 1.5V + 每 rad/s 增加 0.4V
+    float Uq = 1.5f + fabs(target_velocity) * 0.4f;
+    
+    // 限制在可用电压范围内
+    if (Uq > Motor_1_control->motor->voltage_limit) {
+        Uq = Motor_1_control->motor->voltage_limit;
+    }
 
-    // 使用新添加的motor_get_electricalAngle函数获取电角度
+    // 获取电角度并设置电压
     float electrical_angle = motor_get_electricalAngle(Motor_1_control->motor, Motor_1_control->shaft_angle);
     setPhaseVoltage(Motor_1_control, Uq, 0, electrical_angle);
 
-    Motor_1_control->loop_timestamp = now_us; // 用于计算下一个时间间隔
+    last_timestamp = now_us;
     return Uq;
 }
 
@@ -114,6 +131,18 @@ void User_Task_1(void)
     
     // 执行开环速度控制
     velocityOpenloop(target_velocity);
+
+    // 读取编码器角度并在变化时打印
+    if (g_encoder_m0) {
+        static float last_logged_angle = -10.0f;
+        float current_angle = ENCODER_GET_ANGLE(g_encoder_m0);
+        
+        // 当角度变化超过 0.05 rad (~3度) 时打印
+        if (fabs(current_angle - last_logged_angle) > 0.05f) {
+            log_d("Encoder Angle: %.2f rad", current_angle);
+            last_logged_angle = current_angle;
+        }
+    }
 }
 
 void User_Task_2(void)

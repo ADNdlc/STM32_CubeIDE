@@ -22,6 +22,7 @@
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
 motor_control_t *Motor_1_control = NULL;
+absolute_encoder_driver_t *g_encoder_m0 = NULL;
 
 /* 调试串口队列用的缓冲区 */
 static uint8_t debug_tx_buf[2048];
@@ -32,7 +33,7 @@ void bsp_init(void)
   /* 系统初始化 */
   sys_init();
 #ifndef platform_sys_mem_create
-#warning "bsp_init: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
+#warning "mem: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
 #else
   SysMem *mem_temp = NULL;
   mem_temp = platform_sys_mem_create();
@@ -72,10 +73,22 @@ void bsp_init(void)
   pwm_driver_t *M_IN_2 = pwm_driver_get(M0_IN_2);
   pwm_driver_t *M_IN_3 = pwm_driver_get(M0_IN_3);
 
+  PWM_SET_FREQ(M_IN_1, 30000);
+  PWM_SET_FREQ(M_IN_2, 30000);
+  PWM_SET_FREQ(M_IN_3, 30000);
+
   threephase_motor_t *Motor_1 = threephase_motor_create(M_IN_1, M_IN_2, M_IN_3, 12.0f);
-  motor_set_voltage(Motor_1, 12.0f, 8.0f);
+  motor_set_voltage(Motor_1, 12.0f, 12.0f);
 
   Motor_1_control = motor_control_create(Motor_1, 7);
+
+  /* 4. 创建编码器驱动 */
+  g_encoder_m0 = absolute_encoder_driver_get(ENCODER_ID_M0);
+  if (g_encoder_m0) {
+      log_i("Encoder M0 initialized.");
+  } else {
+      log_w("Encoder M0 initialization failed!");
+  }
 }
 
 #endif

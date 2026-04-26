@@ -55,23 +55,22 @@ I (../Core/Inc/tim.h)(0x69EB3967)
 I (../Core/Inc/usart.h)(0x69EA1A90)
 I (../Core/Inc/usb.h)(0x69EB39C4)
 I (../Core/Inc/gpio.h)(0x69EA1A8E)
-I (../BSP/BSP_init.h)(0x69EC96A1)
+I (../BSP/BSP_init.h)(0x69EDC3E8)
 I (../Component/uart_queue/uart_queue.h)(0x69EB3DD9)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
+I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../Component/utils/ring_buffer/ring_buffer.h)(0x69C25818)
 I (../Component/motor_control\motor_control.h)(0x69ED9412)
 I (../Component/motor_control\..\ThreePhase_motor\ThreePhase_motor.h)(0x69EC99C8)
@@ -114,7 +113,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x69E07D8F)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd.h)(0x69E07D8F)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_usb.h)(0x69E07D8F)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h)(0x69E07D8F)
-F (../Core/Src/freertos.c)(0x69ED829E)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\freertos.o --omf_browse 2-3_freertos_example_0\freertos.crf --depend 2-3_freertos_example_0\freertos.d)
+F (../Core/Src/freertos.c)(0x69EDC393)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\freertos.o --omf_browse 2-3_freertos_example_0\freertos.crf --depend 2-3_freertos_example_0\freertos.d)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x69E07D91)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
@@ -1414,9 +1413,9 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3/portmacro.h)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h)(0x69E07D91)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/task.h)(0x69E07D91)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/list.h)(0x69E07D91)
-F (..\BSP\BSP_init.c)(0x69ECB056)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\bsp_init.o --omf_browse 2-3_freertos_example_0\bsp_init.crf --depend 2-3_freertos_example_0\bsp_init.d)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+F (..\BSP\BSP_init.c)(0x69EDCC84)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\bsp_init.o --omf_browse 2-3_freertos_example_0\bsp_init.crf --depend 2-3_freertos_example_0\bsp_init.d)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (../Component/Component_inc.h)(0x69EB3FD0)
@@ -1454,7 +1453,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_usb.h)(0x69E07D8F)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h)(0x69E07D8F)
 I (../Component/utils\ring_buffer\ring_buffer.h)(0x69C25818)
 I (../Component/uart_queue\uart_queue.h)(0x69EB3DD9)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
@@ -1462,39 +1461,34 @@ I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../Component/logger\elog_init.h)(0x69C25818)
+I (../Component/logger\elog_init.h)(0x69EDCA3D)
 I (../Lib/EasyLogger/easylogger/inc/elog.h)(0x69C25818)
 I (../Lib/EasyLogger/easylogger/inc/elog_cfg.h)(0x69C25818)
-I (../BSP/Drivers/factory/factory_inc.h)(0x69EB841B)
+I (../BSP/Drivers/factory/factory_inc.h)(0x69EDC67C)
 I (../BSP/Drivers/factory/connectivity\inc\gpio_factory.h)(0x69EA21E9)
 I (../BSP/Drivers/factory/connectivity\inc\spi_factory.h)(0x69EA22F4)
 I (../BSP/Drivers/factory/connectivity\inc\usart_factory.h)(0x69EA2375)
 I (../BSP/Drivers/factory/connectivity\inc\i2c_factory.h)(0x69EA237F)
 I (../BSP/Drivers/factory/connectivity\inc\pwm_factory.h)(0x69EB854C)
-I (../BSP/Drivers/factory/device\inc\OLED_factory.h)(0x69EA24D3)
-I (../BSP/Drivers/device/device_inc.h)(0x69EA2452)
-I (../BSP/Drivers/device/oled\chip\oled_drv_ssd1306.h)(0x69EB3015)
-I (../BSP/Drivers/device/oled\bus\oled_i2c_bus.h)(0x69EA23C1)
-I (../BSP/Drivers/device/oled\bus\oled_spi_bus.h)(0x69EA23D2)
+I (../BSP/Drivers/factory/device\inc\absolute_encoder_factory.h)(0x69EDC1DF)
 I (../BSP/Drivers/factory/timer\inc\timer_factory.h)(0x69EA24E5)
 I (../Component/ThreePhase_motor\ThreePhase_motor.h)(0x69EC99C8)
 I (../Component/motor_control\motor_control.h)(0x69ED9412)
-F (..\BSP\BSP_init.h)(0x69EC96A1)()
-F (..\BSP\Board\dev_map.h)(0x69EC2AE1)()
-F (..\BSP\Board\dev_map_config.h)(0x69EB2DBF)()
-F (..\BSP\Board\stm32f103_board\stm32f103_board_v1.c)(0x69ED7C73)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32f103_board_v1.o --omf_browse 2-3_freertos_example_0\stm32f103_board_v1.crf --depend 2-3_freertos_example_0\stm32f103_board_v1.d)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+F (..\BSP\BSP_init.h)(0x69EDC3E8)()
+F (..\BSP\Board\dev_map.h)(0x69EDC5E8)()
+F (..\BSP\Board\dev_map_config.h)(0x69EDC336)()
+F (..\BSP\Board\stm32f103_board\stm32f103_board_v1.c)(0x69EDC9F9)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32f103_board_v1.o --omf_browse 2-3_freertos_example_0\stm32f103_board_v1.crf --depend 2-3_freertos_example_0\stm32f103_board_v1.d)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
-I (../BSP/Drivers/device/device_inc.h)(0x69EA2452)
-I (../BSP/Drivers/device/oled\chip\oled_drv_ssd1306.h)(0x69EB3015)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
+I (../BSP/Drivers/device/device_inc.h)(0x69EDC625)
+I (../BSP/Drivers/device/as5600/as5600.h)(0x69EDC541)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
@@ -1503,20 +1497,17 @@ I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../BSP/Drivers/device/oled\bus\oled_i2c_bus.h)(0x69EA23C1)
-I (../BSP/Drivers/device/oled\bus\oled_spi_bus.h)(0x69EA23D2)
-I (../BSP/Drivers/factory/factory_inc.h)(0x69EB841B)
+I (../BSP/Drivers/factory/factory_inc.h)(0x69EDC67C)
 I (../BSP/Drivers/factory/connectivity\inc\gpio_factory.h)(0x69EA21E9)
 I (../BSP/Drivers/factory/connectivity\inc\spi_factory.h)(0x69EA22F4)
 I (../BSP/Drivers/factory/connectivity\inc\usart_factory.h)(0x69EA2375)
 I (../BSP/Drivers/factory/connectivity\inc\i2c_factory.h)(0x69EA237F)
 I (../BSP/Drivers/factory/connectivity\inc\pwm_factory.h)(0x69EB854C)
-I (../BSP/Drivers/factory/device\inc\OLED_factory.h)(0x69EA24D3)
+I (../BSP/Drivers/factory/device\inc\absolute_encoder_factory.h)(0x69EDC1DF)
 I (../BSP/Drivers/factory/timer\inc\timer_factory.h)(0x69EA24E5)
 I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x69E07D8F)
@@ -1558,90 +1549,40 @@ I (../Core/Inc/main.h)(0x69ED93CA)
 I (../BSP/Drivers/platform/stm32/Connectivity\usart\stm32_usart_driver.h)(0x69EB2605)
 I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
 I (../Core/Inc/spi.h)(0x69EB39C4)
 I (../Core/Inc/tim.h)(0x69EB3967)
 I (../Core/Inc/usart.h)(0x69EA1A90)
-F (..\BSP\Drivers\interface\interface_inc.h)(0x69EB8566)()
-F (..\BSP\Drivers\device\device_inc.h)(0x69EA2452)()
-F (..\BSP\Drivers\device\oled\chip\oled_drv_ssd1306.c)(0x69EB31AA)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\oled_drv_ssd1306.o --omf_browse 2-3_freertos_example_0\oled_drv_ssd1306.crf --depend 2-3_freertos_example_0\oled_drv_ssd1306.d)
-I (..\BSP\Drivers\device\oled\chip\oled_drv_ssd1306.h)(0x69EB3015)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+F (..\BSP\Drivers\interface\interface_inc.h)(0x69EDC659)()
+F (..\BSP\Drivers\device\device_inc.h)(0x69EDC625)()
+F (..\BSP\Drivers\device\as5600\as5600.c)(0x69EDC226)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\as5600.o --omf_browse 2-3_freertos_example_0\as5600.crf --depend 2-3_freertos_example_0\as5600.d)
+I (..\BSP\Drivers\device\as5600\as5600.h)(0x69EDC541)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-F (..\BSP\Drivers\device\oled\oled_driver.c)(0x69C25818)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\oled_driver.o --omf_browse 2-3_freertos_example_0\oled_driver.crf --depend 2-3_freertos_example_0\oled_driver.d)
-I (..\BSP\Drivers\interface\Device\oled_driver.h)(0x69EA231D)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (..\BSP\Drivers\interface\Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
-F (..\BSP\Drivers\device\oled\oled_font.c)(0x69C25818)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\oled_font.o --omf_browse 2-3_freertos_example_0\oled_font.crf --depend 2-3_freertos_example_0\oled_font.d)
-I (..\BSP\Drivers\interface\Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
-F (..\BSP\Drivers\device\oled\bus\oled_i2c_bus.c)(0x69EB5294)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\oled_i2c_bus.o --omf_browse 2-3_freertos_example_0\oled_i2c_bus.crf --depend 2-3_freertos_example_0\oled_i2c_bus.d)
-I (..\BSP\Drivers\device\oled\bus\oled_i2c_bus.h)(0x69EA23C1)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
-I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
-I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
-I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
-I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
-I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
-I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
-F (..\BSP\Drivers\device\oled\bus\oled_spi_bus.c)(0x69EB51BA)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\oled_spi_bus.o --omf_browse 2-3_freertos_example_0\oled_spi_bus.crf --depend 2-3_freertos_example_0\oled_spi_bus.d)
-I (..\BSP\Drivers\device\oled\bus\oled_spi_bus.h)(0x69EA23D2)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
-I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
-I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
-I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
-I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
-I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
-I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
-F (..\BSP\Drivers\factory\factory_inc.h)(0x69EB841B)()
+I (D:\Keil_v5\ARM\ARMCC\include\math.h)(0x588B8344)
+F (..\BSP\Drivers\factory\factory_inc.h)(0x69EDC67C)()
 F (..\BSP\Drivers\factory\connectivity\src\gpio_factory.c)(0x69EB4F82)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\gpio_factory.o --omf_browse 2-3_freertos_example_0\gpio_factory.crf --depend 2-3_freertos_example_0\gpio_factory.d)
 I (..\BSP\Drivers\factory\connectivity\src\..\inc\gpio_factory.h)(0x69EA21E9)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
@@ -1650,10 +1591,9 @@ I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x69E07D8F)
@@ -1695,13 +1635,13 @@ I (../Core/Inc/main.h)(0x69ED93CA)
 I (../BSP/Drivers/platform/stm32/Connectivity\usart\stm32_usart_driver.h)(0x69EB2605)
 I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
 F (..\BSP\Drivers\factory\connectivity\src\i2c_factory.c)(0x69EB4FA9)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\i2c_factory.o --omf_browse 2-3_freertos_example_0\i2c_factory.crf --depend 2-3_freertos_example_0\i2c_factory.d)
 I (..\BSP\Drivers\factory\connectivity\src\..\inc\i2c_factory.h)(0x69EA237F)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
@@ -1749,14 +1689,14 @@ I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
 I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
 F (..\BSP\Drivers\factory\connectivity\src\spi_factory.c)(0x69EB4FA9)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\spi_factory.o --omf_browse 2-3_freertos_example_0\spi_factory.crf --depend 2-3_freertos_example_0\spi_factory.d)
 I (..\BSP\Drivers\factory\connectivity\src\..\inc\spi_factory.h)(0x69EA22F4)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
@@ -1804,14 +1744,14 @@ I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
 I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
 F (..\BSP\Drivers\factory\connectivity\src\usart_factory.c)(0x69EB4FA9)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\usart_factory.o --omf_browse 2-3_freertos_example_0\usart_factory.crf --depend 2-3_freertos_example_0\usart_factory.d)
 I (..\BSP\Drivers\factory\connectivity\src\..\inc\usart_factory.h)(0x69EA2375)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
@@ -1859,15 +1799,15 @@ I (../BSP/Drivers/platform/stm32/Connectivity\usart\stm32_usart_driver.h)(0x69EB
 I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-F (..\BSP\Drivers\factory\device\src\OLED_factory.c)(0x69EB57EE)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\oled_factory.o --omf_browse 2-3_freertos_example_0\oled_factory.crf --depend 2-3_freertos_example_0\oled_factory.d)
-I (..\BSP\Drivers\factory\device\src\..\inc\OLED_factory.h)(0x69EA24D3)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+F (..\BSP\Drivers\factory\timer\src\timer_factory.c)(0x69EB4FC8)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\timer_factory.o --omf_browse 2-3_freertos_example_0\timer_factory.crf --depend 2-3_freertos_example_0\timer_factory.d)
+I (..\BSP\Drivers\factory\timer\src\..\inc\timer_factory.h)(0x69EA24E5)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
@@ -1876,16 +1816,132 @@ I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../BSP/Drivers/device/device_inc.h)(0x69EA2452)
-I (../BSP/Drivers/device/oled\chip\oled_drv_ssd1306.h)(0x69EB3015)
-I (../BSP/Drivers/device/oled\bus\oled_i2c_bus.h)(0x69EA23C1)
-I (../BSP/Drivers/device/oled\bus\oled_spi_bus.h)(0x69EA23D2)
-I (../BSP/Drivers/factory/factory_inc.h)(0x69EB841B)
+I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x69E07D8F)
+I (../Core/Inc/stm32f1xx_hal_conf.h)(0x69EB39C5)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x69E07D8F)
+I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x69E07D8F)
+I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x69E07D8F)
+I (../Drivers/CMSIS/Include/core_cm3.h)(0x69E07D87)
+I (../Drivers/CMSIS/Include/cmsis_version.h)(0x69E07D87)
+I (../Drivers/CMSIS/Include/cmsis_compiler.h)(0x69E07D87)
+I (../Drivers/CMSIS/Include/cmsis_armcc.h)(0x69E07D87)
+I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_exti.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_can.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_usb.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h)(0x69E07D8F)
+I (../BSP/Drivers/platform/stm32/Connectivity\gpio\stm32_gpio_driver.h)(0x69EB2197)
+I (../BSP/Drivers/platform/stm32/Connectivity\spi\stm32_spi_driver.h)(0x69EB2605)
+I (../BSP/Drivers/platform/stm32/Connectivity\i2c\stm32_i2c_driver.h)(0x69EB2605)
+I (../Core/Inc/i2c.h)(0x69EB3966)
+I (../Core/Inc/main.h)(0x69ED93CA)
+I (../BSP/Drivers/platform/stm32/Connectivity\usart\stm32_usart_driver.h)(0x69EB2605)
+I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
+I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+F (..\BSP\Drivers\factory\connectivity\src\pwm_factory.c)(0x69EC2364)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\pwm_factory.o --omf_browse 2-3_freertos_example_0\pwm_factory.crf --depend 2-3_freertos_example_0\pwm_factory.d)
+I (..\BSP\Drivers\factory\connectivity\src\..\inc\pwm_factory.h)(0x69EB854C)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
+I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
+I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
+I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
+I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
+I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
+I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
+I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
+I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
+I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
+I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
+I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
+I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x69E07D8F)
+I (../Core/Inc/stm32f1xx_hal_conf.h)(0x69EB39C5)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x69E07D8F)
+I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x69E07D8F)
+I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x69E07D8F)
+I (../Drivers/CMSIS/Include/core_cm3.h)(0x69E07D87)
+I (../Drivers/CMSIS/Include/cmsis_version.h)(0x69E07D87)
+I (../Drivers/CMSIS/Include/cmsis_compiler.h)(0x69E07D87)
+I (../Drivers/CMSIS/Include/cmsis_armcc.h)(0x69E07D87)
+I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_exti.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_can.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_usb.h)(0x69E07D8F)
+I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h)(0x69E07D8F)
+I (../BSP/Drivers/platform/stm32/Connectivity\gpio\stm32_gpio_driver.h)(0x69EB2197)
+I (../BSP/Drivers/platform/stm32/Connectivity\spi\stm32_spi_driver.h)(0x69EB2605)
+I (../BSP/Drivers/platform/stm32/Connectivity\i2c\stm32_i2c_driver.h)(0x69EB2605)
+I (../Core/Inc/i2c.h)(0x69EB3966)
+I (../Core/Inc/main.h)(0x69ED93CA)
+I (../BSP/Drivers/platform/stm32/Connectivity\usart\stm32_usart_driver.h)(0x69EB2605)
+I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
+I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+F (..\BSP\Drivers\factory\device\src\absolute_encoder_factory.c)(0x69EDCD22)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\absolute_encoder_factory.o --omf_browse 2-3_freertos_example_0\absolute_encoder_factory.crf --depend 2-3_freertos_example_0\absolute_encoder_factory.d)
+I (..\BSP\Drivers\factory\device\src\..\inc\absolute_encoder_factory.h)(0x69EDC1DF)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
+I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
+I (../BSP/Drivers/device/as5600/as5600.h)(0x69EDC541)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
+I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
+I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
+I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
+I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
+I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
+I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
+I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
+I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
+I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
+I (../BSP/Drivers/factory/factory_inc.h)(0x69EDC67C)
 I (../BSP/Drivers/factory/connectivity\inc\gpio_factory.h)(0x69EA21E9)
 I (../BSP/Drivers/factory/connectivity\inc\spi_factory.h)(0x69EA22F4)
 I (../BSP/Drivers/factory/connectivity\inc\usart_factory.h)(0x69EA2375)
@@ -1893,128 +1949,6 @@ I (../BSP/Drivers/factory/connectivity\inc\i2c_factory.h)(0x69EA237F)
 I (../BSP/Drivers/factory/connectivity\inc\pwm_factory.h)(0x69EB854C)
 I (../BSP/Drivers/factory/timer\inc\timer_factory.h)(0x69EA24E5)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
-F (..\BSP\Drivers\factory\timer\src\timer_factory.c)(0x69EB4FC8)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\timer_factory.o --omf_browse 2-3_freertos_example_0\timer_factory.crf --depend 2-3_freertos_example_0\timer_factory.d)
-I (..\BSP\Drivers\factory\timer\src\..\inc\timer_factory.h)(0x69EA24E5)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
-I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
-I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
-I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
-I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
-I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x69E07D8F)
-I (../Core/Inc/stm32f1xx_hal_conf.h)(0x69EB39C5)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x69E07D8F)
-I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x69E07D8F)
-I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x69E07D8F)
-I (../Drivers/CMSIS/Include/core_cm3.h)(0x69E07D87)
-I (../Drivers/CMSIS/Include/cmsis_version.h)(0x69E07D87)
-I (../Drivers/CMSIS/Include/cmsis_compiler.h)(0x69E07D87)
-I (../Drivers/CMSIS/Include/cmsis_armcc.h)(0x69E07D87)
-I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_exti.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_can.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_usb.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h)(0x69E07D8F)
-I (../BSP/Drivers/platform/stm32/Connectivity\gpio\stm32_gpio_driver.h)(0x69EB2197)
-I (../BSP/Drivers/platform/stm32/Connectivity\spi\stm32_spi_driver.h)(0x69EB2605)
-I (../BSP/Drivers/platform/stm32/Connectivity\i2c\stm32_i2c_driver.h)(0x69EB2605)
-I (../Core/Inc/i2c.h)(0x69EB3966)
-I (../Core/Inc/main.h)(0x69ED93CA)
-I (../BSP/Drivers/platform/stm32/Connectivity\usart\stm32_usart_driver.h)(0x69EB2605)
-I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
-I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-F (..\BSP\Drivers\factory\connectivity\src\pwm_factory.c)(0x69EC2364)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\pwm_factory.o --omf_browse 2-3_freertos_example_0\pwm_factory.crf --depend 2-3_freertos_example_0\pwm_factory.d)
-I (..\BSP\Drivers\factory\connectivity\src\..\inc\pwm_factory.h)(0x69EB854C)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
-I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
-I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
-I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
-I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
-I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x69E07D8F)
-I (../Core/Inc/stm32f1xx_hal_conf.h)(0x69EB39C5)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h)(0x69E07D8F)
-I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h)(0x69E07D8F)
-I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h)(0x69E07D8F)
-I (../Drivers/CMSIS/Include/core_cm3.h)(0x69E07D87)
-I (../Drivers/CMSIS/Include/cmsis_version.h)(0x69E07D87)
-I (../Drivers/CMSIS/Include/cmsis_compiler.h)(0x69E07D87)
-I (../Drivers/CMSIS/Include/cmsis_armcc.h)(0x69E07D87)
-I (../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_exti.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_can.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_usb.h)(0x69E07D8F)
-I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h)(0x69E07D8F)
-I (../BSP/Drivers/platform/stm32/Connectivity\gpio\stm32_gpio_driver.h)(0x69EB2197)
-I (../BSP/Drivers/platform/stm32/Connectivity\spi\stm32_spi_driver.h)(0x69EB2605)
-I (../BSP/Drivers/platform/stm32/Connectivity\i2c\stm32_i2c_driver.h)(0x69EB2605)
-I (../Core/Inc/i2c.h)(0x69EB3966)
-I (../Core/Inc/main.h)(0x69ED93CA)
-I (../BSP/Drivers/platform/stm32/Connectivity\usart\stm32_usart_driver.h)(0x69EB2605)
-I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
-I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
 F (..\BSP\Drivers\platform\stm32\stm32_inc.h)(0x69EB851D)()
 F (..\BSP\Drivers\platform\stm32\System\System_port.h)(0x69EA253B)()
 F (..\BSP\Drivers\platform\stm32\System\Sys\stm32_sys.c)(0x69ED9424)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32_sys.o --omf_browse 2-3_freertos_example_0\stm32_sys.crf --depend 2-3_freertos_example_0\stm32_sys.d)
@@ -2115,8 +2049,8 @@ I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 F (..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.c)(0x69EB531A)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32_i2c_driver.o --omf_browse 2-3_freertos_example_0\stm32_i2c_driver.crf --depend 2-3_freertos_example_0\stm32_i2c_driver.d)
 I (..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.h)(0x69EB2605)
@@ -2169,15 +2103,15 @@ I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 F (..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_soft_driver.c)(0x69EB532E)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32_i2c_soft_driver.o --omf_browse 2-3_freertos_example_0\stm32_i2c_soft_driver.crf --depend 2-3_freertos_example_0\stm32_i2c_soft_driver.d)
 I (../BSP/Drivers/interface/System/Sys/Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (..\BSP\Drivers\platform\stm32\Connectivity\i2c\stm32_i2c_driver.h)(0x69EB2605)
 I (../Core/Inc/i2c.h)(0x69EB3966)
@@ -2226,8 +2160,8 @@ I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 F (..\BSP\Drivers\platform\stm32\Connectivity\spi\stm32_spi_driver.c)(0x69EB539C)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32_spi_driver.o --omf_browse 2-3_freertos_example_0\stm32_spi_driver.crf --depend 2-3_freertos_example_0\stm32_spi_driver.d)
 I (..\BSP\Drivers\platform\stm32\Connectivity\spi\stm32_spi_driver.h)(0x69EB2605)
@@ -2280,8 +2214,8 @@ I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
 F (..\BSP\Drivers\platform\stm32\Connectivity\timer\stm32_timer_driver.c)(0x69ECC58F)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32_timer_driver.o --omf_browse 2-3_freertos_example_0\stm32_timer_driver.crf --depend 2-3_freertos_example_0\stm32_timer_driver.d)
@@ -2335,8 +2269,8 @@ I (../BSP/Drivers/platform/stm32/Connectivity\usart\stm32_usart_driver.h)(0x69EB
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
 I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB2681)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 F (..\BSP\Drivers\platform\stm32\Connectivity\usart\stm32_usart_driver.c)(0x69EB539C)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32_usart_driver.o --omf_browse 2-3_freertos_example_0\stm32_usart_driver.crf --depend 2-3_freertos_example_0\stm32_usart_driver.d)
 I (..\BSP\Drivers\platform\stm32\Connectivity\usart\stm32_usart_driver.h)(0x69EB2605)
@@ -2389,13 +2323,13 @@ I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
-F (..\BSP\Drivers\platform\stm32\Connectivity\pwm\stm32_pwm_driver.c)(0x69ED911D)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32_pwm_driver.o --omf_browse 2-3_freertos_example_0\stm32_pwm_driver.crf --depend 2-3_freertos_example_0\stm32_pwm_driver.d)
-I (..\BSP\Drivers\platform\stm32\Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
+F (..\BSP\Drivers\platform\stm32\Connectivity\pwm\stm32_pwm_driver.c)(0x69EDCCCC)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\stm32_pwm_driver.o --omf_browse 2-3_freertos_example_0\stm32_pwm_driver.crf --depend 2-3_freertos_example_0\stm32_pwm_driver.d)
+I (..\BSP\Drivers\platform\stm32\Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
 I (../BSP/Drivers/platform/stm32/stm32_inc.h)(0x69EB851D)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x69E07D8F)
 I (../Core/Inc/stm32f1xx_hal_conf.h)(0x69EB39C5)
@@ -2444,33 +2378,33 @@ I (../BSP/Drivers/platform/stm32/Connectivity\timer\stm32_timer_driver.h)(0x69EB
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/Connectivity\rtc\stm32_rtc_driver.h)(0x69EB27F4)
-I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EC2566)
+I (../BSP/Drivers/platform/stm32/Connectivity\pwm\stm32_pwm_driver.h)(0x69EDC9CE)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_bus.h)(0x69E07D8F)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_rcc.h)(0x69E07D8F)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_tim.h)(0x69E07D8F)
 F (..\Component\uart_queue\uart_queue.c)(0x69EB3EF9)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\uart_queue.o --omf_browse 2-3_freertos_example_0\uart_queue.crf --depend 2-3_freertos_example_0\uart_queue.d)
 I (..\Component\uart_queue\uart_queue.h)(0x69EB3DD9)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
+I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../Component/utils/ring_buffer/ring_buffer.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
+I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
 F (..\Component\uart_queue\uart_queue.h)(0x69EB3DD9)()
 F (..\Component\utils\ring_buffer\ring_buffer.c)(0x69EB3D7C)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\ring_buffer.o --omf_browse 2-3_freertos_example_0\ring_buffer.crf --depend 2-3_freertos_example_0\ring_buffer.d)
 I (..\Component\utils\ring_buffer\ring_buffer.h)(0x69C25818)
@@ -2479,12 +2413,12 @@ I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
-I (..\BSP\Drivers\interface\System\Sys\Sys.h)(0x69EB4DAC)
+I (../BSP/Drivers/interface/System/Sys/Sys.h)(0x69EB4DAC)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 F (..\Component\utils\ring_buffer\ring_buffer.h)(0x69C25818)()
-F (..\Component\logger\elog_init.h)(0x69C25818)()
+F (..\Component\logger\elog_init.h)(0x69EDCA3D)()
 F (..\Component\logger\elog_init.c)(0x69C25818)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\elog_init.o --omf_browse 2-3_freertos_example_0\elog_init.crf --depend 2-3_freertos_example_0\elog_init.d)
 I (../Lib/EasyLogger/easylogger/inc/elog.h)(0x69C25818)
 I (../Lib/EasyLogger/easylogger/inc/elog_cfg.h)(0x69C25818)
@@ -2530,21 +2464,20 @@ I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x588B8344)
-I (../BSP/BSP_init.h)(0x69EC96A1)
+I (../BSP/BSP_init.h)(0x69EDC3E8)
 I (../Component/uart_queue/uart_queue.h)(0x69EB3DD9)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
 I (../Component/utils/ring_buffer/ring_buffer.h)(0x69C25818)
 I (../Component/motor_control\motor_control.h)(0x69ED9412)
@@ -2552,65 +2485,62 @@ I (../Component/motor_control\..\ThreePhase_motor\ThreePhase_motor.h)(0x69EC99C8
 F (..\Component\Component_inc.h)(0x69EB3FD0)()
 F (..\Component\pwm_led\pwm_led.c)(0x69EC2501)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\pwm_led.o --omf_browse 2-3_freertos_example_0\pwm_led.crf --depend 2-3_freertos_example_0\pwm_led.d)
 I (..\Component\pwm_led\pwm_led.h)(0x69EC7833)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
+I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 F (..\Component\ThreePhase_motor\ThreePhase_motor.c)(0x69ED7D56)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\threephase_motor.o --omf_browse 2-3_freertos_example_0\threephase_motor.crf --depend 2-3_freertos_example_0\threephase_motor.d)
 I (..\Component\ThreePhase_motor\ThreePhase_motor.h)(0x69EC99C8)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
+I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 F (..\Component\ThreePhase_motor\ThreePhase_motor.h)(0x69EC99C8)()
-F (..\Component\motor_control\motor_control.c)(0x69ED9424)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\motor_control.o --omf_browse 2-3_freertos_example_0\motor_control.crf --depend 2-3_freertos_example_0\motor_control.d)
+F (..\Component\motor_control\motor_control.c)(0x69EDB020)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\motor_control.o --omf_browse 2-3_freertos_example_0\motor_control.crf --depend 2-3_freertos_example_0\motor_control.d)
 I (..\Component\motor_control\motor_control.h)(0x69ED9412)
 I (..\Component\motor_control\..\ThreePhase_motor\ThreePhase_motor.h)(0x69EC99C8)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
+I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\math.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x588B8344)
 F (..\Component\motor_control\motor_control.h)(0x69ED9412)()
@@ -2651,43 +2581,39 @@ I (..\Test\core\test_framework.h)(0x69EB6508)
 I (../A_Project_cfg/Project_cfg.h)(0x69ED9412)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x588B8344)
-I (../BSP/BSP_init.h)(0x69EC96A1)
+I (../BSP/BSP_init.h)(0x69EDC3E8)
 I (../Component/uart_queue/uart_queue.h)(0x69EB3DD9)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/System\Sys\Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
+I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../Component/utils/ring_buffer/ring_buffer.h)(0x69C25818)
 I (../Component/motor_control\motor_control.h)(0x69ED9412)
 I (../Component/motor_control\..\ThreePhase_motor\ThreePhase_motor.h)(0x69EC99C8)
 I (../Test/test_config.h)(0x69EC2AF0)
 I (../Lib/EasyLogger/easylogger/inc/elog.h)(0x69C25818)
 I (../Lib/EasyLogger/easylogger/inc/elog_cfg.h)(0x69C25818)
-I (../BSP/Drivers/factory/factory_inc.h)(0x69EB841B)
+I (../BSP/Drivers/factory/factory_inc.h)(0x69EDC67C)
 I (../BSP/Drivers/factory/connectivity\inc\gpio_factory.h)(0x69EA21E9)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (../BSP/Drivers/factory/connectivity\inc\spi_factory.h)(0x69EA22F4)
 I (../BSP/Drivers/factory/connectivity\inc\usart_factory.h)(0x69EA2375)
 I (../BSP/Drivers/factory/connectivity\inc\i2c_factory.h)(0x69EA237F)
 I (../BSP/Drivers/factory/connectivity\inc\pwm_factory.h)(0x69EB854C)
-I (../BSP/Drivers/factory/device\inc\OLED_factory.h)(0x69EA24D3)
-I (../BSP/Drivers/device/device_inc.h)(0x69EA2452)
-I (../BSP/Drivers/device/oled\chip\oled_drv_ssd1306.h)(0x69EB3015)
-I (../BSP/Drivers/device/oled\bus\oled_i2c_bus.h)(0x69EA23C1)
-I (../BSP/Drivers/device/oled\bus\oled_spi_bus.h)(0x69EA23D2)
+I (../BSP/Drivers/factory/device\inc\absolute_encoder_factory.h)(0x69EDC1DF)
 I (../BSP/Drivers/factory/timer\inc\timer_factory.h)(0x69EA24E5)
+I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
 F (..\Test\core\test_framework.h)(0x69EB6508)()
 F (..\Test\test_config.h)(0x69EC2AF0)()
 F (..\Test\Unit\test_led.c)(0x69EB78D7)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\test_led.o --omf_browse 2-3_freertos_example_0\test_led.crf --depend 2-3_freertos_example_0\test_led.d)
@@ -2697,33 +2623,28 @@ I (../BSP/Drivers/interface/System/Sys/Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../Lib/EasyLogger/easylogger/inc/elog.h)(0x69C25818)
 I (../Lib/EasyLogger/easylogger/inc/elog_cfg.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../BSP/Drivers/factory/factory_inc.h)(0x69EB841B)
+I (../BSP/Drivers/factory/factory_inc.h)(0x69EDC67C)
 I (../BSP/Drivers/factory/connectivity\inc\gpio_factory.h)(0x69EA21E9)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (../BSP/Drivers/factory/connectivity\inc\spi_factory.h)(0x69EA22F4)
 I (../BSP/Drivers/factory/connectivity\inc\usart_factory.h)(0x69EA2375)
 I (../BSP/Drivers/factory/connectivity\inc\i2c_factory.h)(0x69EA237F)
 I (../BSP/Drivers/factory/connectivity\inc\pwm_factory.h)(0x69EB854C)
-I (../BSP/Drivers/factory/device\inc\OLED_factory.h)(0x69EA24D3)
-I (../BSP/Drivers/device/device_inc.h)(0x69EA2452)
-I (../BSP/Drivers/device/oled\chip\oled_drv_ssd1306.h)(0x69EB3015)
-I (../BSP/Drivers/device/oled\bus\oled_i2c_bus.h)(0x69EA23C1)
-I (../BSP/Drivers/device/oled\bus\oled_spi_bus.h)(0x69EA23D2)
+I (../BSP/Drivers/factory/device\inc\absolute_encoder_factory.h)(0x69EDC1DF)
 I (../BSP/Drivers/factory/timer\inc\timer_factory.h)(0x69EA24E5)
 F (..\Test\Unit\test_pwm_led.c)(0x69EC2990)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\test_pwm_led.o --omf_browse 2-3_freertos_example_0\test_pwm_led.crf --depend 2-3_freertos_example_0\test_pwm_led.d)
 I (../Test/test_config.h)(0x69EC2AF0)
@@ -2732,35 +2653,30 @@ I (../BSP/Drivers/interface/System/Sys/Sys.h)(0x69EB4DAC)
 I (D:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x588B8344)
 I (D:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../Lib/EasyLogger/easylogger/inc/elog.h)(0x69C25818)
 I (../Lib/EasyLogger/easylogger/inc/elog_cfg.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../BSP/Drivers/factory/factory_inc.h)(0x69EB841B)
+I (../BSP/Drivers/factory/factory_inc.h)(0x69EDC67C)
 I (../BSP/Drivers/factory/connectivity\inc\gpio_factory.h)(0x69EA21E9)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
 I (../BSP/Drivers/factory/connectivity\inc\spi_factory.h)(0x69EA22F4)
 I (../BSP/Drivers/factory/connectivity\inc\usart_factory.h)(0x69EA2375)
 I (../BSP/Drivers/factory/connectivity\inc\i2c_factory.h)(0x69EA237F)
 I (../BSP/Drivers/factory/connectivity\inc\pwm_factory.h)(0x69EB854C)
-I (../BSP/Drivers/factory/device\inc\OLED_factory.h)(0x69EA24D3)
-I (../BSP/Drivers/device/device_inc.h)(0x69EA2452)
-I (../BSP/Drivers/device/oled\chip\oled_drv_ssd1306.h)(0x69EB3015)
-I (../BSP/Drivers/device/oled\bus\oled_i2c_bus.h)(0x69EA23C1)
-I (../BSP/Drivers/device/oled\bus\oled_spi_bus.h)(0x69EA23D2)
+I (../BSP/Drivers/factory/device\inc\absolute_encoder_factory.h)(0x69EDC1DF)
 I (../BSP/Drivers/factory/timer\inc\timer_factory.h)(0x69EA24E5)
-F (..\UserAPP\user_task.c)(0x69ED94B3)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\user_task.o --omf_browse 2-3_freertos_example_0\user_task.crf --depend 2-3_freertos_example_0\user_task.d)
+F (..\UserAPP\user_task.c)(0x69EDC3F5)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../A_Project_cfg -I ../BSP -I ../BSP/Board -I ../BSP/Board/stm32f103_board -I ../BSP/Drivers/device -I ../BSP/Drivers/factory -I ../BSP/Drivers/interface -I ../BSP/Drivers/platform/stm32 -I ../Component -I ../Component/logger -I ../BSP/Drivers/interface/System/Sys -I ../Component/utils -I ../Lib/EasyLogger/easylogger/inc -I ../Lib/EasyLogger/easylogger/src -I ../BSP/Drivers/interface/Device -I ../Test/core -I ../Test -I ../UserAPP-I.\RTE\_2-3_FreeRTOS_example_0-ID:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o 2-3_freertos_example_0\user_task.o --omf_browse 2-3_freertos_example_0\user_task.crf --depend 2-3_freertos_example_0\user_task.d)
 I (..\UserAPP\user_task.h)(0x69EC8FF1)
 I (../Core/Inc/main.h)(0x69ED93CA)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x69E07D8F)
@@ -2813,38 +2729,34 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h)(0x69E07D
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h)(0x69E07D91)
 I (../BSP/Drivers/interface/System/Sys/sys.h)(0x69EB4DAC)
 I (../BSP/Drivers/platform/stm32/System\System_port.h)(0x69EA253B)
-I (../BSP/Board/dev_map_config.h)(0x69EB2DBF)
+I (../BSP/Board/dev_map_config.h)(0x69EDC336)
 I (../BSP/Drivers/platform/stm32/System\Sys\stm32_sys.h)(0x69C25818)
 I (../Lib/EasyLogger/easylogger/inc/elog.h)(0x69C25818)
 I (../Lib/EasyLogger/easylogger/inc/elog_cfg.h)(0x69C25818)
 I (D:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x588B8344)
 I (../Component/motor_control/motor_control.h)(0x69ED9412)
 I (../Component/motor_control/..\ThreePhase_motor\ThreePhase_motor.h)(0x69EC99C8)
-I (../BSP/Drivers/interface/interface_inc.h)(0x69EB8566)
+I (../BSP/Drivers/interface/interface_inc.h)(0x69EDC659)
 I (../BSP/Drivers/interface/Connectivity\gpio_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\i2c_driver.h)(0x69EB5294)
 I (../BSP/Drivers/interface/Connectivity\spi_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Connectivity\usart_driver.h)(0x69C25818)
-I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69EC7A5D)
-I (../BSP/Drivers/interface/Device\oled_driver.h)(0x69EA231D)
-I (../BSP/Drivers/interface/Device\oled_font.h)(0x69C25818)
-I (D:\Keil_v5\ARM\ARMCC\include\string.h)(0x588B8344)
+I (../BSP/Drivers/interface/Connectivity\pwm_driver.h)(0x69ED9B73)
+I (../BSP/Drivers/interface/Device/absolute_encoder_driver.h)(0x69EDC4D3)
+I (../BSP/Drivers/interface/Device/illuminance_driver.h)(0x69C25818)
 I (../BSP/Drivers/interface/Timer\timer_driver.h)(0x69C25818)
-I (../BSP/BSP_init.h)(0x69EC96A1)
+I (../BSP/BSP_init.h)(0x69EDC3E8)
 I (../Component/uart_queue/uart_queue.h)(0x69EB3DD9)
 I (../Component/utils/ring_buffer/ring_buffer.h)(0x69C25818)
-I (../BSP/Board/dev_map.h)(0x69EC2AE1)
-I (../BSP/Drivers/factory/factory_inc.h)(0x69EB841B)
+I (../BSP/Board/dev_map.h)(0x69EDC5E8)
+I (../BSP/Drivers/factory/factory_inc.h)(0x69EDC67C)
 I (../BSP/Drivers/factory/connectivity\inc\gpio_factory.h)(0x69EA21E9)
 I (../BSP/Drivers/factory/connectivity\inc\spi_factory.h)(0x69EA22F4)
 I (../BSP/Drivers/factory/connectivity\inc\usart_factory.h)(0x69EA2375)
 I (../BSP/Drivers/factory/connectivity\inc\i2c_factory.h)(0x69EA237F)
 I (../BSP/Drivers/factory/connectivity\inc\pwm_factory.h)(0x69EB854C)
-I (../BSP/Drivers/factory/device\inc\OLED_factory.h)(0x69EA24D3)
-I (../BSP/Drivers/device/device_inc.h)(0x69EA2452)
-I (../BSP/Drivers/device/oled\chip\oled_drv_ssd1306.h)(0x69EB3015)
-I (../BSP/Drivers/device/oled\bus\oled_i2c_bus.h)(0x69EA23C1)
-I (../BSP/Drivers/device/oled\bus\oled_spi_bus.h)(0x69EA23D2)
+I (../BSP/Drivers/factory/device\inc\absolute_encoder_factory.h)(0x69EDC1DF)
 I (../BSP/Drivers/factory/timer\inc\timer_factory.h)(0x69EA24E5)
 I (../Component/pwm_led/pwm_led.h)(0x69EC7833)
+I (D:\Keil_v5\ARM\ARMCC\include\math.h)(0x588B8344)
 F (..\UserAPP\user_task.h)(0x69EC8FF1)()

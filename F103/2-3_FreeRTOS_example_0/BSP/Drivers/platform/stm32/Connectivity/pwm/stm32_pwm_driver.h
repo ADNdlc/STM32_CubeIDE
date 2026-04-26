@@ -8,6 +8,7 @@
 #ifndef BSP_DEVICE_DRIVER_PWM_LED_STM32_PWM_ADAPTER_H_
 #define BSP_DEVICE_DRIVER_PWM_LED_STM32_PWM_ADAPTER_H_
 
+#include <stdint.h>
 #include "Connectivity\pwm_driver.h"
 #include "stm32_inc.h"
 
