@@ -22,8 +22,9 @@ void motor_control_destroy(motor_control_t *self);
 void setPhaseVoltage(motor_control_t *motor_ctrl, float Uq, float Ud, float angle_el);
 
 float get_electricalAngle_manual(motor_control_t *self, float shaft_angle);
-float get_electricalAngle(motor_control_t *self);
+float get_electricalAngle(motor_control_t *self, float shaft_angle);
 
 int calibrate_zero_electric_angle(motor_control_t *self);
+int motor_control_init(motor_control_t *self);
 
 #endif /* BSP_DEVICE_DRIVER_MOTOR_CONTROL_H_ */

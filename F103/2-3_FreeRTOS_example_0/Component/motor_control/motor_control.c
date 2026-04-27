@@ -46,10 +46,13 @@ float _normalizeAngle(float angle)
  */
 void setPhaseVoltage(motor_control_t *motor_ctrl, float Uq, float Ud, float angle_el)
 {
-  angle_el = _normalizeAngle(angle_el + motor_ctrl->zero_electric_angle);
-  // 帕克逆变换(忽略 Ud)
-  float Ualpha = -Uq * sin(angle_el);
-  float Ubeta = Uq * cos(angle_el);
+  // angle_el 应该是转子的实时电角度（由 get_electricalAngle 获取）
+  angle_el = _normalizeAngle(angle_el);
+  
+  // 帕克逆变换 (考虑 Ud 和 Uq)
+  // 为了产生转矩，定子磁场需领先转子磁场 90 度
+  float Ualpha = -Uq * sin(angle_el) + Ud * cos(angle_el);
+  float Ubeta =  Uq * cos(angle_el) + Ud * sin(angle_el);
 
   // 克拉克逆变换
   float Ua = Ualpha;
@@ -72,13 +75,14 @@ float get_electricalAngle_manual(motor_control_t *self, float shaft_angle)
   return (self->motor->pole_pairs * shaft_angle);
 }
 
-float get_electricalAngle(motor_control_t *self)
+float get_electricalAngle(motor_control_t *self, float shaft_angle)
 {
-  if (!self || !self->encoder)
+  if (!self)
     return -1;
   // 计算方向系数：true表示正向(+1)，false表示反向(-1)
   float direction_factor = self->direction ? 1.0f : -1.0f;
-  return (self->motor->pole_pairs * direction_factor * ENCODER_GET_ANGLE(self->encoder) - self->zero_electric_angle);
+  float raw_elec_angle = self->motor->pole_pairs * direction_factor * shaft_angle;
+  return _normalizeAngle(raw_elec_angle + self->zero_electric_angle);
 }
 
 /**
@@ -96,67 +100,46 @@ int calibrate_zero_electric_angle(motor_control_t *self)
   if (!self || !self->encoder)
     return -1;
   
-  // 1. 施加已知电角度电压，让电机转到 _3PI_2 位置（270度）
+  // 1. 施加电压使电机对齐到电角度 0 
+  // 由于 setPhaseVoltage 内部会加 90度，所以我们要传入 -90度 (_3PI_2) 来产生 0度的磁场
   setPhaseVoltage(self, 3, 0, _3PI_2);
   
-  // 2. 等待初始稳定时间
-  sys_delay_ms(500);
+  // 2. 等待稳定
+  sys_delay_ms(700);
   
-  // 3. 多次读取编码器值，判断电机是否稳定
-  #define STABILITY_CHECK_COUNT 5    // 稳定性检查次数
-  #define ANGLE_STABILITY_THRESHOLD 0.005f  // 角度稳定性阈值（弧度，约0.57度）
+  // 3. 多次读取并检查稳定性
+  #define STABILITY_CHECK_COUNT 5
+  #define ANGLE_STABILITY_THRESHOLD 0.005f
   
   float last_angle = ENCODER_GET_ANGLE(self->encoder);
   uint8_t stable_count = 0;
   uint32_t timeout_count = 0;
-  const uint32_t MAX_TIMEOUT = 20; // 最大超时次数（每次100ms，总共2秒）
   
-  while (stable_count < STABILITY_CHECK_COUNT && timeout_count < MAX_TIMEOUT)
+  while (stable_count < STABILITY_CHECK_COUNT && timeout_count < 20)
   {
-    sys_delay_ms(100); // 每次等待100ms
-    
+    sys_delay_ms(100);
     float current_angle = ENCODER_GET_ANGLE(self->encoder);
     float angle_diff = fabsf(current_angle - last_angle);
+    if (angle_diff > M_PI_F) angle_diff = 2.0f * M_PI_F - angle_diff;
     
-    // 归一化角度差到 [0, π] 范围（处理角度环绕问题）
-    if (angle_diff > M_PI_F){
-      angle_diff = 2.0f * M_PI_F - angle_diff;
-    }
-    
-    if (angle_diff < ANGLE_STABILITY_THRESHOLD){
-      stable_count++;
-    }
-    else{
-      stable_count = 0; // 重置稳定计数器
-    }
+    if (angle_diff < ANGLE_STABILITY_THRESHOLD) stable_count++;
+    else stable_count = 0;
     
     last_angle = current_angle;
     timeout_count++;
   }
-  
-  // 4. 检查是否成功稳定
-  if (stable_count < STABILITY_CHECK_COUNT){
-    // 超时未稳定，使用最后一次读取的角度
-    log_w("Motor calibration timeout, using last angle reading");
-  }
-  
-  // 5. 使用最终稳定的角度值
-  float actual_mechanical_angle = last_angle;
-  
-  // 6. 计算方向系数：true表示正向(+1)，false表示反向(-1)
+
+  // 4. 计算零点偏移量
+  // 此时电机物理位置在电角度 0，所以我们希望 get_electricalAngle 返回 0
+  // 公式：0 = (pole_pairs * direction * mechanical_angle) + zero_offset
+  // 所以：zero_offset = -(pole_pairs * direction * mechanical_angle)
   float direction_factor = self->direction ? 1.0f : -1.0f;
+  float raw_elec_angle = self->motor->pole_pairs * direction_factor * last_angle;
   
-  // 7. 计算理论电角度（不包含零点偏移）
-  float theoretical_electrical_angle = self->motor->pole_pairs * direction_factor * actual_mechanical_angle;
+  self->zero_electric_angle = _normalizeAngle(-raw_elec_angle);
   
-  // 8. 计算零点偏移量：已知目标电角度 - 实际测量的理论电角度
-  float zero_offset = _3PI_2 - theoretical_electrical_angle;
-  
-  // 9. 归一化零点偏移到 [0, 2π) 范围
-  self->zero_electric_angle = _normalizeAngle(zero_offset);
-  
-  // 10. 停止电机
-  setPhaseVoltage(self, 0, 0, _3PI_2);
+  // 5. 停止电机
+  setPhaseVoltage(self, 0, 0, 0);
   
   return 0;
 }
@@ -178,12 +161,58 @@ motor_control_t *motor_control_create(threephase_motor_t *motor, absolute_encode
     return NULL;
 
   motor_ctrl->motor = motor;
+  motor_ctrl->encoder = encoder; // 赋值编码器
   motor_ctrl->motor->pole_pairs = pole_pairs;
   motor_ctrl->shaft_angle = 0.0f;
   motor_ctrl->zero_electric_angle = 0.0f;
+  motor_ctrl->direction = true;   // 默认正向
   motor_ctrl->loop_timestamp = 0;
 
   return motor_ctrl;
+}
+
+/**
+ * @brief 电机控制初始化（自动辨识方向 + 校准零点）
+ */
+int motor_control_init(motor_control_t *self)
+{
+  if (!self || !self->encoder) return -1;
+  
+  log_i("Starting motor initialization...");
+
+  // 1. 自动辨识方向
+  // 移动到电角度 0
+  setPhaseVoltage(self, 3, 0, 0);
+  sys_delay_ms(500);
+  float angle_start = ENCODER_GET_ANGLE(self->encoder);
+  
+  // 移动到电角度 PI/2 (90度)
+  setPhaseVoltage(self, 3, 0, M_PI_F / 2.0f);
+  sys_delay_ms(500);
+  float angle_end = ENCODER_GET_ANGLE(self->encoder);
+  
+  // 计算位移并处理过零点
+  float diff = angle_end - angle_start;
+  if (diff > M_PI_F) diff -= 2.0f * M_PI_F;
+  if (diff < -M_PI_F) diff += 2.0f * M_PI_F;
+  
+  if (diff > 0) {
+    self->direction = true;
+    log_i("Encoder direction: Normal");
+  } else {
+    self->direction = false;
+    log_i("Encoder direction: Inverted");
+  }
+
+  // 2. 执行零点校准
+  int ret = calibrate_zero_electric_angle(self);
+  if (ret == 0) {
+    log_i("Calibration success. Zero offset: %.2f rad", self->zero_electric_angle);
+  } else {
+    log_e("Calibration failed!");
+  }
+  
+  return ret;
 }
 
 void motor_control_destroy(motor_control_t *self)

@@ -27,7 +27,9 @@
 /* USER CODE BEGIN Includes */
 #include "test_framework.h"
 #include "elog.h"
+#include "BSP_init.h"
 #include "user_task.h"
+#include "motor_control/motor_control.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -156,6 +158,10 @@ void StartDefaultTask(void *argument)
 /* USER CODE END Header_myFunc01 */
 void myFunc01(void *argument)
 {
+  if(Motor_1_control)
+    calibrate_zero_electric_angle(Motor_1_control);
+  if(Motor_2_control)
+    calibrate_zero_electric_angle(Motor_2_control);
   /* USER CODE BEGIN myFunc01 */
   /* Infinite loop */
   for (;;)
