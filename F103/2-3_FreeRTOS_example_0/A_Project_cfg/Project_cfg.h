@@ -14,4 +14,6 @@
 /* ----- RTOS配置 ----- */
 #define FREERTOS_ENABLED 1 // sys.c启用FreeRTOS支持
 
+
+
 #endif /* APPLICATION_PROJECT_CFG_H_ */

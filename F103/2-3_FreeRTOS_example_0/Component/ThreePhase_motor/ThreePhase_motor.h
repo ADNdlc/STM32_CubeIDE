@@ -15,7 +15,7 @@ struct threephase_motor_t
 
   float bus_voltage;   // 母线电压(电机驱动电压)
   float voltage_limit; // 电机电压限制
-  uint8_t pole_pairs;        // 极对数
+  uint8_t pole_pairs;  // 极对数
 };
 
 // 公共 API
@@ -33,14 +33,6 @@ void motor_destroy(threephase_motor_t *self);
  * @note  如果任一相电压超出单相(voltage_limit/2)限制, 将自动进行等比例缩放 (clamp)
  */
 int motor_set_phase_voltage(threephase_motor_t *self, float Vu, float Vv, float Vw);
-
-/**
- * @brief 根据机械角度获取对应电角度
- * @param self motor_t 实例
- * @param shaft_angle 机械角度
- * @return 电机电角度
- */
-float motor_get_electricalAngle(threephase_motor_t *self , float shaft_angle);
 
 /**
  * @brief 更新电压参数

@@ -89,11 +89,11 @@ void bsp_init(void)
 
   threephase_motor_t *Motor_1 = threephase_motor_create(M_IN_1, M_IN_2, M_IN_3, 12.0f);
   motor_set_voltage(Motor_1, 12.0f, 12.0f);
-  Motor_1_control = motor_control_create(Motor_1, 7);
+  Motor_1_control = motor_control_create(Motor_1, NULL, 7);
 
   threephase_motor_t *Motor_2 = threephase_motor_create(M1_IN_1_drv, M1_IN_2_drv, M1_IN_3_drv, 12.0f);
   motor_set_voltage(Motor_2, 12.0f, 12.0f);
-  Motor_2_control = motor_control_create(Motor_2, 7);
+  Motor_2_control = motor_control_create(Motor_2, NULL, 7);
 
   /* 4. 创建编码器驱动 */
   g_encoder_m0 = absolute_encoder_driver_get(ENCODER_ID_M0);

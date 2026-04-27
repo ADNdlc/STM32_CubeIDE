@@ -98,13 +98,6 @@ int motor_set_phase_voltage(threephase_motor_t *self, float Vu, float Vv, float 
   return 0;
 }
 
-float motor_get_electricalAngle(threephase_motor_t *self, float shaft_angle)
-{
-  if (!self)
-    return -1;
-  return (shaft_angle * self->pole_pairs);
-}
-
 void motor_set_voltage(threephase_motor_t *self, float bus_voltage, float voltage_limit)
 {
   if (!self)
