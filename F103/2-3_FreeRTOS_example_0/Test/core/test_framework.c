@@ -2,6 +2,7 @@
 #include "BSP_init.h"
 #include "test_config.h"
 #include <string.h>
+#include "shell.h"
 
 #if TEST_ENABLE
 
@@ -66,37 +67,18 @@ void Test_Select_And_Run(int index) {
   }
 }
 
-void Test_Framework_HandleInput(uint8_t cmd) {
-// 调试：输出接收到的实际值
-//  log_d("Received cmd: 0x%02X (%d), '0'=0x%02X, '9'=0x%02X", 
-//        cmd, cmd, (uint8_t)'0', (uint8_t)'9');
-  
-  // 忽略回车符和换行符
-  if (cmd == '\r' || cmd == '\n') {
-    return;
-  }
-  
-  if (cmd == 'm') {
-    Test_List_All();
-  } else if (cmd == 's') {
-    Stop_Current_Test();
-  } else if (cmd >= '0' && cmd <= '9') {
-    Test_Select_And_Run(cmd - '0');
-  } else {
-    log_w("Unknown command: 0x%02X ('%c')", cmd, cmd);
-  }
+// Shell 包装函数
+void shell_test_run(int index) {
+    Test_Select_And_Run(index);
 }
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), test_list, Test_List_All, list all test cases);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), test_run, shell_test_run, select and run test case);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), test_stop, Stop_Current_Test, stop current test case);
 
 // 在 main while(1) 中调用
 void Test_Framework_Run(void) {
-  uint8_t rx_char;
-
-  // 1. 串口指令解析：使用统一的全局队列获取数据
-  if (g_debug_queue) {
-    while (uart_queue_getdata(g_debug_queue, &rx_char, 1) > 0) {
-      Test_Framework_HandleInput(rx_char);
-    }
-  }
+  // 串口输入现在由 Letter-Shell 统一处理
 
   // 2. 执行当前选中的测试循环逻辑
   if (current_test && current_test->loop) {

@@ -12,7 +12,9 @@
 #ifndef __SHELL_CFG_USER_H__
 #define __SHELL_CFG_USER_H__
 
-#include "stm32f4xx_hal.h"
+#define SHELL_CFG_USER
+
+#include "Sys.h"
 #include "FreeRTOS.h"
 #include "portable.h"
 
@@ -20,7 +22,7 @@
  * @brief 是否使用shell伴生对象
  *        一些扩展的组件(文件系统支持，日志工具等)需要使用伴生对象
  */
-#define     SHELL_USING_COMPANION       1
+#define     SHELL_USING_COMPANION       0
 
 
 /**
@@ -59,7 +61,7 @@
  *        定义此宏为获取系统Tick，如`HAL_GetTick()`
  * @note 此宏不定义时无法使用双击tab补全命令help，无法使用shell超时锁定
  */
-#define     SHELL_GET_TICK()            HAL_GetTick()
+#define     SHELL_GET_TICK()            sys_get_systick_ms()
 
 /**
  * @brief 使用锁

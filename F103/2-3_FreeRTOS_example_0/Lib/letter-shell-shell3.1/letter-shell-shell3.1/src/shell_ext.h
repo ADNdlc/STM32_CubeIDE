@@ -13,7 +13,7 @@
 #define __SHELL_EXT_H__
 
 #include "shell.h"
-
+#include "stdlib.h"
 /**
  * @brief 数字类型
  * 

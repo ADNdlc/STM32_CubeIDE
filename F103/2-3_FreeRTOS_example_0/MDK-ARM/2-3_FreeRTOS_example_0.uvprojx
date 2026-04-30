@@ -1459,11 +1459,6 @@
               <FileType>1</FileType>
               <FilePath>..\Lib\letter-shell-shell3.1\letter-shell-shell3.1\src\shell_ext.c</FilePath>
             </File>
-            <File>
-              <FileName>shell_cfg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Lib\letter-shell-shell3.1\letter-shell-shell3.1\src\shell_cfg.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

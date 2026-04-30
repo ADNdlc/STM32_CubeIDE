@@ -17,6 +17,7 @@
 #include "pwm_led/pwm_led.h"
 #include "sys.h"
 #include "uart_queue/uart_queue.h" // 包含uart_queue相关函数
+#include "shell.h"
 #include <math.h>
 
 
@@ -28,13 +29,10 @@
 // 1: 位置闭环控制模式
 #define POSITION_CONTROL_MODE 1
 
-#if POSITION_CONTROL_MODE
 // 位置闭环控制模式下的全局目标位置变量
 static float target_position = 0.0f; // 默认目标位置 0 弧度
-#else
 // 开环速度控制模式下的全局目标速度变量
 static float target_velocity = 5.0f; // 默认目标速度 5 rad/s
-#endif
 
 // 归一化角度到 [0,2PI]
 static float _normalizeAngle(float angle) {
@@ -145,40 +143,26 @@ void positioncloseloop(float target_position) {
 }
 #endif
 
-void User_Task_HandleInput(uint8_t cmd) {
-  if (cmd == '\r' || cmd == '\n') return;
-
-#if POSITION_CONTROL_MODE
-  if (cmd >= '0' && cmd <= '9') {
+void motor_set_pos(float pos) {
     HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
-    int digit = cmd - '0';
-    float position_range = 2.0f * M_PI_F;
-    target_position = (digit == 9) ? 0.0f : (float)digit * position_range / 8.0f;
+    target_position = pos;
     log_i("Target position set to: %.2f rad", target_position);
-  } else if (cmd == '+') {
+}
+
+void motor_set_vel(float vel) {
     HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
-    target_position = _normalizeAngle(target_position + M_PI_F / 8.0f);
-    log_i("Target position: %.2f rad", target_position);
-  } else if (cmd == '-') {
-    target_position = _normalizeAngle(target_position - M_PI_F / 8.0f);
-    log_i("Target position: %.2f rad", target_position);
-  } else if (cmd == 's') {
+    target_velocity = vel;
+    log_i("Target velocity set to: %.1f rad/s", target_velocity);
+}
+
+void motor_stop_cmd(void) {
     HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
     log_i("Motor disabled");
-  }
-#else
-  if (cmd >= '0' && cmd <= '9') {
-    HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_SET);
-    target_velocity = (float)(cmd - '0');
-    log_i("Target velocity set to: %.1f rad/s", target_velocity);
-  } else if (cmd == 's') {
-    HAL_GPIO_WritePin(MOTOR_EN_GPIO_Port, MOTOR_EN_Pin, GPIO_PIN_RESET);
-    target_velocity = 0.0f;
-    motor_stop(Motor_1_control->motor);
-    log_i("Motor stopped");
-  }
-#endif
 }
+
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), motor_pos, motor_set_pos, set motor target position);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), motor_vel, motor_set_vel, set motor target velocity);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), motor_stop, motor_stop_cmd, stop motor);
 
 extern motor_control_t *Motor_1_control;
 extern motor_control_t *Motor_2_control;
@@ -186,12 +170,7 @@ extern absolute_encoder_driver_t *g_encoder_m0;
 extern absolute_encoder_driver_t *g_encoder_m1;
 
 void User_Task_1(void) {
-  if (g_debug_queue) {
-    uint8_t rx_char;
-    while (uart_queue_getdata(g_debug_queue, &rx_char, 1) > 0) {
-      User_Task_HandleInput(rx_char);
-    }
-  }
+  // 串口输入现在由 Letter-Shell 统一处理
 
 #if POSITION_CONTROL_MODE
   positioncloseloop(target_position);

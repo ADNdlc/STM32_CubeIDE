@@ -8,15 +8,14 @@
  * @copyright (c) 2019 Letter
  * 
  */
-
+ 
 #include "FreeRTOS.h"
+#include "semphr.h"
 #include "task.h"
 #include "shell.h"
-#include "serial.h"
-#include "stm32f4xx_hal.h"
-#include "usart.h"
-#include "cevent.h"
-#include "log.h"
+#include "BSP_init.h"
+#include "uart_queue/uart_queue.h"
+#include "elog.h"
 
 
 Shell shell;
@@ -34,7 +33,9 @@ static SemaphoreHandle_t shellMutex;
  */
 short userShellWrite(char *data, unsigned short len)
 {
-    serialTransmit(&debugSerial, (uint8_t *)data, len, 0x1FF);
+    if (g_debug_queue) {
+        return uart_queue_send(g_debug_queue, (uint8_t *)data, len);
+    }
     return len;
 }
 
@@ -49,7 +50,11 @@ short userShellWrite(char *data, unsigned short len)
  */
 short userShellRead(char *data, unsigned short len)
 {
-    return serialReceive(&debugSerial, (uint8_t *)data, len, 0);
+    if (g_debug_queue) {
+        // 读取一个字节（带FreeRTOS超时阻塞）
+        return uart_queue_getdata(g_debug_queue, (uint8_t *)data, 1);
+    }
+    return 0;
 }
 
 /**
@@ -91,10 +96,10 @@ void userShellInit(void)
     shell.lock = userShellLock;
     shell.unlock = userShellUnlock;
     shellInit(&shell, shellBuffer, 512);
-    if (xTaskCreate(shellTask, "shell", 256, &shell, 5, NULL) != pdPASS)
+    // 增加栈大小至 512 words (2KB) 确保安全
+    if (xTaskCreate(shellTask, "shell", 512, &shell, 5, NULL) != pdPASS)
     {
-        logError("shell task creat failed");
+        log_e("shell task creat failed");
     }
 }
-CEVENT_EXPORT(EVENT_INIT_STAGE2, userShellInit);
 

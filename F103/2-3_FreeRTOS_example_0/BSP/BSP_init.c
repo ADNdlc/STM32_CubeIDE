@@ -18,6 +18,7 @@
 
 #include "ThreePhase_motor\ThreePhase_motor.h"
 #include "motor_control\motor_control.h"
+#include "shell_port.h"
 
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
@@ -89,10 +90,10 @@ void bsp_init(void) {
 
   /* 4. 创建编码器驱动 */
   g_encoder_m0 = absolute_encoder_driver_get(ENCODER_ID_M0);
-  //g_encoder_m1 = absolute_encoder_driver_get(ENCODER_ID_M1);
+  g_encoder_m1 = absolute_encoder_driver_get(ENCODER_ID_M1);
 
   Motor_1_control = motor_control_create(Motor_1, g_encoder_m0, 7);
-  //Motor_2_control = motor_control_create(Motor_2, g_encoder_m1, 7);
+  Motor_2_control = motor_control_create(Motor_2, g_encoder_m1, 7);
 
   /* 5. 电机初始化（辨识方向与零点校准） */
   if (Motor_1_control) {
@@ -104,6 +105,9 @@ void bsp_init(void) {
     log_i("Initializing Motor 2...");
     motor_control_init(Motor_2_control);
   }
+
+  /* 6. 初始化 Shell */
+  userShellInit();
 }
 
 #endif

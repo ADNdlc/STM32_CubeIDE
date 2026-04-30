@@ -13,7 +13,7 @@
 #define __SHELL_CFG_H__
 
 #ifdef SHELL_CFG_USER
-#include SHELL_CFG_USER
+#include "shell_cfg_user.h"
 #endif
 
 #ifndef SHELL_TASK_WHILE
@@ -180,7 +180,7 @@
  *        定义此宏为获取系统Tick，如`HAL_GetTick()`
  * @note 此宏不定义时无法使用双击tab补全命令help，无法使用shell超时锁定
  */
-#define     SHELL_GET_TICK()            0
+#define     SHELL_GET_TICK()            1
 #endif /** SHELL_GET_TICK */
 
 #ifndef SHELL_USING_LOCK
@@ -188,7 +188,7 @@
  * @brief 使用锁
  * @note 使用shell锁时，需要对加锁和解锁进行实现
  */
-#define     SHELL_USING_LOCK            0
+#define     SHELL_USING_LOCK            1
 #endif /** SHELL_USING_LOCK */
 
 #ifndef SHELL_MALLOC
