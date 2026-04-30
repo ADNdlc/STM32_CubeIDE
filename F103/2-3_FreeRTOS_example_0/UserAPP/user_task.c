@@ -95,7 +95,7 @@ float velocityOpenloop(float target_velocity) {
  * @brief 电机位置闭环控制函数
  */
 void positioncloseloop(float target_position) {
-  static const float Kp = 1.2f;
+  static const float Kp = 1.1f;
   static const float Ki = 0.1f; 
   static const float Kd = 0.05f; 
 
@@ -125,13 +125,13 @@ void positioncloseloop(float target_position) {
 
   // 4. PID 计算
   integral_error += error * dt;
-  float integral_max = Motor_1_control->motor->voltage_limit / Ki;
+  float integral_max = Motor_1_control->motor->bus_voltage / Ki;
   integral_error = _constrain(integral_error, -integral_max, integral_max);
   float derivative_error = (error - last_error) / dt;
   float Uq = Kp * error + Ki * integral_error + Kd * derivative_error;
 
   // 5. 电压限制
-  float voltage_limit = Motor_1_control->motor->voltage_limit;
+  float voltage_limit = Motor_1_control->motor->bus_voltage;
   Uq = _constrain(Uq, -voltage_limit, voltage_limit);
 
   // 6. 获取电角度（复用读取到的机械角度）

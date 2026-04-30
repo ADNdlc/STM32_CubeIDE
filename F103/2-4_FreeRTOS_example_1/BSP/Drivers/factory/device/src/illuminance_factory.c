@@ -6,11 +6,10 @@
  *
  *  光照传感器工厂实现
  */
-
 #include "elog.h"
 #define LOG_TAG "ILLUMINANCE_FACTORY"
-#include "i2c_factory.h"
-#include "illuminance_factory.h"
+#include "../../connectivity/inc/i2c_factory.h"
+#include "../inc/illuminance_factory.h"
 #include <stddef.h>
 
 #if (DEV_LIGHT == USE_BH1750)

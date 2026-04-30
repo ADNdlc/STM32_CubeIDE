@@ -69,6 +69,12 @@ void Error_Handler(void);
 #define M1_IN1_GPIO_Port GPIOA
 #define M1_OUT1_CS_Pin GPIO_PIN_4
 #define M1_OUT1_CS_GPIO_Port GPIOA
+#define M1_OUT2_CS_Pin GPIO_PIN_5
+#define M1_OUT2_CS_GPIO_Port GPIOA
+#define M1_IN2_Pin GPIO_PIN_6
+#define M1_IN2_GPIO_Port GPIOA
+#define M1_IN3_Pin GPIO_PIN_7
+#define M1_IN3_GPIO_Port GPIOA
 #define M0_OUT1_CS_Pin GPIO_PIN_0
 #define M0_OUT1_CS_GPIO_Port GPIOB
 #define M0_OUT2_CS_Pin GPIO_PIN_1
@@ -77,10 +83,8 @@ void Error_Handler(void);
 #define I2C0_SCL_GPIO_Port GPIOB
 #define I2C0_SDA_Pin GPIO_PIN_11
 #define I2C0_SDA_GPIO_Port GPIOB
-#define M1_IN2_Pin GPIO_PIN_4
-#define M1_IN2_GPIO_Port GPIOB
-#define M1_IN3_Pin GPIO_PIN_5
-#define M1_IN3_GPIO_Port GPIOB
+#define MOTOR_EN_Pin GPIO_PIN_8
+#define MOTOR_EN_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 

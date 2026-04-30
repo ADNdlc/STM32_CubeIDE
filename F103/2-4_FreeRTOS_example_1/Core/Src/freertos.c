@@ -25,8 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "test_framework.h"
-#include "elog.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,13 +51,20 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for LEDTask */
-osThreadId_t LEDTaskHandle;
-const osThreadAttr_t LEDTask_attributes = {
-  .name = "LEDTask",
+/* Definitions for myTask01 */
+osThreadId_t myTask01Handle;
+const osThreadAttr_t myTask01_attributes = {
+  .name = "myTask01",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for myTask02 */
+osThreadId_t myTask02Handle;
+const osThreadAttr_t myTask02_attributes = {
+  .name = "myTask02",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
@@ -69,7 +75,8 @@ const osThreadAttr_t LEDTask_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-void LEDFunc(void *argument);
+void myFunc01(void *argument);
+void myFunc02(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -103,8 +110,11 @@ void MX_FREERTOS_Init(void) {
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of LEDTask */
-  LEDTaskHandle = osThreadNew(LEDFunc, NULL, &LEDTask_attributes);
+  /* creation of myTask01 */
+  myTask01Handle = osThreadNew(myFunc01, NULL, &myTask01_attributes);
+
+  /* creation of myTask02 */
+  myTask02Handle = osThreadNew(myFunc02, NULL, &myTask02_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -129,30 +139,45 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	Test_Framework_Run();
-    osDelay(2);
+    osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
 }
 
-/* USER CODE BEGIN Header_LEDFunc */
+/* USER CODE BEGIN Header_myFunc01 */
 /**
-* @brief Function implementing the LEDTask thread.
+* @brief Function implementing the myTask01 thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_LEDFunc */
-void LEDFunc(void *argument)
+/* USER CODE END Header_myFunc01 */
+void myFunc01(void *argument)
 {
-  /* USER CODE BEGIN LEDFunc */
+  /* USER CODE BEGIN myFunc01 */
   /* Infinite loop */
   for(;;)
   {
-    //log_i("LED Toggle");
-    //HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    osDelay(1);
   }
-  /* USER CODE END LEDFunc */
+  /* USER CODE END myFunc01 */
+}
+
+/* USER CODE BEGIN Header_myFunc02 */
+/**
+* @brief Function implementing the myTask02 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_myFunc02 */
+void myFunc02(void *argument)
+{
+  /* USER CODE BEGIN myFunc02 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END myFunc02 */
 }
 
 /* Private application code --------------------------------------------------*/

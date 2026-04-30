@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "adc.h"
 #include "can.h"
 #include "dma.h"
 #include "i2c.h"
@@ -32,6 +33,7 @@
 /* USER CODE BEGIN Includes */
 #include "BSP_init.h"
 #include "test_framework.h"
+#include "user_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -106,6 +108,7 @@ int main(void)
   MX_TIM3_Init();
   MX_SPI2_Init();
   MX_USB_PCD_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   bsp_init();
   Test_Framework_Init();
@@ -169,7 +172,8 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC|RCC_PERIPHCLK_USB;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
   PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL_DIV1_5;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
@@ -189,7 +193,7 @@ void SystemClock_Config(void)
   * @param  htim : TIM handle
   * @retval None
   */
-__weak void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
 

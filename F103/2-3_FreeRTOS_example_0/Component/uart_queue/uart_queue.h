@@ -4,7 +4,6 @@
  *  Created on: Dec 3, 2025
  *      Author: 12114
  */
-
 #ifndef UART_QUEUE_UART_QUEUE_H_
 #define UART_QUEUE_UART_QUEUE_H_
 

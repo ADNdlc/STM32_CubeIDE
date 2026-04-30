@@ -221,10 +221,9 @@ void stm32_timer_driver_destroy(timer_driver_t *driver_base) {
  * 注意：所有开启中断的 TIM 都会进入这里
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-  // 1. 保护系统心跳 (如果使用的是 TIM 作为 SysTick 时基)
-  // uwTickPrio 是中断优先级，不应直接与 Instance 比较。
-  // 如果当前工程使用 TIMx 作为心跳，请在此处添加具体的保护逻辑。
-  // 2. 查找并执行驱动回调
+  if (htim->Instance == TIM4){
+    HAL_IncTick();
+  }
   stm32_timer_driver_t *driver = find_timer_driver(htim->Instance);
   if (driver && driver->callback) {
     driver->callback(driver->callback_context);

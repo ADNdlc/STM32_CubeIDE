@@ -4,7 +4,6 @@
  *  Created on: Dec 1, 2025
  *      Author: 12114
  */
-
 #include "ring_buffer.h"
 #include <stdlib.h>
 #include <string.h>
@@ -83,7 +82,7 @@ bool rb_push(ring_buffer_t *rb, uint8_t data) {
  * @param rb 环形缓冲区对象指针
  * @param ptr 指向可读数据起始地址的指针
  * @return 连续可读数据的长度
- * @note 此函数不移动读指针，需要配合rb_advance使用
+ * @note 此函数不移动读指针，需要配合下面的rb_advance使用
  */
 size_t rb_peek(ring_buffer_t *rb, uint8_t **ptr) {
   if (rb->head == rb->tail)
@@ -176,7 +175,7 @@ size_t rb_write(ring_buffer_t *rb, const uint8_t *data, size_t len) {
  * @param rb 环形缓冲区对象指针
  * @param ptr 指向可写空间起始地址的指针
  * @return 连续可写空间的长度
- * @note 此函数不移动写指针，需要配合rb_advance_head使用
+ * @note 此函数不移动写指针，需要配合下面的rb_advance_head使用
  */
 size_t rb_peek_write(ring_buffer_t *rb, uint8_t **ptr) {
   size_t free = rb_free_space(rb);

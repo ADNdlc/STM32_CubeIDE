@@ -126,6 +126,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	 // Test_Framework_Run();
 	 //User_Task_1();
     /* USER CODE END WHILE */
 

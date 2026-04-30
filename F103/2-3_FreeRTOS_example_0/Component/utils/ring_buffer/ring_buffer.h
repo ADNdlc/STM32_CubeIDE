@@ -4,7 +4,6 @@
  *  Created on: Dec 1, 2025
  *      Author: 12114
  */
-
 #ifndef UART_QUEUE_RING_BUFFER_H_
 #define UART_QUEUE_RING_BUFFER_H_
 

@@ -7,7 +7,7 @@
 #include "connectivity\inc\i2c_factory.h"
 #include "connectivity\inc\pwm_factory.h"
 
-#include "device\inc\OLED_factory.h"
+#include "device\inc\absolute_encoder_factory.h"
 
 #include "timer\inc\timer_factory.h"
 

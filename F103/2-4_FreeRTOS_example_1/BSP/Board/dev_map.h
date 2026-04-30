@@ -15,8 +15,6 @@
 /* ----- GPIO ----- */
 typedef enum {
   GPIO_ID_LED0 = 0,
-//  GPIO_ID_OLED_DC,
-//  GPIO_ID_OLED_RES,
   //...
   GPIO_MAX_DEVICES
 } gpio_device_id_t;
@@ -38,7 +36,9 @@ extern const usart_mapping_t usart_mappings[USART_MAX_DEVICES];
 
 /* ----- i2c ----- */
 typedef enum {
-  I2C_BUS_OLED = 0,
+  I2C_M0_OUT = 0,
+  I2C_M1_OUT = 1,
+
   //...
   I2C_MAX_DEVICES
 } i2c_device_id_t;
@@ -60,22 +60,25 @@ extern const spi_mapping_t spi_mappings[SPI_MAX_DEVICES];
 
 /* ----- Timer ----- */
 typedef enum {
-	TIMER_ID_1 = 0,
-	TIMER_ID_2,
+  TIMER_ID_1 = 0,
+  TIMER_ID_2,
 
-	TIMER_ID_MAX
+  TIMER_ID_MAX
 } timer_device_id_t;
 typedef struct {
   void *resource;
 } timer_mapping_t;
 extern const timer_mapping_t timer_mappings[TIMER_ID_MAX];
 
-
 /* ----- PWM ----- */
 typedef enum {
-  PWM_ID_R = 0,
-  PWM_ID_G = 1,
-  PWM_ID_B = 2,
+  M0_IN_1,
+  M0_IN_2,
+  M0_IN_3,
+  M1_IN_1,
+  M1_IN_2,
+  M1_IN_3,
+
   PWM_ID_MAX
 } pwm_device_id_t;
 typedef struct {
@@ -83,28 +86,23 @@ typedef struct {
 } pwm_mapping_t;
 extern const pwm_mapping_t pwm_mappings[PWM_ID_MAX];
 
-/* ----- OLED ----- */
+/* ----- 绝对值编码器 ----- */
 typedef enum {
-  OLED_ID_MAIN = 0,
-  //...
-  OLED_ID_MAX
-} oled_id_t;
+  ENCODER_ID_M0 = 0,
+  ENCODER_ID_M1 = 1,
+
+  ENCODER_ID_MAX
+} absolute_encoder_id_t;
+
 typedef struct {
   void *resource;
-} oled_mapping_t;
-extern const oled_mapping_t oled_mappings[OLED_ID_MAX];
+} absolute_encoder_mapping_t;
 
-/* ----- 电源监测 ----- */
-typedef enum {
-  POWER_MONITOR_ID_MAIN = 0,
-  //...
-  POWER_MONITOR_MAX
-} power_monitor_id_t;
-typedef struct {
-  void *resource;
-} power_monitor_mapping_t;
-extern const power_monitor_mapping_t power_monitor_mappings[POWER_MONITOR_MAX];
+extern const absolute_encoder_mapping_t
+    absolute_encoder_mappings[ENCODER_ID_MAX];
 
+
+    
 #define CALL_RESOURE(config, type, res_name)                                   \
   ((type)(((config *)mapping->resource)->res_name))
 

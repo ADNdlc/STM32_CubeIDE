@@ -1,6 +1,12 @@
 #include "stm32_pwm_driver.h"
 #include <stdlib.h>
 
+#ifdef STM32H743xx
+#include "stm32h7xx_ll_bus.h"
+#include "stm32h7xx_ll_rcc.h"
+#include "stm32h7xx_ll_tim.h"
+#endif
+
 #ifdef STM32F103xB
 #include "stm32f1xx_ll_bus.h"
 #include "stm32f1xx_ll_rcc.h"
@@ -83,6 +89,13 @@ static uint32_t Get_TIM_Input_Clock(TIM_HandleTypeDef *htim) {
 static void _stm32_pwm_start(pwm_driver_t *base) {
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
   HAL_TIM_PWM_Start(self->config.htim, self->config.channel);
+
+#ifdef TIM_BDTR_MOE
+  // 对于高级定时器 (TIM1, TIM8)，必须使能主输出 (MOE) 才能在引脚上看到波形
+  if (IS_TIM_BREAK_INSTANCE(self->config.htim->Instance)) {
+    __HAL_TIM_MOE_ENABLE(self->config.htim);
+  }
+#endif
 }
 
 static void _stm32_pwm_stop(pwm_driver_t *base) {
@@ -90,10 +103,17 @@ static void _stm32_pwm_stop(pwm_driver_t *base) {
   HAL_TIM_PWM_Stop(self->config.htim, self->config.channel);
 }
 
-static void _stm32_pwm_set_duty(pwm_driver_t *base, uint32_t duty) {
+static int _stm32_pwm_set_duty(pwm_driver_t *base, uint32_t duty) {
   stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
   // 直接设置 CCR 寄存器
   __HAL_TIM_SET_COMPARE(self->config.htim, self->config.channel, duty);
+  return 0;
+}
+
+static int _stm32_pwm_set_duty_max(pwm_driver_t *base, uint32_t duty_max){
+  stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
+  __HAL_TIM_SET_AUTORELOAD(self->config.htim, duty_max);
+  return 0;
 }
 
 static uint32_t _stm32_pwm_get_duty_max(pwm_driver_t *base) {
@@ -122,19 +142,23 @@ static void _stm32_pwm_set_freq(pwm_driver_t *base, uint32_t freq) {
   const uint32_t MAX_ARR = 0xFFFF;
 
   // 计算总的分频因子
-  // cycles = Tim_Ker_Clk / freq
+  // Timer_Freq = Tim_Ker_Clk / ((PSC+1) * (ARR+1))  (边沿对齐)
+  // Timer_Freq = Tim_Ker_Clk / (2 * (PSC+1) * ARR) (中心对齐)
+  
   uint32_t cycles = tim_ker_clk / freq;
+  
+  // 检测是否为中心对齐模式 (TIM_CR1_CMS != 0)
+  if ((self->config.htim->Instance->CR1 & TIM_CR1_CMS) != 0) {
+      cycles /= 2;
+  }
 
   if (cycles <= MAX_ARR) {
-    // 如果不需要预分频就能装下
     psc = 0;
-    arr = cycles - 1;
+    arr = cycles; // 中心对齐下 ARR 即为半周期计数
   } else {
-    // 需要预分频
-    // psc = (cycles / 65536)
     psc = (cycles / (MAX_ARR + 1));
-    // 重新计算 arr
-    arr = (tim_ker_clk / ((psc + 1) * freq)) - 1;
+    arr = (tim_ker_clk / ((psc + 1) * freq));
+    if ((self->config.htim->Instance->CR1 & TIM_CR1_CMS) != 0) arr /= 2;
   }
 
   // 3. 写入寄存器
@@ -160,13 +184,25 @@ static uint32_t _stm32_pwm_get_freq(pwm_driver_t *base) {
   return tim_ker_clk / ((psc + 1) * (arr + 1));
 }
 
+static void _stm32_pwm_set_polarity(pwm_driver_t *base, uint8_t inverted) {
+  stm32_pwm_driver_t *self = (stm32_pwm_driver_t *)base;
+  uint32_t polarity = inverted ? LL_TIM_OCPOLARITY_LOW : LL_TIM_OCPOLARITY_HIGH;
+  
+  // 修改极性前先停止通道（推荐做法）
+  uint32_t channel = self->config.channel;
+  LL_TIM_OC_SetPolarity(self->config.htim->Instance, channel, polarity);
+}
+
 static const pwm_driver_ops_t stm32_pwm_ops = {
     .start = _stm32_pwm_start,
     .stop = _stm32_pwm_stop,
     .set_duty = _stm32_pwm_set_duty,
     .set_freq = _stm32_pwm_set_freq,
     .get_freq = _stm32_pwm_get_freq,
-    .get_duty_max = _stm32_pwm_get_duty_max};
+    .set_duty_max = _stm32_pwm_set_duty_max,
+    .get_duty_max = _stm32_pwm_get_duty_max,
+    .set_polarity = _stm32_pwm_set_polarity,
+};
 
 stm32_pwm_driver_t *stm32_pwm_driver_create(stm32_pwm_config_t *config) {
 #ifdef USE_MEMPOOL

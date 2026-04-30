@@ -18,7 +18,10 @@
 
 #if TEST_ENABLE
 #define ENABLE_TEST_LED 1
-#define ENABLE_TEST_PWM 1
+#define ENABLE_TEST_PWM 0
+#define ENABLE_TEST_PWM_LED 0
+#define ENABLE_TEST_ENCODER 1
+#define ENABLE_TEST_ENCODER_SPEED 1
 #endif
 
 #endif /* TEST_CONFIG_H_ */

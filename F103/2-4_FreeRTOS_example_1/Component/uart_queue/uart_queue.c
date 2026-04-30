@@ -4,7 +4,6 @@
  *  Created on: Dec 3, 2025
  *      Author: 12114
  */
-
 #include "uart_queue.h"
 #include "stdio.h"
 #include <stdlib.h>
@@ -15,7 +14,7 @@
 #define UARTQUEUE_MEMSOURCE SYS_MEM_INTERNAL // 从哪里分配
 #endif
 
-#define Rx_Manual_restart 0
+#define Rx_Manual_restart 0 // 接收事件中是否需要重新启动接收?(stm32HAL库是不需要的)
 
 // 定义消息宏
 #define WAIT_MESSAGE_PREFIX "\r\n[WAIT:"

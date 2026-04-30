@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../A_Project_cfg;../BSP;../BSP/Board;../BSP/Board/stm32f103_board;../BSP/Drivers/device;../BSP/Drivers/factory;../BSP/Drivers/interface;../BSP/Drivers/platform/stm32;../Component;../Component/logger;../BSP/Drivers/interface/System/Sys;../Component/utils;../Lib/EasyLogger/easylogger/inc;../Lib/EasyLogger/easylogger/src;../BSP/Drivers/interface/Device;../Test/core;../Test;../UserAPP</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../A_Project_cfg;../BSP;../BSP/Board;../BSP/Board/stm32f103_board;../BSP/Drivers/device;../BSP/Drivers/factory;../BSP/Drivers/interface;../BSP/Drivers/platform/stm32;../Component;../Component/logger;../BSP/Drivers/interface/System/Sys;../Component/utils;../Lib/EasyLogger/easylogger/inc;../Lib/EasyLogger/easylogger/src;../BSP/Drivers/interface/Device;../Test/core;../Test;../UserAPP;..\Lib\letter-shell-shell3.1\letter-shell-shell3.1\src;..\Component\shell_port</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1389,6 +1389,21 @@
               <FileType>5</FileType>
               <FilePath>..\Component\motor_control\motor_control.h</FilePath>
             </File>
+            <File>
+              <FileName>shell_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Component\shell_port\shell_port.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_port.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Component\shell_port\shell_port.h</FilePath>
+            </File>
+            <File>
+              <FileName>shell_cfg_user.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Component\shell_port\shell_cfg_user.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1424,6 +1439,31 @@
               <FileType>1</FileType>
               <FilePath>..\Lib\EasyLogger\easylogger\src\elog_utils.c</FilePath>
             </File>
+            <File>
+              <FileName>shell.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\letter-shell-shell3.1\letter-shell-shell3.1\src\shell.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_cmd_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\letter-shell-shell3.1\letter-shell-shell3.1\src\shell_cmd_list.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_companion.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\letter-shell-shell3.1\letter-shell-shell3.1\src\shell_companion.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_ext.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\letter-shell-shell3.1\letter-shell-shell3.1\src\shell_ext.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_cfg.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\letter-shell-shell3.1\letter-shell-shell3.1\src\shell_cfg.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1458,6 +1498,11 @@
               <FileName>test_encoder.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Test\Unit\test_encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>test_encoder_speed.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Test\Unit\test_encoder_speed.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -15,7 +15,6 @@
 #include "Connectivity\i2c\stm32_i2c_driver.h"
 #include "Connectivity\usart\stm32_usart_driver.h"
 #include "Connectivity\timer\stm32_timer_driver.h"
-#include "Connectivity\rtc\stm32_rtc_driver.h"
 #include "Connectivity\pwm\stm32_pwm_driver.h"
 
 
