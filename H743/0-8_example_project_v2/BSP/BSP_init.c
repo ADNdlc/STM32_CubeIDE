@@ -71,6 +71,9 @@ void bsp_init(void) {
 
   /* 3. elog初始化 */
   if (elog_init_and_config() == ELOG_NO_ERR) {
+
+	elog_set_filter_lvl(2); // ELOG_LVL_WARN
+
     log_i("log init success.");
     log_a("log lvel: %d", ELOG_LVL_TOTAL_NUM);
     log_i("sys CoreClock: %d MHz", sys_get_CoreClock());
@@ -131,7 +134,7 @@ void bsp_process(void) {
 
 // 导出 elog 控制命令
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC),
-                 elog_output, elog_set_output_enabled,
+                 log_out, elog_set_output_enabled,
                  enable / disable elog output);
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC),
                  elog_lvl, elog_set_filter_lvl, set elog filter level);
