@@ -51,6 +51,7 @@
 
 #elif defined(SYS_PROFILE_UNIT_TEST)
 // --- 单元测试模式配置 ---
+#define SHELL_ENABLE 1
 #define TEST_ENABLE 1
 #define RES_USE_INTERNAL 0 // 测试不用带大图片
 #define RES_BURN_ENABLE 0
@@ -68,13 +69,14 @@
 #define RES_USE_INTERNAL 0
 
 // 开启业务系统
-#define LVGL_ENABLE 1
-#define GUI_ENABLE 1
-#define SERVICE_ENABLE 1
-#define NETWORK_SERVICE_ENABLE 1
-#define SNTP_SERVICE_ENABLE 1
+#define SHELL_ENABLE 1
+#define LVGL_ENABLE 0
+#define GUI_ENABLE 0
+#define SERVICE_ENABLE 0
+#define NETWORK_SERVICE_ENABLE 0
+#define SNTP_SERVICE_ENABLE 0
 #define THINGMODEL_ENABLE 1
-#define CLOUD_SERVICE_ENABLE 1
+#define CLOUD_SERVICE_ENABLE 0
 #define TEST_ENABLE 0
 #endif
 #endif /* APPLICATION_PROJECT_CFG_H_ */

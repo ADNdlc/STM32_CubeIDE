@@ -99,6 +99,15 @@ SECTIONS
     _test_end = .;          /* 定义段结束地址符号 */
     . = ALIGN(4);
   } >FLASH
+    .shell_registry :
+  {
+    . = ALIGN(4);
+    _shell_command_start = .;
+    KEEP(*(.shell_registry))
+    _shell_command_end = .;
+    . = ALIGN(4);
+  } >FLASH
+  
   /* ====== 测试程序段结束 ====== */
 
   .ARM.extab (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */

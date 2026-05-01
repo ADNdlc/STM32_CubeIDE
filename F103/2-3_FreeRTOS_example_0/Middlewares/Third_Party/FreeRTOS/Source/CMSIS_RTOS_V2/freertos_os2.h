@@ -86,7 +86,7 @@
 
 
 /*
-  CMSIS-RTOS2 FreeRTOS configuration check (FreeRTOSConfig.h).
+  CMSIS-RTOS2 FreeRTOS configuration check (FreeRTOSConfig.h). 
 
   Note: CMSIS-RTOS API requires functions included by using following definitions.
         In case if certain API function is not used compiler will optimize it away.

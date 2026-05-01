@@ -13,6 +13,7 @@
 #define     __SHELL_H__
 
 #include "shell_cfg.h"
+#include "stdlib.h"
 
 #define     SHELL_VERSION               "3.2.3"                 /**< 版本号 */
 

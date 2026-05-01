@@ -36,6 +36,7 @@
 /* USER CODE BEGIN Includes */
 #include "BSP_init.h"
 #include "app.h"
+#include "shell_port.h"
 #include "test_framework.h"
 /* USER CODE END Includes */
 
@@ -130,6 +131,9 @@ int main(void)
 
   bsp_init(); // 驱动层初始化
   app_init();
+#if SHELL_ENABLE
+  userShellInit();
+#endif
   Test_Framework_Init();
 
   /* USER CODE END 2 */
@@ -137,6 +141,9 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
+#if SHELL_ENABLE
+	userShellProcess();
+#endif
     Test_Framework_Run();
     bsp_process();
     app_run();

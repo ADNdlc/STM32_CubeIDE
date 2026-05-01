@@ -10,7 +10,7 @@
 #ifndef BSP_DRIVERS_FACTORY_DEVICE_ILLUMINANCE_FACTORY_H_
 #define BSP_DRIVERS_FACTORY_DEVICE_ILLUMINANCE_FACTORY_H_
 
-#include "illuminance_driver.h"
+#include "Device/illuminance_driver.h"
 #include "dev_map.h"
 
 /**

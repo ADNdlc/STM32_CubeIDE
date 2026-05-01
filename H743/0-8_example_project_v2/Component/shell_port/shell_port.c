@@ -87,32 +87,6 @@ int userShellUnlock(Shell *shell)
     xSemaphoreGiveRecursive(shellMutex);
     return 0;
 }
-#else
-/**
- * @brief 用户shell上锁 (裸机版本)
- * 
- * @param shell shell
- * 
- * @return int 0
- */
-int userShellLock(Shell *shell)
-{
-    // 裸机环境下无并发，直接返回
-    return 0;
-}
-
-/**
- * @brief 用户shell解锁 (裸机版本)
- * 
- * @param shell shell
- * 
- * @return int 0
- */
-int userShellUnlock(Shell *shell)
-{
-    // 裸机环境下无并发，直接返回
-    return 0;
-}
 #endif
 
 /**
@@ -123,14 +97,14 @@ void userShellInit(void)
 {
 #ifdef FREERTOS_ENABLED
     shellMutex = xSemaphoreCreateMutex();
-#endif
-
-    shell.write = userShellWrite;
-    shell.read = userShellRead;
     shell.lock = userShellLock;
     shell.unlock = userShellUnlock;
+#endif
+    shell.write = userShellWrite;
+    shell.read = userShellRead;
+
     shellInit(&shell, shellBuffer, 512);
-    
+
 #ifdef FREERTOS_ENABLED
     if (xTaskCreate(shellTask, "shell", 512, &shell, 5, NULL) != pdPASS)
     {

@@ -9,7 +9,7 @@
 #define APPLICATION_PROJECT_CFG_H_
 
 /* ----- 运行配置 ----- */
-#define TEST_ENABLE 0 // 使能测试模式(不进入主程序)
+#define TEST_ENABLE 1 // 使能测试模式(不进入主程序)
 
 /* ----- RTOS配置 ----- */
 #define FREERTOS_ENABLED 1 // sys.c启用FreeRTOS支持

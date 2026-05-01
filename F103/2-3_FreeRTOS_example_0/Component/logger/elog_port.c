@@ -70,7 +70,3 @@ const char *elog_port_get_p_info(void) { return ""; }
  * @return current thread name
  */
 const char *elog_port_get_t_info(void) { return ""; }
-
-#include "shell.h"
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), elog_start, elog_start, start elog);
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), elog_stop, elog_stop, stop elog);
