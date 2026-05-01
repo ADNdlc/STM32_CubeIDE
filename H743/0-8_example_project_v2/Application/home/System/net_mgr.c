@@ -46,8 +46,8 @@ extern const mqtt_adapter_t g_onenet_adapter; // OneNet MQTT适配器
 static bool g_wifi_target_enabled = false; // 用户期望的使能状态
 static net_mgr_wifi_state_t g_wifi_state = NET_MGR_WIFI_STATE_IDLE;
 static net_mgr_mqtt_state_t g_mqtt_state = NET_MGR_MQTT_STATE_IDLE;
-static uint32_t g_wifi_state_timer = 0;         // WiFi状态计时器
-static uint32_t g_mqtt_state_timer = 0;         // MQTT状态计时器
+static uint32_t g_wifi_state_timer = 0;    // WiFi状态计时器
+static uint32_t g_mqtt_state_timer = 0;    // MQTT状态计时器
 static uint32_t g_retry_count = 0;         // 重试计数
 static uint32_t g_mqtt_retry_count = 0;    // MQTT 特定重试计数库
 static bool g_pending_config_save = false; // 是否需要持久化配置
@@ -107,7 +107,8 @@ static void mqtt_event_handler(mqtt_service_t *svc,
     net_mgr_set_mqtt_state(NET_MGR_MQTT_STATE_RUNNING);
   } else if (event->type == MQTT_DRV_EVENT_DISCONNECTED) {
     log_w("MQTT Disconnected Event received");
-    if (g_mqtt_state == NET_MGR_MQTT_STATE_RUNNING || g_mqtt_state == NET_MGR_MQTT_STATE_STARTING) {
+    if (g_mqtt_state == NET_MGR_MQTT_STATE_RUNNING ||
+        g_mqtt_state == NET_MGR_MQTT_STATE_STARTING) {
       g_mqtt_retry_count++;
       if (g_mqtt_retry_count <= 3) {
         log_w("MQTT retrying %lu/3...", g_mqtt_retry_count);

@@ -1,7 +1,7 @@
 /*
  * BSP_init.c
  *
- *  Created on: Feb 7, 2026
+ *  Created on: Feb 7,2026
  *      Author: 12114
  */
 #include "Project_cfg.h"
@@ -43,6 +43,18 @@ static void lv_tick_cb(void *ctx) {
 } // 供 Timer 回调使用的 LVGL 心跳
 #endif
 
+/**
+ * @brief 系统复位命令
+ * 
+ * 执行系统软复位，等同于按下复位按钮
+ */
+static int bsp_reset_cmd(int argc, char *argv[]) {
+    log_i("System reset initiated...");
+    HAL_NVIC_SystemReset();
+    // 不会执行到这里，因为系统已经复位
+    return 0;
+}
+
 void bsp_init(void) {
 #ifndef platform_sys_mem_create
 #error "bsp_init: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
@@ -72,7 +84,7 @@ void bsp_init(void) {
   /* 3. elog初始化 */
   if (elog_init_and_config() == ELOG_NO_ERR) {
 
-	elog_set_filter_lvl(2); // ELOG_LVL_WARN
+	elog_set_filter_lvl(5); // ELOG_LVL_WARN
 
     log_i("log init success.");
     log_a("log lvel: %d", ELOG_LVL_TOTAL_NUM);
@@ -137,4 +149,8 @@ SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC),
                  log_out, elog_set_output_enabled,
                  enable / disable elog output);
 SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC),
-                 elog_lvl, elog_set_filter_lvl, set elog filter level);
+                 log_lvl, elog_set_filter_lvl, set elog filter level);
+
+// 导出系统复位命令
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                 reset, bsp_reset_cmd, perform system reset);

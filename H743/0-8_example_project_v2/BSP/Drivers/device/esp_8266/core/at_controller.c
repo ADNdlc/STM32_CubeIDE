@@ -33,7 +33,7 @@ static void at_cmd_cleanup(at_controller_t *self, AT_Cmd_t *cmd);
 // "OK"
 static void handle_final_ok(void *ctx, const char *line) {
   at_controller_t *self = (at_controller_t *)ctx;
-  // 【修复】：处于 BUSY 状态时如果收到 OK，也必须承认并结束命令！
+  // 处于 BUSY 状态时如果收到 OK，也必须承认并结束命令！
   if (self->state == AT_CTRL_STATE_WAIT_RSP || self->state == AT_CTRL_STATE_BUSY) {
     if (self->current_cmd && self->current_cmd->response_cb) {
       self->current_cmd->response_cb(self->current_cmd->ctx, AT_CMD_OK, line);

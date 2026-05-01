@@ -5,15 +5,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 typedef struct {
-    char ssid[33];  // <ssid>
-    char mac[18];   // mac地址
-    int8_t rssi;    // 信号强度
-    uint8_t channel;// 信道号
-    uint8_t encryption;      // <ecn>,加密方式
-    uint8_t pairwise_cipher; // <pairwise_cipher>,成对加密类型
-    uint8_t group_cipher;    // <group_cipher>,组加密类型与pairwise_cipher相同
-    uint8_t protocol;        // <wifi_protocol>,支持的协议类型
-    uint8_t wps;             // <wps>,是否支持WPS
+  char ssid[33];           // <ssid>
+  char mac[18];            // mac地址
+  int8_t rssi;             // 信号强度
+  uint8_t channel;         // 信道号
+  uint8_t encryption;      // <ecn>,加密方式
+  uint8_t pairwise_cipher; // <pairwise_cipher>,成对加密类型
+  uint8_t group_cipher;    // <group_cipher>,组加密类型与pairwise_cipher相同
+  uint8_t protocol;        // <wifi_protocol>,支持的协议类型
+  uint8_t wps;             // <wps>,是否支持WPS
 } wifi_ap_info_t;
 #endif
 #include "app_manager.h"
