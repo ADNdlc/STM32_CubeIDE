@@ -20,8 +20,8 @@
 #include "elog.h"
 #include "shell.h"
 #include "shell_fs.h"
-#include "vfs_manager.h"
 #include "uart_queue/uart_queue.h"
+#include "vfs_manager.h"
 #include <string.h>
 
 Shell shell;
@@ -92,75 +92,82 @@ int userShellUnlock(Shell *shell) {
 // --- File System Adapter ---
 
 static void normalize_path(char *path) {
-    char *src = path, *dst = path;
-    while (*src) {
-        if (*src == '/' && *(src + 1) == '/') src++;
-        else if (*src == '/' && *(src + 1) == '.' && (*(src + 2) == '/' || *(src + 2) == '\0')) src += 2;
-        else if (*src == '/' && *(src + 1) == '.' && *(src + 2) == '.' && (*(src + 3) == '/' || *(src + 3) == '\0')) {
-            src += 3;
-            if (dst > path) {
-                dst--;
-                while (dst > path && *dst != '/') dst--;
-            }
-        } else *dst++ = *src++;
+  if (!path || path[0] == '\0')
+    return;
+  char *src = path, *dst = path;
+
+  // 简化的归一化逻辑：仅处理重复的 '/'
+  while (*src) {
+    if (*src == '/' && *(src + 1) == '/') {
+      src++;
+      continue;
     }
-    if (dst == path) *dst++ = '/';
-    *dst = '\0';
+    *dst++ = *src++;
+  }
+  *dst = '\0';
+
+  // 移除末尾多余的 '/' (除非是根目录)
+  if (dst > path + 1 && *(dst - 1) == '/') {
+    *(dst - 1) = '\0';
+  }
 }
 
 static size_t userShellGetCWD(char *path, size_t len) {
-    strncpy(path, shellPathBuffer, len);
-    return strlen(path);
+  strncpy(path, shellPathBuffer, len);
+  return strlen(path);
 }
 
 static size_t userShellChDir(char *path) {
-    char temp[VFS_MAX_PATH_LEN];
-    if (path[0] == '/') {
-        strncpy(temp, path, VFS_MAX_PATH_LEN);
-    } else {
-        snprintf(temp, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, path);
-    }
-    normalize_path(temp);
-    
-    // 处理根目录跳转
-    if (strcmp(temp, "/") == 0) {
-        strncpy(shellPathBuffer, temp, VFS_MAX_PATH_LEN);
-        return 0;
-    }
+  char temp[VFS_MAX_PATH_LEN];
+  if (path[0] == '/') {
+    strncpy(temp, path, VFS_MAX_PATH_LEN);
+  } else {
+    snprintf(temp, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, path);
+  }
+  normalize_path(temp);
 
-    vfs_dir_t dir;
-    if (vfs_opendir(temp, &dir) == VFS_OK) {
-        vfs_closedir(dir);
-        strncpy(shellPathBuffer, temp, VFS_MAX_PATH_LEN);
-        return 0;
-    }
-    return -1;
+  // 处理根目录跳转
+  if (strcmp(temp, "/") == 0) {
+    strncpy(shellPathBuffer, temp, VFS_MAX_PATH_LEN);
+    return 0;
+  }
+
+  vfs_dir_t dir;
+  if (vfs_opendir(temp, &dir) == VFS_OK) {
+    vfs_closedir(dir);
+    strncpy(shellPathBuffer, temp, VFS_MAX_PATH_LEN);
+    return 0;
+  }
+  return -1;
 }
 
 static size_t userShellListDir(char *path, char *buffer, size_t maxLen) {
-    size_t offset = 0;
-    buffer[0] = '\0';
+  size_t offset = 0;
+  buffer[0] = '\0';
 
-    // 处理根目录虚拟列表（显示挂载点）
-    if (strcmp(path, "/") == 0) {
-        // 这里我们可以导出 vfs_manager 内部的挂载点，或者直接硬编码已知的
-        // 简单起见，目前列出已挂载的 /sys
-        offset += snprintf(buffer + offset, maxLen - offset, "%-20s %s\r\n", "sys", "<DIR>");
-        return offset;
-    }
-
-    vfs_dir_t dir;
-    vfs_dirent_t dirent;
-    if (vfs_opendir(path, &dir) != VFS_OK) return 0;
-    
-    while (vfs_readdir(dir, &dirent) > 0) {
-        int len = snprintf(buffer + offset, maxLen - offset, "%-20s %s\r\n", 
-                           dirent.name, dirent.info.is_dir ? "<DIR>" : "");
-        if (len < 0 || offset + len >= maxLen) break;
-        offset += len;
-    }
-    vfs_closedir(dir);
+  // 处理根目录虚拟列表（显示挂载点）
+  if (strcmp(path, "/") == 0) {
+    // 这里我们可以导出 vfs_manager 内部的挂载点，或者直接硬编码已知的
+    // 简单起见，目前列出已挂载的 /sys
+    offset += snprintf(buffer + offset, maxLen - offset, "%-20s %s\r\n", "sys",
+                       "<DIR>");
     return offset;
+  }
+
+  vfs_dir_t dir;
+  vfs_dirent_t dirent;
+  if (vfs_opendir(path, &dir) != VFS_OK)
+    return 0;
+
+  while (vfs_readdir(dir, &dirent) > 0) {
+    int len = snprintf(buffer + offset, maxLen - offset, "%-20s %s\r\n",
+                       dirent.name, dirent.info.is_dir ? "<DIR>" : "");
+    if (len < 0 || offset + len >= maxLen)
+      break;
+    offset += len;
+  }
+  vfs_closedir(dir);
+  return offset;
 }
 
 /**
@@ -208,52 +215,100 @@ void userShellProcess(void) {
 
 // --- Extra FS Commands ---
 
-void shellCat(char *filename) {
-    char fullPath[VFS_MAX_PATH_LEN];
-    if (filename[0] == '/') strncpy(fullPath, filename, VFS_MAX_PATH_LEN);
-    else snprintf(fullPath, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, filename);
-    normalize_path(fullPath);
+int shellCat(int argc, char *argv[]) {
+  if (argc < 2) {
+    shellWriteString(&shell, "Usage: cat <filename>\r\n");
+    return -1;
+  }
+  char *filename = argv[1];
 
-    int fd = vfs_open(fullPath, VFS_O_RDONLY);
-    if (fd < 0) {
-        shellPrint(shellGetCurrent(), "Error: Cannot open %s\r\n", fullPath);
-        return;
-    }
-    char buf[128];
-    int len;
-    while ((len = vfs_read(fd, buf, sizeof(buf) - 1)) > 0) {
-        buf[len] = '\0';
-        shellWriteString(shellGetCurrent(), buf);
-    }
-    vfs_close(fd);
-    shellWriteString(shellGetCurrent(), "\r\n");
+  static char fullPath[VFS_MAX_PATH_LEN]; // 使用静态缓冲区减少栈压力
+  if (filename[0] == '/') {
+    strncpy(fullPath, filename, VFS_MAX_PATH_LEN - 1);
+  } else {
+    snprintf(fullPath, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, filename);
+  }
+  normalize_path(fullPath);
+  // 调试日志：确认路径是否正确
+  log_d("cat attempting to open: [%s]", fullPath);
+  int fd = vfs_open(fullPath, VFS_O_RDONLY);
+  if (fd < 0) {
+    shellPrint(&shell, "Error: Cannot open %s (fd=%d)\r\n", fullPath, fd);
+    return -1;
+  }
+
+  char buf[128];
+  int len;
+  while ((len = vfs_read(fd, buf, sizeof(buf) - 1)) > 0) {
+    buf[len] = '\0';
+    shellWriteString(&shell, buf);
+  }
+  vfs_close(fd);
+  shellWriteString(&shell, "\r\n");
+  return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), cat, shellCat, cat file);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                 cat, shellCat, cat file);
 
-void shellMkdir(char *path) {
-    char fullPath[VFS_MAX_PATH_LEN];
-    if (path[0] == '/') strncpy(fullPath, path, VFS_MAX_PATH_LEN);
-    else snprintf(fullPath, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, path);
-    normalize_path(fullPath);
-    if (vfs_mkdir(fullPath) != VFS_OK) shellPrint(shellGetCurrent(), "Error: mkdir %s failed\r\n", fullPath);
+int shellMkdir(int argc, char *argv[]) {
+  if (argc < 2) {
+    shellWriteString(&shell, "Usage: mkdir <path>\r\n");
+    return -1;
+  }
+  char *path = argv[1];
+  char fullPath[VFS_MAX_PATH_LEN];
+  if (path[0] == '/')
+    strncpy(fullPath, path, VFS_MAX_PATH_LEN);
+  else
+    snprintf(fullPath, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, path);
+  normalize_path(fullPath);
+  if (vfs_mkdir(fullPath) != VFS_OK) {
+    shellPrint(&shell, "Error: mkdir %s failed\r\n", fullPath);
+    return -1;
+  }
+  return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), mkdir, shellMkdir, make directory);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                 mkdir, shellMkdir, make directory);
 
-void shellRm(char *path) {
-    char fullPath[VFS_MAX_PATH_LEN];
-    if (path[0] == '/') strncpy(fullPath, path, VFS_MAX_PATH_LEN);
-    else snprintf(fullPath, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, path);
-    normalize_path(fullPath);
-    if (vfs_unlink(fullPath) != VFS_OK) shellPrint(shellGetCurrent(), "Error: rm %s failed\r\n", fullPath);
+int shellRm(int argc, char *argv[]) {
+  if (argc < 2) {
+    shellWriteString(&shell, "Usage: rm <path>\r\n");
+    return -1;
+  }
+  char *path = argv[1];
+  char fullPath[VFS_MAX_PATH_LEN];
+  if (path[0] == '/')
+    strncpy(fullPath, path, VFS_MAX_PATH_LEN);
+  else
+    snprintf(fullPath, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, path);
+  normalize_path(fullPath);
+  if (vfs_unlink(fullPath) != VFS_OK) {
+    shellPrint(&shell, "Error: rm %s failed\r\n", fullPath);
+    return -1;
+  }
+  return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), rm, shellRm, remove file or dir);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                 rm, shellRm, remove file or dir);
 
-void shellFormat(char *path) {
-    char fullPath[VFS_MAX_PATH_LEN];
-    if (path[0] == '/') strncpy(fullPath, path, VFS_MAX_PATH_LEN);
-    else snprintf(fullPath, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, path);
-    normalize_path(fullPath);
-    if (vfs_format(fullPath, NULL) != VFS_OK) shellPrint(shellGetCurrent(), "Error: format %s failed\r\n", fullPath);
+int shellFormat(int argc, char *argv[]) {
+  if (argc < 2) {
+    shellWriteString(&shell, "Usage: format <path>\r\n");
+    return -1;
+  }
+  char *path = argv[1];
+  char fullPath[VFS_MAX_PATH_LEN];
+  if (path[0] == '/')
+    strncpy(fullPath, path, VFS_MAX_PATH_LEN);
+  else
+    snprintf(fullPath, VFS_MAX_PATH_LEN, "%s/%s", shellPathBuffer, path);
+  normalize_path(fullPath);
+  if (vfs_format(fullPath, NULL) != VFS_OK) {
+    shellPrint(&shell, "Error: format %s failed\r\n", fullPath);
+    return -1;
+  }
+  return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC), format, shellFormat, format partition);
-
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                 format, shellFormat, format partition);
