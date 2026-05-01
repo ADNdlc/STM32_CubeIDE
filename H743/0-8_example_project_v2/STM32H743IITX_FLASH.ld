@@ -99,10 +99,13 @@ SECTIONS
     _test_end = .;          /* 定义段结束地址符号 */
     . = ALIGN(4);
   } >FLASH
+  
     .shell_registry :
   {
     . = ALIGN(4);
     _shell_command_start = .;
+    KEEP(*(shellCommand))
+    KEEP(*(.shellCommand))
     KEEP(*(.shell_registry))
     _shell_command_end = .;
     . = ALIGN(4);

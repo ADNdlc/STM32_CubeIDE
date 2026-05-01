@@ -3,6 +3,9 @@
 // 依赖
 #include "BSP_init.h"
 #include "Sys.h"
+#include "shell.h"
+#include "shell_port.h"
+#include "shell_cfg_user.h"
 
 /**
  * EasyLogger port initialize
@@ -31,6 +34,14 @@ void elog_port_deinit(void) {
  * @param size log size
  */
 void elog_port_output(const char *log, size_t size) {
+#if defined(SHELL_SUPPORT_END_LINE) && SHELL_SUPPORT_END_LINE == 1
+  // 增加保护：仅在 shell 已初始化（write接口有效）时使用尾行模式
+  if (shell.write != NULL) {
+    shellWriteEndLine(&shell, (char *)log, size);
+    return;
+  }
+#endif
+  // 如果 shell 未初始化，或者未开启尾行模式，回退到原始 UART 队列输出
   if (g_debug_queue) {
     uart_queue_send(g_debug_queue, (const uint8_t *)log, size);
   }

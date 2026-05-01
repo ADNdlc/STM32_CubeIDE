@@ -12,8 +12,9 @@
 #ifndef __SHELL_CFG_H__
 #define __SHELL_CFG_H__
 
+#define SHELL_CFG_USER
 #ifdef SHELL_CFG_USER
-#include SHELL_CFG_USER
+#include "shell_cfg_user.h"
 #endif
 
 #ifndef SHELL_TASK_WHILE

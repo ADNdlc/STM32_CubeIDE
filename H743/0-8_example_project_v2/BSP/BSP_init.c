@@ -24,6 +24,7 @@
 #include "timer_factory.h"
 #include "uart_queue.h"
 #include "usart_factory.h"
+#include "shell.h"
 
 #include "lvgl_resource/lvgl_resource.h"
 
@@ -66,6 +67,8 @@ void bsp_init(void) {
       uart_queue_start_receive(g_debug_queue); // 开启异步接收
     }
   }
+
+
   /* 3. elog初始化 */
   if (elog_init_and_config() == ELOG_NO_ERR) {
     log_i("log init success.");
@@ -74,6 +77,8 @@ void bsp_init(void) {
   } else {
     elog_deinit();
   }
+
+
 
   /* ---- 外部sdram和内存池初始化,注意顺序 ---- */
   sdram_driver_t *driver = sdram_driver_get(SDRAM_MAIN); // 获取SDRAM驱动
@@ -123,3 +128,10 @@ void bsp_process(void) {
   service_factory_process(); // 服务组件的底层处理
 #endif
 }
+
+// 导出 elog 控制命令
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC),
+                 elog_output, elog_set_output_enabled,
+                 enable / disable elog output);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC),
+                 elog_lvl, elog_set_filter_lvl, set elog filter level);
