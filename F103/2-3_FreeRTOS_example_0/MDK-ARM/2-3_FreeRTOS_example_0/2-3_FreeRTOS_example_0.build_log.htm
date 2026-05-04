@@ -27,16 +27,22 @@ Project File Date:  04/30/2026
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target '2-3_FreeRTOS_example_0'
-compiling freertos.c...
+compiling elog_port.c...
+compiling shell_port.c...
+compiling BSP_init.c...
 ../BSP/Drivers/interface/Connectivity\i2c_driver.h(12): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_8BIT"  (declared at line 334 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
   #define I2C_MEMADD_SIZE_8BIT (0x00000001U)
 ../BSP/Drivers/interface/Connectivity\i2c_driver.h(13): warning:  #47-D: incompatible redefinition of macro "I2C_MEMADD_SIZE_16BIT"  (declared at line 335 of "../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h")
   #define I2C_MEMADD_SIZE_16BIT (0x00000002U)
-../Core/Src/freertos.c: 2 warnings, 0 errors
+..\Component\shell_port\shell_port.h(26): warning:  #1-D: last line of file ends without a newline
+  #endif
+..\BSP\BSP_init.c(38): warning:  #1215-D: #warning directive: "mem: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
+  #warning "mem: 未定义有效的目标平台，请检查TARGET_PLATFORM配置"
+..\BSP\BSP_init.c: 4 warnings, 0 errors
 linking...
-Program Size: Code=49036 RO-data=3568 RW-data=444 ZI-data=13668  
+Program Size: Code=47436 RO-data=3552 RW-data=440 ZI-data=13672  
 FromELF: creating hex file...
-"2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf" - 0 Error(s), 2 Warning(s).
+"2-3_FreeRTOS_example_0\2-3_FreeRTOS_example_0.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -60,7 +66,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE@5.6.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

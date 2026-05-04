@@ -45,7 +45,9 @@ short userShellWrite(char *data, unsigned short len) {
   if (g_debug_queue) {
     return uart_queue_send(g_debug_queue, (uint8_t *)data, len);
   }
-  return len;
+  else {
+    return 0;
+  }
 }
 
 /**
@@ -60,7 +62,9 @@ short userShellRead(char *data, unsigned short len) {
   if (g_debug_queue) {
     return uart_queue_getdata(g_debug_queue, (uint8_t *)data, 1);
   }
-  return 0;
+  else {
+    return 0;
+  }
 }
 
 #ifdef FREERTOS_ENABLED
