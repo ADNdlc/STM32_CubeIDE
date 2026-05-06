@@ -270,7 +270,8 @@ void at_controller_process(at_controller_t *self) {
             // parser
             if (self->current_cmd && self->current_cmd->parser_cb &&
                 (self->state == AT_CTRL_STATE_WAIT_RSP ||
-                 self->state == AT_CTRL_STATE_WAIT_DATAIN)) {
+                 self->state == AT_CTRL_STATE_WAIT_DATAIN ||
+                 self->state == AT_CTRL_STATE_BUSY)) {
               self->current_cmd->parser_cb(self->current_cmd->ctx, rx_line_buf);
             } else {
               log_w("Unhandled line: %s", rx_line_buf);
