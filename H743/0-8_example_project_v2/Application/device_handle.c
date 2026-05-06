@@ -186,8 +186,18 @@ void devices_process(void) {
     float temp_f, humi_f;
     if (humiture != NULL &&
         HUMITURE_READ_FLOAT(humiture, &temp_f, &humi_f) == 0) {
-      log_i("Humiture: %.1f°C, %.1f%%", temp_f, humi_f);
-      // 转换为int32 (乘以10保存0.1度/0.1%精度)
+      // 修正：温度加两度，湿度减3%
+      temp_f += 2.0f;
+      humi_f -= 1.0f;
+      
+      // 限制湿度范围
+      if (humi_f < 0.0f) humi_f = 0.0f;
+      if (humi_f > 100.0f) humi_f = 100.0f;
+
+      log_i("Humiture(Calibrated): %.1f°C, %.1f%%", temp_f, humi_f);
+      
+      // 转换为int32上报给云平台
+      // 注意：既然乘以10导致无法同步，说明云端物模型定义的是 1代表1度/1%
       temperature = (int32_t)(temp_f);
       humidity = (int32_t)(humi_f);
 
@@ -201,8 +211,7 @@ void devices_process(void) {
                                    THING_SOURCE_DRV);
     }
 
-    log_d("Temp: %d.%dC, Humi: %d.%d%%", temperature / 10,
-          abs(temperature % 10), humidity / 10, abs(humidity % 10));
+    log_d("Temp: %d C, Humi: %d %%", (int)temperature, (int)humidity);
 
     // 读取光照
     float lux_f;
