@@ -51,7 +51,7 @@
 
 #elif defined(SYS_PROFILE_UNIT_TEST)
 // --- 单元测试模式配置 ---
-#define SHELL_ENABLE 1
+#define SHELL_ENABLE 0
 #define TEST_ENABLE 1
 #define RES_USE_INTERNAL 0 // 测试不用带大图片
 #define RES_BURN_ENABLE 0

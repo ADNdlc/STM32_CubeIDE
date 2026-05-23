@@ -93,9 +93,9 @@ float velocityOpenloop(float target_velocity) {
  * @brief 电机位置闭环控制函数
  */
 void positioncloseloop(float target_position) {
-  static const float Kp = 1.1f;
+  static const float Kp = 0.9f;
   static const float Ki = 0.1f; 
-  static const float Kd = 0.05f; 
+  static const float Kd = 0.00f; 
 
   static float integral_error = 0.0f;
   static float last_error = 0.0f;
@@ -107,7 +107,7 @@ void positioncloseloop(float target_position) {
   float dt = (current_timestamp - last_timestamp) * 1e-6f;
   if (dt <= 0 || dt > 0.1f) dt = 0.001f;
 
-  // 1. 获取当前机械角度（弧度）- 控制循环核心读取
+  // 1. 获取当前机械角度（弧度）
   float current_mech_angle = ENCODER_GET_ANGLE(g_encoder_m0);
   
   // 2. 根据电机方向调整反馈极性

@@ -17,7 +17,6 @@
 #include "uart_queue/uart_queue.h"
 #include "usart_factory.h"
 
-
 /* 全局设备句柄 */
 uart_queue_t *g_debug_queue = NULL;
 
